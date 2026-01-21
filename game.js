@@ -124,8 +124,12 @@ async function fetchPlayerScores(playerId) {
   return await response.json();
 }
 
-
 function renderLeaderboard(list) {
+  const container = document.getElementById("leaderboardContainer");
+  if (!container) {
+    console.warn("Leaderboard container not found");
+    return;
+  }
   const container = document.getElementById("leaderboardContainer");
   container.innerHTML = "";
 
