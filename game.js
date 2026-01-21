@@ -98,8 +98,7 @@ const tutorialSteps = [
 
 async function fetchLeaderboard() {
   const response = await fetch(
-    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?
-select=pseudo,score,duration_ms,undo_count,jokers_used&order=score.desc, duration_ms.asc, undo_count.asc, jokers_used.asc&limit=100",
+    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=pseudo,score,duration_ms,undo_count,jokers_used&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
