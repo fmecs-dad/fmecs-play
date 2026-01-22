@@ -1,4 +1,3 @@
-  
 // ===============================
 //   VARIABLES GLOBALES
 // ===============================
@@ -579,7 +578,6 @@ function initMaltaCross() {
     activePoints.add(key);
   });
 
-  autoSave();
 }
 
 function redrawEverything() {
@@ -622,10 +620,9 @@ function edgesOfSegment(segmentKeys) {
 
 function gainJoker() {
   jokersAvailable++;
-  autoSave();
   jokersTotal++;
-  autoSave();
   updateCounters();
+  autoSave();
 
   const container = document.getElementById("jokerEffectContainer");
   const float = document.createElement("div");
@@ -642,7 +639,7 @@ function gainJoker() {
 function loseJoker(amount) {
   jokersAvailable -= amount;
   updateCounters();
-
+  autoSave();
   const container = document.getElementById("jokerEffectContainer");
   const float = document.createElement("div");
   float.className = "joker-loss";
@@ -1173,7 +1170,6 @@ function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
       });
 
       score++;
-      autoSave();
       updateCounters();
       appendHistoryEntry(segment, steps);
       updateTutorialButtonState();
@@ -1477,5 +1473,3 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
-
-
