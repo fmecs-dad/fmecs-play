@@ -272,6 +272,11 @@ function restoreGameState() {
   
 const data = loadGameState();
   if (!data) return false;
+  console.log("[RESTORE] data.activePoints =", data.activePoints);
+console.log("[RESTORE] data.permanentPoints =", data.permanentPoints);
+console.log("[RESTORE] data.usedEdges =", data.usedEdges);
+console.log("[RESTORE] data.validatedSegments =", data.validatedSegments);
+console.log("[RESTORE] data.historyStack =", data.historyStack);
 
   // Vérification stricte : données essentielles présentes
   if (!Array.isArray(data.activePoints) ||
@@ -311,6 +316,11 @@ const data = loadGameState();
   // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
+console.log("[RESTORE] activePoints après injection =", [...activePoints]);
+console.log("[RESTORE] permanentPoints après injection =", [...permanentPoints]);
+console.log("[RESTORE] usedEdges après injection =", [...usedEdges]);
+console.log("[RESTORE] validatedSegments après injection =", validatedSegments);
+console.log("[RESTORE] historyStack après injection =", historyStack);
 
   return true;
 }
@@ -1016,10 +1026,26 @@ function togglePause() {
 // ===============================
 
 function startNewGame() {
+  console.log("[startNewGame] appelée");
+
+  // Tentative de restauration
+  const restored = restoreGameState();
+  console.log("[startNewGame] restoreGameState() →", restored);
+
+  if (restored) {
+    console.log("[startNewGame] partie restaurée");
+    redrawEverything();
+    startTimer();
+    return;
+  }
+
+  console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
   resetGameState();
   initMaltaCross();
   redrawEverything();
+  startTimer();
 }
+
 
 
 function resetGameState() {
@@ -1473,6 +1499,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 
 
 
