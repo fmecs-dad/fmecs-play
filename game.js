@@ -11,6 +11,13 @@ if (!playerId) {
   localStorage.setItem("player_id", playerId);
 }
 
+let playerPseudo = localStorage.getItem("playerPseudo");
+
+if (!playerPseudo) {
+  playerPseudo = "Joueur";
+  localStorage.setItem("playerPseudo", playerPseudo);
+}
+
 let soundEnabled = true;
 let audioUnlocked = false;
 
@@ -1467,3 +1474,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
