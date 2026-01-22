@@ -1017,7 +1017,6 @@ function togglePause() {
 // ===============================
 
 function startNewGame() {
-  resetGameState();
 
   // restaurer la partie si elle existe
   if (restoreGameState()) {
@@ -1027,6 +1026,7 @@ function startNewGame() {
   }
 
   // Sinon, démarrer une nouvelle partie
+  resetGameState();
   initMaltaCross();
   redrawEverything();
   startTimer();
@@ -1485,3 +1485,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 });
+
