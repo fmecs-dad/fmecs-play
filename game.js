@@ -271,23 +271,34 @@ function loadGameState() {
 }
 
 function restoreGameState() {
-  
-const data = loadGameState();
-  if (!data) return false;
+  console.log("[restoreGameState] tentative de restauration…");
 
-  // Vérification stricte : données essentielles présentes
+  const data = loadGameState();
+  console.log("[restoreGameState] data brute :", data);
+
+  if (!data) {
+    console.log("[restoreGameState] aucune donnée trouvée");
+    return false;
+  }
+
   if (!Array.isArray(data.activePoints) ||
       !Array.isArray(data.permanentPoints) ||
       !Array.isArray(data.validatedSegments) ||
       data.activePoints.length === 0 ||
       data.permanentPoints.length === 0) {
+    console.log("[restoreGameState] données invalides :", {
+      activePoints: data.activePoints,
+      permanentPoints: data.permanentPoints,
+      validatedSegments: data.validatedSegments
+    });
     return false;
   }
 
-  // Restaurer les Sets
-  activePoints = new Set(data.activePoints);
-  permanentPoints = new Set(data.permanentPoints);
-  usedEdges = new Set(data.usedEdges || []);
+  // … le reste de ta fonction inchangé …
+
+  console.log("[restoreGameState] restauration OK");
+  return true;
+}
 
   // Restaurer les tableaux simples
   validatedSegments = data.validatedSegments;
@@ -316,7 +327,8 @@ const data = loadGameState();
   // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
-
+  
+  console.log("[restoreGameState] restauration OK");
   return true;
 }
 
@@ -1019,22 +1031,26 @@ function togglePause() {
 // ===============================
 
 function startNewGame() {
+  console.log("[startNewGame] appelée");
 
   // restaurer la partie si elle existe
-  if (restoreGameState()) {
+  const restored = restoreGameState();
+  console.log("[startNewGame] restoreGameState() →", restored);
+
+  if (restored) {
     redrawEverything();
     startTimer();
+    console.log("[startNewGame] partie restaurée");
     return;
   }
 
+  console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
   // Sinon, démarrer une nouvelle partie
   resetGameState();
   initMaltaCross();
   redrawEverything();
   startTimer();
 }
-
-
 
 function resetGameState() {
 
@@ -1487,5 +1503,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 });
+
 
 
