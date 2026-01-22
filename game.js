@@ -2,8 +2,6 @@
 //   VARIABLES GLOBALES
 // ===============================
 
-let skipInit = false;
-let restoringGameState = false;
 
 let playerId = localStorage.getItem("player_id");
 
@@ -235,8 +233,6 @@ function updateSoundButton() {
 
 function saveGameState() {
   if (tutorialRunning) return; // jamais pendant le tutoriel
-  // Ne jamais sauvegarder un plateau vide (évite d'écraser une sauvegarde valide)
-  if (activePoints.size === 0 || permanentPoints.size === 0) return;
 
   const data = {
     activePoints: Array.from(activePoints),
@@ -273,49 +269,52 @@ function loadGameState() {
 }
 
 function restoreGameState() {
-  console.log("[restoreGameState] tentative de restauration…");
+  
+const data = loadGameState();
+  if (!data) return false;
 
-  const raw = localStorage.getItem("morpionSave");
-  if (!raw) {
-    console.log("[restoreGameState] aucune sauvegarde trouvée");
+  // Vérification stricte : données essentielles présentes
+  if (!Array.isArray(data.activePoints) ||
+      !Array.isArray(data.permanentPoints) ||
+      !Array.isArray(data.validatedSegments) ||
+      data.activePoints.length === 0 ||
+      data.permanentPoints.length === 0) {
     return false;
   }
 
-  let data;
-  try {
-    data = JSON.parse(raw);
-  } catch (e) {
-    console.warn("[restoreGameState] JSON invalide");
-    return false;
+  // Restaurer les Sets
+  activePoints = new Set(data.activePoints);
+  permanentPoints = new Set(data.permanentPoints);
+  usedEdges = new Set(data.usedEdges || []);
+
+  // Restaurer les tableaux simples
+  validatedSegments = data.validatedSegments;
+
+  // Restaurer les variables simples
+  score = data.score ?? 0;
+  jokersAvailable = data.jokersAvailable ?? 0;
+  jokersTotal = data.jokersTotal ?? 0;
+  undoCount = data.undoCount ?? 0;
+  timerSeconds = data.timerSeconds ?? 0;
+  gameOver = data.gameOver ?? false;
+  paused = data.paused ?? false;
+
+  // Restaurer l'historique
+  const historyList = document.getElementById("historyList");
+  historyList.innerHTML = "";
+  if (data.historyStack) {
+    data.historyStack.forEach(entry => {
+      appendHistoryEntry(entry.points, entry.activeCount);
+    });
   }
 
-  console.log("[restoreGameState] data brute :", data);
-
-  // On vide les structures existantes
-  activePoints.clear();
-  permanentPoints.clear();
-  usedEdges.clear();
-  validatedSegments.length = 0;
-  historyStack.length = 0;
-
-  // On remplit correctement les Sets
-  data.activePoints.forEach(p => activePoints.add(p));
-  data.permanentPoints.forEach(p => permanentPoints.add(p));
-  data.usedEdges.forEach(e => usedEdges.add(e));
-
-  // Segments restaurés
-  data.validatedSegments.forEach(seg => validatedSegments.push(seg));
-
-  // Historique restauré
-  data.historyStack.forEach(h => historyStack.push(h));
-
-  console.log("[restoreGameState] restauration OK");
-
-  // Empêche initMaltaCross() d'effacer la restauration
-  restoringGameState = true;
+  // Restaurer l'état du son
+  soundEnabled = data.soundEnabled ?? true;
+  updateSoundButton();
 
   return true;
 }
+
 
 // Sauvegarde automatique à chaque coup
 function autoSave() {
@@ -534,12 +533,11 @@ function drawMaltaCross() {
 }
 
 function initMaltaCross() {
-  if (skipInit) return;
-  if (restoringGameState) return;
 
   permanentPoints.clear();
   activePoints.clear();
 
+  // Construction brute de la croix
   let x = 0, y = 0;
   const pts = [];
   const add = (px, py) => pts.push({ x: px, y: py });
@@ -559,26 +557,28 @@ function initMaltaCross() {
     }
   }
 
+  // Point de référence dans la croix brute
   const refX = -3;
   const refY = 3;
 
+  // Point logique où placer ce point
   const targetLeftX = 12;
   const targetLeftY = 15;
 
-  const offsetX = targetLeftX - refX;
-  const offsetY = targetLeftY - refY;
+  const offsetX = targetLeftX - refX; // 15
+  const offsetY = targetLeftY - refY; // 12
 
+  // Application de l’offset
   pts.forEach(p => {
     const key = `${p.x + offsetX},${p.y + offsetY}`;
     permanentPoints.add(key);
     activePoints.add(key);
   });
+
+  autoSave();
 }
 
 function redrawEverything() {
-  console.log("activePoints:", activePoints);
-console.log("permanentPoints:", permanentPoints);
-console.log("validatedSegments:", validatedSegments);
 
   // Le canvas s’adapte visuellement
   canvas.width = canvas.clientWidth;
@@ -618,9 +618,10 @@ function edgesOfSegment(segmentKeys) {
 
 function gainJoker() {
   jokersAvailable++;
-  jokersTotal++;
-  updateCounters();
   autoSave();
+  jokersTotal++;
+  autoSave();
+  updateCounters();
 
   const container = document.getElementById("jokerEffectContainer");
   const float = document.createElement("div");
@@ -637,7 +638,7 @@ function gainJoker() {
 function loseJoker(amount) {
   jokersAvailable -= amount;
   updateCounters();
-  autoSave();
+
   const container = document.getElementById("jokerEffectContainer");
   const float = document.createElement("div");
   float.className = "joker-loss";
@@ -1015,32 +1016,11 @@ function togglePause() {
 // ===============================
 
 function startNewGame() {
-  console.log("[startNewGame] appelée");
-
-  const restored = restoreGameState();
-  console.log("[startNewGame] restoreGameState() →", restored);
-
-  if (restored) {
-    skipInit = true;
-
-    redrawEverything();
-    startTimer();
-    console.log("[startNewGame] partie restaurée");
-
-    // On réactive le flux normal
-    skipInit = false;
-    restoringGameState = false;
-
-    return;
-  }
-
-  console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
-
   resetGameState();
   initMaltaCross();
   redrawEverything();
-  startTimer();
 }
+
 
 function resetGameState() {
 
@@ -1189,6 +1169,7 @@ function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
       });
 
       score++;
+      autoSave();
       updateCounters();
       appendHistoryEntry(segment, steps);
       updateTutorialButtonState();
@@ -1491,13 +1472,7 @@ document.addEventListener("DOMContentLoaded", () => {
     a.load();
   });
 
-
 });
-document.addEventListener("DOMContentLoaded", () => {
-  startNewGame();
-});
-
-
 
 
 
