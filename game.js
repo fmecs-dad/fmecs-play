@@ -589,6 +589,9 @@ function initMaltaCross() {
 }
 
 function redrawEverything() {
+  console.log("activePoints:", activePoints);
+console.log("permanentPoints:", permanentPoints);
+console.log("validatedSegments:", validatedSegments);
 
   // Le canvas s’adapte visuellement
   canvas.width = canvas.clientWidth;
@@ -1500,6 +1503,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
