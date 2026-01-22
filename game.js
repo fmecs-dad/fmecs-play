@@ -271,16 +271,17 @@ function loadGameState() {
 }
 
 function restoreGameState() {
-  
-const data = loadGameState();
-  if (!data) return false;
-  console.log("[RESTORE] data.activePoints =", data.activePoints);
-console.log("[RESTORE] data.permanentPoints =", data.permanentPoints);
-console.log("[RESTORE] data.usedEdges =", data.usedEdges);
-console.log("[RESTORE] data.validatedSegments =", data.validatedSegments);
-console.log("[RESTORE] data.historyStack =", data.historyStack);
 
-  // Vérification stricte : données essentielles présentes
+  const data = loadGameState();
+  if (!data) return false;
+
+  console.log("[RESTORE] data.activePoints =", data.activePoints);
+  console.log("[RESTORE] data.permanentPoints =", data.permanentPoints);
+  console.log("[RESTORE] data.usedEdges =", data.usedEdges);
+  console.log("[RESTORE] data.validatedSegments =", data.validatedSegments);
+  console.log("[RESTORE] data.historyStack =", data.historyStack);
+
+  // Vérification stricte
   if (!Array.isArray(data.activePoints) ||
       !Array.isArray(data.permanentPoints) ||
       !Array.isArray(data.validatedSegments) ||
@@ -295,7 +296,7 @@ console.log("[RESTORE] data.historyStack =", data.historyStack);
   usedEdges = new Set(data.usedEdges || []);
 
   // Restaurer les tableaux simples
-  validatedSegments = data.validatedSegments;
+  validatedSegments = [...data.validatedSegments];
 
   // Restaurer les variables simples
   score = data.score ?? 0;
@@ -306,27 +307,39 @@ console.log("[RESTORE] data.historyStack =", data.historyStack);
   gameOver = data.gameOver ?? false;
   paused = data.paused ?? false;
 
-  // Restaurer l'historique
+  // Restaurer l'historique interne
+  historyStack = data.historyStack ? [...data.historyStack] : [];
+
+  // Restaurer l'historique visuel
   const historyList = document.getElementById("historyList");
   historyList.innerHTML = "";
-  if (data.historyStack) {
-    data.historyStack.forEach(entry => {
-      appendHistoryEntry(entry.points, entry.activeCount);
-    });
-  }
+  historyStack.forEach(entry => {
+    appendHistoryEntry(entry.points, entry.activeCount);
+  });
+
+  // Redessiner les segments validés
+  validatedSegments.forEach(seg => {
+    drawSegment(seg.points[0], seg.points[1]);
+  });
+
+  // Redessiner les edges utilisés
+  usedEdges.forEach(edge => {
+    const [p1, p2] = edge.split("|");
+    drawEdge(p1, p2);
+  });
 
   // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
-console.log("[RESTORE] activePoints après injection =", [...activePoints]);
-console.log("[RESTORE] permanentPoints après injection =", [...permanentPoints]);
-console.log("[RESTORE] usedEdges après injection =", [...usedEdges]);
-console.log("[RESTORE] validatedSegments après injection =", validatedSegments);
-console.log("[RESTORE] historyStack après injection =", historyStack);
+
+  console.log("[RESTORE] activePoints après injection =", [...activePoints]);
+  console.log("[RESTORE] permanentPoints après injection =", [...permanentPoints]);
+  console.log("[RESTORE] usedEdges après injection =", [...usedEdges]);
+  console.log("[RESTORE] validatedSegments après injection =", validatedSegments);
+  console.log("[RESTORE] historyStack après injection =", historyStack);
 
   return true;
 }
-
 
 // Sauvegarde automatique à chaque coup
 function autoSave() {
@@ -1502,6 +1515,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
