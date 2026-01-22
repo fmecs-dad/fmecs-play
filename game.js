@@ -1035,32 +1035,35 @@ function togglePause() {
 function startNewGame() {
   console.log("[startNewGame] appelée");
 
+  // Tentative de restauration
   const restored = restoreGameState();
   console.log("[startNewGame] restoreGameState() →", restored);
 
   if (restored) {
+    // Empêche initMaltaCross() d'effacer la restauration
     skipInit = true;
-    restoringGameState = true;   // ← AJOUT ICI
+    restoringGameState = true;
 
+    // Affichage de la partie restaurée
     redrawEverything();
     startTimer();
     console.log("[startNewGame] partie restaurée");
 
-    // IMPORTANT : remettre les flags AVANT le return
-    skipInit = false;
+    // IMPORTANT : réactiver le flux normal APRÈS affichage
     restoringGameState = false;
+    skipInit = false;
 
     return;
   }
 
   console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
 
+  // Nouvelle partie
   resetGameState();
   initMaltaCross();
   redrawEverything();
   startTimer();
 }
-
 
 function resetGameState() {
 
@@ -1516,6 +1519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
