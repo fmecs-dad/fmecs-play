@@ -275,60 +275,47 @@ function loadGameState() {
 function restoreGameState() {
   console.log("[restoreGameState] tentative de restauration…");
 
-  const data = loadGameState();
+  const raw = localStorage.getItem("morpionSave");
+  if (!raw) {
+    console.log("[restoreGameState] aucune sauvegarde trouvée");
+    return false;
+  }
+
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    console.warn("[restoreGameState] JSON invalide");
+    return false;
+  }
+
   console.log("[restoreGameState] data brute :", data);
 
-  if (!data) {
-    console.log("[restoreGameState] aucune donnée trouvée");
-    return false;
-  }
+  // On vide les structures existantes
+  activePoints.clear();
+  permanentPoints.clear();
+  usedEdges.clear();
+  validatedSegments.length = 0;
+  historyStack.length = 0;
 
-  if (!Array.isArray(data.activePoints) ||
-      !Array.isArray(data.permanentPoints) ||
-      !Array.isArray(data.validatedSegments) ||
-      data.activePoints.length === 0 ||
-      data.permanentPoints.length === 0) {
-    console.log("[restoreGameState] données invalides :", {
-      activePoints: data.activePoints,
-      permanentPoints: data.permanentPoints,
-      validatedSegments: data.validatedSegments
-    });
-    return false;
-  }
+  // On remplit correctement les Sets
+  data.activePoints.forEach(p => activePoints.add(p));
+  data.permanentPoints.forEach(p => permanentPoints.add(p));
+  data.usedEdges.forEach(e => usedEdges.add(e));
 
-  // Restaurer les tableaux simples
-  validatedSegments = data.validatedSegments;
+  // Segments restaurés
+  data.validatedSegments.forEach(seg => validatedSegments.push(seg));
 
-  // Restaurer les variables simples
-  score = data.score ?? 0;
-  jokersAvailable = data.jokersAvailable ?? 0;
-  jokersTotal = data.jokersTotal ?? 0;
-  undoCount = data.undoCount ?? 0;
-  timerSeconds = data.timerSeconds ?? 0;
-  gameOver = data.gameOver ?? false;
-  if (gameOver) {
-    gameOver = false;
-  }
-  paused = data.paused ?? false;
+  // Historique restauré
+  data.historyStack.forEach(h => historyStack.push(h));
 
-  // Restaurer l'historique
-  const historyList = document.getElementById("historyList");
-  historyList.innerHTML = "";
-  if (data.historyStack) {
-    data.historyStack.forEach(entry => {
-      appendHistoryEntry(entry.points, entry.activeCount);
-    });
-  }
-
-  // Restaurer l'état du son
-  soundEnabled = data.soundEnabled ?? true;
-  updateSoundButton();
-  
   console.log("[restoreGameState] restauration OK");
+
+  // Empêche initMaltaCross() d'effacer la restauration
   restoringGameState = true;
+
   return true;
 }
-
 
 // Sauvegarde automatique à chaque coup
 function autoSave() {
@@ -548,12 +535,11 @@ function drawMaltaCross() {
 
 function initMaltaCross() {
   if (skipInit) return;
-  
   if (restoringGameState) return;
+
   permanentPoints.clear();
   activePoints.clear();
 
-  // Construction brute de la croix
   let x = 0, y = 0;
   const pts = [];
   const add = (px, py) => pts.push({ x: px, y: py });
@@ -573,24 +559,20 @@ function initMaltaCross() {
     }
   }
 
-  // Point de référence dans la croix brute
   const refX = -3;
   const refY = 3;
 
-  // Point logique où placer ce point
   const targetLeftX = 12;
   const targetLeftY = 15;
 
-  const offsetX = targetLeftX - refX; // 15
-  const offsetY = targetLeftY - refY; // 12
+  const offsetX = targetLeftX - refX;
+  const offsetY = targetLeftY - refY;
 
-  // Application de l’offset
   pts.forEach(p => {
     const key = `${p.x + offsetX},${p.y + offsetY}`;
     permanentPoints.add(key);
     activePoints.add(key);
   });
-
 }
 
 function redrawEverything() {
@@ -1035,30 +1017,25 @@ function togglePause() {
 function startNewGame() {
   console.log("[startNewGame] appelée");
 
-  // Tentative de restauration
   const restored = restoreGameState();
   console.log("[startNewGame] restoreGameState() →", restored);
 
   if (restored) {
-    // Empêche initMaltaCross() d'effacer la restauration
     skipInit = true;
-    restoringGameState = true;
 
-    // Affichage de la partie restaurée
     redrawEverything();
     startTimer();
     console.log("[startNewGame] partie restaurée");
 
-    // IMPORTANT : réactiver le flux normal APRÈS affichage
-    restoringGameState = false;
+    // On réactive le flux normal
     skipInit = false;
+    restoringGameState = false;
 
     return;
   }
 
   console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
 
-  // Nouvelle partie
   resetGameState();
   initMaltaCross();
   redrawEverything();
@@ -1519,6 +1496,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
