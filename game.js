@@ -323,6 +323,7 @@ function restoreGameState() {
   updateSoundButton();
   
   console.log("[restoreGameState] restauration OK");
+  restoringGameState = true;
   return true;
 }
 
@@ -544,7 +545,7 @@ function drawMaltaCross() {
 }
 
 function initMaltaCross() {
-
+  if (restoringGameState) return;
   permanentPoints.clear();
   activePoints.clear();
 
@@ -1039,6 +1040,8 @@ function startNewGame() {
     startTimer();
     console.log("[startNewGame] partie restaurée");
     return;
+    restoringGameState = false;
+
   }
 
   console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
@@ -1503,6 +1506,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
