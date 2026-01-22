@@ -17,6 +17,8 @@ if (!playerPseudo) {
   localStorage.setItem("playerPseudo", playerPseudo);
 }
 
+let historyStack = [];
+
 let soundEnabled = true;
 let audioUnlocked = false;
 
@@ -1500,6 +1502,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
