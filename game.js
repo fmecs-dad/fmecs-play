@@ -1,4 +1,4 @@
-
+  
 // ===============================
 //   VARIABLES GLOBALES
 // ===============================
@@ -298,6 +298,9 @@ const data = loadGameState();
   undoCount = data.undoCount ?? 0;
   timerSeconds = data.timerSeconds ?? 0;
   gameOver = data.gameOver ?? false;
+  if (gameOver) {
+    gameOver = false;
+  }
   paused = data.paused ?? false;
 
   // Restaurer l'historique
@@ -1474,4 +1477,5 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 
