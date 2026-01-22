@@ -330,8 +330,7 @@ function restoreGameState() {
   });
   */
   console.log("[RESTORE] historyStack avant return =", historyStack);
-  return true;
-}
+  
   // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
@@ -1519,6 +1518,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
