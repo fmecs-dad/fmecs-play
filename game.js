@@ -545,6 +545,7 @@ function drawMaltaCross() {
 }
 
 function initMaltaCross() {
+  if (skipInit) return;
   if (restoringGameState) return;
   permanentPoints.clear();
   activePoints.clear();
@@ -1030,16 +1031,17 @@ function togglePause() {
 
 function startNewGame() {
   console.log("[startNewGame] appelée");
-
   // restaurer la partie si elle existe
   const restored = restoreGameState();
   console.log("[startNewGame] restoreGameState() →", restored);
 
   if (restored) {
+    skipInit = true;
     redrawEverything();
     startTimer();
     console.log("[startNewGame] partie restaurée");
     return;
+    skipInit = false;
     restoringGameState = false;
 
   }
@@ -1506,6 +1508,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
