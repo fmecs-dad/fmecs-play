@@ -233,6 +233,8 @@ function updateSoundButton() {
 
 function saveGameState() {
   if (tutorialRunning) return; // jamais pendant le tutoriel
+  // Ne jamais sauvegarder un plateau vide (évite d'écraser une sauvegarde valide)
+  if (activePoints.size === 0 || permanentPoints.size === 0) return;
 
   const data = {
     activePoints: Array.from(activePoints),
@@ -1485,4 +1487,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 });
+
 
