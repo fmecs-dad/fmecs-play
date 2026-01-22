@@ -3,6 +3,7 @@
 // ===============================
 
 let skipInit = false;
+let restoringGameState = false;
 
 let playerId = localStorage.getItem("player_id");
 
@@ -547,6 +548,7 @@ function drawMaltaCross() {
 
 function initMaltaCross() {
   if (skipInit) return;
+  
   if (restoringGameState) return;
   permanentPoints.clear();
   activePoints.clear();
@@ -1032,28 +1034,33 @@ function togglePause() {
 
 function startNewGame() {
   console.log("[startNewGame] appelée");
-  // restaurer la partie si elle existe
+
   const restored = restoreGameState();
   console.log("[startNewGame] restoreGameState() →", restored);
 
   if (restored) {
     skipInit = true;
+    restoringGameState = true;   // ← AJOUT ICI
+
     redrawEverything();
     startTimer();
     console.log("[startNewGame] partie restaurée");
-    return;
+
+    // IMPORTANT : remettre les flags AVANT le return
     skipInit = false;
     restoringGameState = false;
 
+    return;
   }
 
   console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
-  // Sinon, démarrer une nouvelle partie
+
   resetGameState();
   initMaltaCross();
   redrawEverything();
   startTimer();
 }
+
 
 function resetGameState() {
 
@@ -1509,6 +1516,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
