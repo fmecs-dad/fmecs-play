@@ -1018,9 +1018,20 @@ function togglePause() {
 
 function startNewGame() {
   resetGameState();
+
+  // restaurer la partie si elle existe
+  if (restoreGameState()) {
+    redrawEverything();
+    startTimer();
+    return;
+  }
+
+  // Sinon, démarrer une nouvelle partie
   initMaltaCross();
   redrawEverything();
+  startTimer();
 }
+
 
 
 function resetGameState() {
@@ -1471,5 +1482,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const a = document.getElementById("clickSound");
     a.load();
   });
+
 
 });
