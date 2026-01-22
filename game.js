@@ -2,6 +2,7 @@
 //   VARIABLES GLOBALES
 // ===============================
 
+let skipInit = false;
 
 let playerId = localStorage.getItem("player_id");
 
@@ -1508,6 +1509,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   startNewGame();
 });
+
 
 
 
