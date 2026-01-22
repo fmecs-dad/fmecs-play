@@ -294,12 +294,6 @@ function restoreGameState() {
     return false;
   }
 
-  // … le reste de ta fonction inchangé …
-
-  console.log("[restoreGameState] restauration OK");
-  return true;
-}
-
   // Restaurer les tableaux simples
   validatedSegments = data.validatedSegments;
 
@@ -1503,6 +1497,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 });
+
 
 
 
