@@ -318,6 +318,7 @@ function restoreGameState() {
   });
 
   // Redessiner les segments validés
+  /*
   validatedSegments.forEach(seg => {
     drawSegment(seg.points[0], seg.points[1]);
   });
@@ -327,7 +328,10 @@ function restoreGameState() {
     const [p1, p2] = edge.split("|");
     drawEdge(p1, p2);
   });
-
+  */
+  console.log("[RESTORE] historyStack avant return =", historyStack);
+  return true;
+}
   // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
@@ -1515,6 +1519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
