@@ -1295,7 +1295,8 @@ console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue
     undoBtn.classList.remove("disabled");
   }
 
-  const restored = false;
+  //const restored = false;
+  const restored = restoreGameState();
 
   if (!restored || gameOver) {
     resetGameState();
@@ -1545,6 +1546,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
