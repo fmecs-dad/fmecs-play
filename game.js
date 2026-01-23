@@ -6,10 +6,11 @@
 const SUPABASE_ANON_KEY = "5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
 
 // Initialisation Supabase
-const sb = supabase.createClient(
+const supa = window.supabase.createClient(
   "https://gjzqghhqpycbcwykxvgw.supabase.co",
   SUPABASE_ANON_KEY
 );
+
 
 // Fonctions Auth
 async function getCurrentUser() {
