@@ -1076,29 +1076,8 @@ async function checkGameOver() {
       current.returnsUsed,
       current.jokersUsed
     );
-  }
-}
 
-await sendScoreToSupabase(
-  user.id,
-  current.score,
-  current.duration * 1000,
-  current.returnsUsed,
-  current.jokersUsed
-);
-
-}
-
-await sendScoreToSupabase(
-  user.id,
-  playerPseudo,
-  current.score,
-  current.duration * 1000,
-  current.returnsUsed,
-  current.jokersUsed
-);
-
-
+    // GESTION DU RECORD
     if (isNewRecord) {
 
       const pauseBtn = document.getElementById("pauseBtn");
@@ -1124,7 +1103,6 @@ await sendScoreToSupabase(
     showEndGamePanel();
   }
 }
-
 
 function getPossibleMoves() {
   const moves = [];
