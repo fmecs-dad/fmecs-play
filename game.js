@@ -519,9 +519,56 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  if (bestDist <= 20) return best;
+  if (bestDist <= 15) return best;
 
   return null;
+}
+
+function snapToAlignedPoint(first, clicked) {
+  const { x: x1, y: y1 } = first;
+  const { x: x2, y: y2 } = clicked;
+
+  // 1. Déjà aligné ?
+  if (x1 === x2 || y1 === y2 || Math.abs(x1 - x2) === Math.abs(y1 - y2)) {
+    return clicked;
+  }
+
+  // 2. Chercher le point aligné le plus proche
+  const candidates = [];
+
+  // même colonne
+  candidates.push({ x: x1, y: y2 });
+
+  // même ligne
+  candidates.push({ x: x2, y: y1 });
+
+  // diagonales
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const signX = dx > 0 ? 1 : -1;
+  const signY = dy > 0 ? 1 : -1;
+  candidates.push({ x: x1 + Math.abs(dy) * signX, y: y1 + Math.abs(dy) * signY });
+  candidates.push({ x: x1 + Math.abs(dx) * signY, y: y1 + Math.abs(dx) * signX });
+
+  // 3. Choisir le plus proche
+  let best = clicked;
+  let bestDist = Infinity;
+
+  for (const c of candidates) {
+    const px = offset + c.x * spacing;
+    const py = offset + c.y * spacing;
+    const dist = Math.hypot(mx - px, my - py);
+
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = c;
+    }
+  }
+
+  // 4. Tolérance
+  if (bestDist <= 15) return best;
+
+  return clicked; // pas de snap possible
 }
 
 
@@ -1490,6 +1537,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
