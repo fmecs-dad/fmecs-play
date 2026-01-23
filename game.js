@@ -253,7 +253,7 @@ function saveGameState() {
     paused
     
   };
-  console.log("SAVE GAME STATE → validatedSegments.length =", validatedSegments.length);
+  
   try {
     localStorage.setItem("currentGameState", JSON.stringify(data));
   } catch (e) {
@@ -299,7 +299,6 @@ function restoreGameState() {
   jokersTotal = data.jokersTotal ?? 0;
   undoCount = data.undoCount ?? 0;
   timerSeconds = data.timerSeconds ?? 0;
-  //document.getElementById("timerValue").textContent = formatTime(timerSeconds);
 
   gameOver = data.gameOver ?? false;
   paused = data.paused ?? false;
@@ -808,10 +807,10 @@ function undoLastMove() {
   const historyList = document.getElementById("historyList");
   if (historyList.lastChild) historyList.removeChild(historyList.lastChild);
 
-  updateCounters();
-  redrawEverything();
-  updateTutorialButtonState();
-}
+    updateCounters();
+    redrawEverything();
+    updateTutorialButtonState();
+  }
 
 
 // ===============================
@@ -1019,18 +1018,15 @@ function togglePause() {
 // ===============================
 
 function startNewGame() {
-  console.log("[startNewGame] appelée");
 
   // Tentative de restauration
   const restored = restoreGameState();
-  console.log("[startNewGame] restoreGameState() →", restored);
 
   if (restored) {
     redrawEverything();
     return;
   }
 
-  console.log("[startNewGame] aucune partie restaurée, nouvelle partie");
   resetGameState();
   initMaltaCross();
   redrawEverything();
@@ -1149,7 +1145,7 @@ function runTutorial() {
   tutorialBtn.classList.add("disabled");
 
   playTutorialStep();
-}  // ← FERMER runTutorial ICI
+}
 
 
 // --------------------------------------
@@ -1247,13 +1243,6 @@ function playTutorialStep() {
 // ===============================
 
 function initGame() {
-  console.log("[initGame] appelé");
-console.log("[initGame] scoreValue =", document.getElementById("scoreValue"));
-console.log("[initGame] timerValue =", document.getElementById("timerValue"));
-console.log("[initGame] undoCount =", document.getElementById("undoCount"));
-//console.log("[initGame] jokersAvailable =", document.getElementById("jokersAvailable"));
-console.log("[initGame] timerSeconds =", timerSeconds);
-console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue").textContent);
 
   const undoBtn = document.getElementById("undoBtn");
   if (undoBtn) {
@@ -1285,11 +1274,7 @@ console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue
   //if (!paused && !gameOver) {
   //  startTimer();
  // }
-console.log("[initGame] timerValue APRÈS =", document.getElementById("timerValue").textContent);
-console.log("[initGame] scoreValue APRÈS =", document.getElementById("scoreValue").textContent);
-console.log("[initGame] undoCount APRÈS =", document.getElementById("undoCount").textContent);
-//console.log("[initGame] jokersAvailable APRÈS =", document.getElementById("jokersAvailable").textContent);
-
+  
 }
 
 // ===============================
@@ -1475,11 +1460,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
 
   document.getElementById("readyBtn").addEventListener("click", () => {
-    console.log("[READY] AVANT initGame → timerValue =", document.getElementById("timerValue").textContent); 
-    console.log("[READY] AVANT initGame → scoreValue =", document.getElementById("scoreValue").textContent); 
-    console.log("[READY] AVANT initGame → undoCount =", document.getElementById("undoCount").textContent);
-    console.log("[READY] modal fermé, DOM avant initGame → timerValue =", document.getElementById("timerValue").textContent);
-
+    
     unlockAudio();
     audioUnlocked = true;
 
@@ -1488,10 +1469,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("readyModal").style.display = "none";
 
     initGame();
-console.log("[READY] APRÈS initGame → timerValue =", document.getElementById("timerValue").textContent); 
-    console.log("[READY] APRÈS initGame → scoreValue =", document.getElementById("scoreValue").textContent); 
-    console.log("[READY] APRÈS initGame → undoCount =", document.getElementById("undoCount").textContent);
-    console.log("[READY] DOM juste avant initGame → scoreValue =", document.getElementById("scoreValue").textContent);
 
     const board = document.getElementById("canvasContainer");
     board.classList.remove("show");
@@ -1513,6 +1490,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
