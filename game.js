@@ -1510,6 +1510,8 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("[READY] AVANT initGame → timerValue =", document.getElementById("timerValue").textContent); 
     console.log("[READY] AVANT initGame → scoreValue =", document.getElementById("scoreValue").textContent); 
     console.log("[READY] AVANT initGame → undoCount =", document.getElementById("undoCount").textContent);
+    console.log("[READY] modal fermé, DOM avant initGame → timerValue =", document.getElementById("timerValue").textContent);
+
     unlockAudio();
     audioUnlocked = true;
 
@@ -1521,7 +1523,8 @@ document.addEventListener("DOMContentLoaded", () => {
 console.log("[READY] APRÈS initGame → timerValue =", document.getElementById("timerValue").textContent); 
     console.log("[READY] APRÈS initGame → scoreValue =", document.getElementById("scoreValue").textContent); 
     console.log("[READY] APRÈS initGame → undoCount =", document.getElementById("undoCount").textContent);
-    
+    console.log("[READY] DOM juste avant initGame → scoreValue =", document.getElementById("scoreValue").textContent);
+
     const board = document.getElementById("canvasContainer");
     board.classList.remove("show");
     board.classList.add("slide-in-premium");
@@ -1542,6 +1545,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
