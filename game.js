@@ -3,7 +3,7 @@
 // ===============================
 
 // Clé publique Supabase (à récupérer dans ton dashboard)
-const SUPABASE_ANON_KEY = "5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
+const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
 
 // Initialisation Supabase
 const supa = window.supabase.createClient(
