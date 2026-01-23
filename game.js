@@ -39,6 +39,35 @@ document.getElementById("authBtn").addEventListener("click", async () => {
   document.getElementById("authOverlay").style.display = "flex";
 });
 
+async function fetchPlayerPseudo(userId) {
+  const { data, error } = await supabase
+    .from("players")
+    .select("pseudo")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    console.error("Erreur récupération pseudo :", error);
+    return "Joueur";
+  }
+
+  return data.pseudo;
+}
+
+async function updatePlayerPseudo(userId, newPseudo) {
+  const { error } = await supabase
+    .from("players")
+    .update({ pseudo: newPseudo })
+    .eq("id", userId);
+
+  if (error) {
+    console.error("Erreur mise à jour pseudo :", error);
+    return false;
+  }
+
+  return true;
+}
+
 document.getElementById("closeAuthBtn").addEventListener("click", () => {
   document.getElementById("authOverlay").style.display = "none";
 });
@@ -70,6 +99,13 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   document.getElementById("authOverlay").style.display = "none";
   updateAuthUI();
+
+  const user = await getCurrentUser();
+  if (user) {
+    const pseudo = await fetchPlayerPseudo(user.id);
+    localStorage.setItem("playerPseudo", pseudo);
+  }
+
 });
 
 // ===============================
@@ -118,11 +154,11 @@ async function computeScoreHash(playerId, score, duration, undoCount, jokersUsed
 }
 
 async function sendScoreToSupabase(userId, pseudo, score, duration, undoCount, jokersUsed){
-  const hash = await computeScoreHash(playerId, score, duration, undoCount, jokersUsed);
+  const hash = await computeScoreHash(userId, score, duration, undoCount, jokersUsed);
 
   const payload = {
-    player_id: playerId,
-    pseudo: pseudo,
+    player_id: userId,
+    pseudo: localStorage.getItem("playerPseudo"),
     score: score,
     duration_ms: duration,
     undo_count: undoCount,
@@ -143,24 +179,6 @@ async function sendScoreToSupabase(userId, pseudo, score, duration, undoCount, j
   return response.ok;
 }
 
-async function getCurrentUser() {
-  const { data } = await supabase.auth.getUser();
-  return data.user;
-}
-
-function updateAuthUI() {
-  getCurrentUser().then(user => {
-    const btn = document.getElementById("authBtn");
-    if (!btn) return;
-
-    btn.textContent = user ? "Se déconnecter" : "Se connecter";
-  });
-}
-
-supabase.auth.onAuthStateChange(() => {
-  updateAuthUI();
-});
-
 const tutorialSteps = [
   { message: "Exemple 1 : une ligne horizontale.", start: { x: 15, y: 12 }, end: { x: 19, y: 12 } },
   { message: "Exemple 2 : une ligne verticale.",   start: { x: 15, y: 12 }, end: { x: 15, y: 16 } },
@@ -174,7 +192,7 @@ const tutorialSteps = [
 
 async function fetchLeaderboard() {
   const response = await fetch(
-    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=pseudo,score,duration_ms,undo_count,jokers_used&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
+    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,players(pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -186,9 +204,9 @@ async function fetchLeaderboard() {
   return await response.json();
 }
 
-async function fetchPlayerScores(playerId) {
+async function fetchPlayerScores(userId) {
   const response = await fetch(
-    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?player_id=eq.${playerId}&select=*`,
+    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?player_id=eq.${userId}&select=*`,
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -202,16 +220,19 @@ async function fetchPlayerScores(playerId) {
 
 function renderLeaderboard(list) {
   const container = document.getElementById("leaderboardContainer");
-  if (!container) return; // sécurité au cas où
+  if (!container) return;
 
   container.innerHTML = "";
 
   list.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
+
+    const pseudo = entry.players?.pseudo ?? "???";
+
     row.innerHTML = `
       <span class="rank">${index + 1}</span>
-      <span class="pseudo">${entry.pseudo}</span>
+      <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
       <span class="duration">${(entry.duration_ms / 1000).toFixed(1)}s</span>
       <span class="undo">${entry.undo_count}</span>
@@ -222,24 +243,6 @@ function renderLeaderboard(list) {
 }
 
 fetchLeaderboard().then(renderLeaderboard);
-
-function getPlayerId() {
-  let id = localStorage.getItem("player_id");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("player_id", id);
-  }
-  return id;
-}
-
-function getPlayerPseudo() {
-  let pseudo = localStorage.getItem("playerPseudo");
-  if (!pseudo) {
-    pseudo = "Joueur";
-    localStorage.setItem("playerPseudo", pseudo);
-  }
-  return pseudo;
-}
 
 function saveBestScore(data) {
   try {
@@ -534,6 +537,26 @@ function updateTutorialButtonState() {
     tutorialBtn.classList.remove("disabled");
   }
 }
+
+document.getElementById("savePseudoBtn").addEventListener("click", async () => {
+  const user = await getCurrentUser();
+  if (!user) {
+    alert("Vous devez être connecté.");
+    return;
+  }
+
+  const newPseudo = document.getElementById("pseudoInput").value.trim();
+  if (newPseudo.length < 3) {
+    alert("Le pseudo doit faire au moins 3 caractères.");
+    return;
+  }
+
+  const ok = await updatePlayerPseudo(user.id, newPseudo);
+  if (ok) {
+    localStorage.setItem("playerPseudo", newPseudo);
+    alert("Pseudo mis à jour !");
+  }
+});
 
 
 // ===============================
@@ -1018,7 +1041,7 @@ function isBetterThan(a, b) {
     return a.jokersUsed < b.jokersUsed;
 }
 
-function checkGameOver() {   
+async function checkGameOver() {   
   const moves = getPossibleMoves();
   if (moves.length === 0) {
 
@@ -1041,9 +1064,29 @@ function checkGameOver() {
 
     // ENVOI DU SCORE GLOBAL
     const user = await getCurrentUser();
-if (!user) {
-  document.getElementById("authOverlay").style.display = "flex";
-  return;
+    if (!user) {
+      document.getElementById("authOverlay").style.display = "flex";
+      return;
+    }
+
+    await sendScoreToSupabase(
+      user.id,
+      current.score,
+      current.duration * 1000,
+      current.returnsUsed,
+      current.jokersUsed
+    );
+  }
+}
+
+await sendScoreToSupabase(
+  user.id,
+  current.score,
+  current.duration * 1000,
+  current.returnsUsed,
+  current.jokersUsed
+);
+
 }
 
 await sendScoreToSupabase(
