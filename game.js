@@ -1507,7 +1507,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
 
   document.getElementById("readyBtn").addEventListener("click", () => {
-
+    console.log("[READY] AVANT initGame → timerValue =", document.getElementById("timerValue").textContent); 
+    console.log("[READY] AVANT initGame → scoreValue =", document.getElementById("scoreValue").textContent); 
+    console.log("[READY] AVANT initGame → undoCount =", document.getElementById("undoCount").textContent);
     unlockAudio();
     audioUnlocked = true;
 
@@ -1516,7 +1518,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("readyModal").style.display = "none";
 
     initGame();
-
+console.log("[READY] APRÈS initGame → timerValue =", document.getElementById("timerValue").textContent); 
+    console.log("[READY] APRÈS initGame → scoreValue =", document.getElementById("scoreValue").textContent); 
+    console.log("[READY] APRÈS initGame → undoCount =", document.getElementById("undoCount").textContent);
+    
     const board = document.getElementById("canvasContainer");
     board.classList.remove("show");
     board.classList.add("slide-in-premium");
@@ -1537,6 +1542,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
