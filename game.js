@@ -1058,6 +1058,9 @@ function startNewGame() {
     console.log("[startNewGame] partie restaurée");
     redrawEverything();
     startTimer();
+    console.log("[START] timerSeconds après startTimer =", timerSeconds);
+console.log("[START] timerValue après startTimer =", document.getElementById("timerValue").textContent);
+
     return;
   }
 
@@ -1522,6 +1525,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
