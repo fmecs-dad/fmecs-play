@@ -1281,6 +1281,9 @@ function playTutorialStep() {
 // ===============================
 
 function initGame() {
+  console.log("[initGame] APPELÉ");
+console.log("[initGame] timerSeconds =", timerSeconds);
+console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue").textContent);
 
   const undoBtn = document.getElementById("undoBtn");
   if (undoBtn) {
@@ -1310,6 +1313,11 @@ function initGame() {
   //if (!paused && !gameOver) {
   //  startTimer();
  // }
+console.log("[initGame] timerValue APRÈS =", document.getElementById("timerValue").textContent);
+console.log("[initGame] scoreValue APRÈS =", document.getElementById("scoreValue").textContent);
+console.log("[initGame] undoCount APRÈS =", document.getElementById("undoCount").textContent);
+console.log("[initGame] jokersAvailable APRÈS =", document.getElementById("jokersAvailable").textContent);
+
 }
 
 // ===============================
@@ -1525,6 +1533,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
