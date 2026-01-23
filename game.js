@@ -3,7 +3,7 @@
 // ===============================
 
 // Initialisation Supabase
-const supabase = supabase.createClient(
+const sb = supabase.createClient(
   "https://gjzqghhqpycbcwykxvgw.supabase.co",
   SUPABASE_ANON_KEY
 );
