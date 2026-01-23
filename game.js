@@ -1057,7 +1057,7 @@ function startNewGame() {
   if (restored) {
     console.log("[startNewGame] partie restaurée");
     redrawEverything();
-    startTimer();
+    //startTimer();
     console.log("[START] timerSeconds après startTimer =", timerSeconds);
 console.log("[START] timerValue après startTimer =", document.getElementById("timerValue").textContent);
 
@@ -1546,6 +1546,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
