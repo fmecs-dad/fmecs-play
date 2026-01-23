@@ -298,8 +298,8 @@ function restoreGameState() {
   jokersAvailable = data.jokersAvailable ?? 0;
   jokersTotal = data.jokersTotal ?? 0;
   undoCount = data.undoCount ?? 0;
-  //timerSeconds = data.timerSeconds ?? 0;
-  timerValue = data.timerValue ?? 0;
+  timerSeconds = data.timerSeconds ?? 0;
+  //timerValue = data.timerValue ?? 0;
   console.log("[RESTORE] timerSeconds AVANT affichage =", timerSeconds);
 console.log("[RESTORE] timerValue.innerText AVANT =", document.getElementById("timerValue").textContent);
 //document.getElementById("timerValue").textContent = formatTime(timerSeconds);
@@ -1536,6 +1536,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
