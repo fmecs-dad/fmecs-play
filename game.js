@@ -73,17 +73,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 });
 
 // ===============================
-//   ANCIEN SYSTEME LOCAL À SUPPRIMER
-// ===============================
-// ❌ Supprimer tout ceci :
-// let playerId = localStorage.getItem("player_id");
-// if (!playerId) { ... }
-// let playerPseudo = localStorage.getItem("playerPseudo");
-// if (!playerPseudo) { ... }
-// const playerId = getPlayerId();
-// let playerPseudo = getPlayerPseudo();
-
-// ===============================
 //   VARIABLES DE JEU
 // ===============================
 
@@ -1689,6 +1678,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
