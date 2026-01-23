@@ -275,13 +275,7 @@ function restoreGameState() {
 
   const data = loadGameState();
   if (!data) return false;
-
-  console.log("[RESTORE] data.activePoints =", data.activePoints);
-  console.log("[RESTORE] data.permanentPoints =", data.permanentPoints);
-  console.log("[RESTORE] data.usedEdges =", data.usedEdges);
-  console.log("[RESTORE] data.validatedSegments =", data.validatedSegments);
-  console.log("[RESTORE] data.historyStack =", data.historyStack);
-
+  
   // Vérification stricte
   if (!Array.isArray(data.activePoints) ||
       !Array.isArray(data.permanentPoints) ||
@@ -304,10 +298,11 @@ function restoreGameState() {
   jokersAvailable = data.jokersAvailable ?? 0;
   jokersTotal = data.jokersTotal ?? 0;
   undoCount = data.undoCount ?? 0;
-  timerSeconds = data.timerSeconds ?? 0;
+  //timerSeconds = data.timerSeconds ?? 0;
+  timerValue = data.timerValue ?? 0;
   console.log("[RESTORE] timerSeconds AVANT affichage =", timerSeconds);
 console.log("[RESTORE] timerValue.innerText AVANT =", document.getElementById("timerValue").textContent);
-document.getElementById("timerValue").textContent = formatTime(timerSeconds);
+//document.getElementById("timerValue").textContent = formatTime(timerSeconds);
 console.log("[RESTORE] timerValue.innerText APRES =", document.getElementById("timerValue").textContent);
 
   gameOver = data.gameOver ?? false;
@@ -1541,6 +1536,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
