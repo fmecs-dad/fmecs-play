@@ -2,6 +2,57 @@
 //   VARIABLES GLOBALES
 // ===============================
 
+const supabase = supabase.createClient(
+  "https://gjzqghhqpycbcwykxvgw.supabase.co",
+  SUPABASE_ANON_KEY
+);
+
+document.getElementById("authBtn").addEventListener("click", async () => {
+  const user = await getCurrentUser();
+
+  if (user) {
+    // Déconnexion
+    await supabase.auth.signOut();
+    updateAuthUI();
+    return;
+  }
+
+  // Sinon : ouvrir la fenêtre de connexion
+  document.getElementById("authOverlay").style.display = "flex";
+});
+
+document.getElementById("closeAuthBtn").addEventListener("click", () => {
+  document.getElementById("authOverlay").style.display = "none";
+});
+
+document.getElementById("signupBtn").addEventListener("click", async () => {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+
+  const { error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  alert("Compte créé ! Vérifie ton email.");
+});
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  document.getElementById("authOverlay").style.display = "none";
+  updateAuthUI();
+});
 
 let playerId = localStorage.getItem("player_id");
 
@@ -16,6 +67,9 @@ if (!playerPseudo) {
   playerPseudo = "Joueur";
   localStorage.setItem("playerPseudo", playerPseudo);
 }
+
+const playerId = getPlayerId();
+let playerPseudo = getPlayerPseudo();
 
 let historyStack = [];
 
@@ -58,6 +112,28 @@ let tutorialRunning = false;
 const SUPABASE_URL = "https://gjzqghhqpycbcwykxvgw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
 
+async function getCurrentUser() {
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
+
+function updateAuthUI() {
+  getCurrentUser().then(user => {
+    const btn = document.getElementById("authBtn");
+    if (!btn) return;
+
+    if (user) {
+      btn.textContent = "Se déconnecter";
+    } else {
+      btn.textContent = "Se connecter";
+    }
+  });
+}
+
+// Écoute les changements de session
+supabase.auth.onAuthStateChange(() => {
+  updateAuthUI();
+});
 
 const SECRET_SALT = atob("eDlGITEyQGE=");
 
@@ -154,6 +230,24 @@ function renderLeaderboard(list) {
 }
 
 fetchLeaderboard().then(renderLeaderboard);
+
+function getPlayerId() {
+  let id = localStorage.getItem("player_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("player_id", id);
+  }
+  return id;
+}
+
+function getPlayerPseudo() {
+  let pseudo = localStorage.getItem("playerPseudo");
+  if (!pseudo) {
+    pseudo = "Joueur";
+    localStorage.setItem("playerPseudo", pseudo);
+  }
+  return pseudo;
+}
 
 function saveBestScore(data) {
   try {
@@ -1539,6 +1633,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
