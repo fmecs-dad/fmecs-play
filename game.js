@@ -1428,6 +1428,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const snapped = snapToAlignedPoint(selectedStart, { x, y });
+    
     const result = getSegmentBetween(selectedStart, { x, y });
     selectedStart = null;
 
@@ -1537,6 +1539,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
