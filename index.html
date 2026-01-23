@@ -557,7 +557,7 @@ body {
         <button id="stepBtn" class="main-btn">Pas à Pas</button>
         <button id="helpBtn" class="main-btn">Aide</button>
         <button id="soundBtn" class="main-btn">Son : on</button>
-        <button id="authBtn">Se connecter</button>
+        <button id="authBtn" class="main-btn">Se connecter</button>
 
 
         <span id="bestScoreTop" class="best-score-info"></span>
@@ -683,6 +683,27 @@ body {
     <button id="closeBestScore" class="main-btn">Fermer</button>
   </div>
 </div>
+
+<!-- Fenêtre d'authentification -->
+<div id="authOverlay" class="overlay hidden">
+  <div class="auth-panel">
+    <h2>Connexion / Inscription</h2>
+
+    <label>Email</label>
+    <input type="email" id="authEmail" />
+
+    <label>Mot de passe</label>
+    <input type="password" id="authPassword" />
+
+    <div class="auth-buttons">
+      <button id="signupBtn">Créer un compte</button>
+      <button id="loginBtn">Se connecter</button>
+    </div>
+
+    <button id="closeAuthBtn" class="close-btn">Fermer</button>
+  </div>
+</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="game.js"></script>
