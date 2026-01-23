@@ -14,7 +14,7 @@ const supa = window.supabase.createClient(
 
 // Fonctions Auth
 async function getCurrentUser() {
-  const { data } = await supabase.auth.getUser();
+  const { data } = await supa.auth.getUser();
   return data.user;
 }
 
@@ -26,7 +26,7 @@ function updateAuthUI() {
   });
 }
 
-supabase.auth.onAuthStateChange(() => {
+supa.auth.onAuthStateChange(() => {
   updateAuthUI();
 });
 
@@ -35,7 +35,7 @@ document.getElementById("authBtn").addEventListener("click", async () => {
   const user = await getCurrentUser();
 
   if (user) {
-    await supabase.auth.signOut();
+    await supa.auth.signOut();
     updateAuthUI();
     return;
   }
@@ -80,7 +80,7 @@ document.getElementById("signupBtn").addEventListener("click", async () => {
   const email = document.getElementById("authEmail").value;
   const password = document.getElementById("authPassword").value;
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supa.auth.signUp({ email, password });
 
   if (error) {
     alert("Erreur : " + error.message);
@@ -94,7 +94,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("authEmail").value;
   const password = document.getElementById("authPassword").value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supa.auth.signInWithPassword({ email, password });
 
   if (error) {
     alert("Erreur : " + error.message);
@@ -1592,7 +1592,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const user = await getCurrentUser();
 
   if (user) {
-    await supabase.auth.signOut();
+    await supa.auth.signOut();
     updateAuthUI();
     return;
   }
@@ -1625,7 +1625,7 @@ document.getElementById("closeAuthBtn").addEventListener("click", () => {
   const email = document.getElementById("authEmail").value;
   const password = document.getElementById("authPassword").value;
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supa.auth.signUp({ email, password });
 
   if (error) {
     alert("Erreur : " + error.message);
@@ -1639,7 +1639,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = document.getElementById("authEmail").value;
   const password = document.getElementById("authPassword").value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supa.auth.signInWithPassword({ email, password });
 
   if (error) {
     alert("Erreur : " + error.message);
