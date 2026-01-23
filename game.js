@@ -2,6 +2,9 @@
 //   VARIABLES GLOBALES
 // ===============================
 
+// Clé publique Supabase (à récupérer dans ton dashboard)
+const SUPABASE_ANON_KEY = "5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
+
 // Initialisation Supabase
 const sb = supabase.createClient(
   "https://gjzqghhqpycbcwykxvgw.supabase.co",
