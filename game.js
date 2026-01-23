@@ -1281,7 +1281,11 @@ function playTutorialStep() {
 // ===============================
 
 function initGame() {
-  console.log("[initGame] APPELÉ");
+  console.log("[initGame] appelé");
+console.log("[initGame] scoreValue =", document.getElementById("scoreValue"));
+console.log("[initGame] timerValue =", document.getElementById("timerValue"));
+console.log("[initGame] undoCount =", document.getElementById("undoCount"));
+console.log("[initGame] jokersAvailable =", document.getElementById("jokersAvailable"));
 console.log("[initGame] timerSeconds =", timerSeconds);
 console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue").textContent);
 
@@ -1533,6 +1537,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
