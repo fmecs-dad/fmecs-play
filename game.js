@@ -253,7 +253,7 @@ function saveGameState() {
     paused
     
   };
-
+  console.log("SAVE GAME STATE → validatedSegments.length =", validatedSegments.length);
   try {
     localStorage.setItem("currentGameState", JSON.stringify(data));
   } catch (e) {
@@ -1519,6 +1519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
