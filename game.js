@@ -2,22 +2,40 @@
 //   VARIABLES GLOBALES
 // ===============================
 
+// Initialisation Supabase
 const supabase = supabase.createClient(
   "https://gjzqghhqpycbcwykxvgw.supabase.co",
   SUPABASE_ANON_KEY
 );
 
+// Fonctions Auth
+async function getCurrentUser() {
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
+
+function updateAuthUI() {
+  getCurrentUser().then(user => {
+    const btn = document.getElementById("authBtn");
+    if (!btn) return;
+    btn.textContent = user ? "Se déconnecter" : "Se connecter";
+  });
+}
+
+supabase.auth.onAuthStateChange(() => {
+  updateAuthUI();
+});
+
+// Listeners Auth
 document.getElementById("authBtn").addEventListener("click", async () => {
   const user = await getCurrentUser();
 
   if (user) {
-    // Déconnexion
     await supabase.auth.signOut();
     updateAuthUI();
     return;
   }
 
-  // Sinon : ouvrir la fenêtre de connexion
   document.getElementById("authOverlay").style.display = "flex";
 });
 
@@ -54,25 +72,22 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   updateAuthUI();
 });
 
-let playerId = localStorage.getItem("player_id");
+// ===============================
+//   ANCIEN SYSTEME LOCAL À SUPPRIMER
+// ===============================
+// ❌ Supprimer tout ceci :
+// let playerId = localStorage.getItem("player_id");
+// if (!playerId) { ... }
+// let playerPseudo = localStorage.getItem("playerPseudo");
+// if (!playerPseudo) { ... }
+// const playerId = getPlayerId();
+// let playerPseudo = getPlayerPseudo();
 
-if (!playerId) {
-  playerId = crypto.randomUUID();
-  localStorage.setItem("player_id", playerId);
-}
-
-let playerPseudo = localStorage.getItem("playerPseudo");
-
-if (!playerPseudo) {
-  playerPseudo = "Joueur";
-  localStorage.setItem("playerPseudo", playerPseudo);
-}
-
-const playerId = getPlayerId();
-let playerPseudo = getPlayerPseudo();
+// ===============================
+//   VARIABLES DE JEU
+// ===============================
 
 let historyStack = [];
-
 let soundEnabled = true;
 let audioUnlocked = false;
 
@@ -80,7 +95,6 @@ const size = 34;
 let offset;
 let spacing;
 
-// Variables de jeu
 let selectedStart = null;
 let score = 0;
 let paused = false;
@@ -89,7 +103,6 @@ let gameOver = false;
 let canvas = null;
 let ctx = null;
 let tutorialBtn = null;
-
 
 let activePoints = new Set();
 let permanentPoints = new Set();
@@ -105,35 +118,8 @@ let timerRunning = false;
 
 let undoCount = 0;
 
-// Tutoriel
 let currentTutorialStep = 0;
 let tutorialRunning = false;
-
-const SUPABASE_URL = "https://gjzqghhqpycbcwykxvgw.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
-
-async function getCurrentUser() {
-  const { data } = await supabase.auth.getUser();
-  return data.user;
-}
-
-function updateAuthUI() {
-  getCurrentUser().then(user => {
-    const btn = document.getElementById("authBtn");
-    if (!btn) return;
-
-    if (user) {
-      btn.textContent = "Se déconnecter";
-    } else {
-      btn.textContent = "Se connecter";
-    }
-  });
-}
-
-// Écoute les changements de session
-supabase.auth.onAuthStateChange(() => {
-  updateAuthUI();
-});
 
 const SECRET_SALT = atob("eDlGITEyQGE=");
 
@@ -168,6 +154,23 @@ async function sendScoreToSupabase(pseudo, score, duration, undoCount, jokersUse
   return response.ok;
 }
 
+async function getCurrentUser() {
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+}
+
+function updateAuthUI() {
+  getCurrentUser().then(user => {
+    const btn = document.getElementById("authBtn");
+    if (!btn) return;
+
+    btn.textContent = user ? "Se déconnecter" : "Se connecter";
+  });
+}
+
+supabase.auth.onAuthStateChange(() => {
+  updateAuthUI();
+});
 
 const tutorialSteps = [
   { message: "Exemple 1 : une ligne horizontale.", start: { x: 15, y: 12 }, end: { x: 19, y: 12 } },
@@ -1048,13 +1051,21 @@ function checkGameOver() {
     const isNewRecord = isBetterThan(current, best);
 
     // ENVOI DU SCORE GLOBAL
-    sendScoreToSupabase(
-      playerPseudo,
-      current.score,
-      current.duration * 1000,
-      current.returnsUsed,
-      current.jokersUsed
-    );
+    const user = await getCurrentUser();
+if (!user) {
+  document.getElementById("authOverlay").style.display = "flex";
+  return;
+}
+
+await sendScoreToSupabase(
+  user.id,
+  playerPseudo,
+  current.score,
+  current.duration * 1000,
+  current.returnsUsed,
+  current.jokersUsed
+);
+
 
     if (isNewRecord) {
 
@@ -1563,6 +1574,22 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("helpBtn").addEventListener("click", () => {
   playClickSound();
 
+ document.getElementById("authBtn").addEventListener("click", async () => {
+  const user = await getCurrentUser();
+
+  if (user) {
+    await supabase.auth.signOut();
+    updateAuthUI();
+    return;
+  }
+
+  document.getElementById("authOverlay").style.display = "flex";
+});
+
+document.getElementById("closeAuthBtn").addEventListener("click", () => {
+  document.getElementById("authOverlay").style.display = "none";
+});
+
   const overlay = document.getElementById("helpOverlay");
   if (!overlay) {
     console.error("helpOverlay introuvable dans le DOM");
@@ -1578,6 +1605,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
   overlay.classList.remove("hidden");
   overlay.style.display = "flex";
+});
+
+  document.getElementById("signupBtn").addEventListener("click", async () => {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+
+  const { error } = await supabase.auth.signUp({ email, password });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  alert("Compte créé ! Vérifie ton email.");
+});
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  document.getElementById("authOverlay").style.display = "none";
+  updateAuthUI();
 });
 
 
@@ -1633,6 +1689,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
