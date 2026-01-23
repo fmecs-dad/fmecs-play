@@ -1320,7 +1320,7 @@ console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue
 console.log("[initGame] timerValue APRÈS =", document.getElementById("timerValue").textContent);
 console.log("[initGame] scoreValue APRÈS =", document.getElementById("scoreValue").textContent);
 console.log("[initGame] undoCount APRÈS =", document.getElementById("undoCount").textContent);
-console.log("[initGame] jokersAvailable APRÈS =", document.getElementById("jokersAvailable").textContent);
+//console.log("[initGame] jokersAvailable APRÈS =", document.getElementById("jokersAvailable").textContent);
 
 }
 
@@ -1537,6 +1537,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
