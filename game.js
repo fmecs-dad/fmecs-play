@@ -603,8 +603,6 @@ function initMaltaCross() {
     permanentPoints.add(key);
     activePoints.add(key);
   });
-
-  autoSave();
 }
 
 function redrawEverything() {
@@ -1519,6 +1517,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
