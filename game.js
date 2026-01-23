@@ -117,7 +117,7 @@ async function computeScoreHash(playerId, score, duration, undoCount, jokersUsed
   return await sha256(raw);
 }
 
-async function sendScoreToSupabase(pseudo, score, duration, undoCount, jokersUsed) {
+async function sendScoreToSupabase(userId, pseudo, score, duration, undoCount, jokersUsed){
   const hash = await computeScoreHash(playerId, score, duration, undoCount, jokersUsed);
 
   const payload = {
@@ -1678,6 +1678,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
