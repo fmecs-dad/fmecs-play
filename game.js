@@ -299,11 +299,7 @@ function restoreGameState() {
   jokersTotal = data.jokersTotal ?? 0;
   undoCount = data.undoCount ?? 0;
   timerSeconds = data.timerSeconds ?? 0;
-  //timerValue = data.timerValue ?? 0;
-  console.log("[RESTORE] timerSeconds AVANT affichage =", timerSeconds);
-console.log("[RESTORE] timerValue.innerText AVANT =", document.getElementById("timerValue").textContent);
-document.getElementById("timerValue").textContent = formatTime(timerSeconds);
-console.log("[RESTORE] timerValue.innerText APRES =", document.getElementById("timerValue").textContent);
+  //document.getElementById("timerValue").textContent = formatTime(timerSeconds);
 
   gameOver = data.gameOver ?? false;
   paused = data.paused ?? false;
@@ -318,30 +314,10 @@ console.log("[RESTORE] timerValue.innerText APRES =", document.getElementById("t
     appendHistoryEntry(entry.points, entry.activeCount);
   });
 
-  // Redessiner les segments validés
-  /*
-  validatedSegments.forEach(seg => {
-    drawSegment(seg.points[0], seg.points[1]);
-  });
-
-  // Redessiner les edges utilisés
-  usedEdges.forEach(edge => {
-    const [p1, p2] = edge.split("|");
-    drawEdge(p1, p2);
-  });
-  */
-  console.log("[RESTORE] historyStack avant return =", historyStack);
-  
   // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
-
-  console.log("[RESTORE] activePoints après injection =", [...activePoints]);
-  console.log("[RESTORE] permanentPoints après injection =", [...permanentPoints]);
-  console.log("[RESTORE] usedEdges après injection =", [...usedEdges]);
-  console.log("[RESTORE] validatedSegments après injection =", validatedSegments);
-  console.log("[RESTORE] historyStack après injection =", historyStack);
-
+  
   return true;
 }
 
@@ -1536,6 +1512,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
