@@ -302,7 +302,7 @@ function restoreGameState() {
   //timerValue = data.timerValue ?? 0;
   console.log("[RESTORE] timerSeconds AVANT affichage =", timerSeconds);
 console.log("[RESTORE] timerValue.innerText AVANT =", document.getElementById("timerValue").textContent);
-//document.getElementById("timerValue").textContent = formatTime(timerSeconds);
+document.getElementById("timerValue").textContent = formatTime(timerSeconds);
 console.log("[RESTORE] timerValue.innerText APRES =", document.getElementById("timerValue").textContent);
 
   gameOver = data.gameOver ?? false;
@@ -1536,6 +1536,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
