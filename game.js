@@ -1274,10 +1274,11 @@ console.log("[initGame] timerValue AVANT =", document.getElementById("timerValue
   updateCounters();
   document.getElementById("undoCount").textContent = undoCount;
   updateSoundButton();
+  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
 
   gameOver = false;
   paused = false;
-
+  
   updateTutorialButtonState();
   updateBestScoreTop();
 
@@ -1512,6 +1513,7 @@ console.log("[READY] APRÈS initGame → timerValue =", document.getElementById(
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
