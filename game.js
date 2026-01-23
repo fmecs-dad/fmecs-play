@@ -241,8 +241,8 @@ function saveGameState() {
     permanentPoints: Array.from(permanentPoints),
     usedEdges: Array.from(usedEdges),
     validatedSegments, // tableau simple → OK
-    //historyStack: JSON.parse(JSON.stringify(validatedSegments)),
-    historyStack: JSON.parse(JSON.stringify(historyStack)),
+    historyStack: JSON.parse(JSON.stringify(validatedSegments)),
+    //historyStack: JSON.parse(JSON.stringify(historyStack)),
     score,
     jokersAvailable,
     jokersTotal,
@@ -1519,6 +1519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 document.addEventListener("DOMContentLoaded", startNewGame);
+
 
 
 
