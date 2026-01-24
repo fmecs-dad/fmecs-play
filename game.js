@@ -637,7 +637,7 @@ function getNearestPoint(mx, my) {
   return null;
 }
 
-function snapToAlignedPoint(first, clicked) {
+function snapToAlignedPoint(first, clicked, mx, my) {
   const { x: x1, y: y1 } = first;
   const { x: x2, y: y2 } = clicked;
 
@@ -1547,7 +1547,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const snapped = snapToAlignedPoint(selectedStart, { x, y });
+    const snapped = snapToAlignedPoint(selectedStart, { x, y }, mx, my);
     
     const result = getSegmentBetween(selectedStart, { x, y });
     selectedStart = null;
