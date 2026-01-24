@@ -1045,7 +1045,9 @@ function isBetterThan(a, b) {
     return a.jokersUsed < b.jokersUsed;
 }
 
-async function checkGameOver() {   
+async function checkGameOver() { 
+console.log("checkGameOver called", validatedSegments.length, activePoints.size);
+  
   const moves = getPossibleMoves();
   if (moves.length === 0) {
 
