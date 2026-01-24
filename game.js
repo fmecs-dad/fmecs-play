@@ -1045,9 +1045,9 @@ function isBetterThan(a, b) {
     return a.jokersUsed < b.jokersUsed;
 }
 
-async function checkGameOver() { 
-console.log("checkGameOver called", validatedSegments.length, activePoints.size);
-  
+async function checkGameOver() {
+  console.log("checkGameOver called", validatedSegments.length, activePoints.size);
+
   const moves = getPossibleMoves();
   if (moves.length === 0) {
 
@@ -1068,45 +1068,29 @@ console.log("checkGameOver called", validatedSegments.length, activePoints.size)
     const best = loadBestScore();
     const isNewRecord = isBetterThan(current, best);
 
-    // ENVOI DU SCORE GLOBAL
-    const user = await getCurrentUser();
-    if (!user) {
-      document.getElementById("authOverlay").style.display = "flex";
-      return;
-    }
-
-    await sendScoreToSupabase(
-      user.id,
-      current.score,
-      current.duration * 1000,
-      current.returnsUsed,
-      current.jokersUsed
-    );
-
-    // GESTION DU RECORD
+    // 1️⃣ On affiche d'abord la fenêtre (record ou fin de partie)
     if (isNewRecord) {
-
-      const pauseBtn = document.getElementById("pauseBtn");
-      const undoBtn  = document.getElementById("undoBtn");
-
-      if (pauseBtn) {
-        pauseBtn.disabled = true;
-        pauseBtn.classList.add("disabled");
-      }
-
-      if (undoBtn) {
-        undoBtn.disabled = true;
-        undoBtn.classList.add("disabled");
-      }
-
       saveBestScore(current);
       updateBestScoreTop();
       playNewRecordSound();
       showBestScorePanel();
-      return;
+    } else {
+      showEndGamePanel();
     }
 
-    showEndGamePanel();
+    // 2️⃣ Ensuite seulement, on tente d'envoyer le score (sans bloquer)
+    const user = await getCurrentUser();
+    if (user) {
+      await sendScoreToSupabase(
+        user.id,
+        current.score,
+        current.duration * 1000,
+        current.returnsUsed,
+        current.jokersUsed
+      );
+    }
+
+    // 3️⃣ Si pas connecté → on ne fait rien pour l'instant
   }
 }
 
