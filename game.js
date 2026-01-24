@@ -1046,8 +1046,7 @@ function isBetterThan(a, b) {
 }
 
 async function checkGameOver() {
-  console.log("checkGameOver called", validatedSegments.length, activePoints.size);
-
+  
   const moves = getPossibleMoves();
   if (moves.length === 0) {
 
@@ -1068,7 +1067,7 @@ async function checkGameOver() {
     const best = loadBestScore();
     const isNewRecord = isBetterThan(current, best);
 
-    // 1️⃣ On affiche d'abord la fenêtre (record ou fin de partie)
+    // On affiche d'abord la fenêtre (record ou fin de partie)
     if (isNewRecord) {
       saveBestScore(current);
       updateBestScoreTop();
@@ -1078,7 +1077,7 @@ async function checkGameOver() {
       showEndGamePanel();
     }
 
-    // 2️⃣ Ensuite seulement, on tente d'envoyer le score (sans bloquer)
+    // Ensuite seulement, on tente d'envoyer le score (sans bloquer)
     const user = await getCurrentUser();
     if (user) {
       await sendScoreToSupabase(
@@ -1090,7 +1089,7 @@ async function checkGameOver() {
       );
     }
 
-    // 3️⃣ Si pas connecté → on ne fait rien pour l'instant
+    // Si pas connecté → on ne fait rien pour l'instant
   }
 }
 
