@@ -41,6 +41,23 @@ body {
   background-attachment: fixed;
 }
 
+.jeton-img {
+  display: block;
+  margin: 10px auto;
+  width: 60px;
+  height: auto;
+}
+
+.jeton-img {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
 #gameContainer {
   display: flex;
   flex-direction: column;
@@ -517,9 +534,11 @@ body {
   <div id="readyModal" class="modal">
   <div class="modal-content">
     <p>Prêt à jouer ?</p>
-    <button id="readyBtn" class="main-btn">Oui</button>
+    <img src="images/jeton.png" alt="Jeton FMecs" class="jeton-img">
+    <button id="readyBtn" class="main-btn">Commencer</button>
   </div>
 </div>
+
 
 
   <div id="gameContainer">
@@ -709,6 +728,6 @@ body {
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="game.js"></script>
+<script src="game.obf.js"></script>
 </body>
 </html>
