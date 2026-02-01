@@ -669,7 +669,10 @@ console.log("startTimer called. timerRunning =", timerRunning);
   timerRunning = true;
   timerInterval = setInterval(() => {
     timerSeconds++;
-    autoSave();
+    console.log("autoSave BEFORE:", timerSeconds);
+autoSave();
+console.log("autoSave AFTER:", timerSeconds);
+
     document.getElementById("timerValue").textContent = formatTime(timerSeconds);
   }, 1000);
 }
@@ -2093,3 +2096,4 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
