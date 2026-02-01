@@ -663,7 +663,9 @@ function formatTime(sec) {
 }
 
 function startTimer() {
-  if (timerRunning) return;
+console.log("startTimer called. timerRunning =", timerRunning);
+
+  if (timerInterval) return; // empêche tout double interval
   timerRunning = true;
   timerInterval = setInterval(() => {
     timerSeconds++;
@@ -673,9 +675,10 @@ function startTimer() {
 }
 
 function stopTimer() {
-  timerRunning = false;
+  if (!timerInterval) return;
   clearInterval(timerInterval);
   timerInterval = null;
+  timerRunning = false;
 }
 
 function resetTimer() {
