@@ -1277,15 +1277,22 @@ function getPossibleMoves() {
 
 function pauseGame() {
   paused = true;
+
+  // Arrête proprement le timer
   clearInterval(timerInterval);
+  timerInterval = null;     // ← essentiel
   timerRunning = false;
+
   document.getElementById("pauseBtn").textContent = "Reprendre";
   flash("Jeu en pause");
 }
 
 function resumeGame() {
   paused = false;
+
+  // Redémarre proprement le timer
   startTimer();
+
   document.getElementById("pauseBtn").textContent = "Pause";
   flash("Reprise");
 }
@@ -1294,7 +1301,6 @@ function togglePause() {
   if (paused) resumeGame();
   else pauseGame();
 }
-
 
 // ===============================
 //   RÉINITIALISATION DU JEU
@@ -2096,4 +2102,5 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
