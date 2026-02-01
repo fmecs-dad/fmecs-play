@@ -663,17 +663,13 @@ function formatTime(sec) {
 }
 
 function startTimer() {
-console.log("startTimer called. timerRunning =", timerRunning);
-
   if (timerInterval) return; // empêche tout double interval
   timerRunning = true;
   timerInterval = setInterval(() => {
-    timerSeconds++;
-    console.log("autoSave BEFORE:", timerSeconds);
-autoSave();
-console.log("autoSave AFTER:", timerSeconds);
+  timerSeconds++;
+  autoSave();
 
-    document.getElementById("timerValue").textContent = formatTime(timerSeconds);
+  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
   }, 1000);
 }
 
@@ -2102,5 +2098,6 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
