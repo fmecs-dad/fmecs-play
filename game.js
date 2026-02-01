@@ -1,118 +1,248 @@
-// ===============================
+/// ===============================
 //   VARIABLES GLOBALES
 // ===============================
 
-// Clé publique Supabase (à récupérer dans ton dashboard)
 const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
 
-// Initialisation Supabase
 const supa = window.supabase.createClient(
   "https://gjzqghhqpycbcwykxvgw.supabase.co",
   SUPABASE_ANON_KEY
 );
 
-
-// Fonctions Auth
-async function getCurrentUser() {
-  const { data } = await supa.auth.getUser();
-  return data.user;
-}
-
-function updateAuthUI() {
-  getCurrentUser().then(user => {
-    const btn = document.getElementById("authBtn");
-    if (!btn) return;
-    btn.textContent = user ? "Se déconnecter" : "Se connecter";
-  });
-}
-
-supa.auth.onAuthStateChange(() => {
-  updateAuthUI();
-});
-
-// Listeners Auth
-document.getElementById("authBtn").addEventListener("click", async () => {
-  const user = await getCurrentUser();
-
-  if (user) {
-    await supa.auth.signOut();
-    updateAuthUI();
-    return;
-  }
-
-  document.getElementById("authOverlay").style.display = "flex";
-});
+// ===============================
+//   AUTH : UTILITAIRES
+// ===============================
 
 async function fetchPlayerPseudo(userId) {
-  const { data, error } = await supabase
+  const { data, error } = await supa
     .from("players")
     .select("pseudo")
     .eq("id", userId)
     .single();
 
-  if (error) {
-    console.error("Erreur récupération pseudo :", error);
-    return "Joueur";
-  }
-
+  if (error) return null;
   return data.pseudo;
 }
 
-async function updatePlayerPseudo(userId, newPseudo) {
-  const { error } = await supabase
-    .from("players")
-    .update({ pseudo: newPseudo })
-    .eq("id", userId);
+// ===============================
+//   UPDATE AUTH UI (VERSION FINALE)
+// ===============================
 
-  if (error) {
-    console.error("Erreur mise à jour pseudo :", error);
-    return false;
+function updateAuthUI(user = null) {
+
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  const burgerPseudo = document.getElementById("burgerPseudo");
+  const btn = document.getElementById("authBtn");
+
+  if (btn) btn.style.display = "none";
+
+  // ÉTAT DÉCONNECTÉ
+  if (!user) {
+    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
+    if (burgerPseudo) burgerPseudo.textContent = "Invité";
+    return;
   }
 
-  return true;
+  // ÉTAT CONNECTÉ
+  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+
+  // Valeur par défaut immédiate
+  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
+  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
+
+  // Mise à jour asynchrone
+  fetchPlayerPseudo(user.id)
+    .then(pseudo => {
+      if (!pseudo) return;
+      if (burgerPseudo) burgerPseudo.textContent = pseudo;
+      localStorage.setItem("playerPseudo", pseudo);
+    })
+    .catch(err => {
+      console.warn("⚠️ fetchPlayerPseudo a échoué :", err);
+    });
 }
 
-document.getElementById("closeAuthBtn").addEventListener("click", () => {
-  document.getElementById("authOverlay").style.display = "none";
-});
+// ===============================
+//   GESTION DES REDIRECTIONS SUPABASE (v1)
+// ===============================
 
-document.getElementById("signupBtn").addEventListener("click", async () => {
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
+(async () => {
+  const hash = window.location.hash;
 
-  const { error } = await supa.auth.signUp({ email, password });
+  if (hash.includes("access_token")) {
 
-  if (error) {
-    alert("Erreur : " + error.message);
+    // v1 → session = supa.auth.session()
+    const session = supa.auth.session();
+
+    if (session?.user) {
+      afficherPageTransition();
+      setTimeout(() => window.close(), 500);
+    }
+
+    window.history.replaceState({}, document.title, "/");
     return;
   }
-
-  alert("Compte créé ! Vérifie ton email.");
-});
-
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
-
-  const { error } = await supa.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    alert("Erreur : " + error.message);
-    return;
-  }
-
-  document.getElementById("authOverlay").style.display = "none";
-  updateAuthUI();
-
-  const user = await getCurrentUser();
-  if (user) {
-    const pseudo = await fetchPlayerPseudo(user.id);
-    localStorage.setItem("playerPseudo", pseudo);
-  }
-
-});
+})();
 
 // ===============================
+//   PAGE DE TRANSITION
+// ===============================
+
+function afficherPageTransition() {
+  const div = document.createElement("div");
+  div.style.position = "fixed";
+  div.style.top = 0;
+  div.style.left = 0;
+  div.style.width = "100vw";
+  div.style.height = "100vh";
+  div.style.background = "black";
+  div.style.color = "white";
+  div.style.display = "flex";
+  div.style.flexDirection = "column";
+  div.style.justifyContent = "center";
+  div.style.alignItems = "center";
+  div.style.fontFamily = "var(--fmecs-font)";
+  div.style.zIndex = 999999;
+
+  div.innerHTML = `
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Compte confirmé</h1>
+    <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 2rem;">Tu peux retourner au jeu.</p>
+    <button id="fmecs-return-btn"
+      style="padding: 1rem 2rem; font-size: 1.2rem; background: #444; color: white; border: none; border-radius: 8px; cursor: pointer;">
+      Retourner au jeu
+    </button>
+  `;
+
+  document.body.innerHTML = "";
+  document.body.appendChild(div);
+
+  document.getElementById("fmecs-return-btn").onclick = () => {
+    window.close();
+    window.location = "http://127.0.0.1:8000/";
+  };
+}
+
+// ===============================
+//   PROFIL & JEU
+// ===============================
+
+function lancerJeuComplet() {
+  document.getElementById("readyModal").style.display = "none";
+  initGame();
+
+  const board = document.getElementById("canvasContainer");
+  board.classList.remove("show");
+  board.classList.add("slide-in-premium");
+  void board.offsetWidth;
+  board.classList.add("show");
+}
+
+async function initialiserProfilEtLancerJeu(session) {
+  if (!session) return;
+
+  const userId = session.user.id;
+
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (player?.pseudo) {
+    localStorage.setItem("playerPseudo", player.pseudo);
+  }
+}
+
+async function ouvrirProfil() {
+  const session = supa.auth.session();
+  const user = session?.user || null;
+
+  if (!user) return;
+
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  document.getElementById("profilePseudoInput").value = player.pseudo || "";
+  document.getElementById("profileAvatarPreview").src = player.avatar_url || "default.png";
+
+  const modal = document.getElementById("profileModal");
+  modal.classList.remove("hidden");
+  modal.style.display = "flex";
+}
+
+// ===============================
+//   LISTENER AUTH SUPABASE (v1)
+// ===============================
+
+supa.auth.onAuthStateChange(async (event, session) => {
+  
+  if (event === "SIGNED_IN") {
+
+    // On attend que la session soit réellement disponible
+    let fresh = null;
+    for (let i = 0; i < 10; i++) {
+      const s = supa.auth.session();
+      if (s?.user) {
+        fresh = s;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    const user = fresh?.user || null;
+
+    // ❌ On NE DOIT PLUS ouvrir readyModal ici
+    // document.getElementById("readyModal").style.display = "flex";
+
+    await initialiserProfilEtLancerJeu(fresh || null);
+
+    updateAuthUI(user);
+    return;
+  }
+
+  // SIGNED_OUT ou autres
+  updateAuthUI(session?.user || null);
+});
+
+
+// --------------------------------------------------
+// AIDE
+// --------------------------------------------------
+
+function openHelpOverlay(auto = false) {
+  if (!auto) playClickSound();
+
+  const overlay = document.getElementById("helpOverlay");
+  const topBar = document.getElementById("topBar");
+
+  overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
+  overlay.classList.remove("hidden");
+  overlay.style.display = "flex";
+
+  
+  window.helpAutoOpened = auto;
+}
+
+
+// ===============================
+//   SESSION AU DÉMARRAGE
+// ===============================
+
+(async () => {
+  
+  const session = supa.auth.session();
+
+  if (session) {
+    await initialiserProfilEtLancerJeu(session);
+  }
+
+  updateAuthUI(session?.user || null);
+})();
+
+// ===============================	
 //   VARIABLES DE JEU
 // ===============================
 
@@ -150,37 +280,46 @@ let undoCount = 0;
 let currentTutorialStep = 0;
 let tutorialRunning = false;
 
+let readyModalAlreadyShown = false;
+
 const SECRET_SALT = atob("eDlGITEyQGE=");
+
+const HELP_SEEN_KEY = "helpSeen";
+
 
 async function computeScoreHash(playerId, score, duration, undoCount, jokersUsed) {
   const raw = playerId + score + duration + undoCount + jokersUsed + SECRET_SALT;
   return await sha256(raw);
 }
 
-async function sendScoreToSupabase(userId, pseudo, score, duration, undoCount, jokersUsed){
-  const hash = await computeScoreHash(userId, score, duration, undoCount, jokersUsed);
+async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
+  try {
+    // Récupération du pseudo depuis la table players
+    const pseudo = await fetchPlayerPseudo(userId);
 
-  const payload = {
-    player_id: userId,
-    pseudo: localStorage.getItem("playerPseudo"),
-    score: score,
-    duration_ms: duration,
-    undo_count: undoCount,
-    jokers_used: jokersUsed,
-    hash: hash
-  };
+    // Calcul du hash
+    const hash = await computeScoreHash(userId, score, durationMs, undoCount, jokersUsed);
 
-  const response = await fetch("https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-    },
-    body: JSON.stringify(payload)
-  });
+    // Insertion via le client Supabase (respecte les policies RLS)
+    const { error } = await supa
+      .from("scores")
+      .insert({
+        player_id: userId,
+        pseudo: pseudo,
+        score: score,
+        duration_ms: durationMs,
+        undo_count: undoCount,
+        jokers_used: jokersUsed,
+        hash: hash,
+        created_at: new Date().toISOString()
+      });
 
-  return response.ok;
+    if (error) {
+      console.error("Erreur insertion score :", error);
+    }
+  } catch (err) {
+    console.error("Erreur inattendue lors de l'envoi du score :", err);
+  }
 }
 
 const tutorialSteps = [
@@ -246,7 +385,22 @@ function renderLeaderboard(list) {
   });
 }
 
-fetchLeaderboard().then(renderLeaderboard);
+document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
+  playClickSound();
+  const overlay = document.getElementById("leaderboardOverlay");
+  overlay.classList.remove("hidden");
+  overlay.style.display = "flex";
+
+  const list = await fetchLeaderboard();
+  renderLeaderboard(list);
+});
+
+document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
+  playClickSound();
+  const overlay = document.getElementById("leaderboardOverlay");
+  overlay.style.display = "none";
+  overlay.classList.add("hidden");
+});
 
 function saveBestScore(data) {
   try {
@@ -318,7 +472,7 @@ document.getElementById("closeBestScore").addEventListener("click", () => {
 });
 
 function updateSoundButton() {
-  const btn = document.getElementById("soundBtn");
+  const btn = document.getElementById("burgerSoundBtn");
   btn.textContent = soundEnabled ? "Son : on" : "Son : off";
 }
 
@@ -503,7 +657,7 @@ function setButtonsEnabled(enabled) {
 }
 
 function formatTime(sec) {
-  const m = Math.round(sec / 60).toString().padStart(2, "0");
+  const m = Math.floor(sec / 60).toString().padStart(2, "0");
   const s = (sec % 60).toString().padStart(2, "0");
   return `${m}:${s}`;
 }
@@ -531,36 +685,6 @@ function resetTimer() {
   timerRunning = false;
   document.getElementById("timerValue").textContent = "00:00";
 }
-
-function updateTutorialButtonState() {
-  if (validatedSegments.length > 0) {
-    tutorialBtn.disabled = true;
-    tutorialBtn.classList.add("disabled");
-  } else {
-    tutorialBtn.disabled = false;
-    tutorialBtn.classList.remove("disabled");
-  }
-}
-
-document.getElementById("savePseudoBtn").addEventListener("click", async () => {
-  const user = await getCurrentUser();
-  if (!user) {
-    alert("Vous devez être connecté.");
-    return;
-  }
-
-  const newPseudo = document.getElementById("pseudoInput").value.trim();
-  if (newPseudo.length < 3) {
-    alert("Le pseudo doit faire au moins 3 caractères.");
-    return;
-  }
-
-  const ok = await updatePlayerPseudo(user.id, newPseudo);
-  if (ok) {
-    localStorage.setItem("playerPseudo", newPseudo);
-    alert("Pseudo mis à jour !");
-  }
-});
 
 
 // ===============================
@@ -969,7 +1093,6 @@ function undoLastMove() {
 
     updateCounters();
     redrawEverything();
-    updateTutorialButtonState();
   }
 
 
@@ -1078,7 +1201,10 @@ async function checkGameOver() {
     }
 
     // Ensuite seulement, on tente d'envoyer le score (sans bloquer)
-    const user = await getCurrentUser();
+    const session = supa.auth.session();
+const user = session?.user || null;
+
+
     if (user) {
       await sendScoreToSupabase(
         user.id,
@@ -1203,6 +1329,11 @@ function resetGameState() {
 
   undoCount = 0;
   document.getElementById("undoCount").textContent = "0";
+  
+  const stepBtn = document.getElementById("burgerStepBtn");
+  stepBtn.disabled = false;
+  stepBtn.classList.remove("disabled");
+
 
   resetTimer();
 
@@ -1292,12 +1423,14 @@ function runTutorial() {
   currentTutorialStep = 0;
 
   setButtonsEnabled(false);
+
+  const tutorialBtn = document.getElementById("burgerStepBtn");
   tutorialBtn.disabled = true;
   tutorialBtn.classList.add("disabled");
 
   playTutorialStep();
+  tutorialBtn.disabled = false;
 }
-
 
 // --------------------------------------
 // Fonction indépendante
@@ -1336,7 +1469,6 @@ function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
       autoSave();
       updateCounters();
       appendHistoryEntry(segment, steps);
-      updateTutorialButtonState();
     }
 
     if (onComplete) onComplete();
@@ -1351,15 +1483,21 @@ function playTutorialStep() {
 
   // 2) Fin du tutoriel
   if (!step) {
-    tutorialRunning = false;
-    showTutorialBubble("Tutoriel terminé !");
-    setTimeout(() => hideTutorialBubble(), 2000);
-    setButtonsEnabled(true);
-    updateTutorialButtonState();
-    redrawEverything();
-    flash("A vous de jouer", "info");
-    return;
-  }
+  tutorialRunning = false;
+  showTutorialBubble("Tutoriel terminé !");
+  setTimeout(() => hideTutorialBubble(), 2000);
+
+  setButtonsEnabled(true);
+
+  const tutorialBtn = document.getElementById("burgerStepBtn");
+  tutorialBtn.disabled = false;
+  tutorialBtn.classList.remove("disabled");
+
+  redrawEverything();
+  flash("A vous de jouer", "info");
+  return;
+}
+
 
   // 3) Mise à jour visuelle
   if (typeof positionLabels === "function") {
@@ -1419,7 +1557,6 @@ function initGame() {
   gameOver = false;
   paused = false;
   
-  updateTutorialButtonState();
   updateBestScoreTop();
 
   //if (!paused && !gameOver) {
@@ -1429,25 +1566,91 @@ function initGame() {
 }
 
 // ===============================
+//   FIRST LAUNCH FLOW
+// ===============================
+
+function handleFirstLaunchFlow(userFromEvent) {
+
+  const helpAlreadySeen = localStorage.getItem(HELP_SEEN_KEY) === "true";
+
+  if (!helpAlreadySeen) {
+    openHelpOverlay(true);
+    return;
+  }
+
+  initialFlow(userFromEvent);
+}
+
+// ===============================
+//   INITIAL FLOW (VERSION FINALE)
+// ===============================
+
+let gameStarted = false; // global
+
+
+function initialFlow(user) {
+  updateAuthUI(user);
+  
+  const lastEmail = localStorage.getItem("lastEmail");
+  const dontRemind = localStorage.getItem("skipWhySignup") === "1";
+
+  // 1. Utilisateur connecté → readyModal (une seule fois)
+  if (user) {
+    if (!readyModalAlreadyShown) {
+      readyModalAlreadyShown = true;
+      document.getElementById("readyModal").style.display = "flex";
+    }
+    return;
+  }
+
+  // 2. Déconnecté + lastEmail + pas skip → whySignupModal
+  if (!user && lastEmail && !dontRemind) {
+    document.getElementById("whySignupModal").style.display = "flex";
+    return;
+  }
+
+  // 3. Déconnecté + lastEmail + skip → readyModal (une seule fois)
+  if (!user && lastEmail && dontRemind) {
+    if (!readyModalAlreadyShown) {
+      readyModalAlreadyShown = true;
+      document.getElementById("readyModal").style.display = "flex";
+    }
+    return;
+  }
+
+  // 4. Déconnecté + pas de lastEmail → authOverlay
+  if (!user && !lastEmail) {
+    const auth = document.getElementById("authOverlay");
+    auth.classList.remove("hidden");
+    auth.style.display = "flex";
+    return;
+  }
+}
+
+function showReadyModal(source) {
+  console.log("🔥 showReadyModal appelé depuis :", source);
+  const modal = document.getElementById("readyModal");
+  modal.style.display = "flex";
+}
+
+
+// ===============================
 //   DOMContentLoaded
 // ===============================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // Références DOM essentielles (globales)
+  // Références DOM essentielles
   canvas = document.getElementById("gameCanvas");
   ctx = canvas.getContext("2d");
-  tutorialBtn = document.getElementById("stepBtn");
 
   // ===============================
   //   CALCUL RÉEL DU CANVAS + GRILLE
   // ===============================
 
-  // 1) Fixer la taille réelle du canvas (CSS → JS)
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
-  // 2) Recalculer spacing et offset en fonction de la taille réelle
   spacing = canvas.width / (size + 1);
   offset = spacing;
 
@@ -1459,57 +1662,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
   if (topLabels.length && leftLabels.length) {
-
     topLabels.forEach(span => {
       const pos = Number(span.textContent);
       if (!Number.isFinite(pos)) return;
-      const x = offset + (pos - 1) * spacing;
-      span.style.left = `${x - 6}px`;
+      span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
     });
 
     leftLabels.forEach(span => {
       const pos = Number(span.textContent);
       if (!Number.isFinite(pos)) return;
-      const y = offset + (pos - 1) * spacing;
-      span.style.top = `${y - 6}px`;
+      span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
     });
   }
 
-  // === Bouton OK fin de partie ===
+  // ===============================
+  //   FIN DE PARTIE
+  // ===============================
+
   document.getElementById("closeEndGame").addEventListener("click", () => {
     document.getElementById("endGameOverlay").classList.add("hidden");
   });
 
-  // === Bouton PAS À PAS ===
-  tutorialBtn.addEventListener("click", () => {
-    playClickSound();
-    if (tutorialRunning) return;
-
-    localStorage.removeItem("currentGameState");
-
-    const modal = document.getElementById("readyModal");
-    if (modal) modal.style.display = "none";
-
-    resetGameState();
-    initMaltaCross();
-    redrawEverything();
-    initGame();
-    runTutorial();
-  });
-
   // ===============================
-  //   LISTENER : CLIC SUR LA GRILLE
+  //   CLIC SUR LA GRILLE
   // ===============================
 
   canvas.addEventListener("click", (e) => {
 
     if (gameOver) return;
-    if (!tutorialRunning && !gameOver && !timerRunning) {
-    startTimer();
-    }
-
+    if (!tutorialRunning && !timerRunning) startTimer();
     if (tutorialRunning) return;
-
     if (paused) resumeGame();
 
     const rect = canvas.getBoundingClientRect();
@@ -1517,7 +1699,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const my = e.clientY - rect.top;
 
     const nearest = getNearestPoint(mx, my);
-
     if (!nearest) {
       flash("Hors grille", "error");
       playErrorSound();
@@ -1532,8 +1713,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const snapped = snapToAlignedPoint(selectedStart, { x, y }, mx, my);
-    
     const result = getSegmentBetween(selectedStart, { x, y });
     selectedStart = null;
 
@@ -1542,23 +1721,21 @@ document.addEventListener("DOMContentLoaded", () => {
       validatedSegments.push(result);
       drawSegment(result.points);
       score++;
+
+      const stepBtn = document.getElementById("burgerStepBtn");
+      stepBtn.disabled = true;
+      stepBtn.classList.add("disabled");
+
       updateCounters();
       appendHistoryEntry(result.points, result.activeCount);
-      updateTutorialButtonState();
       checkGameOver();
     }
+
   });
 
   // ===============================
-  //   BOUTONS
+  //   BOUTONS TOP BAR
   // ===============================
-
-  document.getElementById("resetBtn").addEventListener("click", () => {
-    playClickSound();
-    localStorage.removeItem("currentGameState");
-    startNewGame();
-    initGame();
-  });
 
   document.getElementById("undoBtn").addEventListener("click", () => {
     playClickSound();
@@ -1570,84 +1747,101 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!tutorialRunning) togglePause();
   });
 
-  document.getElementById("helpBtn").addEventListener("click", () => {
-  playClickSound();
-
- document.getElementById("authBtn").addEventListener("click", async () => {
-  const user = await getCurrentUser();
-
-  if (user) {
-    await supa.auth.signOut();
-    updateAuthUI();
-    return;
-  }
-
-  document.getElementById("authOverlay").style.display = "flex";
-});
-
-document.getElementById("closeAuthBtn").addEventListener("click", () => {
-  document.getElementById("authOverlay").style.display = "none";
-});
-
-  const overlay = document.getElementById("helpOverlay");
-  if (!overlay) {
-    console.error("helpOverlay introuvable dans le DOM");
-    return;
-  }
-
-  //  Ajustement dynamique pour éviter que la fenêtre passe sous le bandeau
-  const topBar = document.getElementById("topBar");
-  if (topBar) {
-    const barHeight = topBar.offsetHeight;
-    overlay.style.paddingTop = `${barHeight + 20}px`; // marge de sécurité
-  }
-
-  overlay.classList.remove("hidden");
-  overlay.style.display = "flex";
-});
-
-  document.getElementById("signupBtn").addEventListener("click", async () => {
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
-
-  const { error } = await supa.auth.signUp({ email, password });
-
-  if (error) {
-    alert("Erreur : " + error.message);
-    return;
-  }
-
-  alert("Compte créé ! Vérifie ton email.");
-});
-
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
-
-  const { error } = await supa.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    alert("Erreur : " + error.message);
-    return;
-  }
-
-  document.getElementById("authOverlay").style.display = "none";
-  updateAuthUI();
-});
-
+  // ===============================
+  //   AIDE
+  // ===============================
 
   document.getElementById("closeHelpBtn").addEventListener("click", () => {
     playClickSound();
     const overlay = document.getElementById("helpOverlay");
-    if (!overlay) {
-      console.error("helpOverlay introuvable dans le DOM");
-      return;
-    }
     overlay.style.display = "none";
     overlay.classList.add("hidden");
+
+    if (window.helpAutoOpened) {
+      localStorage.setItem(HELP_SEEN_KEY, "true");
+      document.getElementById("readyModal").style.display = "flex";
+      startNewGame();
+    }
+
   });
 
-  document.getElementById("soundBtn").addEventListener("click", () => {
+  // ===============================
+  //   MENU BURGER
+  // ===============================
+
+  document.getElementById("burgerBtn").addEventListener("click", () => {
+    playClickSound();
+    const ov = document.getElementById("burgerOverlay");
+    ov.classList.toggle("show");
+  });
+
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("burgerOverlay");
+    const burger = document.getElementById("burgerBtn");
+
+    if (!menu.contains(e.target) && e.target !== burger) {
+      menu.classList.remove("show");
+    }
+  });
+
+  document.getElementById("burgerProfileBtn").addEventListener("click", async () => {
+    playClickSound();
+    await ouvrirProfil();
+  });
+
+  // ===============================
+  //   AUTH BURGER (v1)
+  // ===============================
+
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+
+  if (!burgerAuthBtn) {
+    } else {
+    burgerAuthBtn.addEventListener("click", async () => {
+      playClickSound();
+
+      const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
+
+      if (!isConnected) {
+        const auth = document.getElementById("authOverlay");
+        auth.classList.remove("hidden");
+        auth.style.display = "flex";
+        return;
+      }
+
+      await supa.auth.signOut();
+      
+      updateAuthUI();
+
+      });
+  }
+
+  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+    playClickSound();
+    localStorage.removeItem("currentGameState");
+    startNewGame();
+    initGame();
+  });
+
+  document.getElementById("burgerStepBtn").addEventListener("click", () => {
+    playClickSound();
+
+    if (!tutorialRunning) {
+      localStorage.removeItem("currentGameState");
+      document.getElementById("readyModal").style.display = "none";
+      resetGameState();
+      initMaltaCross();
+      redrawEverything();
+      initGame();
+      runTutorial();
+    }
+  });
+
+  document.getElementById("burgerHelpBtn").addEventListener("click", () => {
+    openHelpOverlay(false);
+  });
+
+  document.getElementById("burgerSoundBtn").addEventListener("click", () => {
     playClickSound();
     soundEnabled = !soundEnabled;
     updateSoundButton();
@@ -1658,7 +1852,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   // ===============================
 
   document.getElementById("readyBtn").addEventListener("click", () => {
-    
     unlockAudio();
     audioUnlocked = true;
 
@@ -1678,56 +1871,222 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   });
 
   // ===============================
-  //   PRÉCHARGEMENT AUDIO
+  //   PROFIL
   // ===============================
 
-  window.addEventListener("load", () => {
-    const a = document.getElementById("clickSound");
-    a.load();
+  document.getElementById("profileCloseBtn").addEventListener("click", () => {
+    document.getElementById("profileModal").style.display = "none";
   });
 
+  document.getElementById("profileSaveBtn").addEventListener("click", async () => {
+    const session = supa.auth.session();
+    const user = session?.user || null;
+
+    if (!user) return;
+
+    const pseudo = document.getElementById("profilePseudoInput").value.trim();
+    const avatarFile = document.getElementById("profileAvatarInput").files[0];
+
+    let avatarUrl = null;
+
+    if (avatarFile) {
+      const path = `avatars/${user.id}.png`;
+
+      await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+
+      const { data } = supa.storage.from("avatars").getPublicUrl(path);
+      avatarUrl = data.publicUrl;
+    }
+
+    await supa
+      .from("players")
+      .update({
+        pseudo: pseudo,
+        ...(avatarUrl && { avatar_url: avatarUrl })
+      })
+      .eq("id", user.id);
+
+    localStorage.setItem("playerPseudo", pseudo);
+
+    updateAuthUI();
+
+    document.getElementById("profileModal").style.display = "none";
+  });
+
+  // ===============================
+  //   AUTHENTIFICATION (v1)
+  // ===============================
+
+  document.getElementById("closeAuthBtn").addEventListener("click", () => {
+    playClickSound();
+    const auth = document.getElementById("authOverlay");
+    auth.style.display = "none";
+    auth.classList.add("hidden");
+  });
+
+  document.getElementById("signupBtn").addEventListener("click", () => {
+    playClickSound();
+    const modal = document.getElementById("signupModal");
+    modal.classList.remove("hidden");
+    modal.style.display = "flex";
+  });
+
+  document.getElementById("signupCloseBtn").addEventListener("click", () => {
+    playClickSound();
+    const modal = document.getElementById("signupModal");
+    modal.style.display = "none";
+    modal.classList.add("hidden");
+  });
+
+  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+    playClickSound();
+
+    const email = document.getElementById("authEmail").value;
+    const password = document.getElementById("authPassword").value;
+    const pseudo = document.getElementById("signupPseudoInput").value.trim();
+
+    localStorage.setItem("lastEmail", email);
+
+    if (!pseudo) {
+      alert("Merci de choisir un pseudo.");
+      return;
+    }
+
+    const { data: existing } = await supa
+      .from("players")
+      .select("id")
+      .eq("pseudo", pseudo)
+      .maybeSingle();
+
+    if (existing) {
+      alert("Ce pseudo est déjà pris.");
+      return;
+    }
+
+    const { user, error } = await supa.auth.signUp({ email, password });
+
+    if (error) {
+      alert("Erreur : " + error.message);
+      return;
+    }
+
+    if (!user) {
+      alert("Compte créé ! Vérifie ton email.");
+      return;
+    }
+
+    await supa.from("players").insert([{
+      id: user.id,
+      pseudo: pseudo,
+      created_at: new Date().toISOString()
+    }]);
+
+    localStorage.setItem("playerPseudo", pseudo);
+
+    document.getElementById("signupModal").style.display = "none";
+    document.getElementById("authOverlay").style.display = "none";
+
+    updateAuthUI(user);
+
+    alert("Compte créé ! Vérifie ton email.");
+  });
+
+  document.getElementById("loginBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    playClickSound();
+
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value.trim();
+
+    if (!email || !password) {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      alert("Adresse email invalide.");
+      return;
+    }
+
+    localStorage.setItem("lastEmail", email);
+
+    const { user, error } = await supa.auth.signIn({ email, password });
+
+    if (error) {
+      alert("Erreur : " + error.message);
+      return;
+    }
+
+    document.getElementById("authOverlay").style.display = "none";
+
+    const session = supa.auth.session();
+    updateAuthUI(session?.user || null);
+
+    if (session?.user) {
+      const pseudo = await fetchPlayerPseudo(session.user.id);
+      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+    }
+  });
+
+  // ===============================
+  //   WHY SIGNUP
+  // ===============================
+
+  document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("whySignupModal").style.display = "none";
+
+    const auth = document.getElementById("authOverlay");
+    auth.classList.remove("hidden");
+    auth.style.display = "flex";
+  });
+
+  document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
+    playClickSound();
+
+    const dontRemind = document.getElementById("whySignupDontRemind").checked;
+    if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+
+    document.getElementById("whySignupModal").style.display = "none";
+    document.getElementById("readyModal").style.display = "flex";
+  });
+
+  // ===============================
+  //   FLUX INITIAL (SUPABASE v1)
+  // ===============================
+
+  let flowAlreadyLaunched = false;
+  let initialFlowTimeout = null;
+
+function launchFlowOnce(userFromEvent) {
+  if (flowAlreadyLaunched) return;   
+  flowAlreadyLaunched = true;
+
+  handleFirstLaunchFlow(userFromEvent);
+}
+
+
+  // Événements Supabase v1
+  supa.auth.onAuthStateChange((event, session) => {
+
+    if (event === "SIGNED_IN") {
+      if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+      launchFlowOnce(session?.user || null);
+    }
+
+    if (event === "SIGNED_OUT") {
+      if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+      launchFlowOnce(null);
+    }
+  });
+
+  // Sécurité : lancer même sans event
+  initialFlowTimeout = setTimeout(() => {
+  
+    const session = supa.auth.session();
+    const user = session?.user || null;
+
+    launchFlowOnce(user);
+  }, 300);
+
 });
-document.addEventListener("DOMContentLoaded", startNewGame);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
