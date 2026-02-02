@@ -362,15 +362,40 @@ function truncatePseudo(pseudo) {
   return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
 }
 
-function formatDate(dateString) {
-  const d = new Date(dateString);
+function formatDate(value) {
+  if (!value) return "";
+
+  // Normalise les dates Supabase "2026-02-02 17:30:30"
+  const normalized = value.replace(" ", "T");
+
+  const d = new Date(normalized);
   if (isNaN(d.getTime())) return "";
+
   return d.toLocaleDateString("fr-FR");
+}
+
+function renderLeaderboardHeader(isLoggedIn) {
+  const title = document.getElementById("leaderboardTitle");
+  if (!title) return;
+
+  if (!isLoggedIn) {
+    title.innerHTML = `
+      Leaderboard 
+      <span class="leaderboard-hint">
+        — Si tu veux voir tes scores, inscris‑toi 😉
+      </span>
+    `;
+  } else {
+    title.textContent = "Leaderboard";
+  }
 }
 
 function renderLeaderboard(list, isLoggedIn) {
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
+
+  // Met à jour le titre AVANT d'afficher le tableau
+  renderLeaderboardHeader(isLoggedIn);
 
   container.innerHTML = "";
 
