@@ -662,8 +662,15 @@ body {
   position: relative;
 }
 
+
 /* Grille unifiée pour header + lignes */
-.leaderboard-panel .leaderboard-row,
+.leaderboard-panel .leaderboard-row {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.leaderboard-panel .leaderboard-row:last-child {
+  border-bottom: none;
+}
 .leaderboard-panel .leaderboard-header {
   display: grid !important;
 
