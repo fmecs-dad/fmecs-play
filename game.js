@@ -289,9 +289,9 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
   try {
     const session = supa.auth.session();
     const accessToken = session?.access_token;
-    if (!accessToken) return;
+    if (!accessToken) return false;
 
-    await fetch("https://gjzgqhqpycbcwkykxgw.supabase.co/functions/v1/submit-score", {
+    const res = await fetch("https://gjzgqhqpycbcwkykxgw.supabase.co/functions/v1/submit-score", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -304,8 +304,11 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
         jokers_used: jokersUsed
       })
     });
+
+    return res.ok; // <— IMPORTANT : on renvoie un vrai booléen
   } catch (err) {
     console.error("Erreur envoi score via Edge Function :", err);
+    return false;
   }
 }
 
