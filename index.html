@@ -13,6 +13,10 @@
 
 /* === GLOBAL === */
 
+/* === Mise en page générale === */
+
+/* === GLOBAL === */
+
 html, body {
   margin: 0;
   padding: 0;
@@ -410,16 +414,20 @@ body {
   display: none !important;
 }
 
-/* === GENERIC OVERLAY === */
+/* === GENERIC OVERLAY (CORRIGÉ) === */
 
 .overlay {
   position: fixed;
   inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  display: block; /* plus de flex ici */
+}
+
+.overlay-center {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0,0,0,0.5);
-  z-index: 2000;
 }
 
 .overlay.hidden {
@@ -592,7 +600,6 @@ body {
 
 /* Burger overlay */
 
-
 .burger-panel {
   background: #fff;
   padding: 20px 24px;
@@ -632,7 +639,21 @@ body {
   color: #000;
 }
 
-/* On force la portée pour éviter tout conflit */
+/* === LEADERBOARD PANEL === */
+
+.leaderboard-panel {
+  background: #fff !important;
+  padding: 20px 24px;
+  border-radius: 10px;
+  min-width: 320px;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+/* Colonnes cohérentes pour header + lignes */
 .leaderboard-panel .leaderboard-row,
 .leaderboard-panel .leaderboard-header {
   display: grid !important;
@@ -693,8 +714,43 @@ body {
   justify-content: flex-end;
 }
 
-/* === MENU BURGER DÉROULANT === */
+/* Message invité */
+.leaderboard-hint {
+  font-size: 0.9rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 6px;
+}
 
+/* === AUTH PANEL === */
+
+.auth-panel {
+  position: relative;
+  background: #fff !important;
+  padding: 20px 24px;
+  border-radius: 10px;
+  min-width: 260px;
+  max-width: 320px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-panel input {
+  width: 100%;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* === MENU BURGER DÉROULANT === */
 
 #burgerBtn {
   position: relative;
@@ -702,10 +758,6 @@ body {
 }
 
 /* Menu déroulant */
-#burgerWrapper {
-  position: relative;
-}
-
 #burgerWrapper {
   position: relative;
 }
@@ -955,17 +1007,13 @@ body {
   <audio id="newRecordSound" src="sounds/new-record.mp3" preload="auto"></audio>
 
   <div id="leaderboardOverlay" class="overlay hidden">
-  <div class="leaderboard-panel">
-    <button id="closeLeaderboardBtn" class="close-btn">✕</button>
+    <div class="leaderboard-panel">
+      <button id="closeLeaderboardBtn" class="close-btn">✕</button>
+        <h2 id="leaderboardTitle">Leaderboard</h2>
+      <div id="leaderboardContainer" class="leaderboard-panel"></div>
 
-    <h2 id="leaderboardTitle">Leaderboard</h2>
-
-    <!-- IMPORTANT : ce div NE DOIT PAS avoir la classe leaderboard-panel -->
-    <div id="leaderboardContainer"></div>
-
+    </div>
   </div>
-</div>
-
 
   <div id="flashContainer"></div>
 
