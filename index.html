@@ -421,7 +421,7 @@ body {
   inset: 0;
   background: rgba(0,0,0,0.5);
   z-index: 2000;
-  display: block; /* plus de flex ici */
+  display: block;
 }
 
 .overlay-center {
@@ -433,6 +433,15 @@ body {
 .overlay.hidden {
   display: none !important;
   pointer-events: none !important;
+}
+
+/* Isolation totale du leaderboard pour éviter les héritages du layout du jeu */
+#leaderboardOverlay * {
+  flex: none !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
 }
 
 /* === END GAME PANEL === */
@@ -645,22 +654,22 @@ body {
   background: #fff !important;
   padding: 20px 24px;
   border-radius: 10px;
-  min-width: 320px;
-  max-width: 480px;
+  min-width: 420px;
+  max-width: 520px;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   position: relative;
 }
 
-/* Colonnes cohérentes pour header + lignes */
+/* Grille unifiée pour header + lignes */
 .leaderboard-panel .leaderboard-row,
 .leaderboard-panel .leaderboard-header {
   display: grid !important;
 
   grid-template-columns:
     35px      /* # */
-    3fr       /* pseudo — très large */
+    3fr       /* pseudo large */
     55px      /* score */
     70px      /* temps */
     50px      /* undo */
