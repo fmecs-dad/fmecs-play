@@ -351,25 +351,66 @@ async function fetchPlayerScores(userId) {
   return await response.json();
 }
 
-function renderLeaderboard(list) {
+function formatDuration(ms) {
+  const totalSec = Math.floor(ms / 1000);
+  const min = Math.floor(totalSec / 60);
+  const sec = totalSec % 60;
+  return `${min}:${sec.toString().padStart(2, "0")}`;
+}
+
+function truncatePseudo(pseudo) {
+  return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
+}
+
+function renderLeaderboard(list, isLoggedIn) {
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
 
   container.innerHTML = "";
 
+  // --- Message pour les invités ---
+  const title = document.getElementById("leaderboardTitle");
+  if (title) {
+    if (!isLoggedIn) {
+      title.innerHTML = `
+        Leaderboard 
+        <span class="leaderboard-hint">— Si tu veux voir tes scores, inscris‑toi 😉</span>
+      `;
+    } else {
+      title.textContent = "Leaderboard";
+    }
+  }
+
+  // --- Ligne d’en‑tête ---
+  const header = document.createElement("div");
+  header.className = "leaderboard-row leaderboard-header";
+  header.innerHTML = `
+    <span class="rank">#</span>
+    <span class="pseudo">Pseudo</span>
+    <span class="score">🏆</span>
+    <span class="duration">⏱️</span>
+    <span class="undo">↩️</span>
+    <span class="jokers">🃏</span>
+    <span class="date">📅</span>
+  `;
+  container.appendChild(header);
+
+  // --- Lignes du leaderboard ---
   list.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
 
-    const pseudo = entry.players?.pseudo ?? "???";
+    const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
+    const date = new Date(entry.created_at).toLocaleDateString("fr-FR");
 
     row.innerHTML = `
       <span class="rank">${index + 1}</span>
       <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
-      <span class="duration">${(entry.duration_ms / 1000).toFixed(1)}s</span>
+      <span class="duration">${formatDuration(entry.duration_ms)}</span>
       <span class="undo">${entry.undo_count}</span>
       <span class="jokers">${entry.jokers_used}</span>
+      <span class="date">${date}</span>
     `;
     container.appendChild(row);
   });
