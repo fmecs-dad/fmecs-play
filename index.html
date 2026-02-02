@@ -632,28 +632,14 @@ body {
   color: #000;
 }
 
-/* Leaderboard panel */
-.leaderboard-panel {
-  background: #fff;
-  padding: 20px 24px;
-  border-radius: 10px;
-  min-width: 320px;
-  max-width: 480px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  position: relative;
-}
+/* On force la portée pour éviter tout conflit */
+.leaderboard-panel .leaderboard-row,
+.leaderboard-panel .leaderboard-header {
+  display: grid !important;
 
-/* Colonnes cohérentes pour header + lignes */
-.leaderboard-row,
-.leaderboard-header {
-  display: grid;
-
-  /* Largeur optimisée pour ton panel 480px */
   grid-template-columns:
     35px      /* # */
-    2.8fr     /* pseudo — très large */
+    3fr       /* pseudo — très large */
     55px      /* score */
     70px      /* temps */
     50px      /* undo */
@@ -668,78 +654,43 @@ body {
 }
 
 /* Header */
-.leaderboard-header {
+.leaderboard-panel .leaderboard-header {
   font-weight: 700;
   background: #f7f7f7;
   border-bottom: 2px solid #ddd;
 }
 
 /* Alignements */
-.rank,
-.pseudo {
+.leaderboard-panel .rank,
+.leaderboard-panel .pseudo {
   text-align: left;
 }
 
-.score,
-.duration,
-.undo,
-.jokers,
-.date {
+.leaderboard-panel .score,
+.leaderboard-panel .duration,
+.leaderboard-panel .undo,
+.leaderboard-panel .jokers,
+.leaderboard-panel .date {
   text-align: right;
 }
 
-/* Icônes du header alignées comme les valeurs */
-.leaderboard-header span {
+/* Icônes du header alignées */
+.leaderboard-panel .leaderboard-header span {
   display: flex;
   align-items: center;
 }
 
-.leaderboard-header .rank,
-.leaderboard-header .pseudo {
+.leaderboard-panel .leaderboard-header .rank,
+.leaderboard-panel .leaderboard-header .pseudo {
   justify-content: flex-start;
 }
 
-.leaderboard-header .score,
-.leaderboard-header .duration,
-.leaderboard-header .undo,
-.leaderboard-header .jokers,
-.leaderboard-header .date {
+.leaderboard-panel .leaderboard-header .score,
+.leaderboard-panel .leaderboard-header .duration,
+.leaderboard-panel .leaderboard-header .undo,
+.leaderboard-panel .leaderboard-header .jokers,
+.leaderboard-panel .leaderboard-header .date {
   justify-content: flex-end;
-}
-
-/* Message invité */
-.leaderboard-hint {
-  font-size: 0.9rem;
-  font-weight: 400;
-  opacity: 0.7;
-  margin-left: 6px;
-}
-
-/* Auth panel */
-.auth-panel {
-  position: relative;
-  background: #fff;
-  padding: 20px 24px;
-  border-radius: 10px;
-  min-width: 260px;
-  max-width: 320px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.auth-panel input {
-  width: 100%;
-  padding: 6px 8px;
-  margin-bottom: 6px;
-}
-
-.auth-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 8px;
 }
 
 /* === MENU BURGER DÉROULANT === */
