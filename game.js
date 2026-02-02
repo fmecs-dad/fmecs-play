@@ -1909,7 +1909,7 @@ document.addEventListener("DOMContentLoaded", () => {
     unlockAudio();
     audioUnlocked = true;
 
-    setTimeout(() => playClickSound(), 80);
+    setTimeout(() => playClickSound(), 70);
 
     document.getElementById("readyModal").style.display = "none";
 
@@ -1921,7 +1921,7 @@ document.addEventListener("DOMContentLoaded", () => {
     void board.offsetWidth;
     board.classList.add("show");
 
-    setTimeout(() => playStartGameSound(), 1700);
+    setTimeout(() => playStartGameSound(), 1600);
   });
 
   // ===============================
