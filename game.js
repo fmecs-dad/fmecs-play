@@ -1600,43 +1600,39 @@ function initialFlow(user) {
   updateAuthUI(user);
 
   const lastEmail = localStorage.getItem("lastEmail");
-  const dontRemind = localStorage.getItem("skipWhySignup") === "1";
+  const skip = localStorage.getItem("skipWhySignup") === "1";
 
   // 1. Utilisateur connecté → readyModal
   if (user) {
-    showReadyModal("initialFlow:user");
+    showReadyModal("connected");
     return;
   }
 
-  // 🟩 Cas : joueur déconnecté + skipWhySignup = 1 → readyModal
-  if (!user && dontRemind) {
-    showReadyModal("initialFlow:skipWithoutEmail");
+  // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
+  if (skip) {
+    showReadyModal("skipWhySignup");
     return;
   }
 
-  // 2. Déconnecté + lastEmail + pas skip → whySignupModal
-  if (!user && lastEmail && !dontRemind) {
+  // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
+  if (lastEmail) {
     document.getElementById("whySignupModal").style.display = "flex";
     return;
   }
 
-  // 3. Déconnecté + lastEmail + skip → readyModal
-  if (!user && lastEmail && dontRemind) {
-    showReadyModal("initialFlow:lastEmail+dontRemind");
+  // 4. Nouveau joueur → whySignupModal
+  if (!lastEmail) {
+    document.getElementById("whySignupModal").style.display = "flex";
     return;
   }
 
-  // 4. Déconnecté + pas de lastEmail → authOverlay
-  if (!user && !lastEmail) {
-    const auth = document.getElementById("authOverlay");
-    auth.classList.remove("hidden");
-    auth.style.display = "flex";
-    return;
-  }
+  // 5. Fallback (ne devrait jamais arriver)
+  const auth = document.getElementById("authOverlay");
+  auth.classList.remove("hidden");
+  auth.style.display = "flex";
 }
 
 function showReadyModal(source) {
-  console.log("🔥 showReadyModal appelé depuis :", source);
   const modal = document.getElementById("readyModal");
   modal.style.display = "flex";
 }
