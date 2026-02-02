@@ -663,32 +663,25 @@ body {
 }
 
 
-/* Grille unifiée pour header + lignes */
-.leaderboard-panel .leaderboard-row
+/* Colonnes cohérentes pour header + lignes */
+.leaderboard-panel .leaderboard-row,
 .leaderboard-panel .leaderboard-header {
   display: grid !important;
 
   grid-template-columns:
     35px      /* # */
-    3fr       /* pseudo large */
+    3fr       /* pseudo — très large */
     55px      /* score */
     70px      /* temps */
     50px      /* undo */
     50px      /* jokers */
-    110px;     /* date */
+    110px;    /* date élargie */
 
   gap: 10px;
   font-size: 14px;
   padding: 8px 0;
   white-space: nowrap;
   overflow: hidden;
-}
-
-/* Header */
-.leaderboard-panel .leaderboard-header {
-  font-weight: 700;
-  background: #f7f7f7;
-  border-bottom: 2px solid #ddd;
 }
 
 /* Alignements */
@@ -700,7 +693,11 @@ body {
 .leaderboard-panel .score,
 .leaderboard-panel .duration,
 .leaderboard-panel .undo,
-.leaderboard-panel .jokers,
+.leaderboard-panel .jokers {
+  text-align: right;
+}
+
+/* Date centrée */
 .leaderboard-panel .date {
   text-align: center;
 }
@@ -719,7 +716,11 @@ body {
 .leaderboard-panel .leaderboard-header .score,
 .leaderboard-panel .leaderboard-header .duration,
 .leaderboard-panel .leaderboard-header .undo,
-.leaderboard-panel .leaderboard-header .jokers,
+.leaderboard-panel .leaderboard-header .jokers {
+  justify-content: flex-end;
+}
+
+/* Icône date centrée */
 .leaderboard-panel .leaderboard-header .date {
   justify-content: center;
 }
