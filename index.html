@@ -656,25 +656,24 @@ body {
 .leaderboard-row {
   display: grid;
 
-  /* Colonnes larges et lisibles */
+  /* Colonnes adaptées à ton rendu réel */
   grid-template-columns:
-    40px      /* rank */
-    1.2fr     /* pseudo */
-    80px      /* score */
-    80px      /* temps */
-    60px      /* undo */
-    60px      /* jokers */
-    90px;     /* date */
+    40px      /* # */
+    2fr       /* pseudo — élargi */
+    60px      /* score */
+    70px      /* temps */
+    50px      /* undo */
+    50px      /* jokers */
+    85px;     /* date */
 
   gap: 8px;
   font-size: 14px;
   padding: 6px 0;
   border-bottom: 1px solid #eee;
 
-  /* Empêche les retours à la ligne */
+  /* Une seule ligne, mais visible entièrement */
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
 }
 
 .leaderboard-row .rank {
@@ -694,9 +693,19 @@ body {
   text-align: right;
 }
 
-/* Colonne date */
-.leaderboard-row .date {
-  text-align: right;
+/* Icônes du header alignées comme les valeurs */
+.leaderboard-header span {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.leaderboard-header .pseudo {
+  justify-content: flex-start;
+}
+
+.leaderboard-header .rank {
+  justify-content: center;
 }
 
 /* Message invité */
