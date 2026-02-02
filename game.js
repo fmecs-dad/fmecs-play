@@ -291,7 +291,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
     const accessToken = session?.access_token;
     if (!accessToken) return false;
 
-    const res = await fetch("https://gjzgqhqpycbcwkykxgw.supabase.co/functions/v1/submit-score", {
+    const res = await fetch("https://gjzqghhqpycbcwykxvgw.supabase.co/functions/v1/submit-score", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
