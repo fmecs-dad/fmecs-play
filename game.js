@@ -282,43 +282,30 @@ let tutorialRunning = false;
 
 let readyModalAlreadyShown = false;
 
-const SECRET_SALT = atob("eDlGITEyQGE=");
 
 const HELP_SEEN_KEY = "helpSeen";
 
-
-async function computeScoreHash(playerId, score, duration, undoCount, jokersUsed) {
-  const raw = playerId + score + duration + undoCount + jokersUsed + SECRET_SALT;
-  return await sha256(raw);
-}
-
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    // Récupération du pseudo depuis la table players
-    const pseudo = await fetchPlayerPseudo(userId);
+    const session = supa.auth.session();
+    const accessToken = session?.access_token;
+    if (!accessToken) return;
 
-    // Calcul du hash
-    const hash = await computeScoreHash(userId, score, durationMs, undoCount, jokersUsed);
-
-    // Insertion via le client Supabase (respecte les policies RLS)
-    const { error } = await supa
-      .from("scores")
-      .insert({
-        player_id: userId,
-        pseudo: pseudo,
-        score: score,
+    await fetch("https://gjzgqhqpycbcwkykxgw.supabase.co/functions/v1/submit-score", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        score,
         duration_ms: durationMs,
         undo_count: undoCount,
-        jokers_used: jokersUsed,
-        hash: hash,
-        created_at: new Date().toISOString()
-      });
-
-    if (error) {
-      console.error("Erreur insertion score :", error);
-    }
+        jokers_used: jokersUsed
+      })
+    });
   } catch (err) {
-    console.error("Erreur inattendue lors de l'envoi du score :", err);
+    console.error("Erreur envoi score via Edge Function :", err);
   }
 }
 
