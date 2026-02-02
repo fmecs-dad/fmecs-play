@@ -362,26 +362,19 @@ function truncatePseudo(pseudo) {
   return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
 }
 
+function formatDate(dateString) {
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("fr-FR");
+}
+
 function renderLeaderboard(list, isLoggedIn) {
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
 
   container.innerHTML = "";
 
-  // --- Message pour les invités ---
-  const title = document.getElementById("leaderboardTitle");
-  if (title) {
-    if (!isLoggedIn) {
-      title.innerHTML = `
-        Leaderboard 
-        <span class="leaderboard-hint">— Si tu veux voir tes scores, inscris‑toi 😉</span>
-      `;
-    } else {
-      title.textContent = "Leaderboard";
-    }
-  }
-
-  // --- Ligne d’en‑tête ---
+  // --- Ligne d’en-tête ---
   const header = document.createElement("div");
   header.className = "leaderboard-row leaderboard-header";
   header.innerHTML = `
@@ -401,7 +394,7 @@ function renderLeaderboard(list, isLoggedIn) {
     row.className = "leaderboard-row";
 
     const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
-    const date = new Date(entry.created_at).toLocaleDateString("fr-FR");
+    const date = formatDate(entry.created_at);
 
     row.innerHTML = `
       <span class="rank">${index + 1}</span>

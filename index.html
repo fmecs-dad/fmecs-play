@@ -632,32 +632,7 @@ body {
   color: #000;
 }
 
-/* Leaderboard */
-
-/* Ligne d’en-tête */
-.leaderboard-header {
-  font-weight: 700;
-  background: #f7f7f7;
-  border-bottom: 2px solid #ddd;
-}
-
-/* Nouvelle colonne date */
-.leaderboard-row {
-  grid-template-columns: 30px 1fr 60px 70px 50px 50px 70px;
-}
-
-.leaderboard-row .date {
-  text-align: right;
-}
-
-/* Message invité */
-.leaderboard-hint {
-  font-size: 0.9rem;
-  font-weight: 400;
-  opacity: 0.7;
-  margin-left: 6px;
-}
-
+/* Leaderboard panel */
 .leaderboard-panel {
   background: #fff;
   padding: 20px 24px;
@@ -670,17 +645,66 @@ body {
   position: relative;
 }
 
+/* Ligne d’en-tête */
+.leaderboard-header {
+  font-weight: 700;
+  background: #f7f7f7;
+  border-bottom: 2px solid #ddd;
+}
+
+/* Lignes du leaderboard */
 .leaderboard-row {
   display: grid;
-  grid-template-columns: 30px 1fr 60px 70px 50px 60px;
-  gap: 6px;
-  font-size: 13px;
-  padding: 4px 0;
+
+  /* Colonnes larges et lisibles */
+  grid-template-columns:
+    40px      /* rank */
+    1.2fr     /* pseudo */
+    80px      /* score */
+    80px      /* temps */
+    60px      /* undo */
+    60px      /* jokers */
+    90px;     /* date */
+
+  gap: 8px;
+  font-size: 14px;
+  padding: 6px 0;
   border-bottom: 1px solid #eee;
+
+  /* Empêche les retours à la ligne */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .leaderboard-row .rank {
   font-weight: 600;
+}
+
+/* Alignements */
+.pseudo {
+  text-align: left;
+}
+
+.score,
+.duration,
+.undo,
+.jokers,
+.date {
+  text-align: right;
+}
+
+/* Colonne date */
+.leaderboard-row .date {
+  text-align: right;
+}
+
+/* Message invité */
+.leaderboard-hint {
+  font-size: 0.9rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 6px;
 }
 
 /* Auth panel */
