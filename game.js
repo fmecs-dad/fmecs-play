@@ -1608,9 +1608,9 @@ function initialFlow(user) {
     return;
   }
 
-  // 🟩 NOUVEAU CAS : nouveau joueur → whySignupModal
-  if (!user && !lastEmail && !dontRemind) {
-    document.getElementById("whySignupModal").style.display = "flex";
+  // 🟩 Cas : joueur déconnecté + skipWhySignup = 1 → readyModal
+  if (!user && dontRemind) {
+    showReadyModal("initialFlow:skipWithoutEmail");
     return;
   }
 
@@ -1627,7 +1627,6 @@ function initialFlow(user) {
   }
 
   // 4. Déconnecté + pas de lastEmail → authOverlay
-  // (ce cas devient rare)
   if (!user && !lastEmail) {
     const auth = document.getElementById("authOverlay");
     auth.classList.remove("hidden");
