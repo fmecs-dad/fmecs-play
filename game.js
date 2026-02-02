@@ -1598,16 +1598,19 @@ let gameStarted = false; // global
 
 function initialFlow(user) {
   updateAuthUI(user);
-  
+
   const lastEmail = localStorage.getItem("lastEmail");
   const dontRemind = localStorage.getItem("skipWhySignup") === "1";
 
-  // 1. Utilisateur connecté → readyModal (une seule fois)
+  // 1. Utilisateur connecté → readyModal
   if (user) {
-    if (!readyModalAlreadyShown) {
-      readyModalAlreadyShown = true;
-      document.getElementById("readyModal").style.display = "flex";
-    }
+    showReadyModal("initialFlow:user");
+    return;
+  }
+
+  // 🟩 NOUVEAU CAS : nouveau joueur → whySignupModal
+  if (!user && !lastEmail && !dontRemind) {
+    document.getElementById("whySignupModal").style.display = "flex";
     return;
   }
 
@@ -1617,16 +1620,14 @@ function initialFlow(user) {
     return;
   }
 
-  // 3. Déconnecté + lastEmail + skip → readyModal (une seule fois)
+  // 3. Déconnecté + lastEmail + skip → readyModal
   if (!user && lastEmail && dontRemind) {
-    if (!readyModalAlreadyShown) {
-      readyModalAlreadyShown = true;
-      document.getElementById("readyModal").style.display = "flex";
-    }
+    showReadyModal("initialFlow:lastEmail+dontRemind");
     return;
   }
 
   // 4. Déconnecté + pas de lastEmail → authOverlay
+  // (ce cas devient rare)
   if (!user && !lastEmail) {
     const auth = document.getElementById("authOverlay");
     auth.classList.remove("hidden");
