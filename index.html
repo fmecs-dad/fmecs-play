@@ -1006,7 +1006,7 @@ body {
   <audio id="startGameSound" src="sounds/start.mp3" preload="none"></audio>
   <audio id="newRecordSound" src="sounds/new-record.mp3" preload="auto"></audio>
 
-  <div id="leaderboardOverlay" class="overlay hidden">
+  <div id="leaderboardOverlay" class="overlay overlay-center hidden">
     <div class="leaderboard-panel">
       <button id="closeLeaderboardBtn" class="close-btn">✕</button>
         <h2 id="leaderboardTitle">Leaderboard</h2>
@@ -1017,7 +1017,7 @@ body {
 
   <div id="flashContainer"></div>
 
-  <div id="endGameOverlay" class="overlay hidden">
+  <div id="endGameOverlay" class="overlay overlay-center hidden">
     <div id="endGamePanel">
       <h2>Partie terminée</h2>
       <p id="finalScore"></p>
@@ -1025,7 +1025,7 @@ body {
     </div>
   </div>
 
-  <div id="bestScoreOverlay" class="overlay hidden">
+  <div id="bestScoreOverlay" class="overlay overlay-center hidden">
     <div class="panel">
       <h2>🎉 Nouveau record</h2>
       <div id="bestScoreContent"></div>
@@ -1034,7 +1034,7 @@ body {
   </div>
 
   <!-- Fenêtre d'authentification -->
-<div id="authOverlay" class="overlay hidden">
+<div id="authOverlay" class="overlay overlay-center hidden">
   <div class="auth-panel">
     <!-- Bouton de fermeture en haut à droite -->
     <button id="closeAuthBtn" class="close-btn">✕</button>
