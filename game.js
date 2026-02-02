@@ -1909,7 +1909,7 @@ document.addEventListener("DOMContentLoaded", () => {
     unlockAudio();
     audioUnlocked = true;
 
-    setTimeout(() => playClickSound(), 70);
+    setTimeout(() => playClickSound(), 40);
 
     document.getElementById("readyModal").style.display = "none";
 
