@@ -1921,7 +1921,7 @@ document.addEventListener("DOMContentLoaded", () => {
     void board.offsetWidth;
     board.classList.add("show");
 
-    setTimeout(() => playStartGameSound(), 1750);
+    setTimeout(() => playStartGameSound(), 1700);
   });
 
   // ===============================
