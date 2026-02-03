@@ -1776,7 +1776,7 @@ function closeHelp() {
 document.addEventListener("DOMContentLoaded", () => {
 
   enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-  enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
+  //enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
   enableModalBehavior("loginOverlay", ".login-panel", closeLogin);
 
   // Références DOM essentielles
