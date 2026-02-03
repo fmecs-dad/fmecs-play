@@ -451,6 +451,7 @@ function renderLeaderboard(list, isLoggedIn) {
    OUVERTURE / FERMETURE DU LEADERBOARD
    ============================================================ */
 
+// --- OUVERTURE LEADERBOARD ---
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
 
@@ -476,7 +477,10 @@ document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
   resumeGame(); // reprise du chrono
 });
 
-// Comportement modal : clic en dehors = fermeture
+// ============================================================
+// COMPORTEMENT MODAL DU LEADERBOARD
+// ============================================================
+
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
 const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
 
@@ -492,7 +496,6 @@ leaderboardOverlay.addEventListener("click", (e) => {
 
 // Clic dans la fenêtre → ne pas fermer
 leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
-
 
 function saveBestScore(data) {
   try {
