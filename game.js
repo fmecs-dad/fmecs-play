@@ -1778,7 +1778,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
   enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
-  enableModalBehavior("authOverlay", ".panel", closeAuth);
+  enableModalBehavior("authOverlay", ".panel", closeLogin);
 
 
   // Références DOM essentielles
