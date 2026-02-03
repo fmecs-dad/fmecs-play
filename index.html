@@ -1087,26 +1087,25 @@ body {
 
   <div id="flashContainer"></div>
 
-  <div id="endGameOverlay" class="overlay overlay-center hidden">
-    <div id="endGamePanel">
-      <h2>Partie terminée</h2>
-      <p id="finalScore"></p>
-      <button id="closeEndGame" class="main-btn">OK</button>
-    </div>
+<div id="endGameOverlay" class="overlay overlay-center hidden">
+  <div id="endGamePanel" class="panel">
+    <h2>Partie terminée</h2>
+    <p id="finalScore"></p>
+    <button id="closeEndGame" class="main-btn">OK</button>
   </div>
+</div>
 
-  <div id="bestScoreOverlay" class="overlay overlay-center hidden">
-    <div class="panel">
-      <h2>🎉 Nouveau record</h2>
-      <div id="bestScoreContent"></div>
-      <button id="closeBestScore" class="main-btn">Fermer</button>
-    </div>
+<div id="bestScoreOverlay" class="overlay overlay-center hidden">
+  <div class="panel">
+    <h2>🎉 Nouveau record</h2>
+    <div id="bestScoreContent"></div>
+    <button id="closeBestScore" class="main-btn">Fermer</button>
   </div>
+</div>
 
-  <!-- Fenêtre d'authentification -->
+<!-- Fenêtre d'authentification -->
 <div id="authOverlay" class="overlay overlay-center hidden">
-  <div class="auth-panel">
-    <!-- Bouton de fermeture en haut à droite -->
+  <div class="panel">
     <button id="closeAuthBtn" class="close-btn">✕</button>
 
     <h2>Connexion / Inscription</h2>
@@ -1124,8 +1123,11 @@ body {
   </div>
 </div>
 
-<div id="profileModal" class="modal hidden">
-  <div class="modal-content">
+<!-- Profil -->
+<div id="profileModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <button id="profileCloseBtn" class="close-btn">✕</button>
+
     <h2>Mon Profil</h2>
 
     <label>Pseudo :</label>
@@ -1135,10 +1137,10 @@ body {
     <img id="profileAvatarPreview" src="" class="avatar-preview">
     <input id="profileAvatarInput" type="file" accept="image/*">
 
-    <button id="profileSaveBtn">Enregistrer</button>
-    <button id="profileCloseBtn">Fermer</button>
+    <button id="profileSaveBtn" class="main-btn">Enregistrer</button>
   </div>
 </div>
+
 
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
