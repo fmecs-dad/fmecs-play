@@ -649,7 +649,8 @@ body {
 }
 
 /* === LEADERBOARD PANEL === */
-/* === PANEL === */
+/* On garde les dimensions d’origine */
+
 .leaderboard-panel {
   background: #fff !important;
   padding: 20px 24px;
@@ -658,58 +659,51 @@ body {
   max-width: 520px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   position: relative;
-
-  /* On réserve la place pour le header + colonnes */
-  padding-top: 120px; /* ajustable selon ton design */
 }
 
 
 /* === TITRE FIXÉ === */
 #leaderboardTitle {
-  position: absolute;
-  top: 20px;
-  left: 24px;
-  margin: 0;
-  z-index: 20;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  padding-bottom: 6px;
 }
 
-/* Bouton de fermeture fixé */
-#closeLeaderboardBtn {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  z-index: 20;
+
+/* === MESSAGE INVITÉ === */
+.leaderboard-hint {
+  font-size: 1.1rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 6px;
 }
 
 
 /* === LIGNE DES COLONNES FIXÉE === */
-.leaderboard-header {
-  position: absolute;
-  top: 70px; /* sous le titre */
-  left: 24px;
-  right: 24px;
+.leaderboard-panel .leaderboard-header {
+  position: sticky;
+  top: 42px; /* hauteur du titre */
   background: #f7f7f7;
   border-bottom: 2px solid #ddd;
-  z-index: 15;
+  z-index: 9;
 }
 
 
 /* === CONTENEUR SCROLLABLE === */
-/* Il commence sous la ligne des colonnes */
+/* Seules les lignes scrollent */
 
 #leaderboardContainer {
-  max-height: 360px; /* 10 lignes visibles */
+  max-height: 360px;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   scroll-padding-top: 6px;
-
-  /* Décalage pour ne pas passer sous la ligne des colonnes */
-  margin-top: 110px;
 }
 
 
 /* === LIGNES === */
-.leaderboard-row {
+.leaderboard-panel .leaderboard-row {
   display: grid !important;
   grid-template-columns:
     35px
@@ -748,6 +742,29 @@ body {
 }
 
 
+/* Icônes du header alignées */
+.leaderboard-panel .leaderboard-header span {
+  display: flex;
+  align-items: center;
+}
+
+.leaderboard-panel .leaderboard-header .rank,
+.leaderboard-panel .leaderboard-header .pseudo {
+  justify-content: flex-start;
+}
+
+.leaderboard-panel .leaderboard-header .score,
+.leaderboard-panel .leaderboard-header .duration,
+.leaderboard-panel .leaderboard-header .undo,
+.leaderboard-panel .leaderboard-header .jokers {
+  justify-content: flex-end;
+}
+
+.leaderboard-panel .leaderboard-header .date {
+  justify-content: center;
+}
+
+
 /* === SÉPARATEURS === */
 .leaderboard-panel .leaderboard-row:not(.leaderboard-header) {
   border-bottom: 1px solid #e5e5e5;
@@ -758,20 +775,10 @@ body {
 }
 
 
-/* === MESSAGE INVITÉ === */
-.leaderboard-hint {
-  font-size: 1.1rem;
-  font-weight: 400;
-  opacity: 0.7;
-  margin-left: 6px;
-}
-
-
 /* === PAGINATION MASQUÉE === */
 .leaderboard-pagination {
   display: none !important;
 }
-
 
 /* === AUTH PANEL === */
 
