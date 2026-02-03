@@ -1956,6 +1956,7 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
       if (!isConnected) {
         const auth = document.getElementById("authOverlay");
         auth.classList.remove("hidden");
+        pauseGame();
         return;
       }
 
