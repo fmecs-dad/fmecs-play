@@ -1793,7 +1793,7 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-enableModalBehavior("readyModal", ".panel", closeReady);
+//enableModalBehavior("readyModal", ".panel", closeReady);
 enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
 enableModalBehavior("authOverlay", ".panel", closeLogin);
 enableModalBehavior("profileModal", ".panel", closeProfile);
