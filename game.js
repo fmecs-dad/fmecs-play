@@ -1749,7 +1749,7 @@ function initialFlow(user) {
 
 function showReadyModal(source) {
   const modal = document.getElementById("readyModal");
-  modal.style.display = "flex";
+  modal.classList.remove("hidden");
 }
 
 function closeHelp() {
@@ -1758,7 +1758,7 @@ function closeHelp() {
 
   if (window.helpAutoOpened) {
     localStorage.setItem(HELP_SEEN_KEY, "true");
-    document.getElementById("readyModal").style.display = "flex";
+    document.getElementById("readyModal").classList.remove("hidden");
     startNewGame();
   }
 }
