@@ -466,20 +466,25 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
 });
 
 
-// --- FERMETURE LEADERBOARD ---
-document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
-  playClickSound();
-
+// --- FERMETURE LEADERBOARD (fonction centralisée) ---
+function closeLeaderboard() {
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.style.display = "none";
   overlay.classList.add("hidden");
 
   resumeGame(); // reprise du chrono
+}
+
+// --- Bouton de fermeture ---
+document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
+  playClickSound();
+  closeLeaderboard();
 });
 
-// ============================================================
-// COMPORTEMENT MODAL DU LEADERBOARD
-// ============================================================
+
+//* ============================================================
+   COMPORTEMENT MODAL DU LEADERBOARD
+   ============================================================ */
 
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
 const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
@@ -488,14 +493,13 @@ const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
 leaderboardOverlay.addEventListener("click", (e) => {
   if (e.target === leaderboardOverlay) {
     playClickSound();
-    leaderboardOverlay.style.display = "none";
-    leaderboardOverlay.classList.add("hidden");
-    resumeGame();
+    closeLeaderboard();
   }
 });
 
 // Clic dans la fenêtre → ne pas fermer
 leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
+
 
 function saveBestScore(data) {
   try {
