@@ -400,10 +400,12 @@ function renderLeaderboardHeader(isLoggedIn) {
 
 
 /* ============================================================
-   AFFICHAGE D’UNE PAGE DU LEADERBOARD
+   AFFICHAGE DU LEADERBOARD (scroll + snapping)
    ============================================================ */
 
-function renderLeaderboardPage(list, page) {
+function renderLeaderboard(list, isLoggedIn) {
+  renderLeaderboardHeader(isLoggedIn);
+
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
 
@@ -423,13 +425,8 @@ function renderLeaderboardPage(list, page) {
   `;
   container.appendChild(header);
 
-  // --- Slice de la page ---
-  const start = (page - 1) * LEADERBOARD_PAGE_SIZE;
-  const end = start + LEADERBOARD_PAGE_SIZE;
-  const pageItems = list.slice(start, end);
-
   // --- Lignes du leaderboard ---
-  pageItems.forEach((entry, index) => {
+  list.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
 
@@ -437,7 +434,7 @@ function renderLeaderboardPage(list, page) {
     const date = formatDate(entry.created_at);
 
     row.innerHTML = `
-      <span class="rank">${start + index + 1}</span>
+      <span class="rank">${index + 1}</span>
       <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
       <span class="duration">${formatDuration(entry.duration_ms)}</span>
@@ -451,77 +448,8 @@ function renderLeaderboardPage(list, page) {
 
 
 /* ============================================================
-   PAGINATION PREMIUM (◀ 1 2 3 ▶)
+   OUVERTURE / FERMETURE DU LEADERBOARD
    ============================================================ */
-
-function renderLeaderboardPagination(list) {
-  const totalPages = Math.ceil(list.length / LEADERBOARD_PAGE_SIZE);
-  if (totalPages <= 1) return;
-
-  const container = document.getElementById("leaderboardContainer");
-
-  const nav = document.createElement("div");
-  nav.className = "leaderboard-pagination";
-
-  /* --- Flèche gauche --- */
-  const prev = document.createElement("button");
-  prev.textContent = "◀";
-  prev.disabled = currentLeaderboardPage === 1;
-  prev.onclick = () => {
-    if (currentLeaderboardPage > 1) {
-      currentLeaderboardPage--;
-      renderLeaderboardPage(list, currentLeaderboardPage);
-      renderLeaderboardPagination(list);
-    }
-  };
-  nav.appendChild(prev);
-
-  /* --- Numéros de pages --- */
-  for (let p = 1; p <= totalPages; p++) {
-    const btn = document.createElement("button");
-    btn.textContent = p;
-
-    if (p === currentLeaderboardPage) {
-      btn.classList.add("active");
-    }
-
-    btn.onclick = () => {
-      currentLeaderboardPage = p;
-      renderLeaderboardPage(list, currentLeaderboardPage);
-      renderLeaderboardPagination(list);
-    };
-
-    nav.appendChild(btn);
-  }
-
-  /* --- Flèche droite --- */
-  const next = document.createElement("button");
-  next.textContent = "▶";
-  next.disabled = currentLeaderboardPage === totalPages;
-  next.onclick = () => {
-    if (currentLeaderboardPage < totalPages) {
-      currentLeaderboardPage++;
-      renderLeaderboardPage(list, currentLeaderboardPage);
-      renderLeaderboardPagination(list);
-    }
-  };
-  nav.appendChild(next);
-
-  container.appendChild(nav);
-}
-
-
-/* ============================================================
-   FONCTION PRINCIPALE
-   ============================================================ */
-
-function renderLeaderboard(list, isLoggedIn) {
-  renderLeaderboardHeader(isLoggedIn);
-
-  currentLeaderboardPage = 1;
-  renderLeaderboardPage(list, currentLeaderboardPage);
-  renderLeaderboardPagination(list);
-}
 
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
@@ -539,6 +467,7 @@ document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
   overlay.style.display = "none";
   overlay.classList.add("hidden");
 });
+
 
 function saveBestScore(data) {
   try {
