@@ -219,8 +219,6 @@ function openHelpOverlay(auto = false) {
 
   overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
   overlay.classList.remove("hidden");
-  overlay.style.display = "flex";
-
   
   window.helpAutoOpened = auto;
 }
@@ -455,7 +453,6 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
-  overlay.style.display = "flex";
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
@@ -465,10 +462,8 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
 function closeLeaderboard() {
   const overlay = document.getElementById("leaderboardOverlay");
-  overlay.style.display = "none";
   overlay.classList.add("hidden");
 
-  resumeGame(); // reprise du chrono
 }
 
 // --- Bouton de fermeture ---
