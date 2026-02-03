@@ -220,8 +220,7 @@ function openHelpOverlay(auto = false) {
   overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
   overlay.classList.remove("hidden");
   
-  pauseGame();
-  showPauseMessage();
+  flash("Jeu en pause");
 
   window.helpAutoOpened = auto;
 }
