@@ -1793,7 +1793,7 @@ enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
 enableModalBehavior("authOverlay", ".panel", closeLogin);
 enableModalBehavior("profileModal", ".panel", closeProfile);
 enableModalBehavior("helpOverlay", ".panel", closeHelp);
-enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+enableModalBehavior("leaderboardOverlay", ".panel", closeLeaderboard);
 enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
 enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
