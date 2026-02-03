@@ -791,9 +791,10 @@ body {
 
 /* === AUTH PANEL === */
 
-.auth-panel {
+/* === PANEL SPÉCIFIQUE POUR LA FENÊTRE DE CONNEXION === */
+#authOverlay .panel {
   position: relative;
-  background: #fff !important;
+  background: #fff;
   padding: 20px 24px;
   border-radius: 10px;
   min-width: 260px;
@@ -801,20 +802,24 @@ body {
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.auth-panel input {
+/* Champs */
+#authOverlay .modal-input {
   width: 100%;
-  padding: 6px 8px;
-  margin-bottom: 6px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
 }
 
-.auth-buttons {
+/* Boutons */
+#authOverlay .auth-buttons {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 /* === MENU BURGER DÉROULANT === */
