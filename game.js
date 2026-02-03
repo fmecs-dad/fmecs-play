@@ -1783,7 +1783,7 @@ function closeLogin() {
 document.addEventListener("DOMContentLoaded", () => {
 
   enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-  //enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
+  enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
   enableModalBehavior("authOverlay", ".auth-panel", closeLogin);
 
 
