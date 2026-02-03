@@ -1657,10 +1657,6 @@ function playTutorialStep() {
 
 function initGame() {
 
-  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-  enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
-  enableModalBehavior("loginOverlay", ".login-panel", closeLogin);
-
   const undoBtn = document.getElementById("undoBtn");
   if (undoBtn) {
     undoBtn.disabled = false;
@@ -1763,6 +1759,10 @@ function showReadyModal(source) {
 // ===============================
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+  enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
+  enableModalBehavior("loginOverlay", ".login-panel", closeLogin);
 
   // Références DOM essentielles
   canvas = document.getElementById("gameCanvas");
