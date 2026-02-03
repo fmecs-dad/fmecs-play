@@ -1784,7 +1784,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
   //enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
-  enableModalBehavior("loginOverlay", ".login-panel", closeLogin);
+  enableModalBehavior("authOverlay", ".auth-panel", closeLogin);
+
 
   // Références DOM essentielles
   canvas = document.getElementById("gameCanvas");
