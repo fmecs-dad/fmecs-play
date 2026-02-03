@@ -453,6 +453,9 @@ function renderLeaderboard(list, isLoggedIn) {
 
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
+
+  pauseGame(); // pause du chrono
+
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
   overlay.style.display = "flex";
@@ -461,12 +464,34 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   renderLeaderboard(list);
 });
 
+
+// --- FERMETURE LEADERBOARD ---
 document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
   playClickSound();
+
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.style.display = "none";
   overlay.classList.add("hidden");
+
+  resumeGame(); // reprise du chrono
 });
+
+// Comportement modal : clic en dehors = fermeture
+const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
+
+// Clic sur le fond sombre → fermer
+leaderboardOverlay.addEventListener("click", (e) => {
+  if (e.target === leaderboardOverlay) {
+    playClickSound();
+    leaderboardOverlay.style.display = "none";
+    leaderboardOverlay.classList.add("hidden");
+    resumeGame();
+  }
+});
+
+// Clic dans la fenêtre → ne pas fermer
+leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
 
 
 function saveBestScore(data) {
@@ -753,6 +778,27 @@ function resetTimer() {
   timerSeconds = 0;
   timerRunning = false;
   document.getElementById("timerValue").textContent = "00:00";
+}
+
+function pauseGame() {
+  if (gameTimer) clearInterval(gameTimer);
+}
+
+function resumeGame() {
+  startGameTimer(); // ta fonction existante
+}
+
+function enableModalBehavior(overlayId, panelSelector, closeFn) {
+  const overlay = document.getElementById(overlayId);
+  const panel = overlay.querySelector(panelSelector);
+
+  // Clic sur le fond sombre → fermer
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeFn();
+  });
+
+  // Clic dans la fenêtre → ne pas fermer
+  panel.addEventListener("click", (e) => e.stopPropagation());
 }
 
 
@@ -1607,6 +1653,10 @@ function playTutorialStep() {
 // ===============================
 
 function initGame() {
+
+  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+  enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
+  enableModalBehavior("loginOverlay", ".login-panel", closeLogin);
 
   const undoBtn = document.getElementById("undoBtn");
   if (undoBtn) {
