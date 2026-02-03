@@ -1792,7 +1792,7 @@ document.addEventListener("DOMContentLoaded", () => {
 enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
 enableModalBehavior("authOverlay", ".panel", closeLogin);
 enableModalBehavior("profileModal", ".panel", closeProfile);
-enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
+enableModalBehavior("helpOverlay", ".panel", closeHelp);
 enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
 enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
 enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
