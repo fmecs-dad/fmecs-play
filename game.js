@@ -1769,6 +1769,13 @@ function closeHelp() {
   }
 }
 
+function closeLogin() {
+  const auth = document.getElementById("authOverlay");
+  auth.style.display = "none";
+  auth.classList.add("hidden");
+}
+
+
 // ===============================
 //   DOMContentLoaded
 // ===============================
@@ -2049,11 +2056,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
 
   document.getElementById("closeAuthBtn").addEventListener("click", () => {
-    playClickSound();
-    const auth = document.getElementById("authOverlay");
-    auth.style.display = "none";
-    auth.classList.add("hidden");
-  });
+  playClickSound();
+  closeLogin();
+});
+
 
   document.getElementById("signupBtn").addEventListener("click", () => {
     playClickSound();
