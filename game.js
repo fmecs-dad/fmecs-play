@@ -1765,10 +1765,27 @@ function closeHelp() {
 
 function closeLogin() {
   const auth = document.getElementById("authOverlay");
-  auth.style.display = "none";
   auth.classList.add("hidden");
 }
 
+function closeEndGame() {
+  const overlay = document.getElementById("endGameOverlay");
+  overlay.classList.add("hidden");
+
+}
+
+function closeBestScore() {
+  const overlay = document.getElementById("bestScoreOverlay");
+  overlay.classList.add("hidden");
+}
+
+function closeProfile() {
+  document.getElementById("profileModal").classList.add("hidden");
+}
+
+function closeWhySignup() {
+ document.getElementById("whySignupModal").classList.add("hidden"); 
+}
 
 // ===============================
 //   DOMContentLoaded
