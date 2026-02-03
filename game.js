@@ -481,6 +481,7 @@ document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
   closeLeaderboard();
 });
 
+
 /* ============================================================
    COMPORTEMENT MODAL DU LEADERBOARD
    ============================================================ */
@@ -1756,6 +1757,17 @@ function showReadyModal(source) {
   modal.style.display = "flex";
 }
 
+function closeHelp() {
+  const overlay = document.getElementById("helpOverlay");
+  overlay.style.display = "none";
+  overlay.classList.add("hidden");
+
+  if (window.helpAutoOpened) {
+    localStorage.setItem(HELP_SEEN_KEY, "true");
+    document.getElementById("readyModal").style.display = "flex";
+    startNewGame();
+  }
+}
 
 // ===============================
 //   DOMContentLoaded
@@ -1879,18 +1891,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===============================
 
   document.getElementById("closeHelpBtn").addEventListener("click", () => {
-    playClickSound();
-    const overlay = document.getElementById("helpOverlay");
-    overlay.style.display = "none";
-    overlay.classList.add("hidden");
+  playClickSound();
+  closeHelp();
+});
 
-    if (window.helpAutoOpened) {
-      localStorage.setItem(HELP_SEEN_KEY, "true");
-      document.getElementById("readyModal").style.display = "flex";
-      startNewGame();
-    }
-
-  });
 
   // ===============================
   //   MENU BURGER
@@ -2217,8 +2221,6 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
-
-
 
 
 
