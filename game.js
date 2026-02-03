@@ -481,7 +481,6 @@ document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
   closeLeaderboard();
 });
 
-
 /* ============================================================
    COMPORTEMENT MODAL DU LEADERBOARD
    ============================================================ */
@@ -2218,6 +2217,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
