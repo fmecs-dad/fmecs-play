@@ -482,9 +482,9 @@ document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
 });
 
 
-//* ============================================================
+/* ============================================================
    COMPORTEMENT MODAL DU LEADERBOARD
-   ============================================================ *//
+   ============================================================ */
 
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
 const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
@@ -2218,6 +2218,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
