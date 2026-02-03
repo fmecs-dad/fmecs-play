@@ -649,7 +649,7 @@ body {
 }
 
 /* === LEADERBOARD PANEL === */
-/* Le panel ne scrolle plus : c’est le container interne qui gère le scroll */
+/* Le panel NE DOIT PAS scroller */
 
 .leaderboard-panel {
   background: #fff !important;
@@ -662,32 +662,31 @@ body {
 }
 
 
-/* === CONTENEUR SCROLLABLE + SNAPPING === */
-/* Hauteur réduite pour forcer le scroll même avec 11 scores */
+/* === CONTENEUR SCROLLABLE === */
+/* C’est LUI qui contient toutes les lignes */
 
 #leaderboardContainer {
   max-height: 360px;              /* 10 lignes visibles */
   overflow-y: auto;               /* scroll vertical */
   scroll-snap-type: y mandatory;  /* snapping vertical */
-  scroll-padding-top: 6px;        /* petit espace premium */
+  scroll-padding-top: 6px;
 }
 
 
 /* === LIGNES DU LEADERBOARD === */
-/* Chaque ligne devient un point d’accroche */
 
 .leaderboard-panel .leaderboard-row,
 .leaderboard-panel .leaderboard-header {
   display: grid !important;
 
   grid-template-columns:
-    35px      /* # */
-    3fr       /* pseudo */
-    55px      /* score */
-    70px      /* temps */
-    50px      /* undo */
-    50px      /* jokers */
-    110px;    /* date */
+    35px
+    3fr
+    55px
+    70px
+    50px
+    50px
+    110px;
 
   gap: 10px;
   font-size: 14px;
@@ -695,7 +694,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
 
-  scroll-snap-align: start;       /* snapping ligne par ligne */
+  scroll-snap-align: start;
 }
 
 
