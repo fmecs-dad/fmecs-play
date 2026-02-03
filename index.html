@@ -656,10 +656,17 @@ body {
   border-radius: 10px;
   min-width: 420px;
   max-width: 520px;
-  max-height: 80vh;
+
+  /* Hauteur fixe pour activer le scroll */
+  max-height: 420px;
+
   overflow-y: auto;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   position: relative;
+
+  /* Scroll snapping */
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 6px;
 }
 
 
@@ -682,13 +689,17 @@ body {
   padding: 8px 0;
   white-space: nowrap;
   overflow: hidden;
+
+  /* Chaque ligne devient un point d'accroche */
+  scroll-snap-align: start;
 }
 
 /* Header */ 
 .leaderboard-panel .leaderboard-header {
- font-weight: 700;
- background: #f7f7f7;
- border-bottom: 2px solid #ddd; }
+  font-weight: 700;
+  background: #f7f7f7;
+  border-bottom: 2px solid #ddd;
+}
 
 /* Alignements */
 .leaderboard-panel .rank,
@@ -731,8 +742,14 @@ body {
   justify-content: center;
 }
 
-/* Séparateur uniquement sur les lignes de valeurs */ .leaderboard-panel .leaderboard-row:not(.leaderboard-header) { border-bottom: 1px solid #e5e5e5; } .leaderboard-panel .leaderboard-row:not(.leaderboard-header):last-child { border-bottom: none; 
-} 
+/* Séparateur uniquement sur les lignes de valeurs */
+.leaderboard-panel .leaderboard-row:not(.leaderboard-header) {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.leaderboard-panel .leaderboard-row:not(.leaderboard-header):last-child {
+  border-bottom: none;
+}
 
 /* Message invité */
 .leaderboard-hint {
@@ -742,6 +759,7 @@ body {
   margin-left: 6px;
 }
 
+/* Pagination (désactivée mais conservée si besoin) */
 .leaderboard-pagination {
   display: flex;
   justify-content: left;
@@ -775,19 +793,6 @@ body {
   opacity: 0.3;
   cursor: default;
 }
-
-/* Scroll vertical fluide avec snapping */
-#leaderboardContainer {
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scroll-padding-top: 6px; /* petit espace pour un rendu premium */
-}
-
-/* Chaque ligne devient un point d'accroche */
-.leaderboard-row {
-  scroll-snap-align: start;
-}
-
 
 /* === AUTH PANEL === */
 
