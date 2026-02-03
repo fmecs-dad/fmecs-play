@@ -9,6 +9,9 @@ const supa = window.supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
+let currentLeaderboardPage = 1;
+const LEADERBOARD_PAGE_SIZE = 10;
+
 // ===============================
 //   AUTH : UTILITAIRES
 // ===============================
@@ -375,6 +378,19 @@ function formatDate(value) {
   return d.toLocaleDateString("fr-FR");
 }
 
+
+/* ============================================================
+   VARIABLES GLOBALES
+   ============================================================ */
+
+let currentLeaderboardPage = 1;
+const LEADERBOARD_PAGE_SIZE = 10;
+
+
+/* ============================================================
+   TITRE DU LEADERBOARD
+   ============================================================ */
+
 function renderLeaderboardHeader(isLoggedIn) {
   const title = document.getElementById("leaderboardTitle");
   if (!title) return;
@@ -391,12 +407,14 @@ function renderLeaderboardHeader(isLoggedIn) {
   }
 }
 
-function renderLeaderboard(list, isLoggedIn) {
+
+/* ============================================================
+   AFFICHAGE D’UNE PAGE DU LEADERBOARD
+   ============================================================ */
+
+function renderLeaderboardPage(list, page) {
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
-
-  // Met à jour le titre AVANT d'afficher le tableau
-  renderLeaderboardHeader(isLoggedIn);
 
   container.innerHTML = "";
 
@@ -414,8 +432,13 @@ function renderLeaderboard(list, isLoggedIn) {
   `;
   container.appendChild(header);
 
+  // --- Slice de la page ---
+  const start = (page - 1) * LEADERBOARD_PAGE_SIZE;
+  const end = start + LEADERBOARD_PAGE_SIZE;
+  const pageItems = list.slice(start, end);
+
   // --- Lignes du leaderboard ---
-  list.forEach((entry, index) => {
+  pageItems.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
 
@@ -423,7 +446,7 @@ function renderLeaderboard(list, isLoggedIn) {
     const date = formatDate(entry.created_at);
 
     row.innerHTML = `
-      <span class="rank">${index + 1}</span>
+      <span class="rank">${start + index + 1}</span>
       <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
       <span class="duration">${formatDuration(entry.duration_ms)}</span>
@@ -433,6 +456,80 @@ function renderLeaderboard(list, isLoggedIn) {
     `;
     container.appendChild(row);
   });
+}
+
+
+/* ============================================================
+   PAGINATION PREMIUM (◀ 1 2 3 ▶)
+   ============================================================ */
+
+function renderLeaderboardPagination(list) {
+  const totalPages = Math.ceil(list.length / LEADERBOARD_PAGE_SIZE);
+  if (totalPages <= 1) return;
+
+  const container = document.getElementById("leaderboardContainer");
+
+  const nav = document.createElement("div");
+  nav.className = "leaderboard-pagination";
+
+  /* --- Flèche gauche --- */
+  const prev = document.createElement("button");
+  prev.textContent = "◀";
+  prev.disabled = currentLeaderboardPage === 1;
+  prev.onclick = () => {
+    if (currentLeaderboardPage > 1) {
+      currentLeaderboardPage--;
+      renderLeaderboardPage(list, currentLeaderboardPage);
+      renderLeaderboardPagination(list);
+    }
+  };
+  nav.appendChild(prev);
+
+  /* --- Numéros de pages --- */
+  for (let p = 1; p <= totalPages; p++) {
+    const btn = document.createElement("button");
+    btn.textContent = p;
+
+    if (p === currentLeaderboardPage) {
+      btn.classList.add("active");
+    }
+
+    btn.onclick = () => {
+      currentLeaderboardPage = p;
+      renderLeaderboardPage(list, currentLeaderboardPage);
+      renderLeaderboardPagination(list);
+    };
+
+    nav.appendChild(btn);
+  }
+
+  /* --- Flèche droite --- */
+  const next = document.createElement("button");
+  next.textContent = "▶";
+  next.disabled = currentLeaderboardPage === totalPages;
+  next.onclick = () => {
+    if (currentLeaderboardPage < totalPages) {
+      currentLeaderboardPage++;
+      renderLeaderboardPage(list, currentLeaderboardPage);
+      renderLeaderboardPagination(list);
+    }
+  };
+  nav.appendChild(next);
+
+  container.appendChild(nav);
+}
+
+
+/* ============================================================
+   FONCTION PRINCIPALE
+   ============================================================ */
+
+function renderLeaderboard(list, isLoggedIn) {
+  renderLeaderboardHeader(isLoggedIn);
+
+  currentLeaderboardPage = 1;
+  renderLeaderboardPage(list, currentLeaderboardPage);
+  renderLeaderboardPagination(list);
 }
 
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
