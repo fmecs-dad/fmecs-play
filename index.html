@@ -414,20 +414,32 @@ body {
   display: none !important;
 }
 
-/* === GENERIC OVERLAY (CORRIGÉ) === */
+/* === HELP OVERLAY === */
+#helpOverlay {
+  /* on laisse l’overlay global gérer position/fond/z-index */
+  padding-top: 100px;          /* hauteur du bandeau + marge */
+  align-items: flex-start;     /* aligne le panel en haut */
+}
 
+#helpOverlay.hidden {
+  display: none !important;
+}
+
+/* === GENERIC OVERLAY (UNIFIÉ) === */
 .overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.5);
   z-index: 2000;
-  display: none; /* IMPORTANT */
+  display: none;               /* caché par défaut */
   justify-content: center;
   align-items: center;
 }
 
 .overlay-center {
   display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .overlay.hidden {
@@ -444,8 +456,32 @@ body {
   white-space: nowrap !important;
 }
 
-/* === END GAME PANEL === */
+/* === PANELS GÉNÉRIQUES === */
+.panel {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-sizing: border-box;
+  position: relative;
+}
 
+/* Bouton de fermeture générique */
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* === END GAME PANEL === */
 #endGamePanel {
   background: #fafafa;
   padding: 30px 40px;
@@ -456,7 +492,6 @@ body {
 }
 
 /* === BEST SCORE PANEL === */
-
 #bestScoreOverlay .panel {
   min-width: 460px;
   max-width: 640px;
@@ -495,7 +530,6 @@ body {
 }
 
 /* === TUTORIAL BUBBLE === */
-
 #tutorialBubble {
   position: absolute;
   top: 20px;
@@ -517,8 +551,8 @@ body {
   display: none;
 }
 
-/* === MODAL GÉNÉRIQUE === */
-
+/* === MODAL GÉNÉRIQUE (ANCIEN SYSTÈME) === */
+/* Gardé uniquement si encore utilisé ailleurs, sinon tu peux le supprimer */
 .modal {
   position: fixed;
   inset: 0;
@@ -527,7 +561,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 20000;
-  padding: 20px; /* important pour petits écrans */
+  padding: 20px;
   overflow: hidden;
 }
 
@@ -543,8 +577,6 @@ body {
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   font-size: 18px;
-
-  /* Adaptation automatique */
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
@@ -556,7 +588,6 @@ body {
 }
 
 /* === ANIMATIONS === */
-
 .fade-hidden {
   opacity: 0;
   transform: translateY(-20px) scale(0.98);
@@ -572,7 +603,6 @@ body {
 }
 
 /* Animation premium : arrivée du plateau */
-
 .slide-in-premium {
   opacity: 0;
   transform: translateX(120%) rotate(3deg) scale(0.95);
@@ -632,16 +662,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.close-btn {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
 }
 
 .close-btn:hover {
@@ -861,52 +881,53 @@ body {
 
 <body>
 
-  <!-- Modale "Vous n'êtes pas connecté / inscrit" -->
-  <div id="whySignupModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h2>Vous n'êtes pas connecté / inscrit</h2>
-      <p>En créant un compte, vous pourrez :</p>
-      <ul style="text-align:left; max-width:360px; margin:0 auto 16px;">
-        <li>Enregistrer vos meilleurs scores</li>
-        <li>Apparaître dans le leaderboard</li>
-        <li>Associer un pseudo et un avatar</li>
-      </ul>
+<!-- Modale "Vous n'êtes pas connecté / inscrit" -->
+<div id="whySignupModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <h2>Vous n'êtes pas connecté / inscrit</h2>
+    <p>En créant un compte, vous pourrez :</p>
+    <ul style="text-align:left; max-width:360px; margin:0 auto 16px;">
+      <li>Enregistrer vos meilleurs scores</li>
+      <li>Apparaître dans le leaderboard</li>
+      <li>Associer un pseudo et un avatar</li>
+    </ul>
 
-      <div style="margin:12px 0;">
-        <label style="font-size:14px;">
-          <input type="checkbox" id="whySignupDontRemind" />
-          Ne plus me le rappeler
-        </label>
-      </div>
+    <div style="margin:12px 0;">
+      <label style="font-size:14px;">
+        <input type="checkbox" id="whySignupDontRemind" />
+        Ne plus me le rappeler
+      </label>
+    </div>
 
-      <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
-        <button id="whySignupRegisterBtn" class="main-btn">S’inscrire</button>
-        <button id="whySignupContinueBtn" class="main-btn">Continuer sans compte</button>
-      </div>
+    <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+      <button id="whySignupRegisterBtn" class="main-btn">S’inscrire</button>
+      <button id="whySignupContinueBtn" class="main-btn">Continuer sans compte</button>
     </div>
   </div>
+</div>
 
-  <!-- Modale "Prêt à jouer ?" -->
-  <div id="readyModal" class="overlay hidden">
-    <div class="modal-content">
-      <p>Prêt à jouer ?</p>
-      <img src="images/jeton.png" alt="Jeton FmecS" class="jeton-img">
-      <button id="readyBtn" class="main-btn">Commencer</button>
-    </div>
+<!-- Modale "Prêt à jouer ?" -->
+<div id="readyModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <p>Prêt à jouer ?</p>
+    <img src="images/jeton.png" alt="Jeton FmecS" class="jeton-img">
+    <button id="readyBtn" class="main-btn">Commencer</button>
   </div>
+</div>
 
-  <!-- Modale pseudo -->
-  <div id="signupModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h2>Créer votre pseudo</h2>
-      <input id="signupPseudoInput" type="text" placeholder="Votre pseudo" class="modal-input">
-      <button id="signupConfirmBtn" class="main-btn">Enregistrer</button>
-      <button id="signupCloseBtn" class="close-btn">Annuler</button>
-    </div>
+<!-- Modale pseudo -->
+<div id="signupModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <h2>Créer votre pseudo</h2>
+    <input id="signupPseudoInput" type="text" placeholder="Votre pseudo" class="modal-input">
+    <button id="signupConfirmBtn" class="main-btn">Enregistrer</button>
+    <button id="signupCloseBtn" class="close-btn">Annuler</button>
   </div>
-  
-<div id="profileModal" class="modal hidden">
-  <div class="modal-content">
+</div>
+
+<!-- Profil -->
+<div id="profileModal" class="overlay overlay-center hidden">
+  <div class="panel">
     <h2>Mon Profil</h2>
 
     <label>Pseudo :</label>
@@ -920,6 +941,49 @@ body {
       <button id="profileSaveBtn">Enregistrer</button>
       <button id="profileCloseBtn">Fermer</button>
     </div>
+  </div>
+</div>
+
+<!-- === HELP OVERLAY === -->
+<div id="helpOverlay" class="overlay overlay-center hidden">
+  <div id="helpContent" class="panel help-panel">
+    <button class="close-btn" id="closeHelpBtn">✕</button>
+
+    <h2>📖 Aide - pour bien démarrer</h2>
+    <div class="aide-separator"></div>
+
+    <h3>L’objectif</h3>
+    <p>Tracer un maximum de lignes de 5 points en partant de la Croix de Malte avec les points noirs actifs.</p>
+    <div class="aide-separator"></div>
+
+    <h3>Comment jouer</h3>
+    <ul>
+      <li>Repère une ligne possible de 5 points alignés avec un minimum de 4 points déjà actifs.</li>
+      <li>Clique sur l’un des points d’extrémité, puis sur le point d’arrivée.</li>
+      <li>La ligne sera créée automatiquement si elle est valide.</li>
+      <li>Le bouton Retour permet d'annuler la dernière ligne créée.</li>
+      <li>Le bouton Pause arrête le chrono.</li>
+      <li>Le menu Burger ☰ permet d'accéder au Pas à Pas montrant comment créer des lignes.</li>
+      <li>Retrouve-moi aussi dans ce menu ☰ ainsi que d'autres options</li>
+    </ul>
+    <div class="aide-separator"></div>
+
+    <h3>Règles</h3>
+    <ul>
+      <li>Une ligne doit faire exactement 5 points.</li>
+      <li>Une ligne doit contenir au préalable au moins 2 points déjà actifs.</li>
+      <li>Les lignes peuvent se croiser, mais pas se superposer.</li>
+    </ul>
+    <div class="aide-separator"></div>
+
+    <h3>Jokers</h3>
+    <p>Gagnés lorsqu’une ligne utilise 5 points déjà actifs.</p>
+    <p><strong>Utilisation :</strong></p>
+    <ul>
+      <li>1 joker en - si la ligne comporte seulement 3 points actifs.</li>
+      <li>2 jokers en - si elle ne comporte que 2 points actifs.</li>
+      <li><em>Les lignes avec moins de 2 points actifs ne sont pas autorisées.</em></li>
+    </ul>
   </div>
 </div>
 
@@ -1013,50 +1077,6 @@ body {
 
 </div> <!-- /gameContainer -->
 
-
-  <!-- === HELP OVERLAY === -->
-  <div id="helpOverlay" class="overlay hidden">
-    <div id="helpContent" class="help-panel">
-      <button class="close-btn" id="closeHelpBtn">✕</button>
-
-      <h2>📖 Aide - pour bien démarrer</h2>
-      <div class="aide-separator"></div>
-
-      <h3>L’objectif</h3>
-      <p>Tracer un maximum de lignes de 5 points en partant de la Croix de Malte avec les points noirs actifs.</p>
-      <div class="aide-separator"></div>
-
-      <h3>Comment jouer</h3>
-      <ul>
-        <li>Repère une ligne possible de 5 points alignés avec un minimum de 4 points déjà actifs.</li>
-        <li>Clique sur l’un des points d’extrémité, puis sur le point d’arrivée.</li>
-        <li>La ligne sera créée automatiquement si elle est valide.</li>
-        <li>Le bouton Retour permet d'annuler la dernière ligne créée.</li>
-        <li>Le bouton Pause arrête le chrono.</li>
-        <li>Le menu Burger ☰ permet d'accéder au Pas à Pas montrant comment créer des lignes.</li>
-        <li>Retrouve-moi aussi dans ce menu ☰ ainsi que d'autres options</li>
-      </ul>
-      <div class="aide-separator"></div>
-
-      <h3>Règles</h3>
-      <ul>
-        <li>Une ligne doit faire exactement 5 points.</li>
-        <li>Une ligne doit contenir au préalable au moins 2 points déjà actifs.</li>
-        <li>Les lignes peuvent se croiser, mais pas se superposer.</li>
-      </ul>
-      <div class="aide-separator"></div>
-
-      <h3>Jokers</h3>
-      <p>Gagnés lorsqu’une ligne utilise 5 points déjà actifs.</p>
-      <p><strong>Utilisation :</strong></p>
-      <ul>
-        <li>1 joker en - si la ligne comporte seulement 3 points actifs.</li>
-        <li>2 jokers en - si elle ne comporte que 2 points actifs.</li>
-        <li><em>Les lignes avec moins de 2 points actifs ne sont pas autorisées.</em></li>
-      </ul>
-    </div>
-  </div>
-
   <!-- SONS -->
   <audio id="clickSound" src="sounds/click.mp3" preload="auto"></audio>
   <audio id="errorSound" src="sounds/error.mp3" preload="auto"></audio>
@@ -1100,7 +1120,7 @@ body {
 
   <!-- Fenêtre d'authentification -->
 <div id="authOverlay" class="overlay overlay-center hidden">
-  <div class="auth-panel">
+  <div class="panel">
     <!-- Bouton de fermeture en haut à droite -->
     <button id="closeAuthBtn" class="close-btn">✕</button>
 
