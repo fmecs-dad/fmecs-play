@@ -1989,7 +1989,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setTimeout(() => playClickSound(), 40);
 
-    document.getElementById("readyModal").style.display = "none";
+    document.getElementById("readyModal").classList.add("hidden");
 
     initGame();
 
@@ -2176,8 +2176,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const dontRemind = document.getElementById("whySignupDontRemind").checked;
     if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
-    document.getElementById("whySignupModal").style.display = "none";
+    document.getElementById("whySignupModal").classList.add("hidden");
     document.getElementById("readyModal").classList.remove("hidden");
+
   });
 
   // ===============================
