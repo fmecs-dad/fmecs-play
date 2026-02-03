@@ -649,6 +649,7 @@ body {
 }
 
 /* === LEADERBOARD PANEL === */
+/* Le panel ne scrolle plus : c’est le container interne qui gère le scroll */
 
 .leaderboard-panel {
   background: #fff !important;
@@ -656,33 +657,37 @@ body {
   border-radius: 10px;
   min-width: 420px;
   max-width: 520px;
-
-  /* Hauteur fixe pour activer le scroll */
-  max-height: 420px;
-
-  overflow-y: auto;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   position: relative;
-
-  /* Scroll snapping */
-  scroll-snap-type: y mandatory;
-  scroll-padding-top: 6px;
 }
 
 
-/* Colonnes cohérentes pour header + lignes */
+/* === CONTENEUR SCROLLABLE + SNAPPING === */
+/* C’est ici que le scroll et le snapping doivent s’appliquer */
+
+#leaderboardContainer {
+  max-height: 420px;              /* hauteur visible */
+  overflow-y: auto;               /* scroll vertical */
+  scroll-snap-type: y mandatory;  /* snapping vertical */
+  scroll-padding-top: 6px;        /* petit espace premium */
+}
+
+
+/* === LIGNES DU LEADERBOARD === */
+/* Chaque ligne devient un point d’accroche */
+
 .leaderboard-panel .leaderboard-row,
 .leaderboard-panel .leaderboard-header {
   display: grid !important;
 
   grid-template-columns:
     35px      /* # */
-    3fr       /* pseudo — très large */
+    3fr       /* pseudo */
     55px      /* score */
     70px      /* temps */
     50px      /* undo */
     50px      /* jokers */
-    110px;    /* date élargie */
+    110px;    /* date */
 
   gap: 10px;
   font-size: 14px;
@@ -690,18 +695,21 @@ body {
   white-space: nowrap;
   overflow: hidden;
 
-  /* Chaque ligne devient un point d'accroche */
-  scroll-snap-align: start;
+  scroll-snap-align: start;       /* snapping ligne par ligne */
 }
 
-/* Header */ 
+
+/* === HEADER === */
+
 .leaderboard-panel .leaderboard-header {
   font-weight: 700;
   background: #f7f7f7;
   border-bottom: 2px solid #ddd;
 }
 
-/* Alignements */
+
+/* === ALIGNEMENTS === */
+
 .leaderboard-panel .rank,
 .leaderboard-panel .pseudo {
   text-align: left;
@@ -714,12 +722,13 @@ body {
   text-align: right;
 }
 
-/* Date centrée */
 .leaderboard-panel .date {
   text-align: center;
 }
 
+
 /* Icônes du header alignées */
+
 .leaderboard-panel .leaderboard-header span {
   display: flex;
   align-items: center;
@@ -737,12 +746,13 @@ body {
   justify-content: flex-end;
 }
 
-/* Icône date centrée */
 .leaderboard-panel .leaderboard-header .date {
   justify-content: center;
 }
 
-/* Séparateur uniquement sur les lignes de valeurs */
+
+/* === SÉPARATEURS === */
+
 .leaderboard-panel .leaderboard-row:not(.leaderboard-header) {
   border-bottom: 1px solid #e5e5e5;
 }
@@ -751,7 +761,9 @@ body {
   border-bottom: none;
 }
 
-/* Message invité */
+
+/* === MESSAGE INVITÉ === */
+
 .leaderboard-hint {
   font-size: 1.1rem;
   font-weight: 400;
@@ -759,39 +771,11 @@ body {
   margin-left: 6px;
 }
 
-/* Pagination (désactivée mais conservée si besoin) */
+
+/* === PAGINATION (désactivée totalement) === */
+
 .leaderboard-pagination {
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-}
-
-.leaderboard-pagination button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  font-size: 15px;
-  color: #333;
-}
-
-.leaderboard-pagination button:hover:not(.active):not(:disabled) {
-  color: #000;
-  text-decoration: underline;
-}
-
-.leaderboard-pagination button.active {
-  font-weight: 700;
-  color: #000;
-  text-decoration: underline;
-}
-
-.leaderboard-pagination button:disabled {
-  opacity: 0.3;
-  cursor: default;
+  display: none !important;
 }
 
 /* === AUTH PANEL === */
