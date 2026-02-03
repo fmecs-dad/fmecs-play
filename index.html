@@ -414,32 +414,21 @@ body {
   display: none !important;
 }
 
-/* === HELP OVERLAY === */
-#helpOverlay {
-  /* on laisse l’overlay global gérer position/fond/z-index */
-  padding-top: 100px;          /* hauteur du bandeau + marge */
-  align-items: flex-start;     /* aligne le panel en haut */
-}
+/* === GENERIC OVERLAY (CORRIGÉ) === */
 
-#helpOverlay.hidden {
-  display: none !important;
-}
-
-/* === GENERIC OVERLAY (UNIFIÉ) === */
+/* === OVERLAY MODAL UNIFIÉ === */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 2000;
-  display: none;               /* caché par défaut */
+  background: rgba(0,0,0,0.55);
+  display: none; /* caché par défaut */
   justify-content: center;
   align-items: center;
+  z-index: 99999;
 }
 
 .overlay-center {
   display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .overlay.hidden {
@@ -447,41 +436,31 @@ body {
   pointer-events: none !important;
 }
 
-/* Isolation totale du leaderboard pour éviter les héritages du layout du jeu */
-#leaderboardOverlay * {
-  flex: none !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  overflow: visible !important;
-  white-space: nowrap !important;
-}
-
-/* === PANELS GÉNÉRIQUES === */
+/* === PANELS INTERNES === */
 .panel {
   background: #fff;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  padding: 24px 30px;
+  border-radius: 12px;
   max-width: 90vw;
   max-height: 90vh;
-  overflow: auto;
-  box-sizing: border-box;
+  overflow-y: auto;
   position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
 
-/* Bouton de fermeture générique */
+/* Bouton de fermeture */
 .close-btn {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  border: none;
+  top: 12px;
+  right: 12px;
   background: transparent;
-  font-size: 18px;
+  border: none;
+  font-size: 22px;
   cursor: pointer;
 }
 
 /* === END GAME PANEL === */
+
 #endGamePanel {
   background: #fafafa;
   padding: 30px 40px;
@@ -492,6 +471,7 @@ body {
 }
 
 /* === BEST SCORE PANEL === */
+
 #bestScoreOverlay .panel {
   min-width: 460px;
   max-width: 640px;
@@ -530,6 +510,7 @@ body {
 }
 
 /* === TUTORIAL BUBBLE === */
+
 #tutorialBubble {
   position: absolute;
   top: 20px;
@@ -551,8 +532,8 @@ body {
   display: none;
 }
 
-/* === MODAL GÉNÉRIQUE (ANCIEN SYSTÈME) === */
-/* Gardé uniquement si encore utilisé ailleurs, sinon tu peux le supprimer */
+/* === MODAL GÉNÉRIQUE === */
+
 .modal {
   position: fixed;
   inset: 0;
@@ -561,7 +542,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 20000;
-  padding: 20px;
+  padding: 20px; /* important pour petits écrans */
   overflow: hidden;
 }
 
@@ -577,6 +558,8 @@ body {
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
   font-size: 18px;
+
+  /* Adaptation automatique */
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
@@ -588,6 +571,7 @@ body {
 }
 
 /* === ANIMATIONS === */
+
 .fade-hidden {
   opacity: 0;
   transform: translateY(-20px) scale(0.98);
@@ -603,6 +587,7 @@ body {
 }
 
 /* Animation premium : arrivée du plateau */
+
 .slide-in-premium {
   opacity: 0;
   transform: translateX(120%) rotate(3deg) scale(0.95);
@@ -1120,7 +1105,7 @@ body {
 
   <!-- Fenêtre d'authentification -->
 <div id="authOverlay" class="overlay overlay-center hidden">
-  <div class="panel">
+  <div class="auth-panel">
     <!-- Bouton de fermeture en haut à droite -->
     <button id="closeAuthBtn" class="close-btn">✕</button>
 
