@@ -378,15 +378,6 @@ function formatDate(value) {
   return d.toLocaleDateString("fr-FR");
 }
 
-
-/* ============================================================
-   VARIABLES GLOBALES
-   ============================================================ */
-
-let currentLeaderboardPage = 1;
-const LEADERBOARD_PAGE_SIZE = 10;
-
-
 /* ============================================================
    TITRE DU LEADERBOARD
    ============================================================ */
