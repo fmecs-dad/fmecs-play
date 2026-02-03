@@ -663,10 +663,10 @@ body {
 
 
 /* === CONTENEUR SCROLLABLE + SNAPPING === */
-/* C’est ici que le scroll et le snapping doivent s’appliquer */
+/* Hauteur réduite pour forcer le scroll même avec 11 scores */
 
 #leaderboardContainer {
-  max-height: 3600px;              /* hauteur visible */
+  max-height: 360px;              /* 10 lignes visibles */
   overflow-y: auto;               /* scroll vertical */
   scroll-snap-type: y mandatory;  /* snapping vertical */
   scroll-padding-top: 6px;        /* petit espace premium */
