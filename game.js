@@ -212,14 +212,17 @@ supa.auth.onAuthStateChange(async (event, session) => {
 // --------------------------------------------------
 
 function openHelpOverlay(auto = false) {
+ 
   if (!auto) playClickSound();
-  pauseGame();
   const overlay = document.getElementById("helpOverlay");
   const topBar = document.getElementById("topBar");
 
   overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
   overlay.classList.remove("hidden");
   
+  pauseGame();
+  showPauseMessage();
+
   window.helpAutoOpened = auto;
 }
 
