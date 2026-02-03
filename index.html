@@ -776,6 +776,18 @@ body {
   cursor: default;
 }
 
+/* Scroll vertical fluide avec snapping */
+#leaderboardContainer {
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 6px; /* petit espace pour un rendu premium */
+}
+
+/* Chaque ligne devient un point d'accroche */
+.leaderboard-row {
+  scroll-snap-align: start;
+}
+
 
 /* === AUTH PANEL === */
 
