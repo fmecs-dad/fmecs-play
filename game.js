@@ -130,7 +130,7 @@ function afficherPageTransition() {
 // ===============================
 
 function lancerJeuComplet() {
-  document.getElementById("readyModal").style.display = "none";
+  document.getElementById("readyModal").classList.add("hidden");
   initGame();
 
   const board = document.getElementById("canvasContainer");
@@ -173,7 +173,6 @@ async function ouvrirProfil() {
 
   const modal = document.getElementById("profileModal");
   modal.classList.remove("hidden");
-  modal.style.display = "flex";
 }
 
 // ===============================
@@ -196,9 +195,6 @@ supa.auth.onAuthStateChange(async (event, session) => {
     }
 
     const user = fresh?.user || null;
-
-    // ❌ On NE DOIT PLUS ouvrir readyModal ici
-    // document.getElementById("readyModal").style.display = "flex";
 
     await initialiserProfilEtLancerJeu(fresh || null);
 
@@ -1749,8 +1745,7 @@ function initialFlow(user) {
   // 5. Fallback (ne devrait jamais arriver)
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
-  auth.style.display = "flex";
-}
+  }
 
 function showReadyModal(source) {
   const modal = document.getElementById("readyModal");
@@ -1759,7 +1754,6 @@ function showReadyModal(source) {
 
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
-  overlay.style.display = "none";
   overlay.classList.add("hidden");
 
   if (window.helpAutoOpened) {
@@ -1944,7 +1938,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isConnected) {
         const auth = document.getElementById("authOverlay");
         auth.classList.remove("hidden");
-        auth.style.display = "flex";
         return;
       }
 
@@ -1967,7 +1960,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!tutorialRunning) {
       localStorage.removeItem("currentGameState");
-      document.getElementById("readyModal").style.display = "none";
+      document.getElementById("readyModal").classList.add("hidden");
       resetGameState();
       initMaltaCross();
       redrawEverything();
@@ -2066,7 +2059,6 @@ document.addEventListener("DOMContentLoaded", () => {
     playClickSound();
     const modal = document.getElementById("signupModal");
     modal.classList.remove("hidden");
-    modal.style.display = "flex";
   });
 
   document.getElementById("signupCloseBtn").addEventListener("click", () => {
@@ -2172,11 +2164,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
     playClickSound();
-    document.getElementById("whySignupModal").style.display = "none";
-
+    document.getElementById("whySignupModal").classList.add("hidden");
     const auth = document.getElementById("authOverlay");
     auth.classList.remove("hidden");
-    auth.style.display = "flex";
+    auth.classList.remove("hidden");
   });
 
   document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
@@ -2186,7 +2177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
     document.getElementById("whySignupModal").style.display = "none";
-    document.getElementById("readyModal").style.display = "flex";
+    document.getElementById("readyModal").classList.remove("hidden");
   });
 
   // ===============================
