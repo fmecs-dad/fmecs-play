@@ -661,8 +661,8 @@ body {
   position: relative;
 
   /* IMPORTANT : on enlève tout scroll ici */
-  overflow: visible;
-  max-height: none;
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 
@@ -670,9 +670,9 @@ body {
 /* C’est LUI qui contient toutes les lignes */
 
 #leaderboardContainer {
-  max-height: 360px;              /* 10 lignes visibles */
-  overflow-y: auto;               /* scroll vertical */
-  scroll-snap-type: y mandatory;  /* snapping vertical */
+  max-height: 360px !important;        /* 10 lignes visibles */
+  overflow-y: auto !important;         /* scroll vertical */
+  scroll-snap-type: y mandatory;
   scroll-padding-top: 6px;
 }
 
