@@ -649,7 +649,8 @@ body {
 }
 
 /* === LEADERBOARD PANEL === */
-/* === PANEL === */
+/* Le panel NE DOIT PAS scroller */
+
 .leaderboard-panel {
   background: #fff !important;
   padding: 20px 24px;
@@ -658,46 +659,30 @@ body {
   max-width: 520px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   position: relative;
-}
 
-
-/* === TITRE FIXÉ === */
-#leaderboardTitle {
-  position: sticky;
-  top: 0;
-  background: #fff;
-  z-index: 20;
-  padding-bottom: 6px;
-}
-
-
-/* === LIGNE DES COLONNES FIXÉE === */
-.leaderboard-header {
-  position: sticky;
-  top: 42px; /* juste sous le titre */
-  background: #f7f7f7;
-  border-bottom: 2px solid #ddd;
-  z-index: 19;
+  /* IMPORTANT : on enlève tout scroll ici */
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 
 /* === CONTENEUR SCROLLABLE === */
-/* IMPORTANT : il doit commencer SOUS la ligne des colonnes */
+/* C’est LUI qui contient toutes les lignes */
 
 #leaderboardContainer {
-  max-height: 360px;
-  overflow-y: auto;
+  max-height: 360px !important;        /* 10 lignes visibles */
+  overflow-y: auto !important;         /* scroll vertical */
   scroll-snap-type: y mandatory;
   scroll-padding-top: 6px;
-
-  /* Décalage pour ne pas passer sous la ligne des colonnes */
-  padding-top: 42px;
 }
 
 
-/* === LIGNES === */
-.leaderboard-row {
+/* === LIGNES DU LEADERBOARD === */
+
+.leaderboard-panel .leaderboard-row,
+.leaderboard-panel .leaderboard-header {
   display: grid !important;
+
   grid-template-columns:
     35px
     3fr
@@ -717,7 +702,22 @@ body {
 }
 
 
+/* === HEADER === */
+
+.leaderboard-panel .leaderboard-header {
+  font-weight: 700;
+  background: #f7f7f7;
+  border-bottom: 2px solid #ddd;
+
+  /* AJOUT : header figé */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+
 /* === ALIGNEMENTS === */
+
 .leaderboard-panel .rank,
 .leaderboard-panel .pseudo {
   text-align: left;
@@ -735,7 +735,32 @@ body {
 }
 
 
+/* Icônes du header alignées */
+
+.leaderboard-panel .leaderboard-header span {
+  display: flex;
+  align-items: center;
+}
+
+.leaderboard-panel .leaderboard-header .rank,
+.leaderboard-panel .leaderboard-header .pseudo {
+  justify-content: flex-start;
+}
+
+.leaderboard-panel .leaderboard-header .score,
+.leaderboard-panel .leaderboard-header .duration,
+.leaderboard-panel .leaderboard-header .undo,
+.leaderboard-panel .leaderboard-header .jokers {
+  justify-content: flex-end;
+}
+
+.leaderboard-panel .leaderboard-header .date {
+  justify-content: center;
+}
+
+
 /* === SÉPARATEURS === */
+
 .leaderboard-panel .leaderboard-row:not(.leaderboard-header) {
   border-bottom: 1px solid #e5e5e5;
 }
@@ -745,7 +770,18 @@ body {
 }
 
 
-/* === PAGINATION MASQUÉE === */
+/* === MESSAGE INVITÉ === */
+
+.leaderboard-hint {
+  font-size: 1.1rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 6px;
+}
+
+
+/* === PAGINATION (désactivée totalement) === */
+
 .leaderboard-pagination {
   display: none !important;
 }
