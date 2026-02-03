@@ -1747,6 +1747,9 @@ function showReadyModal(source) {
   modal.classList.remove("hidden");
 }
 
+function closeReady() {
+  document.getElementById("readyModal").classList.add("hidden");
+}
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
   overlay.classList.add("hidden");
