@@ -1776,9 +1776,15 @@ function closeLogin() {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-  enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
-  enableModalBehavior("authOverlay", ".panel", closeLogin);
+enableModalBehavior("readyModal", ".panel", closeReady);
+enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+enableModalBehavior("authOverlay", ".panel", closeLogin);
+enableModalBehavior("profileModal", ".panel", closeProfile);
+enableModalBehavior("helpOverlay", ".help-panel", closeHelp);
+enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+
 
 
   // Références DOM essentielles
