@@ -1794,7 +1794,7 @@ function closeWhySignup() {
 document.addEventListener("DOMContentLoaded", () => {
 
 //enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
-//enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
 enableModalBehavior("authOverlay", ".panel", closeLogin);
 enableModalBehavior("profileModal", ".panel", closeProfile);
 enableModalBehavior("helpOverlay", ".panel", closeHelp);
@@ -2187,23 +2187,22 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   // ===============================
 
   document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("whySignupModal").classList.add("hidden");
-    const auth = document.getElementById("authOverlay");
-    auth.classList.remove("hidden");
-    auth.classList.remove("hidden");
-  });
+  playClickSound();
+  closeWhySignup();
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
+
 
   document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-    playClickSound();
+  playClickSound();
 
-    const dontRemind = document.getElementById("whySignupDontRemind").checked;
-    if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+  const dontRemind = document.getElementById("whySignupDontRemind").checked;
+  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
-    document.getElementById("whySignupModal").classList.add("hidden");
-    document.getElementById("readyModal").classList.remove("hidden");
+  closeWhySignup();
+  document.getElementById("readyModal").classList.remove("hidden");
+});
 
-  });
 
   // ===============================
   //   FLUX INITIAL (SUPABASE v1)
