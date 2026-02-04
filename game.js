@@ -28,44 +28,6 @@ async function fetchPlayerPseudo(userId) {
 }
 
 // ===============================
-//   UPDATE AUTH UI (VERSION FINALE)
-// ===============================
-
-function updateAuthUI(user = null) {
-
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  const burgerPseudo = document.getElementById("burgerPseudo");
-  const btn = document.getElementById("authBtn");
-
-  if (btn) btn.style.display = "none";
-
-  // ÉTAT DÉCONNECTÉ
-  if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
-    if (burgerPseudo) burgerPseudo.textContent = "Invité";
-    return;
-  }
-
-  // ÉTAT CONNECTÉ
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
-
-  // Valeur par défaut immédiate
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
-  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
-
-  // Mise à jour asynchrone
-  fetchPlayerPseudo(user.id)
-    .then(pseudo => {
-      if (!pseudo) return;
-      if (burgerPseudo) burgerPseudo.textContent = pseudo;
-      localStorage.setItem("playerPseudo", pseudo);
-    })
-    .catch(err => {
-      console.warn("⚠️ fetchPlayerPseudo a échoué :", err);
-    });
-}
-
-// ===============================
 //   GESTION DES REDIRECTIONS SUPABASE (v1)
 // ===============================
 
@@ -128,84 +90,18 @@ function afficherPageTransition() {
 // ===============================
 //   PROFIL & JEU
 // ===============================
-
-function lancerJeuComplet() {
-  document.getElementById("readyModal").classList.add("hidden");
-  initGame();
-
-  const board = document.getElementById("canvasContainer");
-  board.classList.remove("show");
-  board.classList.add("slide-in-premium");
-  void board.offsetWidth;
-  board.classList.add("show");
-}
-
-async function initialiserProfilEtLancerJeu(session) {
-  if (!session) return;
-
-  const userId = session.user.id;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", userId)
-    .single();
-
-  if (player?.pseudo) {
-    localStorage.setItem("playerPseudo", player.pseudo);
-  }
-}
-
-async function ouvrirProfil() {
-  const session = supa.auth.session();
-  const user = session?.user || null;
-
-  if (!user) return;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  document.getElementById("profilePseudoInput").value = player.pseudo || "";
-  document.getElementById("profileAvatarPreview").src = player.avatar_url || "default.png";
-
-  const modal = document.getElementById("profileModal");
-  modal.classList.remove("hidden");
-}
-
-// ===============================
-//   LISTENER AUTH SUPABASE (v1)
-// ===============================
-
-supa.auth.onAuthStateChange(async (event, session) => {
-  
-  if (event === "SIGNED_IN") {
-
-    // On attend que la session soit réellement disponible
-    let fresh = null;
-    for (let i = 0; i < 10; i++) {
-      const s = supa.auth.session();
-      if (s?.user) {
-        fresh = s;
-        break;
-      }
-      await new Promise(r => setTimeout(r, 50));
+supa.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_IN") {
+        const user = session.user;
+        // stocker dans localStorage.user
+        // mettre à jour l’UI du bouton
     }
 
-    const user = fresh?.user || null;
-
-    await initialiserProfilEtLancerJeu(fresh || null);
-
-    updateAuthUI(user);
-    return;
-  }
-
-  // SIGNED_OUT ou autres
-  updateAuthUI(session?.user || null);
+    if (event === "SIGNED_OUT") {
+        // vider localStorage.user
+        // mettre à jour l’UI du bouton
+    }
 });
-
 
 // --------------------------------------------------
 // AIDE
