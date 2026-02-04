@@ -454,22 +454,21 @@ function renderLeaderboard(list, isLoggedIn) {
 // --- OUVERTURE LEADERBOARD ---
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
-
-  pauseGame(); // pause du chrono
+  pauseGame();
 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // Récupérer l'utilisateur Supabase
-  const { data: { user } } = await supabase.auth.getUser();
+  // Récupérer l'utilisateur via la session (compatible avec ton setup)
+  const session = supabase.auth.session();
+  const user = session?.user || null;
 
-  // Mettre à jour le header en fonction de la connexion
   renderLeaderboardHeader(!!user);
 
-  // Charger et afficher le leaderboard
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
 });
+
 
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
