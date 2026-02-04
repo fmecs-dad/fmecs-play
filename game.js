@@ -459,15 +459,13 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // 🔥 Récupérer l'utilisateur via le bon client (supa)
+  // 🔥 Récupérer l'utilisateur via supa
   const user = supa.auth.user();
-
-  // 🔥 Mettre à jour le header
-  renderLeaderboardHeader(!!user);
+  const isLoggedIn = !!user;
 
   // Charger et afficher le leaderboard
   const list = await fetchLeaderboard();
-  renderLeaderboard(list);
+  renderLeaderboard(list, isLoggedIn);
 });
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
