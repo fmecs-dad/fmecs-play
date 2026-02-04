@@ -616,6 +616,25 @@ function initMaltaCross() {
 }
 
 /* ------------------------------------------------------------
+   INITIALISATION DU JEU
+------------------------------------------------------------ */
+
+function initGame() {
+  canvas = document.getElementById("gameCanvas");
+  ctx = canvas.getContext("2d");
+
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  spacing = canvas.width / (size + 1);
+  offset = spacing;
+
+  initMaltaCross();
+  redrawEverything();
+  updateCounters();
+}
+
+/* ------------------------------------------------------------
    HISTORIQUE
 ------------------------------------------------------------ */
 
@@ -1163,14 +1182,15 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCounters();
   }
 
-  updateSoundButton();
+  /* --- INITIALISATION DU JEU --- */
+initGame();
+updateSoundButton();
 
-  /* --- AUTH --- */
-  const session = supa.auth.session();
-  updateAuthUI(session?.user || null);
+const session = supa.auth.session();
+updateAuthUI(session?.user || null);
 
-  /* --- FLUX DE PREMIÈRE FOIS --- */
-  handleFirstLaunchFlow();
+handleFirstLaunchFlow();
+
 
   /* --- BOUTONS TOP BAR --- */
   document.getElementById("undoBtn").addEventListener("click", undoLastMove);
