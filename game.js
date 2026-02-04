@@ -380,19 +380,23 @@ function formatDate(value) {
 
 function renderLeaderboardHeader(isLoggedIn) {
   const title = document.getElementById("leaderboardTitle");
-  if (!title) return;
+  const hintContainer = document.querySelector(".leaderboard-hint");
 
+  if (!title || !hintContainer) return;
+
+  // Titre toujours simple
+  title.textContent = "Leaderboard";
+
+  // Si non connecté → afficher le message
   if (!isLoggedIn) {
-    title.innerHTML = `
-      Leaderboard 
-      <span class="leaderboard-hint">
-        — Si tu veux voir tes scores, inscris‑toi 😉
-      </span>
-    `;
+    hintContainer.textContent = "Si tu veux voir tes scores, inscris‑toi 🙂";
+    hintContainer.style.display = "block";
   } else {
-    title.textContent = "Leaderboard";
+    // Si connecté → cacher le message
+    hintContainer.style.display = "none";
   }
 }
+
 
 
 /* ============================================================
@@ -2243,6 +2247,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
