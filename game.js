@@ -1729,13 +1729,13 @@ function initialFlow(user) {
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
-    document.getElementById("whySignupModal").style.display = "flex";
+    document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
   if (!lastEmail) {
-    document.getElementById("whySignupModal").style.display = "flex";
+    document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
