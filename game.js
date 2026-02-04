@@ -570,12 +570,74 @@ function drawSegment(segmentPoints) {
 
 
 function getNearestPoint(mx, my) {
-  const x = Math.round((mx - offset) / spacing);
-  const y = Math.round((my - offset) / spacing);
+  let best = null;
+  let bestDist = Infinity;
 
-  if (x < 1 || x > size || y < 1 || y > size) return null;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const px = offset + x * spacing;
+      const py = offset + y * spacing;
 
-  return { x, y };
+      const dx = mx - px;
+      const dy = my - py;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = { x, y };
+      }
+    }
+  }
+
+  if (bestDist <= 15) return best;
+  return null;
+}
+
+function snapToAlignedPoint(first, clicked, mx, my) {
+  const { x: x1, y: y1 } = first;
+  const { x: x2, y: y2 } = clicked;
+
+  // 1. Déjà aligné ?
+  if (x1 === x2 || y1 === y2 || Math.abs(x1 - x2) === Math.abs(y1 - y2)) {
+    return clicked;
+  }
+
+  // 2. Chercher le point aligné le plus proche
+  const candidates = [];
+
+  // même colonne
+  candidates.push({ x: x1, y: y2 });
+
+  // même ligne
+  candidates.push({ x: x2, y: y1 });
+
+  // diagonales
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const signX = dx > 0 ? 1 : -1;
+  const signY = dy > 0 ? 1 : -1;
+  candidates.push({ x: x1 + Math.abs(dy) * signX, y: y1 + Math.abs(dy) * signY });
+  candidates.push({ x: x1 + Math.abs(dx) * signY, y: y1 + Math.abs(dx) * signX });
+
+  // 3. Choisir le plus proche
+  let best = clicked;
+  let bestDist = Infinity;
+
+  for (const c of candidates) {
+    const px = offset + c.x * spacing;
+    const py = offset + c.y * spacing;
+    const dist = Math.hypot(mx - px, my - py);
+
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = c;
+    }
+  }
+
+  // 4. Tolérance
+  if (bestDist <= 15) return best;
+
+  return clicked; // pas de snap possible
 }
 
 /* ------------------------------------------------------------
@@ -617,26 +679,44 @@ function drawMaltaCross() {
 }
 
 function initMaltaCross() {
+
   permanentPoints.clear();
   activePoints.clear();
 
-  const mid = Math.floor(size / 2) + 1;
+  // Construction brute de la croix
+  let x = 0, y = 0;
+  const pts = [];
+  const add = (px, py) => pts.push({ x: px, y: py });
+  add(x, y);
 
-  const coords = [
-    [mid, mid - 2],
-    [mid, mid - 1],
-    [mid, mid],
-    [mid, mid + 1],
-    [mid, mid + 2],
-
-    [mid - 2, mid],
-    [mid - 1, mid],
-    [mid + 1, mid],
-    [mid + 2, mid],
+  const steps = [
+    [1,0,3],[0,1,3],[1,0,3],[0,1,3],
+    [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
+    [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
   ];
 
-  coords.forEach(([x, y]) => {
-    const key = `${x},${y}`;
+  for (const [dx, dy, n] of steps) {
+    for (let i = 0; i < n; i++) {
+      x += dx;
+      y += dy;
+      add(x, y);
+    }
+  }
+
+  // Point de référence dans la croix brute
+  const refX = -3;
+  const refY = 3;
+
+  // Point logique où placer ce point
+  const targetLeftX = 12;
+  const targetLeftY = 15;
+
+  const offsetX = targetLeftX - refX; // 15
+  const offsetY = targetLeftY - refY; // 12
+
+  // Application de l’offset
+  pts.forEach(p => {
+    const key = `${p.x + offsetX},${p.y + offsetY}`;
     permanentPoints.add(key);
     activePoints.add(key);
   });
