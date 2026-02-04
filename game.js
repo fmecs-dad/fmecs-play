@@ -1577,7 +1577,10 @@ function closeWhySignup() {
 
 function enableModalBehavior(overlayId, panelSelector, closeFn) {
   const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+
   const panel = overlay.querySelector(panelSelector);
+  if (!panel) return;
 
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeFn();
@@ -1585,7 +1588,6 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
   panel.addEventListener("click", (e) => e.stopPropagation());
 }
-
 
 /* ============================================================
    DOMContentLoaded
