@@ -460,6 +460,13 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
+  // Récupérer l'utilisateur Supabase
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Mettre à jour le header en fonction de la connexion
+  renderLeaderboardHeader(!!user);
+
+  // Charger et afficher le leaderboard
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
 });
