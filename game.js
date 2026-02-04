@@ -518,9 +518,56 @@ function updateCounters() {
   document.getElementById("undoCount").textContent = undoCount;
 }
 
+
 /* ------------------------------------------------------------
    GRILLE — OUTILS
 ------------------------------------------------------------ */
+
+// ===============================
+//   DESSIN DE LA GRILLE
+// ===============================
+
+const visualOrigin = offset - spacing;
+
+function drawGrid() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#ddd";
+  ctx.lineWidth = 1;
+
+  for (let y = 0; y < size; y++) {
+    ctx.beginPath();
+    ctx.moveTo(offset, offset + y * spacing);
+    ctx.lineTo(offset + (size - 1) * spacing, offset + y * spacing);
+    ctx.stroke();
+  }
+
+  for (let x = 0; x < size; x++) {
+    ctx.beginPath();
+    ctx.moveTo(offset + x * spacing, offset);
+    ctx.lineTo(offset + x * spacing, offset + (size - 1) * spacing);
+    ctx.stroke();
+  }
+}
+
+function drawPoint(x, y, color = "#000") {
+  ctx.beginPath();
+  ctx.arc(offset + x * spacing, offset + y * spacing, 3, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+
+function drawSegment(segmentPoints) {
+  const [sx, sy] = segmentPoints[0].split(",").map(Number);
+  const [ex, ey] = segmentPoints[4].split(",").map(Number);
+  ctx.strokeStyle = "#000";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(offset + sx * spacing, offset + sy * spacing);
+  ctx.lineTo(offset + ex * spacing, offset + ey * spacing);
+  ctx.stroke();
+}
+
 
 function getNearestPoint(mx, my) {
   const x = Math.round((mx - offset) / spacing);
@@ -529,33 +576,6 @@ function getNearestPoint(mx, my) {
   if (x < 1 || x > size || y < 1 || y > size) return null;
 
   return { x, y };
-}
-
-function drawPoint(x, y) {
-  const cx = offset + x * spacing;
-  const cy = offset + y * spacing;
-
-  ctx.beginPath();
-  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-  ctx.fillStyle = "#000";
-  ctx.fill();
-}
-
-function drawSegment(points) {
-  ctx.strokeStyle = "#000";
-  ctx.lineWidth = 2;
-
-  ctx.beginPath();
-
-  const [x0, y0] = points[0].split(",").map(Number);
-  ctx.moveTo(offset + x0 * spacing, offset + y0 * spacing);
-
-  points.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    ctx.lineTo(offset + x * spacing, offset + y * spacing);
-  });
-
-  ctx.stroke();
 }
 
 /* ------------------------------------------------------------
