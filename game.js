@@ -1575,12 +1575,33 @@ function closeWhySignup() {
   document.getElementById("whySignupModal").classList.add("hidden");
 }
 
+function enableModalBehavior(overlayId, panelSelector, closeFn) {
+  const overlay = document.getElementById(overlayId);
+  const panel = overlay.querySelector(panelSelector);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeFn();
+  });
+
+  panel.addEventListener("click", (e) => e.stopPropagation());
+}
+
 
 /* ============================================================
    DOMContentLoaded
    ============================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
+
+window.addEventListener("resize", () => {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  spacing = canvas.width / (size + 1);
+  offset = spacing;
+
+  redrawEverything();
+});
 
   /* --- MODALES --- */
   enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
