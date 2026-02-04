@@ -472,16 +472,14 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // 🔥 Récupérer l'utilisateur via le localStorage
-  const user = getCurrentUser();
+  // Récupérer l'utilisateur via le bon client (supa)
+  const user = supa.auth.user();
 
   renderLeaderboardHeader(!!user);
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
 });
-
-
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
 function closeLeaderboard() {
