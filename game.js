@@ -459,8 +459,9 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // Récupérer l'utilisateur via la session (compatible avec ton setup)
-  const session = supabase.auth.session();
+  // 🔥 Récupérer l'utilisateur via le localStorage (compatible avec ton setup)
+  const raw = localStorage.getItem("supabase.auth.token");
+  const session = raw ? JSON.parse(raw).currentSession : null;
   const user = session?.user || null;
 
   renderLeaderboardHeader(!!user);
@@ -468,7 +469,6 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
 });
-
 
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
