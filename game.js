@@ -27,19 +27,6 @@ async function fetchPlayerPseudo(userId) {
   return data.pseudo;
 }
 
-function getCurrentUser() {
-  const raw = localStorage.getItem("supabase.auth.token");
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw);
-    return parsed.currentSession?.user || null;
-  } catch {
-    return null;
-  }
-}
-
-
 // ===============================
 //   UPDATE AUTH UI (VERSION FINALE)
 // ===============================
@@ -472,11 +459,13 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // Récupérer l'utilisateur via le bon client (supa)
+  // 🔥 Récupérer l'utilisateur via le bon client (supa)
   const user = supa.auth.user();
 
+  // 🔥 Mettre à jour le header
   renderLeaderboardHeader(!!user);
 
+  // Charger et afficher le leaderboard
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
 });
