@@ -1,1579 +1,1046 @@
 /* ============================================================
-   SUPABASE : INIT
+   BLOC A — VARIABLES GLOBALES + SUPABASE + AUTH + PROFIL
    ============================================================ */
 
-const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
-
-const supa = window.supabase.createClient(
-  "https://gjzqghhqpycbcwykxvgw.supabase.co",
-  SUPABASE_ANON_KEY
+/* --- SUPABASE --- */
+const supa = supabase.createClient(
+  "https://fmecs.supabase.co",
+  "public-anon-key"
 );
 
+/* --- VARIABLES GLOBALES DU JEU --- */
+
+let size = 31;              // Taille de la grille
+let spacing = 0;            // Calculé après init
+let offset = 0;             // Décalage du canvas
+
+let canvas = null;
+let ctx = null;
+
+let activePoints = new Set();
+let permanentPoints = new Set();
+let usedEdges = new Set();
+let validatedSegments = [];
+
+let selectedStart = null;
+
+let score = 0;
+let jokersAvailable = 0;
+let jokersTotal = 0;
+let undoCount = 0;
+
+let timerSeconds = 0;
+let timerInterval = null;
+let timerRunning = false;
+
+let paused = false;
+let gameOver = false;
+
+let tutorialRunning = false;
+let currentTutorialStep = 0;
+
+let historyStack = [];
+let soundEnabled = true;
+let audioUnlocked = false;
 
 /* ============================================================
-   PROFIL : ÉTAT LOCAL
+   PROFIL — UI
    ============================================================ */
-
-function updateUIForLoggedOutUser() {
-    const btn = document.getElementById("btnUser");
-    if (!btn) return;
-
-    btn.textContent = "Se connecter";
-    btn.classList.remove("logged-in");
-    btn.classList.add("logged-out");
-}
-
-function updateUIForLoggedInUser(user) {
-    const btn = document.getElementById("btnUser");
-    if (!btn) return;
-
-    btn.classList.remove("logged-out");
-    btn.classList.add("logged-in");
-
-    btn.innerHTML = `
-        <img src="${user.avatarUrl}" class="avatar-mini">
-        <span>${user.pseudo}</span>
-    `;
-}
-
-
-/* ============================================================
-   PROFIL : INIT SESSION AU DÉMARRAGE
-   ============================================================ */
-
-async function initUserSession() {
-
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-
-    if (!storedUser) {
-        updateUIForLoggedOutUser();
-        return;
-    }
-
-    const session = supa.auth.session();
-
-    if (!session || !session.user) {
-        localStorage.removeItem("user");
-        updateUIForLoggedOutUser();
-        return;
-    }
-
-    updateUIForLoggedInUser(storedUser);
-}
-
-initUserSession();
-
-
-/* ============================================================
-   PROFIL : OUVERTURE / FERMETURE DU BLOC
-   ============================================================ */
-
-const btnUser = document.getElementById("btnUser");
-const profileBlock = document.getElementById("profileBlock");
 
 function openProfileBlock() {
-    profileBlock.classList.remove("closed");
-    profileBlock.classList.add("open");
-
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
-
-    document.getElementById("profilePseudo").textContent = user.pseudo;
-    document.getElementById("profileEmail").textContent = user.email;
-    document.getElementById("profileAvatarLarge").style.backgroundImage =
-        `url('${user.avatarUrl}')`;
-
-    document.getElementById("profileView1").classList.add("active");
-    document.getElementById("profileView2").classList.remove("active");
+  const block = document.getElementById("profileBlock");
+  block.classList.remove("closed");
+  block.classList.add("open");
 }
 
 function closeProfileBlock() {
-    profileBlock.classList.remove("open");
-    profileBlock.classList.add("closed");
+  const block = document.getElementById("profileBlock");
+  block.classList.remove("open");
+  block.classList.add("closed");
 }
 
-
-/* ============================================================
-   PROFIL : BOUTON UTILISATEUR
-   ============================================================ */
-
-btnUser.addEventListener("click", () => {
-
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-
-    if (!storedUser) {
-        openLoginWindow();
-        return;
-    }
-
-    if (profileBlock.classList.contains("open")) {
-        closeProfileBlock();
-    } else {
-        openProfileBlock();
-    }
-});
-
-
-/* ============================================================
-   PROFIL : OUVERTURE LOGIN
-   ============================================================ */
-
-function openLoginWindow() {
-    document.getElementById("authOverlay").classList.remove("hidden");
+function showProfileView1() {
+  document.getElementById("profileView1").classList.add("active");
+  document.getElementById("profileView2").classList.remove("active");
 }
 
+function showProfileView2() {
+  document.getElementById("profileView1").classList.remove("active");
+  document.getElementById("profileView2").classList.add("active");
+}
 
 /* ============================================================
-   PROFIL : BASCULE VUE 1 ↔ VUE 2
+   PROFIL — MISE À JOUR UI
    ============================================================ */
 
-document.getElementById("btnEditProfile").addEventListener("click", () => {
+function updateUserButton(pseudo, avatarUrl) {
+  const btn = document.getElementById("btnUser");
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
+  if (!pseudo) {
+    btn.classList.add("logged-out");
+    btn.innerHTML = "Se connecter";
+    return;
+  }
 
-    document.getElementById("inputPseudo").value = user.pseudo;
-    document.getElementById("inputEmail").value = user.email;
-    document.getElementById("editAvatarLarge").style.backgroundImage =
-        `url('${user.avatarUrl}')`;
+  btn.classList.remove("logged-out");
+  btn.innerHTML = `
+    <img src="${avatarUrl}" class="avatar-mini">
+    <span>${pseudo}</span>
+  `;
+}
 
-    document.getElementById("profileView1").classList.remove("active");
-    document.getElementById("profileView2").classList.add("active");
-});
+function updateProfilePanel(user, pseudo, email, avatarUrl) {
+  document.getElementById("profilePseudo").textContent = pseudo || "";
+  document.getElementById("profileEmail").textContent = email || "";
 
-document.getElementById("btnCancelEdit").addEventListener("click", () => {
-    document.getElementById("profileView2").classList.remove("active");
-    document.getElementById("profileView1").classList.add("active");
-});
+  document.getElementById("profileAvatarLarge").style.backgroundImage =
+    avatarUrl ? `url('${avatarUrl}')` : "none";
 
+  document.getElementById("editAvatarLarge").style.backgroundImage =
+    avatarUrl ? `url('${avatarUrl}')` : "none";
+
+  document.getElementById("inputPseudo").value = pseudo || "";
+  document.getElementById("inputEmail").value = email || "";
+}
 
 /* ============================================================
-   PROFIL : ENREGISTREMENT MODIFICATIONS
+   PROFIL — RÉCUPÉRATION DES DONNÉES
    ============================================================ */
 
-document.getElementById("btnSaveProfile").addEventListener("click", async () => {
+async function fetchPlayerPseudo(userId) {
+  const { data, error } = await supa
+    .from("players")
+    .select("pseudo")
+    .eq("id", userId)
+    .maybeSingle();
 
-    const errorMessage = document.getElementById("profileErrorMessage");
-    errorMessage.textContent = "";
+  if (error) return null;
+  return data?.pseudo || null;
+}
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
+async function fetchPlayerAvatar(userId) {
+  const { data, error } = await supa
+    .from("players")
+    .select("avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
 
-    const newPseudo = document.getElementById("inputPseudo").value.trim();
-    const newEmail = document.getElementById("inputEmail").value.trim();
-    const newPassword = document.getElementById("inputPasswordNew").value.trim();
-    const confirmPassword = document.getElementById("inputPasswordConfirm").value.trim();
-
-    if (!newPseudo) {
-        errorMessage.textContent = "Le pseudo ne peut pas être vide.";
-        return;
-    }
-
-    if (!newEmail) {
-        errorMessage.textContent = "L’email ne peut pas être vide.";
-        return;
-    }
-
-    if (newPassword && newPassword !== confirmPassword) {
-        errorMessage.textContent = "Les mots de passe ne correspondent pas.";
-        return;
-    }
-
-    if (newEmail !== user.email || newPassword) {
-
-        const updatePayload = {};
-        if (newEmail !== user.email) updatePayload.email = newEmail;
-        if (newPassword) updatePayload.password = newPassword;
-
-        const { error: authError } = await supa.auth.update(updatePayload);
-
-        if (authError) {
-            errorMessage.textContent = authError.message;
-            return;
-        }
-    }
-
-    if (newPseudo !== user.pseudo) {
-        const { error: pseudoError } = await supa
-            .from("players")
-            .update({ pseudo: newPseudo })
-            .eq("id", user.id);
-
-        if (pseudoError) {
-            errorMessage.textContent = pseudoError.message;
-            return;
-        }
-    }
-
-    const updatedUser = {
-        ...user,
-        pseudo: newPseudo,
-        email: newEmail
-    };
-
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-
-    document.getElementById("profilePseudo").textContent = newPseudo;
-    document.getElementById("profileEmail").textContent = newEmail;
-
-    document.getElementById("profileView2").classList.remove("active");
-    document.getElementById("profileView1").classList.add("active");
-
-    updateUIForLoggedInUser(updatedUser);
-});
-
+  if (error) return null;
+  return data?.avatar_url || null;
+}
 
 /* ============================================================
-   PROFIL : UPLOAD AVATAR
+   PROFIL — MISE À JOUR SUPABASE
    ============================================================ */
 
-document.getElementById("inputAvatar").addEventListener("change", async () => {
+async function updatePlayerProfile(userId, newPseudo, newEmail, newPassword, avatarFile) {
+  let avatarUrl = null;
 
-    const file = document.getElementById("inputAvatar").files[0];
-    if (!file) return;
+  if (avatarFile) {
+    const fileName = `${userId}_${Date.now()}`;
+    const { data: uploadData, error: uploadError } = await supa.storage
+      .from("avatars")
+      .upload(fileName, avatarFile);
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) return;
-
-    const path = `avatars/${user.id}.png`;
-
-    const { error: uploadError } = await supa.storage
-        .from("avatars")
-        .upload(path, file, { upsert: true });
-
-    if (uploadError) {
-        document.getElementById("profileErrorMessage").textContent = uploadError.message;
-        return;
+    if (!uploadError) {
+      avatarUrl = supa.storage.from("avatars").getPublicUrl(fileName).publicURL;
     }
+  }
 
-    const { data } = supa.storage.from("avatars").getPublicUrl(path);
-    const avatarUrl = data.publicUrl;
+  if (newPseudo) {
+    await supa.from("players").update({ pseudo: newPseudo }).eq("id", userId);
+  }
 
-    await supa
-        .from("players")
-        .update({ avatar_url: avatarUrl })
-        .eq("id", user.id);
+  if (avatarUrl) {
+    await supa.from("players").update({ avatar_url: avatarUrl }).eq("id", userId);
+  }
 
-    const updatedUser = { ...user, avatarUrl };
-    localStorage.setItem("user", JSON.stringify(updatedUser));
+  if (newEmail || newPassword) {
+    await supa.auth.update({
+      email: newEmail || undefined,
+      password: newPassword || undefined
+    });
+  }
 
-    document.getElementById("editAvatarLarge").style.backgroundImage = `url('${avatarUrl}')`;
-    document.getElementById("profileAvatarLarge").style.backgroundImage = `url('${avatarUrl}')`;
-
-    updateUIForLoggedInUser(updatedUser);
-});
-
+  return avatarUrl;
+}
 
 /* ============================================================
-   PROFIL : DÉCONNEXION
+   AUTH — MISE À JOUR UI
    ============================================================ */
 
-document.getElementById("btnLogout").addEventListener("click", async () => {
-
-    await supa.auth.signOut();
-
-    localStorage.removeItem("user");
-
-    updateUIForLoggedOutUser();
-
+async function updateAuthUI(user) {
+  if (!user) {
+    updateUserButton(null);
     closeProfileBlock();
-});
+    return;
+  }
 
+  const pseudo = await fetchPlayerPseudo(user.id);
+  const avatarUrl = await fetchPlayerAvatar(user.id);
 
-/* ============================================================
-   PROFIL : CLIC EXTÉRIEUR
-   ============================================================ */
-
-document.addEventListener("click", (event) => {
-
-    if (!profileBlock.classList.contains("open")) return;
-
-    if (btnUser.contains(event.target)) return;
-    if (profileBlock.contains(event.target)) return;
-
-    closeProfileBlock();
-});
+  updateUserButton(pseudo, avatarUrl);
+  updateProfilePanel(user, pseudo, user.email, avatarUrl);
+}
 
 /* ============================================================
-   LEADERBOARD : FETCH
+   BLOC B — LEADERBOARD + BEST SCORE
    ============================================================ */
+
+/* ------------------------------------------------------------
+   Récupération du leaderboard depuis Supabase
+------------------------------------------------------------ */
 
 async function fetchLeaderboard() {
-  const response = await fetch(
-    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
-    {
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    }
-  );
+  const { data, error } = await supa
+    .from("scores")
+    .select("player_id, score, duration, undo, jokers, created_at")
+    .order("score", { ascending: false })
+    .limit(200);
 
-  return await response.json();
-}
-
-async function fetchPlayerScores(userId) {
-  const response = await fetch(
-    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?player_id=eq.${userId}&select=*`,
-    {
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    }
-  );
-
-  return await response.json();
-}
-
-
-/* ============================================================
-   LEADERBOARD : FORMATTERS
-   ============================================================ */
-
-function formatDuration(ms) {
-  const totalSec = Math.floor(ms / 1000);
-  const min = Math.floor(totalSec / 60);
-  const sec = totalSec % 60;
-  return `${min}:${sec.toString().padStart(2, "0")}`;
-}
-
-function truncatePseudo(pseudo) {
-  return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
-}
-
-function formatDate(value) {
-  if (!value) return "";
-  const normalized = value.replace(" ", "T");
-  const d = new Date(normalized);
-  if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("fr-FR");
-}
-
-
-/* ============================================================
-   LEADERBOARD : HEADER
-   ============================================================ */
-
-function renderLeaderboardHeader(isLoggedIn) {
-  const title = document.getElementById("leaderboardTitle");
-  const hintContainer = document.querySelector(".leaderboard-hint");
-
-  if (!title || !hintContainer) return;
-
-  title.textContent = "Leaderboard";
-
-  if (!isLoggedIn) {
-    hintContainer.textContent = "Si tu veux voir tes scores, inscris‑toi 🙂";
-    hintContainer.style.display = "block";
-  } else {
-    hintContainer.style.display = "none";
+  if (error) {
+    console.error("Erreur leaderboard :", error);
+    return [];
   }
+
+  // Récupération des pseudos et avatars
+  const playerIds = [...new Set(data.map(r => r.player_id))];
+
+  const { data: players } = await supa
+    .from("players")
+    .select("id, pseudo, avatar_url")
+    .in("id", playerIds);
+
+  const map = new Map();
+  players?.forEach(p => map.set(p.id, p));
+
+  return data.map(row => ({
+    ...row,
+    pseudo: map.get(row.player_id)?.pseudo || "???",
+    avatar: map.get(row.player_id)?.avatar_url || null
+  }));
 }
 
+/* ------------------------------------------------------------
+   Affichage du leaderboard dans le panel
+------------------------------------------------------------ */
 
-/* ============================================================
-   LEADERBOARD : RENDER
-   ============================================================ */
-
-function renderLeaderboard(list, isLoggedIn, userId = null) {
-  renderLeaderboardHeader(isLoggedIn);
-
+function renderLeaderboard(rows) {
   const container = document.getElementById("leaderboardContainer");
-  if (!container) return;
-
   container.innerHTML = "";
 
-  let bestIndex = null;
-  if (userId) {
-    bestIndex = list.findIndex(entry => entry.players?.id === userId);
+  if (!rows || rows.length === 0) {
+    container.innerHTML = "<p>Aucun score pour le moment.</p>";
+    return;
   }
 
+  // Header
   const header = document.createElement("div");
-  header.className = "leaderboard-row leaderboard-header";
+  header.className = "leaderboard-header leaderboard-row";
   header.innerHTML = `
     <span class="rank">#</span>
     <span class="pseudo">Pseudo</span>
-    <span class="score">🏆</span>
-    <span class="duration">⏱️</span>
-    <span class="undo">↩️</span>
-    <span class="jokers">🃏</span>
-    <span class="date">📅</span>
+    <span class="score">Score</span>
+    <span class="duration">Temps</span>
+    <span class="undo">↩</span>
+    <span class="jokers">🎲</span>
+    <span class="date">Date</span>
   `;
   container.appendChild(header);
 
-  list.forEach((entry, index) => {
-    const row = document.createElement("div");
-    row.className = "leaderboard-row";
+  // Lignes
+  rows.forEach((row, i) => {
+    const div = document.createElement("div");
+    div.className = "leaderboard-row";
 
-    const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
-    const date = formatDate(entry.created_at);
+    const date = new Date(row.created_at).toLocaleDateString("fr-FR");
 
-    row.innerHTML = `
-      <span class="rank">${index + 1}</span>
-      <span class="pseudo">${pseudo}</span>
-      <span class="score">${entry.score}</span>
-      <span class="duration">${formatDuration(entry.duration_ms)}</span>
-      <span class="undo">${entry.undo_count}</span>
-      <span class="jokers">${entry.jokers_used}</span>
+    div.innerHTML = `
+      <span class="rank">${i + 1}</span>
+      <span class="pseudo">${row.pseudo}</span>
+      <span class="score">${row.score}</span>
+      <span class="duration">${formatDuration(row.duration)}</span>
+      <span class="undo">${row.undo}</span>
+      <span class="jokers">${row.jokers}</span>
       <span class="date">${date}</span>
     `;
 
-    if (index === bestIndex) {
-      row.classList.add("my-best-score");
-    }
-
-    container.appendChild(row);
+    container.appendChild(div);
   });
 }
 
+/* ------------------------------------------------------------
+   Formatage du temps pour le leaderboard
+------------------------------------------------------------ */
 
-/* ============================================================
-   LEADERBOARD : OUVERTURE / FERMETURE
-   ============================================================ */
+function formatDuration(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
 
-document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
-  playClickSound();
-  pauseGame();
+/* ------------------------------------------------------------
+   Ouverture du leaderboard
+------------------------------------------------------------ */
 
+async function openLeaderboard() {
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  const user = supa.auth.user();
-  const isLoggedIn = !!user;
-
-  const list = await fetchLeaderboard();
-  renderLeaderboard(list, isLoggedIn, user?.id || null);
-});
+  const rows = await fetchLeaderboard();
+  renderLeaderboard(rows);
+}
 
 function closeLeaderboard() {
   document.getElementById("leaderboardOverlay").classList.add("hidden");
 }
 
-document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
-  playClickSound();
-  closeLeaderboard();
-});
-
-
 /* ============================================================
-   LEADERBOARD : MODAL BEHAVIOR
+   BEST SCORE — Gestion du record personnel
    ============================================================ */
-
-const leaderboardOverlay = document.getElementById("leaderboardOverlay");
-const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
-
-leaderboardOverlay.addEventListener("click", (e) => {
-  if (e.target === leaderboardOverlay) {
-    playClickSound();
-    closeLeaderboard();
-  }
-});
-
-leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
-
-
-/* ============================================================
-   BEST SCORE : LOCAL STORAGE
-   ============================================================ */
-
-function saveBestScore(data) {
-  try {
-    localStorage.setItem("bestScoreData", JSON.stringify(data));
-  } catch(e) {
-    console.error("Erreur sauvegarde meilleur score :", e);
-  }
-}
 
 function loadBestScore() {
+  const raw = localStorage.getItem("bestScore");
+  if (!raw) return null;
+
   try {
-    const raw = localStorage.getItem("bestScoreData");
-    return raw ? JSON.parse(raw) : null;
-  } catch(e) {
-    console.error("Erreur chargement meilleur score :", e);
+    return JSON.parse(raw);
+  } catch {
     return null;
   }
 }
 
-
-/* ============================================================
-   BEST SCORE : TOP BAR
-   ============================================================ */
-
-function updateBestScoreTop() {
-  const el = document.getElementById("bestScoreTop");
-  if (!el) return;
-
+function saveBestScore(score, duration) {
   const best = loadBestScore();
-  if (!best || isNaN(Number(best.score))) {
-    el.textContent = "";
-    return;
+
+  if (!best || score > best.score) {
+    localStorage.setItem("bestScore", JSON.stringify({ score, duration }));
+    return true; // nouveau record
   }
 
-  const score = Number(best.score);
-  const minutes = Math.floor(best.duration / 60);
-  const seconds = best.duration % 60;
-  const timeStr = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-
-  el.innerHTML =
-    `<span class="emoji">🏆</span> ${score} lignes ` +
-    `<span class="emoji">↩️</span>${best.returnsUsed} ` +
-    `<span class="emoji">🃏</span>${best.jokersUsed} ` +
-    `<span class="emoji">⏱️</span>${timeStr}`;
+  return false;
 }
 
+function showBestScore(score, duration) {
+  const overlay = document.getElementById("bestScoreOverlay");
+  const content = document.getElementById("bestScoreContent");
 
-/* ============================================================
-   BEST SCORE : PANEL
-   ============================================================ */
+  content.innerHTML = `
+    <div class="record-line">🎉 Nouveau record : <strong>${score}</strong></div>
+    <div>Temps : ${formatDuration(duration)}</div>
+  `;
 
-function showBestScorePanel() {
-  const panel = document.getElementById("bestScoreContent");
-  if (!panel) return;
-
-  const best = loadBestScore();
-  if (!best) {
-    panel.innerHTML = "<p>Aucun record enregistré pour le moment.</p>";
-  } else {
-    const score = Number(best.score);
-    const minutes = Math.floor(best.duration / 60);
-    const seconds = best.duration % 60;
-    const timeStr = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-
-    panel.innerHTML = `
-      <div class="record-line">
-        🏆 ${score} lignes — ${best.returnsUsed} retour${best.returnsUsed > 1 ? "s" : ""} — ${best.jokersUsed} joker${best.jokersUsed > 1 ? "s" : ""} — ${timeStr}
-      </div>
-    `;
-  }
-
-  document.getElementById("bestScoreOverlay").classList.remove("hidden");
+  overlay.classList.remove("hidden");
 }
 
-document.getElementById("closeBestScore").addEventListener("click", () => {
-  document.getElementById("bestScoreOverlay").classList.add("hidden");
-});
+/* ============================================================
+   ENVOI DU SCORE À SUPABASE
+   ============================================================ */
 
+async function sendScoreToSupabase(score, duration, undo, jokers) {
+  const session = supa.auth.session();
+  const user = session?.user;
+
+  if (!user) return;
+
+  await supa.from("scores").insert([{
+    player_id: user.id,
+    score,
+    duration,
+    undo,
+    jokers,
+    created_at: new Date().toISOString()
+  }]);
+}
 
 /* ============================================================
-   SOUND BUTTON
+   BLOC C — SAUVEGARDE, AUDIO, UI, TIMER, GRILLE, REDRAW
    ============================================================ */
+
+/* ------------------------------------------------------------
+   AUDIO
+------------------------------------------------------------ */
+
+function playClickSound() {
+  if (!soundEnabled || !audioUnlocked) return;
+  document.getElementById("clickSound").play();
+}
+
+function playErrorSound() {
+  if (!soundEnabled || !audioUnlocked) return;
+  document.getElementById("errorSound").play();
+}
+
+function playSuccessSound() {
+  if (!soundEnabled || !audioUnlocked) return;
+  document.getElementById("successSound").play();
+}
+
+function playStartGameSound() {
+  if (!soundEnabled || !audioUnlocked) return;
+  document.getElementById("startGameSound").play();
+}
+
+function playEndGameSound() {
+  if (!soundEnabled || !audioUnlocked) return;
+  document.getElementById("endGameSound").play();
+}
 
 function updateSoundButton() {
   const btn = document.getElementById("burgerSoundBtn");
   btn.textContent = soundEnabled ? "Son : on" : "Son : off";
 }
 
-/* ============================================================
-   SAUVEGARDE PARTIE
-   ============================================================ */
+/* ------------------------------------------------------------
+   FLASH MESSAGES
+------------------------------------------------------------ */
 
-function saveGameState() {
-  if (tutorialRunning) return;
+function flash(message, type = "info") {
+  const container = document.getElementById("flashContainer");
 
-  const data = {
-    activePoints: Array.from(activePoints),
-    permanentPoints: Array.from(permanentPoints),
-    usedEdges: Array.from(usedEdges),
-    validatedSegments,
-    historyStack: JSON.parse(JSON.stringify(validatedSegments)),
+  const div = document.createElement("div");
+  div.className = "flashMessage";
+  div.textContent = message;
+
+  container.appendChild(div);
+
+  requestAnimationFrame(() => div.classList.add("show"));
+
+  setTimeout(() => {
+    div.classList.remove("show");
+    setTimeout(() => div.remove(), 300);
+  }, 1800);
+}
+
+/* ------------------------------------------------------------
+   TIMER
+------------------------------------------------------------ */
+
+function startTimer() {
+  if (timerRunning) return;
+  timerRunning = true;
+
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    updateTimerUI();
+  }, 1000);
+}
+
+function stopTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+}
+
+function updateTimerUI() {
+  const m = Math.floor(timerSeconds / 60);
+  const s = timerSeconds % 60;
+  document.getElementById("timerValue").textContent =
+    `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
+/* ------------------------------------------------------------
+   PAUSE
+------------------------------------------------------------ */
+
+function togglePause() {
+  if (paused) {
+    resumeGame();
+  } else {
+    pauseGame();
+  }
+}
+
+function pauseGame() {
+  paused = true;
+  stopTimer();
+  flash("Pause");
+}
+
+function resumeGame() {
+  paused = false;
+  startTimer();
+  flash("Reprise");
+}
+
+/* ------------------------------------------------------------
+   SAUVEGARDE LOCALE
+------------------------------------------------------------ */
+
+function autoSave() {
+  const state = {
     score,
     jokersAvailable,
     jokersTotal,
     undoCount,
     timerSeconds,
-    gameOver,
-    soundEnabled,
-    paused
+    activePoints: [...activePoints],
+    usedEdges: [...usedEdges],
+    validatedSegments,
   };
 
-  try {
-    localStorage.setItem("currentGameState", JSON.stringify(data));
-  } catch (e) {
-    console.error("Erreur sauvegarde partie :", e);
-  }
+  localStorage.setItem("currentGameState", JSON.stringify(state));
 }
 
-function loadGameState() {
+function loadSavedGame() {
+  const raw = localStorage.getItem("currentGameState");
+  if (!raw) return false;
+
   try {
-    const raw = localStorage.getItem("currentGameState");
-    return raw ? JSON.parse(raw) : null;
-  } catch (e) {
-    console.error("Erreur chargement partie :", e);
-    return null;
-  }
-}
+    const state = JSON.parse(raw);
 
-function restoreGameState() {
-  const data = loadGameState();
-  if (!data) return false;
+    score = state.score;
+    jokersAvailable = state.jokersAvailable;
+    jokersTotal = state.jokersTotal;
+    undoCount = state.undoCount;
+    timerSeconds = state.timerSeconds;
 
-  if (!Array.isArray(data.activePoints) ||
-      !Array.isArray(data.permanentPoints) ||
-      !Array.isArray(data.validatedSegments) ||
-      data.activePoints.length === 0 ||
-      data.permanentPoints.length === 0) {
+    activePoints = new Set(state.activePoints);
+    usedEdges = new Set(state.usedEdges);
+    validatedSegments = state.validatedSegments;
+
+    updateCounters();
+    updateTimerUI();
+
+    return true;
+  } catch {
     return false;
   }
-
-  activePoints = new Set(data.activePoints);
-  permanentPoints = new Set(data.permanentPoints);
-  usedEdges = new Set(data.usedEdges || []);
-  validatedSegments = [...data.validatedSegments];
-
-  score = data.score ?? 0;
-  jokersAvailable = data.jokersAvailable ?? 0;
-  jokersTotal = data.jokersTotal ?? 0;
-  undoCount = data.undoCount ?? 0;
-  timerSeconds = data.timerSeconds ?? 0;
-
-  gameOver = data.gameOver ?? false;
-  paused = data.paused ?? false;
-
-  historyStack = data.historyStack ? [...data.historyStack] : [];
-
-  const historyList = document.getElementById("historyList");
-  historyList.innerHTML = "";
-  historyStack.forEach(entry => {
-    appendHistoryEntry(entry.points, entry.activeCount);
-  });
-
-  soundEnabled = data.soundEnabled ?? true;
-  updateSoundButton();
-
-  return true;
 }
 
-window.addEventListener("beforeunload", saveGameState);
-
-
-/* ============================================================
-   AUDIO
-   ============================================================ */
-
-function playClickSound() { if (!soundEnabled) return; const a=document.getElementById("clickSound"); a.currentTime=0; a.play(); }
-function playErrorSound() { if (!soundEnabled) return; const a=document.getElementById("errorSound"); a.currentTime=0; a.play(); }
-function playSuccessSound() { if (!soundEnabled) return; const a=document.getElementById("successSound"); a.currentTime=0; a.play(); }
-function playTutorialSound() { if (!soundEnabled) return; const a=document.getElementById("tutorialSound"); a.currentTime=0; a.play(); }
-function playJokerGainSound() { if (!soundEnabled) return; const a=document.getElementById("jokerSound"); a.currentTime=0; a.play(); }
-function playJokerLossSound() { if (!soundEnabled) return; const a=document.getElementById("jokerLossSound"); a.currentTime=0; a.play(); }
-function playEndGameSound() { if (!soundEnabled) return; const a=document.getElementById("endGameSound"); a.currentTime=0; a.play(); }
-function playStartGameSound() { if (!soundEnabled) return; const a=document.getElementById("startGameSound"); a.currentTime=0; a.play(); }
-function playNewRecordSound() { if (!soundEnabled) return; const a=document.getElementById("newRecordSound"); if (a) a.play(); }
-
-function unlockAudio() {
-  const ids = ["clickSound"];
-  ids.forEach(id => {
-    const a = document.getElementById(id);
-    a.volume = 0.001;
-    a.play().then(() => {
-      setTimeout(() => { a.pause(); a.currentTime = 0; a.volume = 1; }, 30);
-    }).catch(()=>{});
-  });
-}
-
-
-/* ============================================================
-   UI UTILITAIRES
-   ============================================================ */
-
-function flash(message, type = "") {
-  const div = document.createElement("div");
-  div.className = "flashMessage " + type;
-  div.textContent = message;
-  document.getElementById("flashContainer").appendChild(div);
-  requestAnimationFrame(() => div.classList.add("show"));
-  setTimeout(() => { 
-    div.classList.remove("show"); 
-    setTimeout(() => div.remove(), 300); 
-  }, 1500);
-}
-
-function showTutorialBubble(text, icon = "") {
-  const bubble = document.getElementById("tutorialBubble");
-  bubble.innerHTML = icon ? `<span style="margin-right:6px;">${icon}</span>${text}` : text;
-  bubble.style.display = "block";
-  requestAnimationFrame(() => bubble.style.opacity = "1");
-}
-
-function hideTutorialBubble() {
-  const bubble = document.getElementById("tutorialBubble");
-  bubble.style.opacity = "0";
-  setTimeout(() => bubble.style.display = "none", 300);
-}
+/* ------------------------------------------------------------
+   UI — COMPTEURS
+------------------------------------------------------------ */
 
 function updateCounters() {
   document.getElementById("scoreValue").textContent = score;
-  document.getElementById("jokersCombinedValue").textContent = `${jokersAvailable} / ${jokersTotal}`;
+  document.getElementById("jokersCombinedValue").textContent =
+    `${jokersAvailable} / ${jokersTotal}`;
+  document.getElementById("undoCount").textContent = undoCount;
 }
 
-function formatTime(sec) {
-  const m = Math.floor(sec / 60).toString().padStart(2, "0");
-  const s = (sec % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
+/* ------------------------------------------------------------
+   GRILLE — OUTILS
+------------------------------------------------------------ */
+
+function getNearestPoint(mx, my) {
+  const x = Math.round((mx - offset) / spacing);
+  const y = Math.round((my - offset) / spacing);
+
+  if (x < 1 || x > size || y < 1 || y > size) return null;
+
+  return { x, y };
 }
 
+function drawPoint(x, y) {
+  const cx = offset + x * spacing;
+  const cy = offset + y * spacing;
 
-/* ============================================================
-   TIMER
-   ============================================================ */
-
-function startTimer() {
-  if (timerInterval) return;
-  timerRunning = true;
-  timerInterval = setInterval(() => {
-    timerSeconds++;
-    autoSave();
-    document.getElementById("timerValue").textContent = formatTime(timerSeconds);
-  }, 1000);
-}
-
-function stopTimer() {
-  if (!timerInterval) return;
-  clearInterval(timerInterval);
-  timerInterval = null;
-  timerRunning = false;
-}
-
-function resetTimer() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  timerSeconds = 0;
-  timerRunning = false;
-  document.getElementById("timerValue").textContent = "00:00";
-}
-
-
-/* ============================================================
-   GRILLE + DESSIN
-   ============================================================ */
-
-function drawGrid() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#ddd";
-  ctx.lineWidth = 1;
-
-  for (let y = 0; y < size; y++) {
-    ctx.beginPath();
-    ctx.moveTo(offset, offset + y * spacing);
-    ctx.lineTo(offset + (size - 1) * spacing, offset + y * spacing);
-    ctx.stroke();
-  }
-
-  for (let x = 0; x < size; x++) {
-    ctx.beginPath();
-    ctx.moveTo(offset + x * spacing, offset);
-    ctx.lineTo(offset + x * spacing, offset + (size - 1) * spacing);
-    ctx.stroke();
-  }
-}
-
-function drawPoint(x, y, color = "#000") {
   ctx.beginPath();
-  ctx.arc(offset + x * spacing, offset + y * spacing, 3, 0, Math.PI * 2);
-  ctx.fillStyle = color;
+  ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+  ctx.fillStyle = "#000";
   ctx.fill();
 }
 
-function drawSegment(segmentPoints) {
-  const [sx, sy] = segmentPoints[0].split(",").map(Number);
-  const [ex, ey] = segmentPoints[4].split(",").map(Number);
+function drawSegment(points) {
   ctx.strokeStyle = "#000";
   ctx.lineWidth = 2;
+
   ctx.beginPath();
-  ctx.moveTo(offset + sx * spacing, offset + sy * spacing);
-  ctx.lineTo(offset + ex * spacing, offset + ey * spacing);
+
+  const [x0, y0] = points[0].split(",").map(Number);
+  ctx.moveTo(offset + x0 * spacing, offset + y0 * spacing);
+
+  points.forEach(key => {
+    const [x, y] = key.split(",").map(Number);
+    ctx.lineTo(offset + x * spacing, offset + y * spacing);
+  });
+
   ctx.stroke();
 }
 
+/* ------------------------------------------------------------
+   GRILLE — REDESSIN COMPLET
+------------------------------------------------------------ */
 
-/* ============================================================
-   SNAP + POINT LE PLUS PROCHE
-   ============================================================ */
+function redrawEverything() {
+  if (!canvas || !ctx) return;
 
-function getNearestPoint(mx, my) {
-  let best = null;
-  let bestDist = Infinity;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const px = offset + x * spacing;
-      const py = offset + y * spacing;
-
-      const dx = mx - px;
-      const dy = my - py;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = { x, y };
-      }
-    }
-  }
-
-  return bestDist <= 15 ? best : null;
-}
-
-function snapToAlignedPoint(first, clicked, mx, my) {
-  const { x: x1, y: y1 } = first;
-  const { x: x2, y: y2 } = clicked;
-
-  if (x1 === x2 || y1 === y2 || Math.abs(x1 - x2) === Math.abs(y1 - y2)) {
-    return clicked;
-  }
-
-  const candidates = [];
-
-  candidates.push({ x: x1, y: y2 });
-  candidates.push({ x: x2, y: y1 });
-
-  const dx = x2 - x1;
-  const dy = y2 - y1;
-  const signX = dx > 0 ? 1 : -1;
-  const signY = dy > 0 ? 1 : -1;
-
-  candidates.push({ x: x1 + Math.abs(dy) * signX, y: y1 + Math.abs(dy) * signY });
-  candidates.push({ x: x1 + Math.abs(dx) * signY, y: y1 + Math.abs(dx) * signX });
-
-  let best = clicked;
-  let bestDist = Infinity;
-
-  for (const c of candidates) {
-    const px = offset + c.x * spacing;
-    const py = offset + c.y * spacing;
-    const dist = Math.hypot(mx - px, my - py);
-
-    if (dist < bestDist) {
-      bestDist = dist;
-      best = c;
-    }
-  }
-
-  return bestDist <= 15 ? best : clicked;
-}
-
-/* ============================================================
-   CROIX DE MALTE
-   ============================================================ */
-
-function drawMaltaCross() {
+  // Points permanents (Croix de Malte)
   permanentPoints.forEach(key => {
     const [x, y] = key.split(",").map(Number);
     drawPoint(x, y);
   });
-}
 
-function initMaltaCross() {
-
-  permanentPoints.clear();
-  activePoints.clear();
-
-  let x = 0, y = 0;
-  const pts = [];
-  const add = (px, py) => pts.push({ x: px, y: py });
-  add(x, y);
-
-  const steps = [
-    [1,0,3],[0,1,3],[1,0,3],[0,1,3],
-    [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
-    [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
-  ];
-
-  for (const [dx, dy, n] of steps) {
-    for (let i = 0; i < n; i++) {
-      x += dx;
-      y += dy;
-      add(x, y);
-    }
-  }
-
-  const refX = -3;
-  const refY = 3;
-
-  const targetLeftX = 12;
-  const targetLeftY = 15;
-
-  const offsetX = targetLeftX - refX;
-  const offsetY = targetLeftY - refY;
-
-  pts.forEach(p => {
-    const key = `${p.x + offsetX},${p.y + offsetY}`;
-    permanentPoints.add(key);
-    activePoints.add(key);
+  // Segments validés
+  validatedSegments.forEach(seg => {
+    drawSegment(seg.points);
   });
-}
 
-function redrawEverything() {
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawGrid();
-
-  validatedSegments.forEach(seg => drawSegment(seg.points));
-
+  // Points actifs
   activePoints.forEach(key => {
     const [x, y] = key.split(",").map(Number);
     drawPoint(x, y);
   });
 }
 
-
-/* ============================================================
-   ARÊTES
-   ============================================================ */
-
-function edgeKey(a, b) {
-  return (a < b) ? `${a}|${b}` : `${b}|${a}`;
-}
-
-function edgesOfSegment(segmentKeys) {
-  const edges = [];
-  for (let i = 0; i < 4; i++) edges.push(edgeKey(segmentKeys[i], segmentKeys[i+1]));
-  return edges;
-}
-
-
-/* ============================================================
-   JOKERS
-   ============================================================ */
-
-function gainJoker() {
-  jokersAvailable++;
-  jokersTotal++;
-  autoSave();
-  updateCounters();
-
-  const container = document.getElementById("jokerEffectContainer");
-  const float = document.createElement("div");
-  float.className = "joker-float";
-  float.textContent = "+1";
-  float.style.left = (canvas.width / 2 - 10) + "px";
-  float.style.top  = (canvas.height / 2 - 20) + "px";
-  container.appendChild(float);
-  setTimeout(() => container.removeChild(float), 1000);
-
-  playJokerGainSound();
-}
-
-function loseJoker(amount) {
-  jokersAvailable -= amount;
-  updateCounters();
-
-  const container = document.getElementById("jokerEffectContainer");
-  const float = document.createElement("div");
-  float.className = "joker-loss";
-  float.textContent = `-${amount}`;
-  float.style.left = (canvas.width / 2 - 12) + "px";
-  float.style.top  = (canvas.height / 2 - 20) + "px";
-  container.appendChild(float);
-  setTimeout(() => container.removeChild(float), 1000);
-
-  playJokerLossSound();
-}
-
-
-/* ============================================================
-   VALIDATION D’UN SEGMENT
-   ============================================================ */
-
-function getSegmentBetween(start, end) {
-  const dx = end.x - start.x;
-  const dy = end.y - start.y;
-
-  const aligned =
-    (dx === 0 && Math.abs(dy) === 4) ||
-    (dy === 0 && Math.abs(dx) === 4) ||
-    (Math.abs(dx) === 4 && Math.abs(dy) === 4);
-
-  if (!aligned) { 
-    flash("Impossible : Points non alignés", "error"); 
-    playErrorSound(); 
-    return null; 
-  }
-
-  const stepX = Math.sign(dx);
-  const stepY = Math.sign(dy);
-
-  const segment = [];
-  for (let i = 0; i < 5; i++) {
-    segment.push(`${start.x + i * stepX},${start.y + i * stepY}`);
-  }
-
-  const edges = edgesOfSegment(segment);
-  if (edges.some(e => usedEdges.has(e))) {
-    flash("Impossible : segment déjà utilisé", "error");
-    playErrorSound();
-    return null;
-  }
-
-  const activeCount = segment.filter(p => activePoints.has(p)).length;
-
-  if (activeCount < 2) {
-    flash("Impossible : au moins 2 points actifs nécessaires", "error");
-    playErrorSound();
-    return null;
-  }
-
-  if (activeCount === 5) { 
-    gainJoker(); 
-    flash("+ 1 joker", "success"); 
-    playSuccessSound(); 
-  }
-  else if (activeCount === 3) {
-    if (jokersAvailable >= 1) { 
-      loseJoker(1); 
-      flash("- 1 joker", "info"); 
-    }
-    else { 
-      flash("Impossible : pas de joker", "error"); 
-      playErrorSound(); 
-      return null; 
-    }
-  }
-  else if (activeCount === 2) {
-    if (jokersAvailable >= 2) { 
-      loseJoker(2); 
-      flash("- 2 jokers", "info"); 
-    }
-    else { 
-      flash("Impossible : 2 jokers nécessaires", "error"); 
-      return null; 
-    }
-  }
-
-  segment.forEach(key => {
-    if (!activePoints.has(key)) {
-      activePoints.add(key);
-      const [px, py] = key.split(",").map(Number);
-      drawPoint(px, py);
-    }
-  });
-
-  edges.forEach(e => usedEdges.add(e));
-
-  return { points: segment, edges, activeCount };
-}
-
-
-/* ============================================================
-   HISTORIQUE
-   ============================================================ */
-
-function appendHistoryEntry(points, activeCount) {
-  const historyList = document.getElementById("historyList");
-  const li = document.createElement("li");
-
-  const displayed = points.map(p => {
-    const [x, y] = p.split(",").map(Number);
-    return `${x + 1},${y + 1}`;
-  });
-
-  li.textContent = displayed.join(" → ");
-
-  if (activeCount === 5) li.className = "gain";
-  else if (activeCount === 3 || activeCount === 2) li.className = "loss";
-  else li.className = "neutral";
-
-  historyList.appendChild(li);
-  historyList.scrollTop = historyList.scrollHeight;
-}
-
-
-/* ============================================================
-   ANNULATION
-   ============================================================ */
-
-function undoLastMove() {
-  if (validatedSegments.length === 0) return;
-
-  const last = validatedSegments.pop();
-
-  undoCount++;
-  autoSave();
-  document.getElementById("undoCount").textContent = undoCount;
-
-  score = Math.max(0, score - 1);
-
-  last.edges.forEach(e => usedEdges.delete(e));
-
-  if (last.activeCount === 5) {
-    jokersAvailable = Math.max(0, jokersAvailable - 1);
-    jokersTotal     = Math.max(0, jokersTotal - 1);
-  } 
-  else if (last.activeCount === 3) {
-    jokersAvailable += 1;
-  } 
-  else if (last.activeCount === 2) {
-    jokersAvailable += 2;
-  }
-
-  last.points.forEach(key => {
-    const [kx, ky] = key.split(",").map(Number);
-
-    const stillUsed = validatedSegments.some(s =>
-      s.points.some(p => {
-        const [px, py] = p.split(",").map(Number);
-        return px === kx && py === ky;
-      })
-    );
-
-    if (!stillUsed && !permanentPoints.has(key)) {
-      activePoints.delete(key);
-      autoSave();
-    }
-  });
-
-  const historyList = document.getElementById("historyList");
-  if (historyList.lastChild) historyList.removeChild(historyList.lastChild);
-
-  updateCounters();
-  redrawEverything();
-}
-
-
-/* ============================================================
-   FIN DE PARTIE
-   ============================================================ */
-
-function finalizeGameState() {
-  gameOver = true;
-  autoSave();
-  stopTimer();
-  localStorage.removeItem("currentGameState");
-
-  const pauseBtn = document.getElementById("pauseBtn");
-  const undoBtn  = document.getElementById("undoBtn");
-
-  if (pauseBtn) {
-    pauseBtn.disabled = true;
-    pauseBtn.classList.add("disabled");
-  }
-
-  if (undoBtn) {
-    undoBtn.disabled = true;
-    undoBtn.classList.add("disabled");
-  }
-}
-
-function showEndGamePanel() {
-  const finalScoreEl = document.getElementById("finalScore");
-  if (finalScoreEl) {
-    finalScoreEl.textContent = "Score final : " + score;
-  }
-
-  playEndGameSound();
-
-  gameOver = true;
-  autoSave();
-
-  const pauseBtn = document.getElementById("pauseBtn");
-  const undoBtn = document.getElementById("undoBtn");
-
-  if (pauseBtn) {
-    pauseBtn.disabled = true;
-    pauseBtn.classList.add("disabled");
-  }
-
-  if (undoBtn) {
-    undoBtn.disabled = true;
-    undoBtn.classList.add("disabled");
-  }
-
-  document.getElementById("endGameOverlay").classList.remove("hidden");
-}
-
-function isBetterThan(a, b) {
-  if (!b) return true;
-
-  if (a.score !== b.score) return a.score > b.score;
-  if (a.duration !== b.duration) return a.duration < b.duration;
-  if (a.returnsUsed !== b.returnsUsed) return a.returnsUsed < b.returnsUsed;
-
-  return a.jokersUsed < b.jokersUsed;
-}
-
-async function checkGameOver() {
-  const moves = getPossibleMoves();
-  if (moves.length === 0) {
-
-    gameOver = true;
-    autoSave();
-    stopTimer();
-    localStorage.removeItem("currentGameState");
-
-    const current = {
-      score,
-      returnsUsed: undoCount,
-      jokersUsed: jokersTotal - jokersAvailable,
-      duration: timerSeconds,
-      screenshot: canvas.toDataURL("image/png"),
-      date: Date.now()
-    };
-
-    const best = loadBestScore();
-    const isNewRecord = isBetterThan(current, best);
-
-    if (isNewRecord) {
-      saveBestScore(current);
-      updateBestScoreTop();
-      playNewRecordSound();
-      showBestScorePanel();
-    } else {
-      showEndGamePanel();
-    }
-
-    const session = supa.auth.session();
-    const user = session?.user || null;
-
-    if (user) {
-      await sendScoreToSupabase(
-        user.id,
-        current.score,
-        current.duration * 1000,
-        current.returnsUsed,
-        current.jokersUsed
-      );
-    }
-  }
-}
-
-
-/* ============================================================
-   COUPS POSSIBLES
-   ============================================================ */
-
-function getPossibleMoves() {
-  const moves = [];
-  const directions = [
-    {dx: 1, dy: 0},
-    {dx: 0, dy: 1},
-    {dx: 1, dy: 1},
-    {dx: 1, dy: -1}
+/* ------------------------------------------------------------
+   CROIX DE MALTE — INITIALISATION
+------------------------------------------------------------ */
+
+function initMaltaCross() {
+  permanentPoints.clear();
+  activePoints.clear();
+
+  const mid = Math.floor(size / 2) + 1;
+
+  const coords = [
+    [mid, mid - 2],
+    [mid, mid - 1],
+    [mid, mid],
+    [mid, mid + 1],
+    [mid, mid + 2],
+
+    [mid - 2, mid],
+    [mid - 1, mid],
+    [mid + 1, mid],
+    [mid + 2, mid],
   ];
 
-  for (let key of activePoints) {
-    const [x, y] = key.split(",").map(Number);
-
-    for (let dir of directions) {
-      const segment = [];
-
-      for (let i = 0; i < 5; i++) {
-        const px = x + i * dir.dx;
-        const py = y + i * dir.dy;
-
-        if (px < 0 || px >= size || py < 0 || py >= size) {
-          segment.length = 0;
-          break;
-        }
-
-        segment.push(`${px},${py}`);
-      }
-
-      if (segment.length !== 5) continue;
-
-      const edges = edgesOfSegment(segment);
-      const overlaps = edges.some(e => usedEdges.has(e));
-      if (overlaps) continue;
-
-      const activeCount = segment.filter(p => activePoints.has(p)).length;
-
-      if (activeCount < 2) continue;
-      if (activeCount === 3 && jokersAvailable < 1) continue;
-      if (activeCount === 2 && jokersAvailable < 2) continue;
-
-      moves.push(segment);
-    }
-  }
-
-  return moves;
-}
-
-
-/* ============================================================
-   PAUSE
-   ============================================================ */
-
-function pauseGame() {
-  paused = true;
-
-  clearInterval(timerInterval);
-  timerInterval = null;
-  timerRunning = false;
-
-  document.getElementById("pauseBtn").textContent = "Reprendre";
-  flash("Jeu en pause");
-}
-
-function resumeGame() {
-  paused = false;
-  startTimer();
-  document.getElementById("pauseBtn").textContent = "Pause";
-  flash("Reprise");
-}
-
-function togglePause() {
-  if (paused) resumeGame();
-  else pauseGame();
-}
-
-
-/* ============================================================
-   RÉINITIALISATION DU JEU
-   ============================================================ */
-
-function startNewGame() {
-
-  const restored = restoreGameState();
-
-  if (restored) {
-    redrawEverything();
-    return;
-  }
-
-  resetGameState();
-  initMaltaCross();
-  redrawEverything();
-  startTimer();
-}
-
-function resetGameState() {
-
-  selectedStart = null;
-  score = 0;
-  paused = false;
-  gameOver = false;
-
-  activePoints = new Set();
-  permanentPoints = new Set();
-  usedEdges = new Set();
-  validatedSegments = [];
-
-  jokersAvailable = 0;
-  jokersTotal = 0;
-
-  undoCount = 0;
-  document.getElementById("undoCount").textContent = "0";
-
-  const stepBtn = document.getElementById("burgerStepBtn");
-  stepBtn.disabled = false;
-  stepBtn.classList.remove("disabled");
-
-  resetTimer();
-
-  const historyList = document.getElementById("historyList");
-  historyList.innerHTML = "";
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-/* ============================================================
-   TUTORIEL : CLIGNOTEMENT
-   ============================================================ */
-
-function blinkPoint(x, y, duration = 1200) {
-  return new Promise(resolve => {
-    let visible = true;
-
-    const interval = setInterval(() => {
-      redrawEverything();
-
-      if (visible) {
-        const cx = offset + x * spacing;
-        const cy = offset + y * spacing;
-
-        ctx.beginPath();
-        ctx.arc(cx, cy, 12, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255, 215, 0, 0.35)";
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-        ctx.fillStyle = "#ff0000";
-        ctx.fill();
-      }
-
-      visible = !visible;
-    }, 250);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      redrawEverything();
-      resolve();
-    }, duration);
+  coords.forEach(([x, y]) => {
+    const key = `${x},${y}`;
+    permanentPoints.add(key);
+    activePoints.add(key);
   });
 }
 
+/* ------------------------------------------------------------
+   HISTORIQUE
+------------------------------------------------------------ */
 
-/* ============================================================
-   TUTORIEL : ANIMATION D’UNE LIGNE
-   ============================================================ */
+function appendHistoryEntry(points, activeCount) {
+  const list = document.getElementById("historyList");
 
-function animateLine(points) {
-  return new Promise(resolve => {
-    let i = 0;
+  const li = document.createElement("li");
+  li.className = activeCount >= 4 ? "gain" : activeCount === 3 ? "neutral" : "loss";
 
-    const interval = setInterval(() => {
-      if (i >= points.length - 1) {
-        clearInterval(interval);
-        resolve();
-        return;
-      }
+  li.textContent = points.join(" → ");
 
-      const p1 = points[i].split(",").map(Number);
-      const p2 = points[i + 1].split(",").map(Number);
-
-      ctx.strokeStyle = "#000";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(offset + p1[0] * spacing, offset + p1[1] * spacing);
-      ctx.lineTo(offset + p2[0] * spacing, offset + p2[1] * spacing);
-      ctx.stroke();
-
-      i++;
-    }, 200);
-  });
+  list.prepend(li);
 }
 
-
 /* ============================================================
-   TUTORIEL : LECTURE DES ÉTAPES
+   BLOC D — LOGIQUE DU JEU, SEGMENTS, JOKERS, UNDO, FIN
    ============================================================ */
 
-function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
+/* ------------------------------------------------------------
+   OUTILS SEGMENTS
+------------------------------------------------------------ */
+
+function keyFromPoint(p) {
+  return `${p.x},${p.y}`;
+}
+
+function isPointActive(key) {
+  return activePoints.has(key);
+}
+
+function isPointPermanent(key) {
+  return permanentPoints.has(key);
+}
+
+function isEdgeUsed(aKey, bKey) {
+  const edge1 = `${aKey}-${bKey}`;
+  const edge2 = `${bKey}-${aKey}`;
+  return usedEdges.has(edge1) || usedEdges.has(edge2);
+}
+
+function markEdgeUsed(aKey, bKey) {
+  const edge = `${aKey}-${bKey}`;
+  usedEdges.add(edge);
+}
+
+/* ------------------------------------------------------------
+   VALIDATION D’UNE LIGNE DE 5 POINTS
+------------------------------------------------------------ */
+
+function buildSegment(start, end) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
-  const stepX = Math.sign(dx);
-  const stepY = Math.sign(dy);
 
-  const segment = [];
+  // doit être aligné
+  if (dx !== 0 && dy !== 0 && Math.abs(dx) !== Math.abs(dy)) return null;
 
-  const steps = Math.max(Math.abs(dx), Math.abs(dy));
-  for (let i = 0; i <= steps; i++) {
-    segment.push(`${start.x + i * stepX},${start.y + i * stepY}`);
+  const length = Math.max(Math.abs(dx), Math.abs(dy));
+  if (length !== 4) return null; // 5 points = 4 intervalles
+
+  const stepX = dx === 0 ? 0 : dx / length;
+  const stepY = dy === 0 ? 0 : dy / length;
+
+  const points = [];
+  for (let i = 0; i <= length; i++) {
+    const x = start.x + stepX * i;
+    const y = start.y + stepY * i;
+    points.push({ x, y });
   }
 
-  animateLine(segment).then(() => {
-    segment.forEach(key => {
-      const [px, py] = key.split(",").map(Number);
-      drawPoint(px, py);
-    });
-
-    if (!isTutorial) {
-      segment.forEach(key => activePoints.add(key));
-
-      const edges = edgesOfSegment(segment);
-      edges.forEach(e => usedEdges.add(e));
-
-      validatedSegments.push({
-        points: segment,
-        edges: edges,
-        activeCount: steps
-      });
-
-      score++;
-      autoSave();
-      updateCounters();
-      appendHistoryEntry(segment, steps);
-    }
-
-    if (onComplete) onComplete();
-  });
+  return points;
 }
 
-function playTutorialStep() {
-  const step = tutorialSteps[currentTutorialStep];
+function countActiveInSegment(points) {
+  let count = 0;
+  points.forEach(p => {
+    if (isPointActive(keyFromPoint(p))) count++;
+  });
+  return count;
+}
 
-  if (!step) {
-    tutorialRunning = false;
-    showTutorialBubble("Tutoriel terminé !");
-    setTimeout(() => hideTutorialBubble(), 2000);
+function canUseJokersFor(activeCount) {
+  if (activeCount >= 4) return { ok: true, jokersNeeded: 0 };
+  if (activeCount === 3) return { ok: jokersAvailable >= 1, jokersNeeded: 1 };
+  if (activeCount === 2) return { ok: jokersAvailable >= 2, jokersNeeded: 2 };
+  return { ok: false, jokersNeeded: Infinity };
+}
 
-    setButtonsEnabled(true);
+/* ------------------------------------------------------------
+   APPLICATION D’UN COUP
+------------------------------------------------------------ */
 
-    const tutorialBtn = document.getElementById("burgerStepBtn");
-    tutorialBtn.disabled = false;
-    tutorialBtn.classList.remove("disabled");
+function applyMove(points) {
+  const keys = points.map(keyFromPoint);
+  const activeCount = countActiveInSegment(points);
 
-    redrawEverything();
-    flash("À vous de jouer", "info");
+  const { ok, jokersNeeded } = canUseJokersFor(activeCount);
+  if (!ok) {
+    flash("Ligne invalide (trop peu de points actifs)", "error");
+    playErrorSound();
+    return false;
+  }
+
+  // Vérifier les arêtes déjà utilisées
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (isEdgeUsed(keys[i], keys[i + 1])) {
+      flash("Cette ligne utilise déjà un segment existant", "error");
+      playErrorSound();
+      return false;
+    }
+  }
+
+  // Historique pour undo
+  historyStack.push({
+    type: "segment",
+    points: keys,
+    jokersUsed: jokersNeeded,
+  });
+
+  // Marquer les arêtes
+  for (let i = 0; i < keys.length - 1; i++) {
+    markEdgeUsed(keys[i], keys[i + 1]);
+  }
+
+  // Ajouter les points comme actifs
+  keys.forEach(k => activePoints.add(k));
+
+  // Score
+  score += 1;
+  if (activeCount === 5) {
+    jokersAvailable += 1;
+    jokersTotal += 1;
+  } else if (jokersNeeded > 0) {
+    jokersAvailable -= jokersNeeded;
+  }
+
+  undoCount++;
+  validatedSegments.push({ points: keys });
+
+  appendHistoryEntry(keys, activeCount);
+  updateCounters();
+  redrawEverything();
+  autoSave();
+  playSuccessSound();
+
+  return true;
+}
+
+/* ------------------------------------------------------------
+   GESTION DU CLIC SUR LE CANVAS
+------------------------------------------------------------ */
+
+function handleCanvasClick(evt) {
+  if (paused || gameOver) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const mx = evt.clientX - rect.left;
+  const my = evt.clientY - rect.top;
+
+  const p = getNearestPoint(mx, my);
+  if (!p) return;
+
+  const key = keyFromPoint(p);
+
+  if (!selectedStart) {
+    // Premier clic
+    if (!isPointActive(key)) {
+      flash("Choisis un point actif pour commencer", "error");
+      playErrorSound();
+      return;
+    }
+    selectedStart = p;
+    playClickSound();
     return;
   }
 
-  redrawEverything();
-
-  showTutorialBubble(step.message, step.icon);
-  const bubble = document.getElementById("tutorialBubble");
-  bubble.className = "step" + (currentTutorialStep + 1);
-
-  blinkPoint(step.start.x, step.start.y)
-    .then(() => blinkPoint(step.end.x, step.end.y))
-    .then(() => {
-      drawSegmentProgressively(step.start, step.end, () => {
-        setTimeout(() => {
-          currentTutorialStep++;
-          playTutorialStep();
-        }, 600);
-      }, true);
-    });
-}
-
-function runTutorial() {
-  if (tutorialRunning) return;
-
-  tutorialRunning = true;
-  currentTutorialStep = 0;
-
-  setButtonsEnabled(false);
-
-  const tutorialBtn = document.getElementById("burgerStepBtn");
-  tutorialBtn.disabled = true;
-  tutorialBtn.classList.add("disabled");
-
-  playTutorialStep();
-  tutorialBtn.disabled = false;
-}
-
-
-/* ============================================================
-   FLUX INITIAL (READY / HELP / WHY SIGNUP)
-   ============================================================ */
-
-function showReadyModal() {
-  document.getElementById("readyModal").classList.remove("hidden");
-}
-
-function closeReady() {
-  document.getElementById("readyModal").classList.add("hidden");
-}
-
-function closeHelp() {
-  const overlay = document.getElementById("helpOverlay");
-  overlay.classList.add("hidden");
-
-  if (window.helpAutoOpened) {
-    localStorage.setItem("helpSeen", "true");
-    document.getElementById("readyModal").classList.remove("hidden");
-    startNewGame();
+  // Deuxième clic
+  const segmentPoints = buildSegment(selectedStart, p);
+  if (!segmentPoints) {
+    flash("La ligne doit faire exactement 5 points alignés", "error");
+    playErrorSound();
+    selectedStart = null;
+    return;
   }
+
+  const success = applyMove(segmentPoints);
+  selectedStart = null;
+
+  if (!success) return;
+
+  // Condition de fin de partie : plus de coups possibles ?
+  // (simple version : on laisse le joueur décider de s’arrêter)
 }
 
-function closeLogin() {
-  document.getElementById("authOverlay").classList.add("hidden");
+/* ------------------------------------------------------------
+   UNDO
+------------------------------------------------------------ */
+
+function undoLastMove() {
+  if (historyStack.length === 0) {
+    flash("Rien à annuler");
+    return;
+  }
+
+  const last = historyStack.pop();
+  if (last.type !== "segment") return;
+
+  // Retirer les arêtes
+  for (let i = 0; i < last.points.length - 1; i++) {
+    const a = last.points[i];
+    const b = last.points[i + 1];
+    const edge1 = `${a}-${b}`;
+    const edge2 = `${b}-${a}`;
+    usedEdges.delete(edge1);
+    usedEdges.delete(edge2);
+  }
+
+  // Retirer les points non permanents
+  last.points.forEach(k => {
+    if (!permanentPoints.has(k)) {
+      activePoints.delete(k);
+    }
+  });
+
+  // Retirer le segment validé
+  validatedSegments = validatedSegments.filter(seg => {
+    return seg.points.join("|") !== last.points.join("|");
+  });
+
+  // Score & jokers
+  score = Math.max(0, score - 1);
+  if (last.jokersUsed > 0) {
+    jokersAvailable += last.jokersUsed;
+  }
+
+  undoCount = Math.max(0, undoCount - 1);
+
+  updateCounters();
+  redrawEverything();
+  autoSave();
+}
+
+/* ------------------------------------------------------------
+   FIN DE PARTIE
+------------------------------------------------------------ */
+
+function endGame() {
+  gameOver = true;
+  stopTimer();
+  playEndGameSound();
+
+  const isNewRecord = saveBestScore(score, timerSeconds);
+  if (isNewRecord) {
+    showBestScore(score, timerSeconds);
+  }
+
+  const overlay = document.getElementById("endGameOverlay");
+  const finalScore = document.getElementById("finalScore");
+  finalScore.textContent = `Score final : ${score}`;
+  overlay.classList.remove("hidden");
+
+  // Envoi à Supabase si connecté
+  sendScoreToSupabase(score, timerSeconds, undoCount, jokersTotal);
 }
 
 function closeEndGame() {
   document.getElementById("endGameOverlay").classList.add("hidden");
 }
 
-function closeBestScore() {
-  document.getElementById("bestScoreOverlay").classList.add("hidden");
+/* ============================================================
+   BLOC E — TUTORIEL COMPLET
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   ÉTAPES DU TUTORIEL
+------------------------------------------------------------ */
+
+const tutorialSteps = [
+  {
+    text: "Bienvenue ! Je vais te montrer comment créer une ligne.",
+    highlight: null
+  },
+  {
+    text: "Pour commencer, clique sur un point actif (noir).",
+    highlight: "active"
+  },
+  {
+    text: "Ensuite, clique sur un autre point aligné pour former une ligne de 5 points.",
+    highlight: "aligned"
+  },
+  {
+    text: "Si la ligne est valide, elle sera créée automatiquement.",
+    highlight: null
+  },
+  {
+    text: "Tu peux utiliser des jokers si la ligne contient peu de points actifs.",
+    highlight: null
+  },
+  {
+    text: "Le bouton Retour annule la dernière ligne.",
+    highlight: "undo"
+  },
+  {
+    text: "Le bouton Pause arrête le chrono.",
+    highlight: "pause"
+  },
+  {
+    text: "Tu peux ouvrir ce tutoriel à tout moment via le menu ☰.",
+    highlight: null
+  },
+  {
+    text: "C’est parti ! Amuse-toi bien 🙂",
+    highlight: null,
+    end: true
+  }
+];
+
+/* ------------------------------------------------------------
+   AFFICHAGE DE LA BULLE
+------------------------------------------------------------ */
+
+function showTutorialBubble(text) {
+  const bubble = document.getElementById("tutorialBubble");
+  bubble.textContent = text;
+  bubble.classList.add("visible");
 }
 
-function closeWhySignup() {
-  document.getElementById("whySignupModal").classList.add("hidden");
+function hideTutorialBubble() {
+  const bubble = document.getElementById("tutorialBubble");
+  bubble.classList.remove("visible");
 }
+
+/* ------------------------------------------------------------
+   DÉMARRAGE DU TUTORIEL
+------------------------------------------------------------ */
+
+function startTutorial() {
+  tutorialRunning = true;
+  currentTutorialStep = 0;
+  showTutorialStep();
+}
+
+/* ------------------------------------------------------------
+   AFFICHAGE D’UNE ÉTAPE
+------------------------------------------------------------ */
+
+function showTutorialStep() {
+  const step = tutorialSteps[currentTutorialStep];
+  if (!step) return;
+
+  showTutorialBubble(step.text);
+
+  // Effets visuels selon l’étape
+  highlightTutorialElement(step.highlight);
+
+  if (step.end) {
+    setTimeout(() => {
+      endTutorial();
+    }, 2000);
+  }
+}
+
+/* ------------------------------------------------------------
+   MISE EN ÉVIDENCE D’ÉLÉMENTS
+------------------------------------------------------------ */
+
+function highlightTutorialElement(type) {
+  const undoBtn = document.getElementById("undoBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+
+  undoBtn.classList.remove("highlight");
+  pauseBtn.classList.remove("highlight");
+
+  if (type === "undo") undoBtn.classList.add("highlight");
+  if (type === "pause") pauseBtn.classList.add("highlight");
+}
+
+/* ------------------------------------------------------------
+   ÉTAPE SUIVANTE
+------------------------------------------------------------ */
+
+function nextTutorialStep() {
+  if (!tutorialRunning) return;
+
+  currentTutorialStep++;
+  if (currentTutorialStep >= tutorialSteps.length) {
+    endTutorial();
+    return;
+  }
+
+  showTutorialStep();
+}
+
+/* ------------------------------------------------------------
+   FIN DU TUTORIEL
+------------------------------------------------------------ */
+
+function endTutorial() {
+  tutorialRunning = false;
+  hideTutorialBubble();
+
+  const undoBtn = document.getElementById("undoBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+
+  undoBtn.classList.remove("highlight");
+  pauseBtn.classList.remove("highlight");
+}
+
+/* ------------------------------------------------------------
+   INTÉGRATION AVEC LE CANVAS
+------------------------------------------------------------ */
+
+function handleTutorialClick() {
+  if (!tutorialRunning) return;
+
+  // Avance le tutoriel à chaque clic
+  nextTutorialStep();
+}
+
+/* ============================================================
+   BLOC F — FLUX INITIAL + DOMCONTENTLOADED + MODALES + BINDINGS
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   OUTIL GÉNÉRIQUE POUR LES MODALES
+------------------------------------------------------------ */
 
 function enableModalBehavior(overlayId, panelSelector, closeFn) {
   const overlay = document.getElementById(overlayId);
@@ -1589,21 +1056,76 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
   panel.addEventListener("click", (e) => e.stopPropagation());
 }
 
-/* ============================================================
-   DOMContentLoaded
-   ============================================================ */
+/* ------------------------------------------------------------
+   MODALES — FERMETURES
+------------------------------------------------------------ */
 
-document.addEventListener("DOMContentLoaded", () => {
+function closeWhySignup() {
+  document.getElementById("whySignupModal").classList.add("hidden");
+}
 
-window.addEventListener("resize", () => {
+function closeLogin() {
+  document.getElementById("authOverlay").classList.add("hidden");
+}
+
+function closeHelp() {
+  document.getElementById("helpOverlay").classList.add("hidden");
+}
+
+function closeBestScore() {
+  document.getElementById("bestScoreOverlay").classList.add("hidden");
+}
+
+/* ------------------------------------------------------------
+   READY MODAL
+------------------------------------------------------------ */
+
+function openReadyModal() {
+  document.getElementById("readyModal").classList.remove("hidden");
+}
+
+function closeReadyModal() {
+  document.getElementById("readyModal").classList.add("hidden");
+}
+
+/* ------------------------------------------------------------
+   WHY SIGNUP (première fois)
+------------------------------------------------------------ */
+
+function handleFirstLaunchFlow() {
+  const dontRemind = localStorage.getItem("dontRemindSignup");
+  if (dontRemind) {
+    openReadyModal();
+    return;
+  }
+
+  document.getElementById("whySignupModal").classList.remove("hidden");
+}
+
+/* ------------------------------------------------------------
+   INITIALISATION DU JEU
+------------------------------------------------------------ */
+
+function initGame() {
+  canvas = document.getElementById("gameCanvas");
+  ctx = canvas.getContext("2d");
+
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
   spacing = canvas.width / (size + 1);
   offset = spacing;
 
+  initMaltaCross();
   redrawEverything();
-});
+  updateCounters();
+}
+
+/* ------------------------------------------------------------
+   DOMCONTENTLOADED — POINT D’ENTRÉE PRINCIPAL
+------------------------------------------------------------ */
+
+document.addEventListener("DOMContentLoaded", () => {
 
   /* --- MODALES --- */
   enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
@@ -1617,320 +1139,167 @@ window.addEventListener("resize", () => {
   canvas = document.getElementById("gameCanvas");
   ctx = canvas.getContext("2d");
 
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
+  window.addEventListener("resize", () => {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
 
-  spacing = canvas.width / (size + 1);
-  offset = spacing;
+    spacing = canvas.width / (size + 1);
+    offset = spacing;
 
-  /* --- REPÈRES --- */
-  const topLabels = document.querySelectorAll('#topLabels span');
-  const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  topLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+    redrawEverything();
   });
 
-  leftLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-  });
+  /* --- BOUTONS TOP BAR --- */
+  document.getElementById("undoBtn").addEventListener("click", undoLastMove);
+  document.getElementById("pauseBtn").addEventListener("click", togglePause);
 
-  /* --- FIN DE PARTIE --- */
-  document.getElementById("closeEndGame").addEventListener("click", () => {
-    document.getElementById("endGameOverlay").classList.add("hidden");
-  });
+  /* --- BOUTON USER --- */
+  document.getElementById("btnUser").addEventListener("click", () => {
+    const session = supa.auth.session();
+    const user = session?.user;
 
-  /* --- CLIC SUR LA GRILLE --- */
-  canvas.addEventListener("click", (e) => {
-
-    if (gameOver) return;
-    if (!tutorialRunning && !timerRunning) startTimer();
-    if (tutorialRunning) return;
-    if (paused) resumeGame();
-
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-
-    const nearest = getNearestPoint(mx, my);
-    if (!nearest) {
-      flash("Hors grille", "error");
-      playErrorSound();
-      selectedStart = null;
+    if (!user) {
+      document.getElementById("authOverlay").classList.remove("hidden");
       return;
     }
 
-    const { x, y } = nearest;
+    openProfileBlock();
+    showProfileView1();
+  });
 
-    if (!selectedStart) {
-      selectedStart = { x, y };
+  /* --- PROFIL : ÉDITION --- */
+  document.getElementById("btnEditProfile").addEventListener("click", () => {
+    showProfileView2();
+  });
+
+  document.getElementById("btnCancelEdit").addEventListener("click", () => {
+    showProfileView1();
+  });
+
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    await supa.auth.signOut();
+    updateAuthUI(null);
+    closeProfileBlock();
+  });
+
+  document.getElementById("btnSaveProfile").addEventListener("click", async () => {
+    const session = supa.auth.session();
+    const user = session?.user;
+    if (!user) return;
+
+    const newPseudo = document.getElementById("inputPseudo").value.trim();
+    const newEmail = document.getElementById("inputEmail").value.trim();
+    const newPassword = document.getElementById("inputPasswordNew").value.trim();
+    const confirm = document.getElementById("inputPasswordConfirm").value.trim();
+    const avatarFile = document.getElementById("inputAvatar").files[0];
+
+    if (newPassword && newPassword !== confirm) {
+      document.getElementById("profileErrorMessage").textContent =
+        "Les mots de passe ne correspondent pas.";
       return;
     }
 
-    const result = getSegmentBetween(selectedStart, { x, y });
-    selectedStart = null;
+    const avatarUrl = await updatePlayerProfile(
+      user.id,
+      newPseudo,
+      newEmail,
+      newPassword,
+      avatarFile
+    );
 
-    if (result) {
-      playSuccessSound();
-      validatedSegments.push(result);
-      drawSegment(result.points);
-      score++;
+    updateAuthUI({ id: user.id, email: newEmail || user.email });
+    showProfileView1();
+  });
 
-      const stepBtn = document.getElementById("burgerStepBtn");
-      stepBtn.disabled = true;
-      stepBtn.classList.add("disabled");
+  /* --- AUTH : LOGIN / SIGNUP --- */
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value.trim();
 
-      updateCounters();
-      appendHistoryEntry(result.points, result.activeCount);
-      checkGameOver();
+    const { user, error } = await supa.auth.signIn({ email, password });
+    if (error) {
+      flash("Identifiants incorrects", "error");
+      return;
     }
+
+    updateAuthUI(user);
+    closeLogin();
   });
 
-  /* --- TOP BAR --- */
-  document.getElementById("undoBtn").addEventListener("click", () => {
-    playClickSound();
-    if (!tutorialRunning) undoLastMove();
-  });
+  document.getElementById("signupBtn").addEventListener("click", async () => {
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value.trim();
 
-  document.getElementById("pauseBtn").addEventListener("click", () => {
-    playClickSound();
-    if (!tutorialRunning) togglePause();
-  });
+    const { user, error } = await supa.auth.signUp({ email, password });
+    if (error) {
+      flash("Erreur lors de l'inscription", "error");
+      return;
+    }
 
-  /* --- AIDE --- */
-  document.getElementById("closeHelpBtn").addEventListener("click", () => {
-    playClickSound();
-    closeHelp();
+    await supa.from("players").insert([{ id: user.id, pseudo: "Joueur" }]);
+
+    updateAuthUI(user);
+    closeLogin();
   });
 
   /* --- MENU BURGER --- */
   document.getElementById("burgerBtn").addEventListener("click", () => {
-    playClickSound();
     document.getElementById("burgerOverlay").classList.toggle("show");
   });
 
-  document.addEventListener("click", (e) => {
-    const menu = document.getElementById("burgerOverlay");
-    const burger = document.getElementById("burgerBtn");
-
-    if (!menu.contains(e.target) && e.target !== burger) {
-      menu.classList.remove("show");
-    }
+  document.getElementById("burgerHelpBtn").addEventListener("click", () => {
+    document.getElementById("helpOverlay").classList.remove("hidden");
   });
+
+  document.getElementById("burgerLeaderboardBtn").addEventListener("click", openLeaderboard);
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
-    playClickSound();
-    localStorage.removeItem("currentGameState");
-    startNewGame();
-    initGame();
-  });
-
-  document.getElementById("burgerStepBtn").addEventListener("click", () => {
-    playClickSound();
-
-    if (!tutorialRunning) {
-      localStorage.removeItem("currentGameState");
-      document.getElementById("readyModal").classList.add("hidden");
-      resetGameState();
-      initMaltaCross();
-      redrawEverything();
-      initGame();
-      runTutorial();
-    }
-  });
-
-  document.getElementById("burgerHelpBtn").addEventListener("click", () => {
-    openHelpOverlay(false);
+    location.reload();
   });
 
   document.getElementById("burgerSoundBtn").addEventListener("click", () => {
-    playClickSound();
     soundEnabled = !soundEnabled;
     updateSoundButton();
   });
 
-  /* --- READY BUTTON --- */
+  /* --- READY MODAL --- */
   document.getElementById("readyBtn").addEventListener("click", () => {
-    unlockAudio();
-    audioUnlocked = true;
-
-    setTimeout(() => playClickSound(), 40);
-
-    document.getElementById("readyModal").classList.add("hidden");
-
-    initGame();
-
-    const board = document.getElementById("canvasContainer");
-    board.classList.remove("show");
-    board.classList.add("slide-in-premium");
-    void board.offsetWidth;
-    board.classList.add("show");
-
-    setTimeout(() => playStartGameSound(), 1500);
+    closeReadyModal();
+    playStartGameSound();
+    startTimer();
   });
 
-  /* ============================================================
-     AUTHENTIFICATION (v1)
-     ============================================================ */
-
-  document.getElementById("closeAuthBtn").addEventListener("click", () => {
-    playClickSound();
-    closeLogin();
+  /* --- WHY SIGNUP --- */
+  document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
+    closeWhySignup();
+    openReadyModal();
   });
-
-  document.getElementById("signupBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("signupModal").classList.remove("hidden");
-  });
-
-  document.getElementById("signupCloseBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("signupModal").classList.add("hidden");
-  });
-
-  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
-    playClickSound();
-
-    const email = document.getElementById("authEmail").value;
-    const password = document.getElementById("authPassword").value;
-    const pseudo = document.getElementById("signupPseudoInput").value.trim();
-
-    localStorage.setItem("lastEmail", email);
-
-    if (!pseudo) {
-      alert("Merci de choisir un pseudo.");
-      return;
-    }
-
-    const { data: existing } = await supa
-      .from("players")
-      .select("id")
-      .eq("pseudo", pseudo)
-      .maybeSingle();
-
-    if (existing) {
-      alert("Ce pseudo est déjà pris.");
-      return;
-    }
-
-    const { user, error } = await supa.auth.signUp({ email, password });
-
-    if (error) {
-      alert("Erreur : " + error.message);
-      return;
-    }
-
-    if (!user) {
-      alert("Compte créé ! Vérifie ton email.");
-      return;
-    }
-
-    await supa.from("players").insert([{
-      id: user.id,
-      pseudo: pseudo,
-      created_at: new Date().toISOString()
-    }]);
-
-    localStorage.setItem("playerPseudo", pseudo);
-
-    document.getElementById("signupModal").classList.add("hidden");
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    updateAuthUI(user);
-
-    alert("Compte créé ! Vérifie ton email.");
-  });
-
-  document.getElementById("loginBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-    playClickSound();
-
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value.trim();
-
-    if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
-
-    if (!email.includes("@") || !email.includes(".")) {
-      alert("Adresse email invalide.");
-      return;
-    }
-
-    localStorage.setItem("lastEmail", email);
-
-    const { user, error } = await supa.auth.signIn({ email, password });
-
-    if (error) {
-      alert("Erreur : " + error.message);
-      return;
-    }
-
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    const session = supa.auth.session();
-    updateAuthUI(session?.user || null);
-
-    if (session?.user) {
-      const pseudo = await fetchPlayerPseudo(session.user.id);
-      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
-    }
-  });
-
-  /* ============================================================
-     WHY SIGNUP
-     ============================================================ */
 
   document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-    playClickSound();
     closeWhySignup();
     document.getElementById("authOverlay").classList.remove("hidden");
   });
 
-  document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-    playClickSound();
-
-    const dontRemind = document.getElementById("whySignupDontRemind").checked;
-    if (dontRemind) localStorage.setItem("skipWhySignup", "1");
-
-    closeWhySignup();
-    document.getElementById("readyModal").classList.remove("hidden");
-  });
-
-  /* ============================================================
-     FLUX INITIAL SUPABASE
-     ============================================================ */
-
-  let flowAlreadyLaunched = false;
-  let initialFlowTimeout = null;
-
-  function launchFlowOnce(userFromEvent) {
-    if (flowAlreadyLaunched) return;
-    flowAlreadyLaunched = true;
-
-    handleFirstLaunchFlow(userFromEvent);
-  }
-
-  supa.auth.onAuthStateChange((event, session) => {
-
-    if (event === "SIGNED_IN") {
-      if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
-      launchFlowOnce(session?.user || null);
-    }
-
-    if (event === "SIGNED_OUT") {
-      if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
-      launchFlowOnce(null);
+  document.getElementById("whySignupDontRemind").addEventListener("change", (e) => {
+    if (e.target.checked) {
+      localStorage.setItem("dontRemindSignup", "1");
+    } else {
+      localStorage.removeItem("dontRemindSignup");
     }
   });
 
-  initialFlowTimeout = setTimeout(() => {
-    const session = supa.auth.session();
-    const user = session?.user || null;
-    launchFlowOnce(user);
-  }, 300);
+  /* --- CANVAS CLIC --- */
+  canvas.addEventListener("click", (evt) => {
+    handleCanvasClick(evt);
+    handleTutorialClick(evt);
+  });
 
+  /* --- INITIALISATION --- */
+  initGame();
+  updateSoundButton();
+
+  const session = supa.auth.session();
+  updateAuthUI(session?.user || null);
+
+  handleFirstLaunchFlow();
 });
