@@ -1076,6 +1076,10 @@ function closeBestScore() {
   document.getElementById("bestScoreOverlay").classList.add("hidden");
 }
 
+function closeEndGame() {
+  document.getElementById("endGameOverlay").classList.add("hidden");
+}
+
 /* ------------------------------------------------------------
    READY MODAL
 ------------------------------------------------------------ */
@@ -1093,32 +1097,13 @@ function closeReadyModal() {
 ------------------------------------------------------------ */
 
 function handleFirstLaunchFlow() {
-  const dontRemind = localStorage.getItem("dontRemindSignup");
-  if (dontRemind) {
+  const skip = localStorage.getItem("skipWhySignup");
+  if (skip) {
     openReadyModal();
     return;
   }
 
   document.getElementById("whySignupModal").classList.remove("hidden");
-}
-
-/* ------------------------------------------------------------
-   INITIALISATION DU JEU
------------------------------------------------------------- */
-
-function initGame() {
-  canvas = document.getElementById("gameCanvas");
-  ctx = canvas.getContext("2d");
-
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
-  spacing = canvas.width / (size + 1);
-  offset = spacing;
-
-  initMaltaCross();
-  redrawEverything();
-  updateCounters();
 }
 
 /* ------------------------------------------------------------
@@ -1149,6 +1134,44 @@ document.addEventListener("DOMContentLoaded", () => {
     redrawEverything();
   });
 
+  /* ------------------------------------------------------------
+     INITIALISATION DU JEU (CORRIGÉE)
+  ------------------------------------------------------------ */
+
+  let loaded = false;
+
+  try {
+    loaded = loadSavedGame();
+
+    // Si la sauvegarde est vide → on l’ignore
+    if (
+      loaded &&
+      activePoints.size === 0 &&
+      permanentPoints.size === 0 &&
+      validatedSegments.length === 0
+    ) {
+      loaded = false;
+    }
+  } catch {
+    loaded = false;
+  }
+
+  if (!loaded) {
+    initGame();
+  } else {
+    redrawEverything();
+    updateCounters();
+  }
+
+  updateSoundButton();
+
+  /* --- AUTH --- */
+  const session = supa.auth.session();
+  updateAuthUI(session?.user || null);
+
+  /* --- FLUX DE PREMIÈRE FOIS --- */
+  handleFirstLaunchFlow();
+
   /* --- BOUTONS TOP BAR --- */
   document.getElementById("undoBtn").addEventListener("click", undoLastMove);
   document.getElementById("pauseBtn").addEventListener("click", togglePause);
@@ -1167,14 +1190,9 @@ document.addEventListener("DOMContentLoaded", () => {
     showProfileView1();
   });
 
-  /* --- PROFIL : ÉDITION --- */
-  document.getElementById("btnEditProfile").addEventListener("click", () => {
-    showProfileView2();
-  });
-
-  document.getElementById("btnCancelEdit").addEventListener("click", () => {
-    showProfileView1();
-  });
+  /* --- PROFIL --- */
+  document.getElementById("btnEditProfile").addEventListener("click", showProfileView2);
+  document.getElementById("btnCancelEdit").addEventListener("click", showProfileView1);
 
   document.getElementById("btnLogout").addEventListener("click", async () => {
     await supa.auth.signOut();
@@ -1254,6 +1272,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("burgerLeaderboardBtn").addEventListener("click", openLeaderboard);
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+    localStorage.removeItem("currentGameState");
     location.reload();
   });
 
@@ -1282,9 +1301,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("whySignupDontRemind").addEventListener("change", (e) => {
     if (e.target.checked) {
-      localStorage.setItem("dontRemindSignup", "1");
+      localStorage.setItem("skipWhySignup", "1");
     } else {
-      localStorage.removeItem("dontRemindSignup");
+      localStorage.removeItem("skipWhySignup");
     }
   });
 
@@ -1293,13 +1312,4 @@ document.addEventListener("DOMContentLoaded", () => {
     handleCanvasClick(evt);
     handleTutorialClick(evt);
   });
-
-  /* --- INITIALISATION --- */
-  initGame();
-  updateSoundButton();
-
-  const session = supa.auth.session();
-  updateAuthUI(session?.user || null);
-
-  handleFirstLaunchFlow();
 });
