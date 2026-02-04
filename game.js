@@ -459,8 +459,8 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // 🔥 Récupérer l'utilisateur via le localStorage (compatible avec ton setup)
-  const raw = localStorage.getItem("supabase.auth.token");
+  // Récupérer l'utilisateur via le localStorage (compatible avec ton setup)
+  const raw = localStorage.getItem("supa.auth.token");
   const session = raw ? JSON.parse(raw).currentSession : null;
   const user = session?.user || null;
 
