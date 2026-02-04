@@ -1060,6 +1060,7 @@ function handleTutorialClick() {
 /* ------------------------------------------------------------
    OUTIL GÉNÉRIQUE POUR LES MODALES
 ------------------------------------------------------------ */
+console.log("Bloc F : début DOMContentLoaded");
 
 function enableModalBehavior(overlayId, panelSelector, closeFn) {
   const overlay = document.getElementById(overlayId);
@@ -1183,7 +1184,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --- INITIALISATION DU JEU --- */
+console.log("Bloc F : avant initGame");
+
 initGame();
+console.log("initGame() appelé");
+
 updateSoundButton();
 
 const session = supa.auth.session();
