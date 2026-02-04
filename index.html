@@ -923,25 +923,6 @@ body {
   </div>
 </div>
 
-<!-- Profil -->
-<div id="profileModal" class="overlay overlay-center hidden">
-  <div class="panel">
-    <h2>Mon Profil</h2>
-
-    <label>Pseudo :</label>
-    <input id="profilePseudoInput" type="text">
-
-    <label>Avatar :</label>
-    <img id="profileAvatarPreview" src="" class="avatar-preview">
-    <input id="profileAvatarInput" type="file" accept="image/*">
-
-    <div class="modal-buttons">
-      <button id="profileSaveBtn">Enregistrer</button>
-      <button id="profileCloseBtn">Fermer</button>
-    </div>
-  </div>
-</div>
-
 <!-- === HELP OVERLAY === -->
 <div id="helpOverlay" class="overlay overlay-center hidden">
     <div class="panel">
@@ -985,10 +966,8 @@ body {
   </div>
 </div>
 
-  <div id="gameContainer">
-
-  <!-- === TOP BAR === -->
-  <div id="topBar">
+<!-- === TOP BAR === -->
+<div id="topBar">
 
     <!-- Bloc 1 : Burger -->
     <div id="burgerWrapper">
@@ -1020,20 +999,79 @@ body {
     <!-- Bloc 5 : Meilleur score -->
     <span id="bestScoreTop" class="best-score-info"></span>
 
-  </div>
-  <!-- === /TOP BAR === -->
+    <!-- Bloc 6 : Bouton utilisateur -->
+    <button id="btnUser" class="user-btn logged-out">Se connecter</button>
+
+</div>
+<!-- === /TOP BAR === -->
+
+<!-- === BLOC PROFIL (NOUVEAU SYSTÈME) === -->
+<div class="profile-block closed" id="profileBlock">
+
+    <!-- Vue 1 -->
+    <div class="profile-view view-1 active" id="profileView1">
+
+        <div class="avatar-large" id="profileAvatarLarge"></div>
+
+        <div class="profile-info">
+            <div class="pseudo" id="profilePseudo"></div>
+            <div class="email" id="profileEmail"></div>
+        </div>
+
+        <button class="btn-edit-profile" id="btnEditProfile">Modifier mon profil</button>
+        <button class="btn-logout" id="btnLogout">Se déconnecter</button>
+
+    </div>
+
+    <!-- Vue 2 -->
+    <div class="profile-view view-2" id="profileView2">
+
+        <div class="avatar-section">
+            <div class="avatar-large" id="editAvatarLarge"></div>
+
+            <button class="btn-change-avatar" id="btnChangeAvatar">
+                Changer l’avatar
+            </button>
+
+            <input type="file" class="input-avatar" id="inputAvatar" accept="image/*">
+        </div>
+
+        <div class="edit-fields">
+
+            <label for="inputPseudo">Pseudo</label>
+            <input type="text" id="inputPseudo">
+
+            <label for="inputEmail">Email</label>
+            <input type="email" id="inputEmail">
+
+            <label for="inputPasswordNew">Nouveau mot de passe</label>
+            <input type="password" id="inputPasswordNew">
+
+            <label for="inputPasswordConfirm">Confirmer le mot de passe</label>
+            <input type="password" id="inputPasswordConfirm">
+
+            <div class="error-message" id="profileErrorMessage"></div>
+        </div>
+
+        <div class="edit-actions">
+            <button class="btn-save" id="btnSaveProfile">Enregistrer</button>
+            <button class="btn-cancel" id="btnCancelEdit">Annuler</button>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="gameContainer">
 
 
   <!-- === MENU BURGER (EN DEHORS DU TOPBAR) === -->
   <div id="burgerOverlay">
-    <button id="burgerProfileBtn" class="main-btn">Profil</button>
     <button id="burgerReplayBtn" class="main-btn">Rejouer</button>
     <button id="burgerStepBtn" class="main-btn">Pas à pas</button>
     <button id="burgerHelpBtn" class="main-btn">Aide</button>
     <button id="burgerSoundBtn" class="main-btn">Son : on</button>
     <button id="burgerLeaderboardBtn" class="main-btn">Leaderboard</button>
-    <span id="burgerPseudo" class="burger-pseudo">Invité</span>
-    <button id="burgerAuthBtn" class="main-btn">Se connecter</button>
   </div>
 
 
@@ -1141,23 +1179,233 @@ body {
   </div>
 </div>
 
-<!-- Profil -->
-<div id="profileModal" class="overlay overlay-center hidden">
-  <div class="panel">
-    <button id="profileCloseBtn" class="close-btn">✕</button>
+/* ===============================
+   BOUTON UTILISATEUR (TOP BAR)
+=============================== */
 
-    <h2>Mon Profil</h2>
+.user-btn {
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
 
-    <label>Pseudo :</label>
-    <input id="profilePseudoInput" type="text">
+.user-btn:hover {
+    background: #006cc0;
+}
 
-    <label>Avatar :</label>
-    <img id="profileAvatarPreview" src="" class="avatar-preview">
-    <input id="profileAvatarInput" type="file" accept="image/*">
+.user-btn .avatar-mini {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 
-    <button id="profileSaveBtn" class="main-btn">Enregistrer</button>
-  </div>
-</div>
+
+/* ===============================
+   BLOC PROFIL
+=============================== */
+
+.profile-block {
+    position: absolute;
+    top: 120px; /* sous le topBar */
+    right: 20px;
+    width: 320px;
+    background: #111;
+    border: 1px solid #1e90ff;
+    border-radius: 12px;
+    padding: 20px;
+    z-index: 999999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.profile-block.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.profile-block.closed {
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* ===============================
+   VUES
+=============================== */
+
+.profile-view {
+    display: none;
+}
+
+.profile-view.active {
+    display: block;
+}
+
+
+/* ===============================
+   AVATARS
+=============================== */
+
+.avatar-large {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #222;
+    background-size: cover;
+    background-position: center;
+    margin: 0 auto 15px;
+    border: 2px solid #1e90ff;
+}
+
+
+/* ===============================
+   VUE 1 : Infos
+=============================== */
+
+.profile-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-info .pseudo {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+.profile-info .email {
+    font-size: 14px;
+    opacity: 0.8;
+    color: #ddd;
+}
+
+.btn-edit-profile,
+.btn-logout {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-edit-profile {
+    background: #0078d4;
+    color: white;
+}
+
+.btn-edit-profile:hover {
+    background: #006cc0;
+}
+
+.btn-logout {
+    background: #444;
+    color: white;
+}
+
+.btn-logout:hover {
+    background: #555;
+}
+
+
+/* ===============================
+   VUE 2 : Edition
+=============================== */
+
+.avatar-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.btn-change-avatar {
+    margin-top: 10px;
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-change-avatar:hover {
+    background: #006cc0;
+}
+
+.input-avatar {
+    display: none;
+}
+
+.edit-fields label {
+    color: white;
+    font-size: 14px;
+    margin-top: 10px;
+    display: block;
+}
+
+.edit-fields input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: white;
+    margin-top: 4px;
+}
+
+.error-message {
+    color: #ff4444;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+
+/* ===============================
+   ACTIONS
+=============================== */
+
+.edit-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.btn-save,
+.btn-cancel {
+    width: 48%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-save {
+    background: #0078d4;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #006cc0;
+}
+
+.btn-cancel {
+    background: #444;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #555;
+}
 
 
 

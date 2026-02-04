@@ -1,6 +1,6 @@
-/// ===============================
-//   VARIABLES GLOBALES
-// ===============================
+/* ============================================================
+   SUPABASE : INIT
+   ============================================================ */
 
 const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
 
@@ -9,214 +9,294 @@ const supa = window.supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
-let currentLeaderboardPage = 1;
-const LEADERBOARD_PAGE_SIZE = 10;
 
-// ===============================
-//   AUTH : UTILITAIRES
-// ===============================
+/* ============================================================
+   PROFIL : ÉTAT LOCAL
+   ============================================================ */
 
-async function fetchPlayerPseudo(userId) {
-  const { data, error } = await supa
-    .from("players")
-    .select("pseudo")
-    .eq("id", userId)
-    .single();
+function updateUIForLoggedOutUser() {
+    const btn = document.getElementById("btnUser");
+    if (!btn) return;
 
-  if (error) return null;
-  return data.pseudo;
+    btn.textContent = "Se connecter";
+    btn.classList.remove("logged-in");
+    btn.classList.add("logged-out");
 }
 
-// ===============================
-//   GESTION DES REDIRECTIONS SUPABASE (v1)
-// ===============================
+function updateUIForLoggedInUser(user) {
+    const btn = document.getElementById("btnUser");
+    if (!btn) return;
 
-(async () => {
-  const hash = window.location.hash;
+    btn.classList.remove("logged-out");
+    btn.classList.add("logged-in");
 
-  if (hash.includes("access_token")) {
+    btn.innerHTML = `
+        <img src="${user.avatarUrl}" class="avatar-mini">
+        <span>${user.pseudo}</span>
+    `;
+}
 
-    // v1 → session = supa.auth.session()
+
+/* ============================================================
+   PROFIL : INIT SESSION AU DÉMARRAGE
+   ============================================================ */
+
+async function initUserSession() {
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (!storedUser) {
+        updateUIForLoggedOutUser();
+        return;
+    }
+
     const session = supa.auth.session();
 
-    if (session?.user) {
-      afficherPageTransition();
-      setTimeout(() => window.close(), 500);
+    if (!session || !session.user) {
+        localStorage.removeItem("user");
+        updateUIForLoggedOutUser();
+        return;
     }
 
-    window.history.replaceState({}, document.title, "/");
-    return;
-  }
-})();
-
-// ===============================
-//   PAGE DE TRANSITION
-// ===============================
-
-function afficherPageTransition() {
-  const div = document.createElement("div");
-  div.style.position = "fixed";
-  div.style.top = 0;
-  div.style.left = 0;
-  div.style.width = "100vw";
-  div.style.height = "100vh";
-  div.style.background = "black";
-  div.style.color = "white";
-  div.style.display = "flex";
-  div.style.flexDirection = "column";
-  div.style.justifyContent = "center";
-  div.style.alignItems = "center";
-  div.style.fontFamily = "var(--fmecs-font)";
-  div.style.zIndex = 999999;
-
-  div.innerHTML = `
-    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Compte confirmé</h1>
-    <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 2rem;">Tu peux retourner au jeu.</p>
-    <button id="fmecs-return-btn"
-      style="padding: 1rem 2rem; font-size: 1.2rem; background: #444; color: white; border: none; border-radius: 8px; cursor: pointer;">
-      Retourner au jeu
-    </button>
-  `;
-
-  document.body.innerHTML = "";
-  document.body.appendChild(div);
-
-  document.getElementById("fmecs-return-btn").onclick = () => {
-    window.close();
-    window.location = "http://127.0.0.1:8000/";
-  };
+    updateUIForLoggedInUser(storedUser);
 }
 
-// ===============================
-//   PROFIL & JEU
-// ===============================
-supa.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN") {
-        const user = session.user;
-        // stocker dans localStorage.user
-        // mettre à jour l’UI du bouton
+initUserSession();
+
+
+/* ============================================================
+   PROFIL : OUVERTURE / FERMETURE DU BLOC
+   ============================================================ */
+
+const btnUser = document.getElementById("btnUser");
+const profileBlock = document.getElementById("profileBlock");
+
+function openProfileBlock() {
+    profileBlock.classList.remove("closed");
+    profileBlock.classList.add("open");
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
+
+    document.getElementById("profilePseudo").textContent = user.pseudo;
+    document.getElementById("profileEmail").textContent = user.email;
+    document.getElementById("profileAvatarLarge").style.backgroundImage =
+        `url('${user.avatarUrl}')`;
+
+    document.getElementById("profileView1").classList.add("active");
+    document.getElementById("profileView2").classList.remove("active");
+}
+
+function closeProfileBlock() {
+    profileBlock.classList.remove("open");
+    profileBlock.classList.add("closed");
+}
+
+
+/* ============================================================
+   PROFIL : BOUTON UTILISATEUR
+   ============================================================ */
+
+btnUser.addEventListener("click", () => {
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (!storedUser) {
+        openLoginWindow();
+        return;
     }
 
-    if (event === "SIGNED_OUT") {
-        // vider localStorage.user
-        // mettre à jour l’UI du bouton
+    if (profileBlock.classList.contains("open")) {
+        closeProfileBlock();
+    } else {
+        openProfileBlock();
     }
 });
 
-// --------------------------------------------------
-// AIDE
-// --------------------------------------------------
 
-function openHelpOverlay(auto = false) {
- 
-  if (!auto) playClickSound();
-  const overlay = document.getElementById("helpOverlay");
-  const topBar = document.getElementById("topBar");
+/* ============================================================
+   PROFIL : OUVERTURE LOGIN
+   ============================================================ */
 
-  overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
-  overlay.classList.remove("hidden");
-  
-  flash("Jeu en pause");
-
-  window.helpAutoOpened = auto;
+function openLoginWindow() {
+    document.getElementById("authOverlay").classList.remove("hidden");
 }
 
 
-// ===============================
-//   SESSION AU DÉMARRAGE
-// ===============================
+/* ============================================================
+   PROFIL : BASCULE VUE 1 ↔ VUE 2
+   ============================================================ */
 
-(async () => {
-  
-  const session = supa.auth.session();
+document.getElementById("btnEditProfile").addEventListener("click", () => {
 
-  if (session) {
-    await initialiserProfilEtLancerJeu(session);
-  }
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
 
-  updateAuthUI(session?.user || null);
-})();
+    document.getElementById("inputPseudo").value = user.pseudo;
+    document.getElementById("inputEmail").value = user.email;
+    document.getElementById("editAvatarLarge").style.backgroundImage =
+        `url('${user.avatarUrl}')`;
 
-// ===============================	
-//   VARIABLES DE JEU
-// ===============================
+    document.getElementById("profileView1").classList.remove("active");
+    document.getElementById("profileView2").classList.add("active");
+});
 
-let historyStack = [];
-let soundEnabled = true;
-let audioUnlocked = false;
-
-const size = 34;
-let offset;
-let spacing;
-
-let selectedStart = null;
-let score = 0;
-let paused = false;
-let gameOver = false;
-
-let canvas = null;
-let ctx = null;
-let tutorialBtn = null;
-
-let activePoints = new Set();
-let permanentPoints = new Set();
-let usedEdges = new Set();
-let validatedSegments = [];
-
-let jokersAvailable = 0;
-let jokersTotal = 0;
-
-let timerInterval = null;
-let timerSeconds = 0;
-let timerRunning = false;
-
-let undoCount = 0;
-
-let currentTutorialStep = 0;
-let tutorialRunning = false;
-
-let readyModalAlreadyShown = false;
+document.getElementById("btnCancelEdit").addEventListener("click", () => {
+    document.getElementById("profileView2").classList.remove("active");
+    document.getElementById("profileView1").classList.add("active");
+});
 
 
-const HELP_SEEN_KEY = "helpSeen";
+/* ============================================================
+   PROFIL : ENREGISTREMENT MODIFICATIONS
+   ============================================================ */
 
-async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
-  try {
-    const session = supa.auth.session();
-    const accessToken = session?.access_token;
-    if (!accessToken) return false;
+document.getElementById("btnSaveProfile").addEventListener("click", async () => {
 
-    const res = await fetch("https://gjzqghhqpycbcwykxvgw.supabase.co/functions/v1/submit-score", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        score,
-        duration_ms: durationMs,
-        undo_count: undoCount,
-        jokers_used: jokersUsed
-      })
-    });
+    const errorMessage = document.getElementById("profileErrorMessage");
+    errorMessage.textContent = "";
 
-    return res.ok; // <— IMPORTANT : on renvoie un vrai booléen
-  } catch (err) {
-    console.error("Erreur envoi score via Edge Function :", err);
-    return false;
-  }
-}
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
 
-const tutorialSteps = [
-  { message: "Exemple 1 : une ligne horizontale.", start: { x: 15, y: 12 }, end: { x: 19, y: 12 } },
-  { message: "Exemple 2 : une ligne verticale.",   start: { x: 15, y: 12 }, end: { x: 15, y: 16 } },
-  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 12, y: 16 }, end: { x: 16, y: 12 } }
-];
+    const newPseudo = document.getElementById("inputPseudo").value.trim();
+    const newEmail = document.getElementById("inputEmail").value.trim();
+    const newPassword = document.getElementById("inputPasswordNew").value.trim();
+    const confirmPassword = document.getElementById("inputPasswordConfirm").value.trim();
 
-// ===============================
-//   MEILLEUR SCORE
-// ===============================
+    if (!newPseudo) {
+        errorMessage.textContent = "Le pseudo ne peut pas être vide.";
+        return;
+    }
 
+    if (!newEmail) {
+        errorMessage.textContent = "L’email ne peut pas être vide.";
+        return;
+    }
+
+    if (newPassword && newPassword !== confirmPassword) {
+        errorMessage.textContent = "Les mots de passe ne correspondent pas.";
+        return;
+    }
+
+    if (newEmail !== user.email || newPassword) {
+
+        const updatePayload = {};
+        if (newEmail !== user.email) updatePayload.email = newEmail;
+        if (newPassword) updatePayload.password = newPassword;
+
+        const { error: authError } = await supa.auth.update(updatePayload);
+
+        if (authError) {
+            errorMessage.textContent = authError.message;
+            return;
+        }
+    }
+
+    if (newPseudo !== user.pseudo) {
+        const { error: pseudoError } = await supa
+            .from("players")
+            .update({ pseudo: newPseudo })
+            .eq("id", user.id);
+
+        if (pseudoError) {
+            errorMessage.textContent = pseudoError.message;
+            return;
+        }
+    }
+
+    const updatedUser = {
+        ...user,
+        pseudo: newPseudo,
+        email: newEmail
+    };
+
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    document.getElementById("profilePseudo").textContent = newPseudo;
+    document.getElementById("profileEmail").textContent = newEmail;
+
+    document.getElementById("profileView2").classList.remove("active");
+    document.getElementById("profileView1").classList.add("active");
+
+    updateUIForLoggedInUser(updatedUser);
+});
+
+
+/* ============================================================
+   PROFIL : UPLOAD AVATAR
+   ============================================================ */
+
+document.getElementById("inputAvatar").addEventListener("change", async () => {
+
+    const file = document.getElementById("inputAvatar").files[0];
+    if (!file) return;
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return;
+
+    const path = `avatars/${user.id}.png`;
+
+    const { error: uploadError } = await supa.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true });
+
+    if (uploadError) {
+        document.getElementById("profileErrorMessage").textContent = uploadError.message;
+        return;
+    }
+
+    const { data } = supa.storage.from("avatars").getPublicUrl(path);
+    const avatarUrl = data.publicUrl;
+
+    await supa
+        .from("players")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", user.id);
+
+    const updatedUser = { ...user, avatarUrl };
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+
+    document.getElementById("editAvatarLarge").style.backgroundImage = `url('${avatarUrl}')`;
+    document.getElementById("profileAvatarLarge").style.backgroundImage = `url('${avatarUrl}')`;
+
+    updateUIForLoggedInUser(updatedUser);
+});
+
+
+/* ============================================================
+   PROFIL : DÉCONNEXION
+   ============================================================ */
+
+document.getElementById("btnLogout").addEventListener("click", async () => {
+
+    await supa.auth.signOut();
+
+    localStorage.removeItem("user");
+
+    updateUIForLoggedOutUser();
+
+    closeProfileBlock();
+});
+
+
+/* ============================================================
+   PROFIL : CLIC EXTÉRIEUR
+   ============================================================ */
+
+document.addEventListener("click", (event) => {
+
+    if (!profileBlock.classList.contains("open")) return;
+
+    if (btnUser.contains(event.target)) return;
+    if (profileBlock.contains(event.target)) return;
+
+    closeProfileBlock();
+});
+
+/* ============================================================
+   LEADERBOARD : FETCH
+   ============================================================ */
 
 async function fetchLeaderboard() {
   const response = await fetch(
@@ -232,7 +312,6 @@ async function fetchLeaderboard() {
   return await response.json();
 }
 
-
 async function fetchPlayerScores(userId) {
   const response = await fetch(
     `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?player_id=eq.${userId}&select=*`,
@@ -247,6 +326,11 @@ async function fetchPlayerScores(userId) {
   return await response.json();
 }
 
+
+/* ============================================================
+   LEADERBOARD : FORMATTERS
+   ============================================================ */
+
 function formatDuration(ms) {
   const totalSec = Math.floor(ms / 1000);
   const min = Math.floor(totalSec / 60);
@@ -260,18 +344,15 @@ function truncatePseudo(pseudo) {
 
 function formatDate(value) {
   if (!value) return "";
-
-  // Normalise les dates Supabase "2026-02-02 17:30:30"
   const normalized = value.replace(" ", "T");
-
   const d = new Date(normalized);
   if (isNaN(d.getTime())) return "";
-
   return d.toLocaleDateString("fr-FR");
 }
 
+
 /* ============================================================
-   TITRE DU LEADERBOARD
+   LEADERBOARD : HEADER
    ============================================================ */
 
 function renderLeaderboardHeader(isLoggedIn) {
@@ -280,23 +361,19 @@ function renderLeaderboardHeader(isLoggedIn) {
 
   if (!title || !hintContainer) return;
 
-  // Titre toujours simple
   title.textContent = "Leaderboard";
 
-  // Si non connecté → afficher le message
   if (!isLoggedIn) {
     hintContainer.textContent = "Si tu veux voir tes scores, inscris‑toi 🙂";
     hintContainer.style.display = "block";
   } else {
-    // Si connecté → cacher le message
     hintContainer.style.display = "none";
   }
 }
 
 
-
 /* ============================================================
-   AFFICHAGE DU LEADERBOARD (scroll + snapping)
+   LEADERBOARD : RENDER
    ============================================================ */
 
 function renderLeaderboard(list, isLoggedIn, userId = null) {
@@ -307,13 +384,11 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
 
   container.innerHTML = "";
 
-  // Trouver la meilleure ligne du joueur
   let bestIndex = null;
   if (userId) {
     bestIndex = list.findIndex(entry => entry.players?.id === userId);
   }
 
-  // Ligne d’en-tête
   const header = document.createElement("div");
   header.className = "leaderboard-row leaderboard-header";
   header.innerHTML = `
@@ -327,7 +402,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
   `;
   container.appendChild(header);
 
-  // Lignes du leaderboard
   list.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
@@ -345,7 +419,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
       <span class="date">${date}</span>
     `;
 
-    // 🔥 Mettre en avant uniquement la meilleure ligne du joueur
     if (index === bestIndex) {
       row.classList.add("my-best-score");
     }
@@ -356,10 +429,9 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
 
 
 /* ============================================================
-   OUVERTURE / FERMETURE DU LEADERBOARD
+   LEADERBOARD : OUVERTURE / FERMETURE
    ============================================================ */
 
-// --- OUVERTURE LEADERBOARD ---
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
   pauseGame();
@@ -372,17 +444,12 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list, isLoggedIn, user?.id || null);
-
 });
 
-// --- FERMETURE LEADERBOARD (fonction centralisée) ---
 function closeLeaderboard() {
-  const overlay = document.getElementById("leaderboardOverlay");
-  overlay.classList.add("hidden");
-
+  document.getElementById("leaderboardOverlay").classList.add("hidden");
 }
 
-// --- Bouton de fermeture ---
 document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
   playClickSound();
   closeLeaderboard();
@@ -390,13 +457,12 @@ document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
 
 
 /* ============================================================
-   COMPORTEMENT MODAL DU LEADERBOARD
+   LEADERBOARD : MODAL BEHAVIOR
    ============================================================ */
 
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
 const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
 
-// Clic sur le fond sombre → fermer
 leaderboardOverlay.addEventListener("click", (e) => {
   if (e.target === leaderboardOverlay) {
     playClickSound();
@@ -404,9 +470,12 @@ leaderboardOverlay.addEventListener("click", (e) => {
   }
 });
 
-// Clic dans la fenêtre → ne pas fermer
 leaderboardPanel.addEventListener("click", (e) => e.stopPropagation());
 
+
+/* ============================================================
+   BEST SCORE : LOCAL STORAGE
+   ============================================================ */
 
 function saveBestScore(data) {
   try {
@@ -425,6 +494,11 @@ function loadBestScore() {
     return null;
   }
 }
+
+
+/* ============================================================
+   BEST SCORE : TOP BAR
+   ============================================================ */
 
 function updateBestScoreTop() {
   const el = document.getElementById("bestScoreTop");
@@ -448,6 +522,11 @@ function updateBestScoreTop() {
     `<span class="emoji">⏱️</span>${timeStr}`;
 }
 
+
+/* ============================================================
+   BEST SCORE : PANEL
+   ============================================================ */
+
 function showBestScorePanel() {
   const panel = document.getElementById("bestScoreContent");
   if (!panel) return;
@@ -462,40 +541,42 @@ function showBestScorePanel() {
     const timeStr = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
     panel.innerHTML = `
-  <div class="record-line">
-    🏆 ${score} lignes — ${best.returnsUsed} retour${best.returnsUsed > 1 ? "s" : ""} — ${best.jokersUsed} joker${best.jokersUsed > 1 ? "s" : ""} — ${timeStr}
-  </div>
-`;
-
+      <div class="record-line">
+        🏆 ${score} lignes — ${best.returnsUsed} retour${best.returnsUsed > 1 ? "s" : ""} — ${best.jokersUsed} joker${best.jokersUsed > 1 ? "s" : ""} — ${timeStr}
+      </div>
+    `;
   }
 
   document.getElementById("bestScoreOverlay").classList.remove("hidden");
 }
 
-
 document.getElementById("closeBestScore").addEventListener("click", () => {
   document.getElementById("bestScoreOverlay").classList.add("hidden");
 });
+
+
+/* ============================================================
+   SOUND BUTTON
+   ============================================================ */
 
 function updateSoundButton() {
   const btn = document.getElementById("burgerSoundBtn");
   btn.textContent = soundEnabled ? "Son : on" : "Son : off";
 }
 
-// ===============================
-//   SAUVEGARDE PARTIE EN COURS
-// ===============================
+/* ============================================================
+   SAUVEGARDE PARTIE
+   ============================================================ */
 
 function saveGameState() {
-  if (tutorialRunning) return; // jamais pendant le tutoriel
+  if (tutorialRunning) return;
 
   const data = {
     activePoints: Array.from(activePoints),
     permanentPoints: Array.from(permanentPoints),
     usedEdges: Array.from(usedEdges),
-    validatedSegments, // tableau simple → OK
+    validatedSegments,
     historyStack: JSON.parse(JSON.stringify(validatedSegments)),
-    //historyStack: JSON.parse(JSON.stringify(historyStack)),
     score,
     jokersAvailable,
     jokersTotal,
@@ -504,9 +585,8 @@ function saveGameState() {
     gameOver,
     soundEnabled,
     paused
-    
   };
-  
+
   try {
     localStorage.setItem("currentGameState", JSON.stringify(data));
   } catch (e) {
@@ -525,11 +605,9 @@ function loadGameState() {
 }
 
 function restoreGameState() {
-
   const data = loadGameState();
   if (!data) return false;
-  
-  // Vérification stricte
+
   if (!Array.isArray(data.activePoints) ||
       !Array.isArray(data.permanentPoints) ||
       !Array.isArray(data.validatedSegments) ||
@@ -538,15 +616,11 @@ function restoreGameState() {
     return false;
   }
 
-  // Restaurer les Sets
   activePoints = new Set(data.activePoints);
   permanentPoints = new Set(data.permanentPoints);
   usedEdges = new Set(data.usedEdges || []);
-
-  // Restaurer les tableaux simples
   validatedSegments = [...data.validatedSegments];
 
-  // Restaurer les variables simples
   score = data.score ?? 0;
   jokersAvailable = data.jokersAvailable ?? 0;
   jokersTotal = data.jokersTotal ?? 0;
@@ -556,35 +630,26 @@ function restoreGameState() {
   gameOver = data.gameOver ?? false;
   paused = data.paused ?? false;
 
-  // Restaurer l'historique interne
   historyStack = data.historyStack ? [...data.historyStack] : [];
 
-  // Restaurer l'historique visuel
   const historyList = document.getElementById("historyList");
   historyList.innerHTML = "";
   historyStack.forEach(entry => {
     appendHistoryEntry(entry.points, entry.activeCount);
   });
 
-  // Restaurer l'état du son
   soundEnabled = data.soundEnabled ?? true;
   updateSoundButton();
-  
+
   return true;
 }
 
-// Sauvegarde automatique à chaque coup
-function autoSave() {
-  saveGameState();
-}
-
-// Sauvegarde à la fermeture
 window.addEventListener("beforeunload", saveGameState);
 
 
-// ===============================
-//   FONCTIONS AUDIO
-// ===============================
+/* ============================================================
+   AUDIO
+   ============================================================ */
 
 function playClickSound() { if (!soundEnabled) return; const a=document.getElementById("clickSound"); a.currentTime=0; a.play(); }
 function playErrorSound() { if (!soundEnabled) return; const a=document.getElementById("errorSound"); a.currentTime=0; a.play(); }
@@ -594,12 +659,7 @@ function playJokerGainSound() { if (!soundEnabled) return; const a=document.getE
 function playJokerLossSound() { if (!soundEnabled) return; const a=document.getElementById("jokerLossSound"); a.currentTime=0; a.play(); }
 function playEndGameSound() { if (!soundEnabled) return; const a=document.getElementById("endGameSound"); a.currentTime=0; a.play(); }
 function playStartGameSound() { if (!soundEnabled) return; const a=document.getElementById("startGameSound"); a.currentTime=0; a.play(); }
-function playNewRecordSound() {
-    if (!soundEnabled) return;
-    const a = document.getElementById("newRecordSound");
-    if (a) a.play();
-}
-
+function playNewRecordSound() { if (!soundEnabled) return; const a=document.getElementById("newRecordSound"); if (a) a.play(); }
 
 function unlockAudio() {
   const ids = ["clickSound"];
@@ -613,17 +673,9 @@ function unlockAudio() {
 }
 
 
-// ===============================
-//   UTILITAIRES UI
-// ===============================
-
-
-async function sha256(message) {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-}
+/* ============================================================
+   UI UTILITAIRES
+   ============================================================ */
 
 function flash(message, type = "") {
   const div = document.createElement("div");
@@ -655,27 +707,24 @@ function updateCounters() {
   document.getElementById("jokersCombinedValue").textContent = `${jokersAvailable} / ${jokersTotal}`;
 }
 
-function setButtonsEnabled(enabled) {
-  document.querySelectorAll("#buttonsArea button").forEach(btn => {
-    btn.disabled = !enabled;
-    btn.classList.toggle("disabled", !enabled);
-  });
-}
-
 function formatTime(sec) {
   const m = Math.floor(sec / 60).toString().padStart(2, "0");
   const s = (sec % 60).toString().padStart(2, "0");
   return `${m}:${s}`;
 }
 
+
+/* ============================================================
+   TIMER
+   ============================================================ */
+
 function startTimer() {
-  if (timerInterval) return; // empêche tout double interval
+  if (timerInterval) return;
   timerRunning = true;
   timerInterval = setInterval(() => {
-  timerSeconds++;
-  autoSave();
-
-  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
+    timerSeconds++;
+    autoSave();
+    document.getElementById("timerValue").textContent = formatTime(timerSeconds);
   }, 1000);
 }
 
@@ -694,33 +743,10 @@ function resetTimer() {
   document.getElementById("timerValue").textContent = "00:00";
 }
 
-function pauseGame() {
-  if (gameTimer) clearInterval(gameTimer);
-}
 
-function resumeGame() {
-  startGameTimer(); // ta fonction existante
-}
-
-function enableModalBehavior(overlayId, panelSelector, closeFn) {
-  const overlay = document.getElementById(overlayId);
-  const panel = overlay.querySelector(panelSelector);
-
-  // Clic sur le fond sombre → fermer
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeFn();
-  });
-
-  // Clic dans la fenêtre → ne pas fermer
-  panel.addEventListener("click", (e) => e.stopPropagation());
-}
-
-
-// ===============================
-//   DESSIN DE LA GRILLE
-// ===============================
-
-const visualOrigin = offset - spacing;
+/* ============================================================
+   GRILLE + DESSIN
+   ============================================================ */
 
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -749,7 +775,6 @@ function drawPoint(x, y, color = "#000") {
   ctx.fill();
 }
 
-
 function drawSegment(segmentPoints) {
   const [sx, sy] = segmentPoints[0].split(",").map(Number);
   const [ex, ey] = segmentPoints[4].split(",").map(Number);
@@ -761,9 +786,10 @@ function drawSegment(segmentPoints) {
   ctx.stroke();
 }
 
-// ===============================
-//   TROUVER LE POINT LE PLUS PROCHE
-// ===============================
+
+/* ============================================================
+   SNAP + POINT LE PLUS PROCHE
+   ============================================================ */
 
 function getNearestPoint(mx, my) {
   let best = null;
@@ -785,38 +811,30 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  if (bestDist <= 15) return best;
-
-  return null;
+  return bestDist <= 15 ? best : null;
 }
 
 function snapToAlignedPoint(first, clicked, mx, my) {
   const { x: x1, y: y1 } = first;
   const { x: x2, y: y2 } = clicked;
 
-  // 1. Déjà aligné ?
   if (x1 === x2 || y1 === y2 || Math.abs(x1 - x2) === Math.abs(y1 - y2)) {
     return clicked;
   }
 
-  // 2. Chercher le point aligné le plus proche
   const candidates = [];
 
-  // même colonne
   candidates.push({ x: x1, y: y2 });
-
-  // même ligne
   candidates.push({ x: x2, y: y1 });
 
-  // diagonales
   const dx = x2 - x1;
   const dy = y2 - y1;
   const signX = dx > 0 ? 1 : -1;
   const signY = dy > 0 ? 1 : -1;
+
   candidates.push({ x: x1 + Math.abs(dy) * signX, y: y1 + Math.abs(dy) * signY });
   candidates.push({ x: x1 + Math.abs(dx) * signY, y: y1 + Math.abs(dx) * signX });
 
-  // 3. Choisir le plus proche
   let best = clicked;
   let bestDist = Infinity;
 
@@ -831,16 +849,12 @@ function snapToAlignedPoint(first, clicked, mx, my) {
     }
   }
 
-  // 4. Tolérance
-  if (bestDist <= 15) return best;
-
-  return clicked; // pas de snap possible
+  return bestDist <= 15 ? best : clicked;
 }
 
-
-// ===============================
-//   CROIX DE MALTE
-// ===============================
+/* ============================================================
+   CROIX DE MALTE
+   ============================================================ */
 
 function drawMaltaCross() {
   permanentPoints.forEach(key => {
@@ -854,7 +868,6 @@ function initMaltaCross() {
   permanentPoints.clear();
   activePoints.clear();
 
-  // Construction brute de la croix
   let x = 0, y = 0;
   const pts = [];
   const add = (px, py) => pts.push({ x: px, y: py });
@@ -874,18 +887,15 @@ function initMaltaCross() {
     }
   }
 
-  // Point de référence dans la croix brute
   const refX = -3;
   const refY = 3;
 
-  // Point logique où placer ce point
   const targetLeftX = 12;
   const targetLeftY = 15;
 
-  const offsetX = targetLeftX - refX; // 15
-  const offsetY = targetLeftY - refY; // 12
+  const offsetX = targetLeftX - refX;
+  const offsetY = targetLeftY - refY;
 
-  // Application de l’offset
   pts.forEach(p => {
     const key = `${p.x + offsetX},${p.y + offsetY}`;
     permanentPoints.add(key);
@@ -894,8 +904,6 @@ function initMaltaCross() {
 }
 
 function redrawEverything() {
-
-  // Le canvas s’adapte visuellement
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
@@ -912,9 +920,9 @@ function redrawEverything() {
 }
 
 
-// ===============================
-//   ARÊTES
-// ===============================
+/* ============================================================
+   ARÊTES
+   ============================================================ */
 
 function edgeKey(a, b) {
   return (a < b) ? `${a}|${b}` : `${b}|${a}`;
@@ -927,13 +935,12 @@ function edgesOfSegment(segmentKeys) {
 }
 
 
-// ===============================
-//   JOKERS
-// ===============================
+/* ============================================================
+   JOKERS
+   ============================================================ */
 
 function gainJoker() {
   jokersAvailable++;
-  autoSave();
   jokersTotal++;
   autoSave();
   updateCounters();
@@ -966,9 +973,10 @@ function loseJoker(amount) {
   playJokerLossSound();
 }
 
-// ===============================
-//   VALIDATION D’UN SEGMENT
-// ===============================
+
+/* ============================================================
+   VALIDATION D’UN SEGMENT
+   ============================================================ */
 
 function getSegmentBetween(start, end) {
   const dx = end.x - start.x;
@@ -1049,9 +1057,9 @@ function getSegmentBetween(start, end) {
 }
 
 
-// ===============================
-//   HISTORIQUE
-// ===============================
+/* ============================================================
+   HISTORIQUE
+   ============================================================ */
 
 function appendHistoryEntry(points, activeCount) {
   const historyList = document.getElementById("historyList");
@@ -1073,9 +1081,9 @@ function appendHistoryEntry(points, activeCount) {
 }
 
 
-// ===============================
-//   ANNULATION
-// ===============================
+/* ============================================================
+   ANNULATION
+   ============================================================ */
 
 function undoLastMove() {
   if (validatedSegments.length === 0) return;
@@ -1120,14 +1128,14 @@ function undoLastMove() {
   const historyList = document.getElementById("historyList");
   if (historyList.lastChild) historyList.removeChild(historyList.lastChild);
 
-    updateCounters();
-    redrawEverything();
-  }
+  updateCounters();
+  redrawEverything();
+}
 
 
-// ===============================
-//   FIN DE PARTIE
-// ===============================
+/* ============================================================
+   FIN DE PARTIE
+   ============================================================ */
 
 function finalizeGameState() {
   gameOver = true;
@@ -1150,7 +1158,6 @@ function finalizeGameState() {
 }
 
 function showEndGamePanel() {
-  
   const finalScoreEl = document.getElementById("finalScore");
   if (finalScoreEl) {
     finalScoreEl.textContent = "Score final : " + score;
@@ -1174,31 +1181,20 @@ function showEndGamePanel() {
     undoBtn.classList.add("disabled");
   }
 
-  const overlay = document.getElementById("endGameOverlay");
-  if (overlay) overlay.classList.remove("hidden");
+  document.getElementById("endGameOverlay").classList.remove("hidden");
 }
 
 function isBetterThan(a, b) {
-    if (!b) return true; // Aucun record existant
+  if (!b) return true;
 
-    // 1. Score le plus élevé
-    if (a.score !== b.score)
-        return a.score > b.score;
+  if (a.score !== b.score) return a.score > b.score;
+  if (a.duration !== b.duration) return a.duration < b.duration;
+  if (a.returnsUsed !== b.returnsUsed) return a.returnsUsed < b.returnsUsed;
 
-    // 2. À score égal → durée la plus courte
-    if (a.duration !== b.duration)
-        return a.duration < b.duration;
-
-    // 3. À durée égale → moins de retours
-    if (a.returnsUsed !== b.returnsUsed)
-        return a.returnsUsed < b.returnsUsed;
-
-    // 4. À retours égal → moins de jokers
-    return a.jokersUsed < b.jokersUsed;
+  return a.jokersUsed < b.jokersUsed;
 }
 
 async function checkGameOver() {
-  
   const moves = getPossibleMoves();
   if (moves.length === 0) {
 
@@ -1219,7 +1215,6 @@ async function checkGameOver() {
     const best = loadBestScore();
     const isNewRecord = isBetterThan(current, best);
 
-    // On affiche d'abord la fenêtre (record ou fin de partie)
     if (isNewRecord) {
       saveBestScore(current);
       updateBestScoreTop();
@@ -1229,10 +1224,8 @@ async function checkGameOver() {
       showEndGamePanel();
     }
 
-    // Ensuite seulement, on tente d'envoyer le score (sans bloquer)
     const session = supa.auth.session();
-const user = session?.user || null;
-
+    const user = session?.user || null;
 
     if (user) {
       await sendScoreToSupabase(
@@ -1243,10 +1236,13 @@ const user = session?.user || null;
         current.jokersUsed
       );
     }
-
-    // Si pas connecté → on ne fait rien pour l'instant
   }
 }
+
+
+/* ============================================================
+   COUPS POSSIBLES
+   ============================================================ */
 
 function getPossibleMoves() {
   const moves = [];
@@ -1294,16 +1290,16 @@ function getPossibleMoves() {
   return moves;
 }
 
-// ===============================
-//   PAUSE
-// ===============================
+
+/* ============================================================
+   PAUSE
+   ============================================================ */
 
 function pauseGame() {
   paused = true;
 
-  // Arrête proprement le timer
   clearInterval(timerInterval);
-  timerInterval = null;     // ← essentiel
+  timerInterval = null;
   timerRunning = false;
 
   document.getElementById("pauseBtn").textContent = "Reprendre";
@@ -1312,10 +1308,7 @@ function pauseGame() {
 
 function resumeGame() {
   paused = false;
-
-  // Redémarre proprement le timer
   startTimer();
-
   document.getElementById("pauseBtn").textContent = "Pause";
   flash("Reprise");
 }
@@ -1325,13 +1318,13 @@ function togglePause() {
   else pauseGame();
 }
 
-// ===============================
-//   RÉINITIALISATION DU JEU
-// ===============================
+
+/* ============================================================
+   RÉINITIALISATION DU JEU
+   ============================================================ */
 
 function startNewGame() {
 
-  // Tentative de restauration
   const restored = restoreGameState();
 
   if (restored) {
@@ -1344,8 +1337,6 @@ function startNewGame() {
   redrawEverything();
   startTimer();
 }
-
-
 
 function resetGameState() {
 
@@ -1364,11 +1355,10 @@ function resetGameState() {
 
   undoCount = 0;
   document.getElementById("undoCount").textContent = "0";
-  
+
   const stepBtn = document.getElementById("burgerStepBtn");
   stepBtn.disabled = false;
   stepBtn.classList.remove("disabled");
-
 
   resetTimer();
 
@@ -1378,9 +1368,9 @@ function resetGameState() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-// ===============================
-//   TUTORIEL : CLIGNOTEMENT
-// ===============================
+/* ============================================================
+   TUTORIEL : CLIGNOTEMENT
+   ============================================================ */
 
 function blinkPoint(x, y, duration = 1200) {
   return new Promise(resolve => {
@@ -1416,9 +1406,9 @@ function blinkPoint(x, y, duration = 1200) {
 }
 
 
-// ===============================
-//   TUTORIEL : ANIMATION D’UNE LIGNE
-// ===============================
+/* ============================================================
+   TUTORIEL : ANIMATION D’UNE LIGNE
+   ============================================================ */
 
 function animateLine(points) {
   return new Promise(resolve => {
@@ -1447,29 +1437,10 @@ function animateLine(points) {
 }
 
 
-// ===============================
-//   TUTORIEL AUTOMATIQUE
-// ===============================
+/* ============================================================
+   TUTORIEL : LECTURE DES ÉTAPES
+   ============================================================ */
 
-function runTutorial() {
-  if (tutorialRunning) return;
-
-  tutorialRunning = true;
-  currentTutorialStep = 0;
-
-  setButtonsEnabled(false);
-
-  const tutorialBtn = document.getElementById("burgerStepBtn");
-  tutorialBtn.disabled = true;
-  tutorialBtn.classList.add("disabled");
-
-  playTutorialStep();
-  tutorialBtn.disabled = false;
-}
-
-// --------------------------------------
-// Fonction indépendante
-// --------------------------------------
 function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
@@ -1482,7 +1453,8 @@ function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
   for (let i = 0; i <= steps; i++) {
     segment.push(`${start.x + i * stepX},${start.y + i * stepY}`);
   }
-    animateLine(segment).then(() => {
+
+  animateLine(segment).then(() => {
     segment.forEach(key => {
       const [px, py] = key.split(",").map(Number);
       drawPoint(px, py);
@@ -1510,221 +1482,117 @@ function drawSegmentProgressively(start, end, onComplete, isTutorial = false) {
   });
 }
 
-
 function playTutorialStep() {
-
-  // 1) Récupération de l’étape
   const step = tutorialSteps[currentTutorialStep];
 
-  // 2) Fin du tutoriel
   if (!step) {
-  tutorialRunning = false;
-  showTutorialBubble("Tutoriel terminé !");
-  setTimeout(() => hideTutorialBubble(), 2000);
+    tutorialRunning = false;
+    showTutorialBubble("Tutoriel terminé !");
+    setTimeout(() => hideTutorialBubble(), 2000);
 
-  setButtonsEnabled(true);
+    setButtonsEnabled(true);
 
-  const tutorialBtn = document.getElementById("burgerStepBtn");
-  tutorialBtn.disabled = false;
-  tutorialBtn.classList.remove("disabled");
+    const tutorialBtn = document.getElementById("burgerStepBtn");
+    tutorialBtn.disabled = false;
+    tutorialBtn.classList.remove("disabled");
 
-  redrawEverything();
-  flash("A vous de jouer", "info");
-  return;
-}
-
-
-  // 3) Mise à jour visuelle
-  if (typeof positionLabels === "function") {
-    positionLabels();
+    redrawEverything();
+    flash("À vous de jouer", "info");
+    return;
   }
 
   redrawEverything();
 
-  // 4) Affichage du message
   showTutorialBubble(step.message, step.icon);
   const bubble = document.getElementById("tutorialBubble");
   bubble.className = "step" + (currentTutorialStep + 1);
 
-  // 5) Animation : start → end → segment
   blinkPoint(step.start.x, step.start.y)
     .then(() => blinkPoint(step.end.x, step.end.y))
     .then(() => {
       drawSegmentProgressively(step.start, step.end, () => {
-
-        // 6) Passage à l’étape suivante
         setTimeout(() => {
           currentTutorialStep++;
           playTutorialStep();
         }, 600);
-
       }, true);
     });
 }
 
-// ===============================
-//   INITIALISATION DU JEU (GLOBAL !)
-// ===============================
+function runTutorial() {
+  if (tutorialRunning) return;
 
-function initGame() {
+  tutorialRunning = true;
+  currentTutorialStep = 0;
 
-  const undoBtn = document.getElementById("undoBtn");
-  if (undoBtn) {
-    undoBtn.disabled = false;
-    undoBtn.classList.remove("disabled");
-  }
+  setButtonsEnabled(false);
 
-  //const restored = false;
-  const restored = restoreGameState();
+  const tutorialBtn = document.getElementById("burgerStepBtn");
+  tutorialBtn.disabled = true;
+  tutorialBtn.classList.add("disabled");
 
-  if (!restored || gameOver) {
-    resetGameState();
-    initMaltaCross();
-  }
-
-  redrawEverything();
-
-  updateCounters();
-  document.getElementById("undoCount").textContent = undoCount;
-  updateSoundButton();
-  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
-
-  gameOver = false;
-  paused = false;
-  
-  updateBestScoreTop();
-
-  //if (!paused && !gameOver) {
-  //  startTimer();
- // }
-  
+  playTutorialStep();
+  tutorialBtn.disabled = false;
 }
 
-// ===============================
-//   FIRST LAUNCH FLOW
-// ===============================
 
-function handleFirstLaunchFlow(userFromEvent) {
+/* ============================================================
+   FLUX INITIAL (READY / HELP / WHY SIGNUP)
+   ============================================================ */
 
-  const helpAlreadySeen = localStorage.getItem(HELP_SEEN_KEY) === "true";
-
-  if (!helpAlreadySeen) {
-    openHelpOverlay(true);
-    return;
-  }
-
-  initialFlow(userFromEvent);
-}
-
-// ===============================
-//   INITIAL FLOW (VERSION FINALE)
-// ===============================
-
-let gameStarted = false; // global
-
-
-function initialFlow(user) {
-  updateAuthUI(user);
-
-  const lastEmail = localStorage.getItem("lastEmail");
-  const skip = localStorage.getItem("skipWhySignup") === "1";
-
-  // 1. Utilisateur connecté → readyModal
-  if (user) {
-    showReadyModal("connected");
-    return;
-  }
-
-  // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
-  if (skip) {
-    showReadyModal("skipWhySignup");
-    return;
-  }
-
-  // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (lastEmail) {
-    document.getElementById("whySignupModal").classList.remove("hidden");
-    return;
-  }
-
-  // 4. Nouveau joueur → whySignupModal
-  if (!lastEmail) {
-    document.getElementById("whySignupModal").classList.remove("hidden");
-    return;
-  }
-
-  // 5. Fallback (ne devrait jamais arriver)
-  const auth = document.getElementById("authOverlay");
-  auth.classList.remove("hidden");
-  }
-
-function showReadyModal(source) {
-  const modal = document.getElementById("readyModal");
-  modal.classList.remove("hidden");
+function showReadyModal() {
+  document.getElementById("readyModal").classList.remove("hidden");
 }
 
 function closeReady() {
   document.getElementById("readyModal").classList.add("hidden");
 }
+
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
   overlay.classList.add("hidden");
 
   if (window.helpAutoOpened) {
-    localStorage.setItem(HELP_SEEN_KEY, "true");
+    localStorage.setItem("helpSeen", "true");
     document.getElementById("readyModal").classList.remove("hidden");
     startNewGame();
   }
 }
 
 function closeLogin() {
-  const auth = document.getElementById("authOverlay");
-  auth.classList.add("hidden");
+  document.getElementById("authOverlay").classList.add("hidden");
 }
 
 function closeEndGame() {
-  const overlay = document.getElementById("endGameOverlay");
-  overlay.classList.add("hidden");
-
+  document.getElementById("endGameOverlay").classList.add("hidden");
 }
 
 function closeBestScore() {
-  const overlay = document.getElementById("bestScoreOverlay");
-  overlay.classList.add("hidden");
-}
-
-function closeProfile() {
-  document.getElementById("profileModal").classList.add("hidden");
+  document.getElementById("bestScoreOverlay").classList.add("hidden");
 }
 
 function closeWhySignup() {
- document.getElementById("whySignupModal").classList.add("hidden"); 
+  document.getElementById("whySignupModal").classList.add("hidden");
 }
 
-// ===============================
-//   DOMContentLoaded
-// ===============================
+
+/* ============================================================
+   DOMContentLoaded
+   ============================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-//enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
-enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
-enableModalBehavior("authOverlay", ".panel", closeLogin);
-enableModalBehavior("profileModal", ".panel", closeProfile);
-enableModalBehavior("helpOverlay", ".panel", closeHelp);
-enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
-enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+  /* --- MODALES --- */
+  enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+  enableModalBehavior("authOverlay", ".panel", closeLogin);
+  enableModalBehavior("helpOverlay", ".panel", closeHelp);
+  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+  enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+  enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
-
-
-  // Références DOM essentielles
+  /* --- CANVAS --- */
   canvas = document.getElementById("gameCanvas");
   ctx = canvas.getContext("2d");
-
-  // ===============================
-  //   CALCUL RÉEL DU CANVAS + GRILLE
-  // ===============================
 
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
@@ -1732,39 +1600,26 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   spacing = canvas.width / (size + 1);
   offset = spacing;
 
-  // ===============================
-  //   POSITIONNEMENT DES REPÈRES
-  // ===============================
-
+  /* --- REPÈRES --- */
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
-  if (topLabels.length && leftLabels.length) {
-    topLabels.forEach(span => {
-      const pos = Number(span.textContent);
-      if (!Number.isFinite(pos)) return;
-      span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-    });
+  topLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+  });
 
-    leftLabels.forEach(span => {
-      const pos = Number(span.textContent);
-      if (!Number.isFinite(pos)) return;
-      span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-    });
-  }
+  leftLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+  });
 
-  // ===============================
-  //   FIN DE PARTIE
-  // ===============================
-
+  /* --- FIN DE PARTIE --- */
   document.getElementById("closeEndGame").addEventListener("click", () => {
     document.getElementById("endGameOverlay").classList.add("hidden");
   });
 
-  // ===============================
-  //   CLIC SUR LA GRILLE
-  // ===============================
-
+  /* --- CLIC SUR LA GRILLE --- */
   canvas.addEventListener("click", (e) => {
 
     if (gameOver) return;
@@ -1808,13 +1663,9 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
       appendHistoryEntry(result.points, result.activeCount);
       checkGameOver();
     }
-
   });
 
-  // ===============================
-  //   BOUTONS TOP BAR
-  // ===============================
-
+  /* --- TOP BAR --- */
   document.getElementById("undoBtn").addEventListener("click", () => {
     playClickSound();
     if (!tutorialRunning) undoLastMove();
@@ -1825,24 +1676,16 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     if (!tutorialRunning) togglePause();
   });
 
-  // ===============================
-  //   AIDE
-  // ===============================
-
+  /* --- AIDE --- */
   document.getElementById("closeHelpBtn").addEventListener("click", () => {
-  playClickSound();
-  closeHelp();
-});
+    playClickSound();
+    closeHelp();
+  });
 
-
-  // ===============================
-  //   MENU BURGER
-  // ===============================
-
+  /* --- MENU BURGER --- */
   document.getElementById("burgerBtn").addEventListener("click", () => {
     playClickSound();
-    const ov = document.getElementById("burgerOverlay");
-    ov.classList.toggle("show");
+    document.getElementById("burgerOverlay").classList.toggle("show");
   });
 
   document.addEventListener("click", (e) => {
@@ -1853,38 +1696,6 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
       menu.classList.remove("show");
     }
   });
-
-  document.getElementById("burgerProfileBtn").addEventListener("click", async () => {
-    playClickSound();
-    await ouvrirProfil();
-  });
-
-  // ===============================
-  //   AUTH BURGER (v1)
-  // ===============================
-
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-
-  if (!burgerAuthBtn) {
-    } else {
-    burgerAuthBtn.addEventListener("click", async () => {
-      playClickSound();
-
-      const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
-
-      if (!isConnected) {
-        const auth = document.getElementById("authOverlay");
-        auth.classList.remove("hidden");
-        pauseGame();
-        return;
-      }
-
-      await supa.auth.signOut();
-      
-      updateAuthUI();
-
-      });
-  }
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
@@ -1917,10 +1728,7 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     updateSoundButton();
   });
 
-  // ===============================
-  //   READY BUTTON
-  // ===============================
-
+  /* --- READY BUTTON --- */
   document.getElementById("readyBtn").addEventListener("click", () => {
     unlockAudio();
     audioUnlocked = true;
@@ -1940,70 +1748,23 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     setTimeout(() => playStartGameSound(), 1500);
   });
 
-  // ===============================
-  //   PROFIL
-  // ===============================
-
-  document.getElementById("profileCloseBtn").addEventListener("click", () => {
-    document.getElementById("profileModal").style.display = "none";
-  });
-
-  document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-    const session = supa.auth.session();
-    const user = session?.user || null;
-
-    if (!user) return;
-
-    const pseudo = document.getElementById("profilePseudoInput").value.trim();
-    const avatarFile = document.getElementById("profileAvatarInput").files[0];
-
-    let avatarUrl = null;
-
-    if (avatarFile) {
-      const path = `avatars/${user.id}.png`;
-
-      await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
-
-      const { data } = supa.storage.from("avatars").getPublicUrl(path);
-      avatarUrl = data.publicUrl;
-    }
-
-    await supa
-      .from("players")
-      .update({
-        pseudo: pseudo,
-        ...(avatarUrl && { avatar_url: avatarUrl })
-      })
-      .eq("id", user.id);
-
-    localStorage.setItem("playerPseudo", pseudo);
-
-    updateAuthUI();
-
-    document.getElementById("profileModal").style.display = "none";
-  });
-
-  // ===============================
-  //   AUTHENTIFICATION (v1)
-  // ===============================
+  /* ============================================================
+     AUTHENTIFICATION (v1)
+     ============================================================ */
 
   document.getElementById("closeAuthBtn").addEventListener("click", () => {
-  playClickSound();
-  closeLogin();
-});
-
+    playClickSound();
+    closeLogin();
+  });
 
   document.getElementById("signupBtn").addEventListener("click", () => {
     playClickSound();
-    const modal = document.getElementById("signupModal");
-    modal.classList.remove("hidden");
+    document.getElementById("signupModal").classList.remove("hidden");
   });
 
   document.getElementById("signupCloseBtn").addEventListener("click", () => {
     playClickSound();
-    const modal = document.getElementById("signupModal");
-    modal.style.display = "none";
-    modal.classList.add("hidden");
+    document.getElementById("signupModal").classList.add("hidden");
   });
 
   document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
@@ -2051,8 +1812,8 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
     localStorage.setItem("playerPseudo", pseudo);
 
-    document.getElementById("signupModal").style.display = "none";
-    document.getElementById("authOverlay").style.display = "none";
+    document.getElementById("signupModal").classList.add("hidden");
+    document.getElementById("authOverlay").classList.add("hidden");
 
     updateAuthUI(user);
 
@@ -2085,7 +1846,7 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
       return;
     }
 
-    document.getElementById("authOverlay").style.display = "none";
+    document.getElementById("authOverlay").classList.add("hidden");
 
     const session = supa.auth.session();
     updateAuthUI(session?.user || null);
@@ -2096,44 +1857,40 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     }
   });
 
-  // ===============================
-  //   WHY SIGNUP
-  // ===============================
+  /* ============================================================
+     WHY SIGNUP
+     ============================================================ */
 
   document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-  playClickSound();
-  closeWhySignup();
-  document.getElementById("authOverlay").classList.remove("hidden");
-});
-
+    playClickSound();
+    closeWhySignup();
+    document.getElementById("authOverlay").classList.remove("hidden");
+  });
 
   document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-  playClickSound();
+    playClickSound();
 
-  const dontRemind = document.getElementById("whySignupDontRemind").checked;
-  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+    const dontRemind = document.getElementById("whySignupDontRemind").checked;
+    if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
-  closeWhySignup();
-  document.getElementById("readyModal").classList.remove("hidden");
-});
+    closeWhySignup();
+    document.getElementById("readyModal").classList.remove("hidden");
+  });
 
-
-  // ===============================
-  //   FLUX INITIAL (SUPABASE v1)
-  // ===============================
+  /* ============================================================
+     FLUX INITIAL SUPABASE
+     ============================================================ */
 
   let flowAlreadyLaunched = false;
   let initialFlowTimeout = null;
 
-function launchFlowOnce(userFromEvent) {
-  if (flowAlreadyLaunched) return;   
-  flowAlreadyLaunched = true;
+  function launchFlowOnce(userFromEvent) {
+    if (flowAlreadyLaunched) return;
+    flowAlreadyLaunched = true;
 
-  handleFirstLaunchFlow(userFromEvent);
-}
+    handleFirstLaunchFlow(userFromEvent);
+  }
 
-
-  // Événements Supabase v1
   supa.auth.onAuthStateChange((event, session) => {
 
     if (event === "SIGNED_IN") {
@@ -2147,17 +1904,10 @@ function launchFlowOnce(userFromEvent) {
     }
   });
 
-  // Sécurité : lancer même sans event
   initialFlowTimeout = setTimeout(() => {
-  
     const session = supa.auth.session();
     const user = session?.user || null;
-
     launchFlowOnce(user);
   }, 300);
 
 });
-
-
-
-
