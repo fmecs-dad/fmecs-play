@@ -403,7 +403,7 @@ function renderLeaderboardHeader(isLoggedIn) {
    AFFICHAGE DU LEADERBOARD (scroll + snapping)
    ============================================================ */
 
-function renderLeaderboard(list, isLoggedIn) {
+function renderLeaderboard(list, isLoggedIn, userId = null) {
   renderLeaderboardHeader(isLoggedIn);
 
   const container = document.getElementById("leaderboardContainer");
@@ -427,23 +427,30 @@ function renderLeaderboard(list, isLoggedIn) {
 
   // --- Lignes du leaderboard ---
   list.forEach((entry, index) => {
-    const row = document.createElement("div");
-    row.className = "leaderboard-row";
+  const row = document.createElement("div");
+  row.className = "leaderboard-row";
 
-    const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
-    const date = formatDate(entry.created_at);
+  const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
+  const date = formatDate(entry.created_at);
 
-    row.innerHTML = `
-      <span class="rank">${index + 1}</span>
-      <span class="pseudo">${pseudo}</span>
-      <span class="score">${entry.score}</span>
-      <span class="duration">${formatDuration(entry.duration_ms)}</span>
-      <span class="undo">${entry.undo_count}</span>
-      <span class="jokers">${entry.jokers_used}</span>
-      <span class="date">${date}</span>
-    `;
-    container.appendChild(row);
-  });
+  row.innerHTML = `
+    <span class="rank">${index + 1}</span>
+    <span class="pseudo">${pseudo}</span>
+    <span class="score">${entry.score}</span>
+    <span class="duration">${formatDuration(entry.duration_ms)}</span>
+    <span class="undo">${entry.undo_count}</span>
+    <span class="jokers">${entry.jokers_used}</span>
+    <span class="date">${date}</span>
+  `;
+
+  // 🔥 Mise en avant du joueur connecté
+  if (userId && entry.players?.id === userId) {
+    row.classList.add("my-best-score");
+  }
+
+  container.appendChild(row);
+});
+
 }
 
 
@@ -459,13 +466,11 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // 🔥 Récupérer l'utilisateur via supa
   const user = supa.auth.user();
   const isLoggedIn = !!user;
 
-  // Charger et afficher le leaderboard
   const list = await fetchLeaderboard();
-  renderLeaderboard(list, isLoggedIn);
+  renderLeaderboard(list, isLoggedIn, user?.id || null);
 });
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
