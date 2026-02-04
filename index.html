@@ -874,6 +874,225 @@ body {
   background: rgba(255,255,255,0.1);
 }
 
+/* ===============================
+   BOUTON UTILISATEUR (TOP BAR)
+=============================== */
+
+.user-btn {
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.user-btn:hover {
+    background: #006cc0;
+}
+
+.user-btn .avatar-mini {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+/* ===============================
+   BLOC PROFIL
+=============================== */
+
+.profile-block {
+    position: absolute;
+    top: 120px;
+    right: 20px;
+    width: 320px;
+    background: #111;
+    border: 1px solid #1e90ff;
+    border-radius: 12px;
+    padding: 20px;
+    z-index: 999999;
+    display: none; /* <-- MASQUÉ PAR DÉFAUT */
+}
+
+.profile-block.open {
+    display: block; /* <-- AFFICHÉ QUAND OUVERT */
+}
+
+/* ===============================
+   VUES
+=============================== */
+
+.profile-view {
+    display: none;
+}
+
+.profile-view.active {
+    display: block;
+}
+
+
+/* ===============================
+   AVATARS
+=============================== */
+
+.avatar-large {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #222;
+    background-size: cover;
+    background-position: center;
+    margin: 0 auto 15px;
+    border: 2px solid #1e90ff;
+}
+
+
+/* ===============================
+   VUE 1 : Infos
+=============================== */
+
+.profile-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-info .pseudo {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+}
+
+.profile-info .email {
+    font-size: 14px;
+    opacity: 0.8;
+    color: #ddd;
+}
+
+.btn-edit-profile,
+.btn-logout {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-edit-profile {
+    background: #0078d4;
+    color: white;
+}
+
+.btn-edit-profile:hover {
+    background: #006cc0;
+}
+
+.btn-logout {
+    background: #444;
+    color: white;
+}
+
+.btn-logout:hover {
+    background: #555;
+}
+
+
+/* ===============================
+   VUE 2 : Edition
+=============================== */
+
+.avatar-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.btn-change-avatar {
+    margin-top: 10px;
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-change-avatar:hover {
+    background: #006cc0;
+}
+
+.input-avatar {
+    display: none;
+}
+
+.edit-fields label {
+    color: white;
+    font-size: 14px;
+    margin-top: 10px;
+    display: block;
+}
+
+.edit-fields input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: white;
+    margin-top: 4px;
+}
+
+.error-message {
+    color: #ff4444;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+
+/* ===============================
+   ACTIONS
+=============================== */
+
+.edit-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.btn-save,
+.btn-cancel {
+    width: 48%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-save {
+    background: #0078d4;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #006cc0;
+}
+
+.btn-cancel {
+    background: #444;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background: #555;
+}
+
   </style>
 </head>
 
@@ -1178,227 +1397,6 @@ body {
     </div>
   </div>
 </div>
-
-/* ===============================
-   BOUTON UTILISATEUR (TOP BAR)
-=============================== */
-
-.user-btn {
-    background: #0078d4;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-
-.user-btn:hover {
-    background: #006cc0;
-}
-
-.user-btn .avatar-mini {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-
-/* ===============================
-   BLOC PROFIL
-=============================== */
-
-.profile-block {
-    position: absolute;
-    top: 120px;
-    right: 20px;
-    width: 320px;
-    background: #111;
-    border: 1px solid #1e90ff;
-    border-radius: 12px;
-    padding: 20px;
-    z-index: 999999;
-    display: none; /* <-- MASQUÉ PAR DÉFAUT */
-}
-
-.profile-block.open {
-    display: block; /* <-- AFFICHÉ QUAND OUVERT */
-}
-
-/* ===============================
-   VUES
-=============================== */
-
-.profile-view {
-    display: none;
-}
-
-.profile-view.active {
-    display: block;
-}
-
-
-/* ===============================
-   AVATARS
-=============================== */
-
-.avatar-large {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: #222;
-    background-size: cover;
-    background-position: center;
-    margin: 0 auto 15px;
-    border: 2px solid #1e90ff;
-}
-
-
-/* ===============================
-   VUE 1 : Infos
-=============================== */
-
-.profile-info {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.profile-info .pseudo {
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-}
-
-.profile-info .email {
-    font-size: 14px;
-    opacity: 0.8;
-    color: #ddd;
-}
-
-.btn-edit-profile,
-.btn-logout {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.btn-edit-profile {
-    background: #0078d4;
-    color: white;
-}
-
-.btn-edit-profile:hover {
-    background: #006cc0;
-}
-
-.btn-logout {
-    background: #444;
-    color: white;
-}
-
-.btn-logout:hover {
-    background: #555;
-}
-
-
-/* ===============================
-   VUE 2 : Edition
-=============================== */
-
-.avatar-section {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.btn-change-avatar {
-    margin-top: 10px;
-    background: #0078d4;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.btn-change-avatar:hover {
-    background: #006cc0;
-}
-
-.input-avatar {
-    display: none;
-}
-
-.edit-fields label {
-    color: white;
-    font-size: 14px;
-    margin-top: 10px;
-    display: block;
-}
-
-.edit-fields input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #444;
-    background: #222;
-    color: white;
-    margin-top: 4px;
-}
-
-.error-message {
-    color: #ff4444;
-    margin-top: 10px;
-    font-size: 13px;
-}
-
-
-/* ===============================
-   ACTIONS
-=============================== */
-
-.edit-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.btn-save,
-.btn-cancel {
-    width: 48%;
-    padding: 10px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-save {
-    background: #0078d4;
-    color: white;
-}
-
-.btn-save:hover {
-    background: #006cc0;
-}
-
-.btn-cancel {
-    background: #444;
-    color: white;
-}
-
-.btn-cancel:hover {
-    background: #555;
-}
-
-
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
   <script src="game.js"></script>
