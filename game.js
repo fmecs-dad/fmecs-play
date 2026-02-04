@@ -609,6 +609,13 @@ function redrawEverything() {
    CROIX DE MALTE — INITIALISATION
 ------------------------------------------------------------ */
 
+function drawMaltaCross() {
+  permanentPoints.forEach(key => {
+    const [x, y] = key.split(",").map(Number);
+    drawPoint(x, y);
+  });
+}
+
 function initMaltaCross() {
   permanentPoints.clear();
   activePoints.clear();
