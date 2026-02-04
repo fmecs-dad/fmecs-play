@@ -443,7 +443,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
     <span class="date">${date}</span>
   `;
 
-  // 🔥 Mise en avant du joueur connecté
+  // Mise en avant du joueur connecté
   if (userId && entry.players?.id === userId) {
     row.classList.add("my-best-score");
   }
@@ -471,6 +471,7 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list, isLoggedIn, user?.id || null);
+
 });
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
