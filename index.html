@@ -1215,7 +1215,7 @@ body {
 
 .profile-block {
     position: absolute;
-    top: 120px; /* sous le topBar */
+    top: 120px;
     right: 20px;
     width: 320px;
     background: #111;
@@ -1223,21 +1223,12 @@ body {
     border-radius: 12px;
     padding: 20px;
     z-index: 999999;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
+    display: none; /* <-- MASQUÉ PAR DÉFAUT */
 }
 
 .profile-block.open {
-    opacity: 1;
-    pointer-events: auto;
+    display: block; /* <-- AFFICHÉ QUAND OUVERT */
 }
-
-.profile-block.closed {
-    opacity: 0;
-    pointer-events: none;
-}
-
 
 /* ===============================
    VUES
