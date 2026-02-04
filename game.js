@@ -411,7 +411,13 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
 
   container.innerHTML = "";
 
-  // --- Ligne d’en-tête ---
+  // Trouver la meilleure ligne du joueur
+  let bestIndex = null;
+  if (userId) {
+    bestIndex = list.findIndex(entry => entry.players?.id === userId);
+  }
+
+  // Ligne d’en-tête
   const header = document.createElement("div");
   header.className = "leaderboard-row leaderboard-header";
   header.innerHTML = `
@@ -425,32 +431,31 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
   `;
   container.appendChild(header);
 
-  // --- Lignes du leaderboard ---
+  // Lignes du leaderboard
   list.forEach((entry, index) => {
-  const row = document.createElement("div");
-  row.className = "leaderboard-row";
+    const row = document.createElement("div");
+    row.className = "leaderboard-row";
 
-  const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
-  const date = formatDate(entry.created_at);
+    const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
+    const date = formatDate(entry.created_at);
 
-  row.innerHTML = `
-    <span class="rank">${index + 1}</span>
-    <span class="pseudo">${pseudo}</span>
-    <span class="score">${entry.score}</span>
-    <span class="duration">${formatDuration(entry.duration_ms)}</span>
-    <span class="undo">${entry.undo_count}</span>
-    <span class="jokers">${entry.jokers_used}</span>
-    <span class="date">${date}</span>
-  `;
+    row.innerHTML = `
+      <span class="rank">${index + 1}</span>
+      <span class="pseudo">${pseudo}</span>
+      <span class="score">${entry.score}</span>
+      <span class="duration">${formatDuration(entry.duration_ms)}</span>
+      <span class="undo">${entry.undo_count}</span>
+      <span class="jokers">${entry.jokers_used}</span>
+      <span class="date">${date}</span>
+    `;
 
-  // Mise en avant du joueur connecté
-  if (userId && entry.players?.id === userId) {
-    row.classList.add("my-best-score");
-  }
+    // 🔥 Mettre en avant uniquement la meilleure ligne du joueur
+    if (index === bestIndex) {
+      row.classList.add("my-best-score");
+    }
 
-  container.appendChild(row);
-});
-
+    container.appendChild(row);
+  });
 }
 
 
