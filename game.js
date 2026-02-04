@@ -27,6 +27,19 @@ async function fetchPlayerPseudo(userId) {
   return data.pseudo;
 }
 
+function getCurrentUser() {
+  const raw = localStorage.getItem("supabase.auth.token");
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed.currentSession?.user || null;
+  } catch {
+    return null;
+  }
+}
+
+
 // ===============================
 //   UPDATE AUTH UI (VERSION FINALE)
 // ===============================
@@ -459,16 +472,15 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // Récupérer l'utilisateur via le localStorage (compatible avec ton setup)
-  const raw = localStorage.getItem("supa.auth.token");
-  const session = raw ? JSON.parse(raw).currentSession : null;
-  const user = session?.user || null;
+  // 🔥 Récupérer l'utilisateur via le localStorage
+  const user = getCurrentUser();
 
   renderLeaderboardHeader(!!user);
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list);
 });
+
 
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
