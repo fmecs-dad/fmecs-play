@@ -757,18 +757,6 @@ function playStartGameSound()  { playSound("startGameSound"); }
 function playNewRecordSound()  { playSound("newRecordSound"); }
 
 
-function unlockAudio() {
-  const ids = ["clickSound"];
-  ids.forEach(id => {
-    const a = document.getElementById(id);
-    a.volume = 0.001;
-    a.play().then(() => {
-      setTimeout(() => { a.pause(); a.currentTime = 0; a.volume = 1; }, 30);
-    }).catch(()=>{});
-  });
-}
-
-
 // ===============================
 //   UTILITAIRES UI
 // ===============================
@@ -2080,7 +2068,6 @@ if (burgerAuthBtn) {
   // ===============================
 
   document.getElementById("readyBtn").addEventListener("click", () => {
-    unlockAudio();
     audioUnlocked = true;
 
     playClickSound()
