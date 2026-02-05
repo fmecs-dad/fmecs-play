@@ -283,6 +283,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
 // --------------------------------------------------
 
 function openHelpOverlay(auto = false) {
+
   if (!auto) playClickSound();
   const overlay = document.getElementById("helpOverlay");
   const topBar = document.getElementById("topBar");
@@ -290,11 +291,13 @@ function openHelpOverlay(auto = false) {
   overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
   overlay.classList.remove("hidden");
 
-  flash("Jeu en pause");
+  // Le flash ne doit apparaître que si ce n’est PAS automatique
+  if (!auto) {
+    flash("Jeu en pause");
+  }
 
   window.helpAutoOpened = auto;
 }
-
 
 // ===============================
 //   SESSION AU DÉMARRAGE
@@ -520,7 +523,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
       <span class="date">${date}</span>
     `;
 
-    // 🔥 Mettre en avant uniquement la meilleure ligne du joueur
+    // Mettre en avant uniquement la meilleure ligne du joueur
     if (index === bestIndex) {
       row.classList.add("my-best-score");
     }
@@ -2032,7 +2035,7 @@ if (burgerAuthBtn) {
 
     const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
 
-    // ➜ OUVERTURE DE LA FENÊTRE DE CONNEXION
+    // OUVERTURE DE LA FENÊTRE DE CONNEXION
     if (!isConnected) {
       const auth = document.getElementById("authOverlay");
       auth.classList.remove("hidden");   // OK
@@ -2040,7 +2043,7 @@ if (burgerAuthBtn) {
       return;
     }
 
-    // ➜ DÉCONNEXION
+    // DÉCONNEXION
     await supa.auth.signOut();
     updateAuthUI();
   });
