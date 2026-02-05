@@ -458,7 +458,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
     `;
 
     // Mise en avant du joueur connecté
-    if (userId && entry.players?.id === userId) {
+    if (index === bestIndex) {
       row.classList.add("my-best-score");
     }
 
