@@ -23,6 +23,7 @@ function getAudioContext() {
   }
   return audioCtx;
 }
+
 const audioBuffers = {};
 
 async function loadSound(id, url) {
@@ -37,7 +38,7 @@ async function loadSound(id, url) {
 // ===============================
 
 async function preloadAllSounds() {
-  getAudioContext(); // <-- création ici si nécessaire
+  getAudioContext(); // création ici si nécessaire
 
   await Promise.all([
     loadSound("clickSound", "sounds/click.mp3"),
@@ -59,8 +60,9 @@ preloadAllSounds();
 // ===============================
 
 window.addEventListener("pointerdown", () => {
-  if (audioCtx.state === "suspended") {
-    audioCtx.resume();
+  const ctx = getAudioContext(); // <-- correction ici
+  if (ctx.state === "suspended") {
+    ctx.resume();
   }
 }, { once: true });
 
@@ -71,7 +73,7 @@ window.addEventListener("pointerdown", () => {
 function playSound(id) {
   if (!soundEnabled) return;
 
-  const ctx = getAudioContext();  // <-- création au premier clic
+  const ctx = getAudioContext();
   const buffer = audioBuffers[id];
   if (!buffer) return;
 
@@ -80,8 +82,6 @@ function playSound(id) {
   source.connect(ctx.destination);
   source.start(0);
 }
-
-
 
 // ===============================
 //   AUTH : UTILITAIRES
