@@ -398,6 +398,7 @@ function renderLeaderboardHeader(isLoggedIn) {
 }
 
 
+
 /* ============================================================
    AFFICHAGE DU LEADERBOARD (scroll + snapping)
    ============================================================ */
@@ -432,6 +433,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
 
   // Lignes du leaderboard
   list.forEach((entry, index) => {
+
     const row = document.createElement("div");
     row.className = "leaderboard-row";
 
@@ -448,7 +450,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
       <span class="date">${date}</span>
     `;
 
-    // Mise en avant du joueur connecté
+    // 🔥 Mettre en avant uniquement la meilleure ligne du joueur
     if (index === bestIndex) {
       row.classList.add("my-best-score");
     }
@@ -456,6 +458,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
     container.appendChild(row);
   });
 }
+
 
 /* ============================================================
    OUVERTURE / FERMETURE DU LEADERBOARD
@@ -474,8 +477,8 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list, isLoggedIn, user?.id || null);
-});
 
+});
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
 function closeLeaderboard() {
