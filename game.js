@@ -324,7 +324,7 @@ const tutorialSteps = [
 
 async function fetchLeaderboard() {
   const response = await fetch(
-    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
+    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -411,7 +411,7 @@ function renderLeaderboardHeader(isLoggedIn) {
    AFFICHAGE DU LEADERBOARD (scroll + snapping)
    ============================================================ */
 
-function renderLeaderboard(list, isLoggedIn) {
+function renderLeaderboard(list, isLoggedIn, userId = null) {
   renderLeaderboardHeader(isLoggedIn);
 
   const container = document.getElementById("leaderboardContainer");
@@ -419,7 +419,13 @@ function renderLeaderboard(list, isLoggedIn) {
 
   container.innerHTML = "";
 
-  // --- Ligne d’en-tête ---
+  // Trouver la meilleure ligne du joueur
+  let bestIndex = null;
+  if (userId) {
+    bestIndex = list.findIndex(entry => entry.players?.id === userId);
+  }
+
+  // Ligne d’en-tête
   const header = document.createElement("div");
   header.className = "leaderboard-row leaderboard-header";
   header.innerHTML = `
@@ -433,7 +439,7 @@ function renderLeaderboard(list, isLoggedIn) {
   `;
   container.appendChild(header);
 
-  // --- Lignes du leaderboard ---
+  // Lignes du leaderboard
   list.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
@@ -450,10 +456,15 @@ function renderLeaderboard(list, isLoggedIn) {
       <span class="jokers">${entry.jokers_used}</span>
       <span class="date">${date}</span>
     `;
+
+    // 🔥 Mettre en avant uniquement la meilleure ligne du joueur
+    if (index === bestIndex) {
+      row.classList.add("my-best-score");
+    }
+
     container.appendChild(row);
   });
 }
-
 
 /* ============================================================
    OUVERTURE / FERMETURE DU LEADERBOARD
@@ -462,14 +473,16 @@ function renderLeaderboard(list, isLoggedIn) {
 // --- OUVERTURE LEADERBOARD ---
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
-
-  pauseGame(); // pause du chrono
+  pauseGame();
 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
+  const user = supa.auth.user();
+  const isLoggedIn = !!user;
+
   const list = await fetchLeaderboard();
-  renderLeaderboard(list);
+  renderLeaderboard(list, isLoggedIn, user?.id || null);
 });
 
 
