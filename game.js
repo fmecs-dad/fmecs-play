@@ -1951,13 +1951,20 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   });
 
   document.addEventListener("click", (e) => {
-    const menu = document.getElementById("burgerOverlay");
-    const burger = document.getElementById("burgerBtn");
+  const menu = document.getElementById("burgerOverlay");
+  const burger = document.getElementById("burgerBtn");
+  const authOverlay = document.getElementById("authOverlay");
 
-    if (!menu.contains(e.target) && e.target !== burger) {
-      menu.classList.remove("show");
-    }
-  });
+  // Ne pas fermer le menu si on clique dans la fenêtre d'authentification
+  if (authOverlay && authOverlay.contains(e.target)) {
+    return;
+  }
+
+  if (!menu.contains(e.target) && e.target !== burger) {
+    menu.classList.remove("show");
+  }
+});
+
 
   document.getElementById("burgerProfileBtn").addEventListener("click", async () => {
     playClickSound();
