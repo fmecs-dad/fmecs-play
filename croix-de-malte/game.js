@@ -113,7 +113,7 @@ function updateAuthUI(user = null) {
   // ÉTAT DÉCONNECTÉ
   if (!user) {
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
-    if (burgerPseudo) burgerPseudo.textContent = "Invité";
+    if (burgerPseudo) burgerPseudo.textContent = "";
     return;
   }
 
