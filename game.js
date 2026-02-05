@@ -527,8 +527,6 @@ function updateCounters() {
 //   DESSIN DE LA GRILLE
 // ===============================
 
-const visualOrigin = offset - spacing;
-
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#ddd";
@@ -549,6 +547,10 @@ function drawGrid() {
   }
 }
 
+// ===============================
+//   DESSIN D’UN POINT
+// ===============================
+
 function drawPoint(x, y, color = "#000") {
   ctx.beginPath();
   ctx.arc(offset + x * spacing, offset + y * spacing, 3, 0, Math.PI * 2);
@@ -556,6 +558,9 @@ function drawPoint(x, y, color = "#000") {
   ctx.fill();
 }
 
+// ===============================
+//   DESSIN D’UN SEGMENT
+// ===============================
 
 function drawSegment(segmentPoints) {
   const [sx, sy] = segmentPoints[0].split(",").map(Number);
@@ -568,6 +573,9 @@ function drawSegment(segmentPoints) {
   ctx.stroke();
 }
 
+// ===============================
+//   TROUVER LE POINT LE PLUS PROCHE
+// ===============================
 
 function getNearestPoint(mx, my) {
   let best = null;
@@ -593,33 +601,31 @@ function getNearestPoint(mx, my) {
   return null;
 }
 
+// ===============================
+//   ALIGNEMENT INTELLIGENT
+// ===============================
+
 function snapToAlignedPoint(first, clicked, mx, my) {
   const { x: x1, y: y1 } = first;
   const { x: x2, y: y2 } = clicked;
 
-  // 1. Déjà aligné ?
   if (x1 === x2 || y1 === y2 || Math.abs(x1 - x2) === Math.abs(y1 - y2)) {
     return clicked;
   }
 
-  // 2. Chercher le point aligné le plus proche
   const candidates = [];
 
-  // même colonne
   candidates.push({ x: x1, y: y2 });
-
-  // même ligne
   candidates.push({ x: x2, y: y1 });
 
-  // diagonales
   const dx = x2 - x1;
   const dy = y2 - y1;
   const signX = dx > 0 ? 1 : -1;
   const signY = dy > 0 ? 1 : -1;
+
   candidates.push({ x: x1 + Math.abs(dy) * signX, y: y1 + Math.abs(dy) * signY });
   candidates.push({ x: x1 + Math.abs(dx) * signY, y: y1 + Math.abs(dx) * signX });
 
-  // 3. Choisir le plus proche
   let best = clicked;
   let bestDist = Infinity;
 
@@ -634,56 +640,19 @@ function snapToAlignedPoint(first, clicked, mx, my) {
     }
   }
 
-  // 4. Tolérance
   if (bestDist <= 15) return best;
-
-  return clicked; // pas de snap possible
+  return clicked;
 }
 
-/* ------------------------------------------------------------
-   GRILLE — REDESSIN COMPLET
------------------------------------------------------------- */
-
-function redrawEverything() {
-  if (!canvas || !ctx) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Points permanents (Croix de Malte)
-  permanentPoints.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    drawPoint(x, y);
-  });
-
-  // Segments validés
-  validatedSegments.forEach(seg => {
-    drawSegment(seg.points);
-  });
-
-  // Points actifs
-  activePoints.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    drawPoint(x, y);
-  });
-}
-
-/* ------------------------------------------------------------
-   CROIX DE MALTE — INITIALISATION
------------------------------------------------------------- */
-
-function drawMaltaCross() {
-  permanentPoints.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    drawPoint(x, y);
-  });
-}
+// ===============================
+//   CROIX DE MALTE — VERSION ORIGINALE
+// ===============================
 
 function initMaltaCross() {
 
   permanentPoints.clear();
   activePoints.clear();
 
-  // Construction brute de la croix
   let x = 0, y = 0;
   const pts = [];
   const add = (px, py) => pts.push({ x: px, y: py });
@@ -703,22 +672,39 @@ function initMaltaCross() {
     }
   }
 
-  // Point de référence dans la croix brute
   const refX = -3;
   const refY = 3;
 
-  // Point logique où placer ce point
   const targetLeftX = 12;
   const targetLeftY = 15;
 
-  const offsetX = targetLeftX - refX; // 15
-  const offsetY = targetLeftY - refY; // 12
+  const offsetX = targetLeftX - refX;
+  const offsetY = targetLeftY - refY;
 
-  // Application de l’offset
   pts.forEach(p => {
     const key = `${p.x + offsetX},${p.y + offsetY}`;
     permanentPoints.add(key);
     activePoints.add(key);
+  });
+}
+
+// ===============================
+//   REDESSIN COMPLET
+// ===============================
+
+function redrawEverything() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawGrid();
+
+  validatedSegments.forEach(seg => drawSegment(seg.points));
+
+  activePoints.forEach(key => {
+    const [x, y] = key.split(",").map(Number);
+    drawPoint(x, y);
   });
 }
 
