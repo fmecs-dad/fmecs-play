@@ -292,8 +292,8 @@ function openHelpOverlay(auto = false) {
   overlay.classList.remove("hidden");
 
   // Le flash ne doit apparaître que si ce n’est PAS automatique
-  if (!auto) {
-    flash("Jeu en pause");
+  //if (!auto) {
+  //  flash("Jeu en pause");
   }
 
   window.helpAutoOpened = auto;
