@@ -1404,11 +1404,12 @@ function getPossibleMoves() {
 // ===============================
 
 function pauseGame() {
+  if (gameOver) return; // Empêche la pause après la fin de partie
+
   paused = true;
 
-  // Arrête proprement le timer
   clearInterval(timerInterval);
-  timerInterval = null;     // ← essentiel
+  timerInterval = null;
   timerRunning = false;
 
   document.getElementById("pauseBtn").textContent = "Reprendre";
@@ -1416,9 +1417,10 @@ function pauseGame() {
 }
 
 function resumeGame() {
+  if (gameOver) return; // Empêche la reprise après la fin de partie
+
   paused = false;
 
-  // Redémarre proprement le timer
   startTimer();
 
   document.getElementById("pauseBtn").textContent = "Pause";
