@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/croix-de-malte", "destination": "/croix-de-malte/index.html" },
+    { "source": "/croix-de-malte/(.*)", "destination": "/croix-de-malte/$1" }
+  ]
+}
