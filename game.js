@@ -1951,20 +1951,13 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   });
 
   document.addEventListener("click", (e) => {
-  const menu = document.getElementById("burgerOverlay");
-  const burger = document.getElementById("burgerBtn");
-  const authOverlay = document.getElementById("authOverlay");
+    const menu = document.getElementById("burgerOverlay");
+    const burger = document.getElementById("burgerBtn");
 
-  // Ne pas fermer le menu si on clique dans la fenêtre d'authentification
-  if (authOverlay && authOverlay.contains(e.target)) {
-    return;
-  }
-
-  if (!menu.contains(e.target) && e.target !== burger) {
-    menu.classList.remove("show");
-  }
-});
-
+    if (!menu.contains(e.target) && e.target !== burger) {
+      menu.classList.remove("show");
+    }
+  });
 
   document.getElementById("burgerProfileBtn").addEventListener("click", async () => {
     playClickSound();
@@ -1972,31 +1965,31 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   });
 
   // ===============================
-  //   AUTH BURGER (v1)
-  // ===============================
+//   AUTH BURGER (v1)
+// ===============================
 
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-  if (!burgerAuthBtn) {
-    } else {
-    burgerAuthBtn.addEventListener("click", async () => {
-      playClickSound();
+if (burgerAuthBtn) {
+  burgerAuthBtn.addEventListener("click", async () => {
+    playClickSound();
 
-      const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
+    const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
 
-      if (!isConnected) {
-        const auth = document.getElementById("authOverlay");
-        auth.classList.remove("hidden");
-        pauseGame();
-        return;
-      }
+    // ➜ OUVERTURE DE LA FENÊTRE DE CONNEXION
+    if (!isConnected) {
+      const auth = document.getElementById("authOverlay");
+      auth.classList.remove("hidden");   // OK
+      pauseGame();
+      return;
+    }
 
-      await supa.auth.signOut();
+    // ➜ DÉCONNEXION
+    await supa.auth.signOut();
+    updateAuthUI();
+  });
+}
 
-      updateAuthUI();
-
-      });
-  }
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
@@ -2096,116 +2089,122 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   });
 
   // ===============================
-  //   AUTHENTIFICATION (v1)
-  // ===============================
+//   AUTHENTIFICATION (v1)
+// ===============================
 
-  document.getElementById("closeAuthBtn").addEventListener("click", () => {
+document.getElementById("closeAuthBtn").addEventListener("click", () => {
   playClickSound();
   closeLogin();
 });
 
+// --- SIGNUP ---
 
-  document.getElementById("signupBtn").addEventListener("click", () => {
-    playClickSound();
-    const modal = document.getElementById("signupModal");
-    modal.classList.remove("hidden");
-  });
+document.getElementById("signupBtn").addEventListener("click", () => {
+  playClickSound();
+  const modal = document.getElementById("signupModal");
+  modal.classList.remove("hidden");
+});
 
-  document.getElementById("signupCloseBtn").addEventListener("click", () => {
-    playClickSound();
-    const modal = document.getElementById("signupModal");
-    modal.classList.add("hidden");
-  });
+document.getElementById("signupCloseBtn").addEventListener("click", () => {
+  playClickSound();
+  const modal = document.getElementById("signupModal");
+  modal.classList.add("hidden");   // ❗ suppression du style.display
+});
 
-  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
-    playClickSound();
+document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+  playClickSound();
 
-    const email = document.getElementById("authEmail").value;
-    const password = document.getElementById("authPassword").value;
-    const pseudo = document.getElementById("signupPseudoInput").value.trim();
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+  const pseudo = document.getElementById("signupPseudoInput").value.trim();
 
-    localStorage.setItem("lastEmail", email);
+  localStorage.setItem("lastEmail", email);
 
-    if (!pseudo) {
-      alert("Merci de choisir un pseudo.");
-      return;
-    }
+  if (!pseudo) {
+    alert("Merci de choisir un pseudo.");
+    return;
+  }
 
-    const { data: existing } = await supa
-      .from("players")
-      .select("id")
-      .eq("pseudo", pseudo)
-      .maybeSingle();
+  const { data: existing } = await supa
+    .from("players")
+    .select("id")
+    .eq("pseudo", pseudo)
+    .maybeSingle();
 
-    if (existing) {
-      alert("Ce pseudo est déjà pris.");
-      return;
-    }
+  if (existing) {
+    alert("Ce pseudo est déjà pris.");
+    return;
+  }
 
-    const { user, error } = await supa.auth.signUp({ email, password });
+  const { user, error } = await supa.auth.signUp({ email, password });
 
-    if (error) {
-      alert("Erreur : " + error.message);
-      return;
-    }
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
 
-    if (!user) {
-      alert("Compte créé ! Vérifie ton email.");
-      return;
-    }
-
-    await supa.from("players").insert([{
-      id: user.id,
-      pseudo: pseudo,
-      created_at: new Date().toISOString()
-    }]);
-
-    localStorage.setItem("playerPseudo", pseudo);
-
-    document.getElementById("signupModal").style.display = "none";
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    updateAuthUI(user);
-
+  if (!user) {
     alert("Compte créé ! Vérifie ton email.");
-  });
+    return;
+  }
 
-  document.getElementById("loginBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-    playClickSound();
+  await supa.from("players").insert([{
+    id: user.id,
+    pseudo: pseudo,
+    created_at: new Date().toISOString()
+  }]);
 
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value.trim();
+  localStorage.setItem("playerPseudo", pseudo);
 
-    if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
+  // --- CORRECTION ICI ---
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.add("hidden");
 
-    if (!email.includes("@") || !email.includes(".")) {
-      alert("Adresse email invalide.");
-      return;
-    }
+  updateAuthUI(user);
 
-    localStorage.setItem("lastEmail", email);
+  alert("Compte créé ! Vérifie ton email.");
+});
 
-    const { user, error } = await supa.auth.signIn({ email, password });
+// --- LOGIN ---
 
-    if (error) {
-      alert("Erreur : " + error.message);
-      return;
-    }
+document.getElementById("loginBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  playClickSound();
 
-    document.getElementById("authOverlay").classList.add("hidden");
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
 
-    const session = supa.auth.session();
-    updateAuthUI(session?.user || null);
+  if (!email || !password) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
 
-    if (session?.user) {
-      const pseudo = await fetchPlayerPseudo(session.user.id);
-      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
-    }
-  });
+  if (!email.includes("@") || !email.includes(".")) {
+    alert("Adresse email invalide.");
+    return;
+  }
+
+  localStorage.setItem("lastEmail", email);
+
+  const { user, error } = await supa.auth.signIn({ email, password });
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  // --- CORRECTION ICI ---
+  document.getElementById("authOverlay").classList.add("hidden");
+
+  const session = supa.auth.session();
+  updateAuthUI(session?.user || null);
+
+  if (session?.user) {
+    const pseudo = await fetchPlayerPseudo(session.user.id);
+    if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+  }
+});
+
 
   // ===============================
   //   WHY SIGNUP
