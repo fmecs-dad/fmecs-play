@@ -457,8 +457,8 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
       <span class="date">${date}</span>
     `;
 
-    // 🔥 Mettre en avant uniquement la meilleure ligne du joueur
-    if (index === bestIndex) {
+    // Mise en avant du joueur connecté
+    if (userId && entry.players?.id === userId) {
       row.classList.add("my-best-score");
     }
 
