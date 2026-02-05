@@ -15,7 +15,14 @@ const LEADERBOARD_PAGE_SIZE = 10;
 // ===============================
 //   AUDIO WEB API - CONTEXTE
 // ===============================
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioCtx = null;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
 const audioBuffers = {};
 
 // ===============================
@@ -46,6 +53,7 @@ preloadAllSounds();
 // ===============================
 //   DEBLOCAGE AUDIO AU 1er CLIC
 // ===============================
+
 window.addEventListener("pointerdown", () => {
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
@@ -55,16 +63,20 @@ window.addEventListener("pointerdown", () => {
 // ===============================
 //   LECTURE D'UN SON (INSTANTANÉE)
 // ===============================
+
 function playSound(id) {
   if (!soundEnabled) return;
+
+  const ctx = getAudioContext();  // <-- création au premier clic
   const buffer = audioBuffers[id];
   if (!buffer) return;
 
-  const source = audioCtx.createBufferSource();
+  const source = ctx.createBufferSource();
   source.buffer = buffer;
-  source.connect(audioCtx.destination);
+  source.connect(ctx.destination);
   source.start(0);
 }
+
 
 
 // ===============================
