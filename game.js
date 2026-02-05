@@ -13,6 +13,61 @@ let currentLeaderboardPage = 1;
 const LEADERBOARD_PAGE_SIZE = 10;
 
 // ===============================
+//   AUDIO WEB API - CONTEXTE
+// ===============================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const audioBuffers = {};
+
+// ===============================
+//   PRECHARGEMENT DES SONS
+// ===============================
+async function loadSound(id, url) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  audioBuffers[id] = await audioCtx.decodeAudioData(arrayBuffer);
+}
+
+async function preloadAllSounds() {
+  await Promise.all([
+    loadSound("clickSound", "sounds/click.mp3"),
+    loadSound("errorSound", "sounds/error.mp3"),
+    loadSound("successSound", "sounds/success.mp3"),
+    loadSound("tutorialSound", "sounds/tutorial.mp3"),
+    loadSound("jokerSound", "sounds/joker.mp3"),
+    loadSound("jokerLossSound", "sounds/jokerloss.mp3"),
+    loadSound("endGameSound", "sounds/end.mp3"),
+    loadSound("startGameSound", "sounds/start.mp3"),
+    loadSound("newRecordSound", "sounds/new-record.mp3")
+  ]);
+}
+
+preloadAllSounds();
+
+// ===============================
+//   DEBLOCAGE AUDIO AU 1er CLIC
+// ===============================
+window.addEventListener("pointerdown", () => {
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+}, { once: true });
+
+// ===============================
+//   LECTURE D'UN SON (INSTANTANÉE)
+// ===============================
+function playSound(id) {
+  if (!soundEnabled) return;
+  const buffer = audioBuffers[id];
+  if (!buffer) return;
+
+  const source = audioCtx.createBufferSource();
+  source.buffer = buffer;
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
+
+
+// ===============================
 //   AUTH : UTILITAIRES
 // ===============================
 
@@ -691,19 +746,15 @@ window.addEventListener("beforeunload", saveGameState);
 //   FONCTIONS AUDIO
 // ===============================
 
-function playClickSound() { if (!soundEnabled) return; const a=document.getElementById("clickSound"); a.currentTime=0; a.play(); }
-function playErrorSound() { if (!soundEnabled) return; const a=document.getElementById("errorSound"); a.currentTime=0; a.play(); }
-function playSuccessSound() { if (!soundEnabled) return; const a=document.getElementById("successSound"); a.currentTime=0; a.play(); }
-function playTutorialSound() { if (!soundEnabled) return; const a=document.getElementById("tutorialSound"); a.currentTime=0; a.play(); }
-function playJokerGainSound() { if (!soundEnabled) return; const a=document.getElementById("jokerSound"); a.currentTime=0; a.play(); }
-function playJokerLossSound() { if (!soundEnabled) return; const a=document.getElementById("jokerLossSound"); a.currentTime=0; a.play(); }
-function playEndGameSound() { if (!soundEnabled) return; const a=document.getElementById("endGameSound"); a.currentTime=0; a.play(); }
-function playStartGameSound() { if (!soundEnabled) return; const a=document.getElementById("startGameSound"); a.currentTime=0; a.play(); }
-function playNewRecordSound() {
-    if (!soundEnabled) return;
-    const a = document.getElementById("newRecordSound");
-    if (a) a.play();
-}
+function playClickSound()      { playSound("clickSound"); }
+function playErrorSound()      { playSound("errorSound"); }
+function playSuccessSound()    { playSound("successSound"); }
+function playTutorialSound()   { playSound("tutorialSound"); }
+function playJokerGainSound()  { playSound("jokerSound"); }
+function playJokerLossSound()  { playSound("jokerLossSound"); }
+function playEndGameSound()    { playSound("endGameSound"); }
+function playStartGameSound()  { playSound("startGameSound"); }
+function playNewRecordSound()  { playSound("newRecordSound"); }
 
 
 function unlockAudio() {
@@ -2032,7 +2083,7 @@ if (burgerAuthBtn) {
     unlockAudio();
     audioUnlocked = true;
 
-    setTimeout(() => playClickSound(), 40);
+    playClickSound()
 
     document.getElementById("readyModal").classList.add("hidden");
 
