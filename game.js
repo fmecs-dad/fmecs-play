@@ -25,16 +25,20 @@ function getAudioContext() {
 }
 const audioBuffers = {};
 
-// ===============================
-//   PRECHARGEMENT DES SONS
-// ===============================
 async function loadSound(id, url) {
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
-  audioBuffers[id] = await audioCtx.decodeAudioData(arrayBuffer);
+  const ctx = getAudioContext();
+  audioBuffers[id] = await ctx.decodeAudioData(arrayBuffer);
 }
 
+// ===============================
+//   PRECHARGEMENT DES SONS
+// ===============================
+
 async function preloadAllSounds() {
+  getAudioContext(); // <-- création ici si nécessaire
+
   await Promise.all([
     loadSound("clickSound", "sounds/click.mp3"),
     loadSound("errorSound", "sounds/error.mp3"),
