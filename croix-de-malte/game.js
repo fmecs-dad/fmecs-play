@@ -2070,6 +2070,7 @@ if (burgerAuthBtn) {
 
   document.getElementById("burgerHelpBtn").addEventListener("click", () => {
     openHelpOverlay(false);
+    pauseGame();
   });
 
   document.getElementById("burgerSoundBtn").addEventListener("click", () => {
