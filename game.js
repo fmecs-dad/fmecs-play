@@ -2068,7 +2068,6 @@ if (burgerAuthBtn) {
   // ===============================
 
   document.getElementById("readyBtn").addEventListener("click", () => {
-    audioUnlocked = true;
 
     playClickSound()
 
