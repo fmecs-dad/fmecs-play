@@ -2114,7 +2114,6 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   document.getElementById("signupCloseBtn").addEventListener("click", () => {
     playClickSound();
     const modal = document.getElementById("signupModal");
-    modal.style.display = "none";
     modal.classList.add("hidden");
   });
 
@@ -2164,7 +2163,7 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     localStorage.setItem("playerPseudo", pseudo);
 
     document.getElementById("signupModal").style.display = "none";
-    document.getElementById("authOverlay").style.display = "none";
+    document.getElementById("authOverlay").classList.add("hidden");
 
     updateAuthUI(user);
 
@@ -2197,7 +2196,7 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
       return;
     }
 
-    document.getElementById("authOverlay").style.display = "none";
+    document.getElementById("authOverlay").classList.add("hidden");
 
     const session = supa.auth.session();
     updateAuthUI(session?.user || null);
