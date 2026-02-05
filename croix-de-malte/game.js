@@ -284,7 +284,6 @@ supa.auth.onAuthStateChange(async (event, session) => {
 
 function openHelpOverlay(auto = false) {
 
-  if (!auto) playClickSound();
   const overlay = document.getElementById("helpOverlay");
   const topBar = document.getElementById("topBar");
 
@@ -293,7 +292,7 @@ function openHelpOverlay(auto = false) {
 
   flash("Jeu en pause");
 
-  window.helpAutoOpened = auto;
+  window.helpAutoOpened = false;
 }
 
 
