@@ -144,22 +144,15 @@ function updateAuthUI(user = null) {
   const hash = window.location.hash;
 
   if (hash.includes("access_token")) {
-
-    const session = supa.auth.session();
-
-    if (session?.user) {
-      updateAuthUI(session.user);
-
-      const pseudo = await fetchPlayerPseudo(session.user.id);
-      if (pseudo) {
-        localStorage.setItem("playerPseudo", pseudo);
-      }
-
-      // Redirection immédiate vers le jeu
-      window.location.replace("https://play.fmecs.fr/croix-de-malte/");
-      return;
-    }
+  const session = supa.auth.session();
+  if (session?.user) {
+    updateAuthUI(session.user);
+    afficherPageTransition();
+    window.history.replaceState({}, document.title, "/croix-de-malte");
+    return;
   }
+}
+
 })();
 
 // ===============================
@@ -2329,6 +2322,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
