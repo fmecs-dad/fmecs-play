@@ -137,57 +137,6 @@ function updateAuthUI(user = null) {
 }
 
 // ===============================
-//   GESTION DES REDIRECTIONS SUPABASE (v1)
-// ===============================
-
-(async () => {
-  const hash = window.location.hash;
-
-  if (hash.includes("access_token")) {
-  const session = supa.auth.session();
-  if (session?.user) {
-    updateAuthUI(session.user);
-    afficherPageTransition();
-    return;
-  }
-}
-
-})();
-
-// ===============================
-//   PAGE DE TRANSITION
-// ===============================
-
-function afficherPageTransition() {
-  const div = document.createElement("div");
-  div.style.position = "fixed";
-  div.style.top = 0;
-  div.style.left = 0;
-  div.style.width = "100vw";
-  div.style.height = "100vh";
-  div.style.background = "black";
-  div.style.color = "white";
-  div.style.display = "flex";
-  div.style.flexDirection = "column";
-  div.style.justifyContent = "center";
-  div.style.alignItems = "center";
-  div.style.fontFamily = "var(--fmecs-font)";
-  div.style.zIndex = 999999;
-
-  div.innerHTML = `
-    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Compte confirmé</h1>
-    <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 2rem;">Tu peux retourner au jeu.</p>
-    <a href="https://play.fmecs.fr/croix-de-malte/" 
-       style="padding: 1rem 2rem; font-size: 1.2rem; background: #444; color: white; border-radius: 8px;">
-      Retourner au jeu
-    </a>
-  `;
-
-  document.body.innerHTML = "";
-  document.body.appendChild(div);
-}
-
-// ===============================
 //   PROFIL & JEU
 // ===============================
 
@@ -2316,6 +2265,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
