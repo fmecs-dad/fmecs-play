@@ -2121,56 +2121,79 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   // Vérification pseudo unique
-  const { data: existing } = await supa
+  const { data: existing, error: checkError } = await supa
     .from("players")
     .select("id")
     .eq("pseudo", pseudo)
     .maybeSingle();
+
+  if (checkError) {
+    console.error("Erreur SELECT pseudo :", checkError);
+    alert("Erreur interne lors de la vérification du pseudo.");
+    return;
+  }
 
   if (existing) {
     alert("Ce pseudo est déjà pris.");
     return;
   }
 
-  // 1. Création du compte SANS confirmation d’email
-  const { user, error: signUpError } = await supa.auth.signUp({
+  // 1. Création du compte
+  const { user, session, error: signUpError } = await supa.auth.signUp({
     email,
-    password: crypto.randomUUID() // mot de passe généré automatiquement
+    password: crypto.randomUUID()
   });
 
   if (signUpError) {
+    console.error("Erreur signUp :", signUpError);
     alert("Erreur : " + signUpError.message);
     return;
   }
 
-  // 2. Insertion dans players
+  // 2. Attendre la session (bug supabase-js v1)
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  // 3. Récupérer la session fraîche
+  const { data: { session: freshSession }, error: sessionError } = await supa.auth.getSession();
+
+  if (sessionError || !freshSession) {
+    console.error("Erreur récupération session :", sessionError);
+    alert("Impossible de récupérer la session après l'inscription.");
+    return;
+  }
+
+  const userId = freshSession.user.id;
+
+  // 4. Insertion dans players
   const { error: insertError } = await supa
     .from("players")
     .insert({
-      id: user.id,
+      id: userId,
       pseudo: pseudo,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      premium: false
     });
 
   if (insertError) {
+    console.error("Erreur INSERT player :", insertError);
     alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
 
-  // 3. Stockage local
-  localStorage.setItem("playerPseudo", pseudo);
+  // 5. Attendre que Supabase synchronise le cookie REST
+  await new Promise(resolve => setTimeout(resolve, 200));
 
-  // 4. Mise à jour UI
-  updateAuthUI(user);
+  // 6. Mise à jour UI
+  updateAuthUI(freshSession.user);
 
-  // 5. Fermeture modals
+  // 7. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
-
 });
+
 
 // --- LOGIN ---
 
