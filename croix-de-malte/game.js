@@ -2120,7 +2120,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 1. Création du compte
+  // 1. Création du compte (v2)
   const { data: signUpData, error: signUpError } = await supa.auth.signUp({
     email,
     password: crypto.randomUUID()
@@ -2132,10 +2132,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 2. Attendre la session (Supabase v1)
-  await new Promise(resolve => setTimeout(resolve, 300));
-
-  // 3. Récupérer la session
+  // 2. Récupérer la session (v2)
   const { data: sessionData, error: sessionError } = await supa.auth.getSession();
 
   if (sessionError || !sessionData.session) {
@@ -2146,7 +2143,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   const userId = sessionData.session.user.id;
 
-  // 4. Vérifier pseudo unique (MAINTENANT que tu es connecté)
+  // 3. Vérifier pseudo unique
   const { data: existing, error: checkError } = await supa
     .from("players")
     .select("id")
@@ -2164,7 +2161,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 5. Insertion dans players
+  // 4. Insertion dans players
   const { error: insertError } = await supa
     .from("players")
     .insert({
@@ -2180,17 +2177,16 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 6. Mise à jour UI
+  // 5. Mise à jour UI
   updateAuthUI(sessionData.session.user);
 
-  // 7. Fermeture modals
+  // 6. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
-
 
 // --- LOGIN ---
 
