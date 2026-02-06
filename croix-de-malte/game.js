@@ -178,19 +178,14 @@ function afficherPageTransition() {
   div.innerHTML = `
     <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Compte confirmé</h1>
     <p style="font-size: 1.2rem; opacity: 0.8; margin-bottom: 2rem;">Tu peux retourner au jeu.</p>
-    <button id="fmecs-return-btn"
-      style="padding: 1rem 2rem; font-size: 1.2rem; background: #444; color: white; border: none; border-radius: 8px; cursor: pointer;">
+    <a href="https://play.fmecs.fr/croix-de-malte/" 
+       style="padding: 1rem 2rem; font-size: 1.2rem; background: #444; color: white; border-radius: 8px;">
       Retourner au jeu
-    </button>
+    </a>
   `;
 
   document.body.innerHTML = "";
   document.body.appendChild(div);
-
-  document.getElementById("fmecs-return-btn").onclick = () => {
-    window.close();
-    window.location = "http://play.fmecs.fr/croix-de-malte/";
-  };
 }
 
 // ===============================
@@ -2322,6 +2317,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
