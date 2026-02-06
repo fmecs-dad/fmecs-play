@@ -145,20 +145,17 @@ function updateAuthUI(user = null) {
 
   if (hash.includes("access_token")) {
 
-    // Recharge la session
     const session = supa.auth.session();
 
     if (session?.user) {
-      // Met à jour l'UI
       updateAuthUI(session.user);
 
-      // Récupère le pseudo
       const pseudo = await fetchPlayerPseudo(session.user.id);
       if (pseudo) {
         localStorage.setItem("playerPseudo", pseudo);
       }
 
-      // Redirection immédiate vers le jeu (empêche Gmail de rejouer le lien)
+      // Redirection immédiate vers le jeu
       window.location.replace("https://play.fmecs.fr/croix-de-malte/");
       return;
     }
@@ -2332,6 +2329,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
