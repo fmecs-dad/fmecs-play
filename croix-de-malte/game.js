@@ -148,7 +148,6 @@ function updateAuthUI(user = null) {
   if (session?.user) {
     updateAuthUI(session.user);
     afficherPageTransition();
-    window.history.replaceState({}, document.title, "/croix-de-malte");
     return;
   }
 }
@@ -2317,6 +2316,7 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
 
 
