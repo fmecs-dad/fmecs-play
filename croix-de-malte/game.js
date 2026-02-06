@@ -2121,22 +2121,23 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   // Vérification pseudo unique
-  const { data: existing, error: checkError } = await supa
-    .from("players")
-    .select("id")
-    .eq("pseudo", pseudo)
-    .maybeSingle();
+const { data: existing, error: checkError } = await supa
+  .from("players")
+  .select("id")
+  .eq("pseudo", pseudo)
+  .maybeSingle();
 
-  if (checkError) {
-    console.error("Erreur SELECT pseudo :", checkError);
-    alert("Erreur interne lors de la vérification du pseudo.");
-    return;
-  }
+// Si l'erreur est PGRST116 → c'est normal → 0 ligne → pseudo libre
+if (checkError && checkError.code !== "PGRST116") {
+  console.error("Erreur SELECT pseudo :", checkError);
+  alert("Erreur interne lors de la vérification du pseudo.");
+  return;
+}
 
-  if (existing) {
-    alert("Ce pseudo est déjà pris.");
-    return;
-  }
+if (existing) {
+  alert("Ce pseudo est déjà pris.");
+  return;
+}
 
   // 1. Création du compte
   const { user, session, error: signUpError } = await supa.auth.signUp({
