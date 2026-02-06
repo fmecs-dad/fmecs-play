@@ -2086,7 +2086,7 @@ if (burgerAuthBtn) {
     document.getElementById("profileModal").style.display = "none";
   });
 
-  // ===============================
+// ===============================
 //   AUTHENTIFICATION (v1)
 // ===============================
 
@@ -2112,17 +2112,15 @@ document.getElementById("signupCloseBtn").addEventListener("click", () => {
 document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
-  const email = document.getElementById("authEmail").value;
-  const password = document.getElementById("authPassword").value;
+  const email = document.getElementById("authEmail").value.trim();
   const pseudo = document.getElementById("signupPseudoInput").value.trim();
 
-  localStorage.setItem("lastEmail", email);
-
-  if (!pseudo) {
-    alert("Merci de choisir un pseudo.");
+  if (!email || !pseudo) {
+    alert("Merci de remplir tous les champs.");
     return;
   }
 
+  // Vérification pseudo unique
   const { data: existing } = await supa
     .from("players")
     .select("id")
@@ -2134,33 +2132,44 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  const { user, error } = await supa.auth.signUp({ email, password });
+  // 1. Création du compte SANS confirmation d’email
+  const { user, error: signUpError } = await supa.auth.signUp({
+    email,
+    password: crypto.randomUUID() // mot de passe généré automatiquement
+  });
 
-  if (error) {
-    alert("Erreur : " + error.message);
+  if (signUpError) {
+    alert("Erreur : " + signUpError.message);
     return;
   }
 
-  if (!user) {
-    alert("Compte créé ! Vérifie ton email.");
+  // 2. Insertion dans players
+  const { error: insertError } = await supa
+    .from("players")
+    .insert({
+      id: user.id,
+      pseudo: pseudo,
+      created_at: new Date().toISOString()
+    });
+
+  if (insertError) {
+    alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
 
-  await supa.from("players").insert([{
-    id: user.id,
-    pseudo: pseudo,
-    created_at: new Date().toISOString()
-  }]);
-
+  // 3. Stockage local
   localStorage.setItem("playerPseudo", pseudo);
 
-  // --- CORRECTION ICI ---
+  // 4. Mise à jour UI
+  updateAuthUI(user);
+
+  // 5. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
-  updateAuthUI(user);
+  playSound("successSound");
+  alert("Compte créé ! Bienvenue dans le jeu.");
 
-  alert("Compte créé ! Vérifie ton email.");
 });
 
 // --- LOGIN ---
