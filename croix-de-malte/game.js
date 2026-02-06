@@ -140,10 +140,6 @@ function updateAuthUI(user = null) {
 //   GESTION DES REDIRECTIONS SUPABASE (v1)
 // ===============================
 
-// ===============================
-//   GESTION DES REDIRECTIONS SUPABASE (v1)
-// ===============================
-
 (async () => {
   const hash = window.location.hash;
 
@@ -2340,3 +2336,4 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
