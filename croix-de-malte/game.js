@@ -203,7 +203,7 @@ function afficherPageTransition() {
 
   document.getElementById("fmecs-return-btn").onclick = () => {
     window.close();
-    window.location = "http://127.0.0.1:8000/";
+    window.location = "http://play.fmecs.fr/croix-de-malte/";
   };
 }
 
@@ -2336,4 +2336,5 @@ function launchFlowOnce(userFromEvent) {
   }, 300);
 
 });
+
 
