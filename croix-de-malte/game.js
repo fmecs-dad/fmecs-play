@@ -140,20 +140,35 @@ function updateAuthUI(user = null) {
 //   GESTION DES REDIRECTIONS SUPABASE (v1)
 // ===============================
 
+// ===============================
+//   GESTION DES REDIRECTIONS SUPABASE (v1)
+// ===============================
+
 (async () => {
   const hash = window.location.hash;
 
   if (hash.includes("access_token")) {
 
-    // v1 → session = supa.auth.session()
+    // Recharge la session après confirmation
     const session = supa.auth.session();
 
     if (session?.user) {
+      // On met à jour l'UI dans cet onglet aussi
+      updateAuthUI(session.user);
+
+      // On récupère le pseudo
+      const pseudo = await fetchPlayerPseudo(session.user.id);
+      if (pseudo) {
+        localStorage.setItem("playerPseudo", pseudo);
+      }
+
+      // Petite animation puis fermeture
       afficherPageTransition();
       setTimeout(() => window.close(), 500);
     }
 
-    window.history.replaceState({}, document.title, "/");
+    // Nettoie l'URL
+    window.history.replaceState({}, document.title, "/croix-de-malte");
     return;
   }
 })();
