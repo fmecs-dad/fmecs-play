@@ -168,7 +168,7 @@ async function initialiserProfilEtLancerJeu(session) {
 }
 
 async function ouvrirProfil() {
-  const session = supa.auth.session();
+  const session = supa.auth.onAuthStateChange();
   const user = session?.user || null;
 
   if (!user) return;
@@ -245,7 +245,7 @@ function openHelpOverlay(auto = false) {
 
 (async () => {
 
-  const session = supa.auth.session();
+  const session = supa.auth.onAuthStateChange();
 
   if (session) {
     await initialiserProfilEtLancerJeu(session);
@@ -299,7 +299,7 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    const session = supa.auth.session();
+    const session = supa.auth.onAuthStateChange();
     const accessToken = session?.access_token;
     if (!accessToken) return false;
 
@@ -1332,7 +1332,7 @@ async function checkGameOver() {
     }
 
     // Ensuite seulement, on tente d'envoyer le score (sans bloquer)
-    const session = supa.auth.session();
+    const session = supa.auth.onAuthStateChange();
 const user = session?.user || null;
 
 
@@ -2052,7 +2052,7 @@ if (burgerAuthBtn) {
   });
 
   document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-    const session = supa.auth.session();
+    const session = supa.auth.onAuthStateChange();
     const user = session?.user || null;
 
     if (!user) return;
@@ -2133,7 +2133,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   // 2. Récupérer la session (v2)
-  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
+  const { data: sessionData, error: sessionError } = await supa.auth.onAuthStateChange();
 
   if (sessionError || !sessionData.session) {
     console.error("Erreur récupération session :", sessionError);
@@ -2219,7 +2219,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   // --- CORRECTION ICI ---
   document.getElementById("authOverlay").classList.add("hidden");
 
-  const session = supa.auth.session();
+  const session = supa.auth.onAuthStateChange();
   updateAuthUI(session?.user || null);
 
   if (session?.user) {
@@ -2283,7 +2283,7 @@ function launchFlowOnce(userFromEvent) {
   // Sécurité : lancer même sans event
   initialFlowTimeout = setTimeout(() => {
 
-    const session = supa.auth.session();
+    const session = supa.auth.onAuthStateChange();
     const user = session?.user || null;
 
     launchFlowOnce(user);
