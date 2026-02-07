@@ -263,7 +263,7 @@ function openHelpOverlay(auto = false) {
   const session = supa.auth.onAuthStateChange();
 
   if (session) {
-    console.log("
+    console.log("dans la boucle")
     await initialiserProfilEtLancerJeu(session);
   }
 
