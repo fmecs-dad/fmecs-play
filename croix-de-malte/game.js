@@ -197,7 +197,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
     // On attend que la session soit réellement disponible
     let fresh = null;
     for (let i = 0; i < 10; i++) {
-      const s = supa.auth.session();
+      const s = supa.onAuthStateChange();
       if (s?.user) {
         fresh = s;
         break;
