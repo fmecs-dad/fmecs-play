@@ -151,21 +151,33 @@ function lancerJeuComplet() {
   board.classList.add("show");
 }
 
-async function initialiserProfilEtLancerJeu(session) {
-  if (!session) return;
 
-  const userId = session.user.id;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", userId)
+// 3. Fonction pour charger les données utilisateur - Fonction @2
+async function initialiserProfilEtLancerJeu(userId) {
+  const { data, error } = await supabase
+    .from('player')
+    .select('*')
+    .eq('user_id', userId)
     .single();
-
-  if (player?.pseudo) {
-    localStorage.setItem("playerPseudo", player.pseudo);
+  if (data) {
+    console.log("Données joueur chargées :", data);
+    // Met à jour l'interface avec les données du joueur
   }
 }
+
+// Fonction initiale @1
+//async function initialiserProfilEtLancerJeu(session) {
+//  if (!session) return;
+//  const userId = session.user.id;
+//  const { data: player } = await supa
+//    .from("players")
+//    .select("*")
+//    .eq("id", userId)
+//    .single();
+//  if (player?.pseudo) {
+//    localStorage.setItem("playerPseudo", player.pseudo);
+//  }
+//}
 
 async function ouvrirProfil() {
   const session = supa.auth.onAuthStateChange();
@@ -193,17 +205,20 @@ async function ouvrirProfil() {
 supa.auth.onAuthStateChange(async (event, session) => {
 
   if (event === "SIGNED_IN") {
+    // Charge les données utilisateur depuis Supabase - fonction @2
+    loadUserData(session.user.id);
 
-    // On attend que la session soit réellement disponible
-    let fresh = null;
-    for (let i = 0; i < 10; i++) {
-      const s = supa.onAuthStateChange();
-      if (s?.user) {
-        fresh = s;
-        break;
-      }
-      await new Promise(r => setTimeout(r, 50));
-    }
+    // Fonction @1
+    //// On attend que la session soit réellement disponible
+    //let fresh = null;
+    //for (let i = 0; i < 10; i++) {
+    //  //const s = supa.onAuthStateChange();
+    //  if (s?.user) {
+    //    fresh = s;
+    //    break;
+    //  }
+    //  await new Promise(r => setTimeout(r, 50));
+    //}
 
     const user = fresh?.user || null;
 
@@ -248,6 +263,7 @@ function openHelpOverlay(auto = false) {
   const session = supa.auth.onAuthStateChange();
 
   if (session) {
+    console.log("
     await initialiserProfilEtLancerJeu(session);
   }
 
