@@ -2133,7 +2133,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   // 2. Récupérer la session (v2)
-  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
+  const { data: sessionData, error: sessionError } = await supa.auth.getUser();
 
   if (sessionError || !sessionData.session) {
     console.error("Erreur récupération session :", sessionError);
