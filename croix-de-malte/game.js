@@ -154,7 +154,7 @@ function lancerJeuComplet() {
 
 // 3. Fonction pour charger les données utilisateur - Fonction @2
 async function initialiserProfilEtLancerJeu(userId) {
-  const { data, error } = await supabase
+  const { data, error } = await supa
     .from('player')
     .select('*')
     .eq('user_id', userId)
