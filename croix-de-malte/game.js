@@ -1734,6 +1734,7 @@ function initGame() {
 // ===============================
 
 function handleFirstLaunchFlow(userFromEvent) {
+  console.log("1 FIRST LAUNCH FLOW")
 
   const helpAlreadySeen = localStorage.getItem(HELP_SEEN_KEY) === "true";
 
