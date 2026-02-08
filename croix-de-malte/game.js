@@ -271,7 +271,7 @@ function openHelpOverlay(auto = false) {
 
   // Met à jour l'UI avec l'utilisateur de la session (ou null)
 
-  updateAuthUI(session.user);
+  //updateAuthUI(session.user);
 
 
 })();
