@@ -243,19 +243,25 @@ function openHelpOverlay(auto = false) {
 }
 
 // ===============================
-//   SESSION AU DÉMARRAGE
+//   SESSION AU DÉMARRAGE (v2)
 // ===============================
 
 (async () => {
+  // Récupère la session de manière asynchrone
+  const { data: { session }, error } = await supa.auth.getSession();
 
-  const session = supa.auth.session();
+  if (error) {
+    console.error("Erreur lors de la récupération de la session :", error);
+  }
 
   if (session) {
     await initialiserProfilEtLancerJeu(session);
   }
 
+  // Met à jour l'UI avec l'utilisateur de la session (ou null)
   updateAuthUI(session?.user || null);
 })();
+
 
 // ===============================	
 //   VARIABLES DE JEU
