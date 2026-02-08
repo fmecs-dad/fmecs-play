@@ -265,11 +265,12 @@ function openHelpOverlay(auto = false) {
   }
 
   if (session) {
+console.log("1 Session au démarrage")
     await initialiserProfilEtLancerJeu(session);
   }
 
   // Met à jour l'UI avec l'utilisateur de la session (ou null)
-console.log("Session au démarrage")
+console.log("2 Session au démarrage")
   updateAuthUI(session.user);
 
 
