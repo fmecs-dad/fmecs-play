@@ -2151,18 +2151,33 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     alert("Ce pseudo est déjà pris.");
     return;
   }
+  
+  const { error: insertError } = await supa
+    .from("players")
+    .insert({
+      id: userId,
+      pseudo: pseudo,
+      created_at: new Date().toISOString(),
+      premium: false
+    });
 
-  // 2. Création du compte (v2)
-  const { data: signUpData, error: signUpError } = await supa.auth.signUp({
-    email,
-    password: crypto.randomUUID() // Mot de passe aléatoire
-  });
-
-  if (signUpError) {
-    console.error("Erreur signUp :", signUpError);
-    alert("Erreur : " + signUpError.message);
+  if (insertError) {
+    console.error("Erreur INSERT player :", insertError);
+    alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
+
+  //// 2. Création du compte (v2)
+  //const { data: signUpData, error: signUpError } = await supa.auth.signUp({
+  //  email,
+  //  password: crypto.randomUUID() // Mot de passe aléatoire
+  //});
+  //
+  //if (signUpError) {
+  //  console.error("Erreur signUp :", signUpError);
+  //  alert("Erreur : " + signUpError.message);
+  //  return;
+  //}
 
   // 3. Récupérer la session (v2)
   const { data: { session }, error: sessionError } = await supa.auth.getSession();
@@ -2276,7 +2291,6 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   let initialFlowTimeout = null;
 
 function launchFlowOnce(userFromEvent) {
-console.log("flux launch")
   if (flowAlreadyLaunched) return;   
   flowAlreadyLaunched = true;
 
