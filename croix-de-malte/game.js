@@ -151,36 +151,24 @@ function lancerJeuComplet() {
   board.classList.add("show");
 }
 
+async function initialiserProfilEtLancerJeu(session) {
+  if (!session) return;
 
-// 3. Fonction pour charger les données utilisateur - Fonction @2
-async function initialiserProfilEtLancerJeu(userId) {
-  const { data, error } = await supa
-    .from('player')
-    .select('*')
-    .eq('user_id', userId)
+  const userId = session.user.id;
+
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", userId)
     .single();
-  if (data) {
-    console.log("Données joueur chargées :", data);
-    // Met à jour l'interface avec les données du joueur
+
+  if (player?.pseudo) {
+    localStorage.setItem("playerPseudo", player.pseudo);
   }
 }
 
-// Fonction initiale @1
-//async function initialiserProfilEtLancerJeu(session) {
-//  if (!session) return;
-//  const userId = session.user.id;
-//  const { data: player } = await supa
-//    .from("players")
-//    .select("*")
-//    .eq("id", userId)
-//    .single();
-//  if (player?.pseudo) {
-//    localStorage.setItem("playerPseudo", player.pseudo);
-//  }
-//}
-
 async function ouvrirProfil() {
-  const session = supa.auth.onAuthStateChange();
+  const session = supa.auth.session();
   const user = session?.user || null;
 
   if (!user) return;
@@ -205,8 +193,21 @@ async function ouvrirProfil() {
 supa.auth.onAuthStateChange(async (event, session) => {
 
   if (event === "SIGNED_IN") {
-    // Charge les données utilisateur depuis Supabase - fonction @2
-    initialiserProfilEtLancerJeu(session.user.id);
+
+    // On attend que la session soit réellement disponible
+    let fresh = null;
+    for (let i = 0; i < 10; i++) {
+      const s = supa.auth.session();
+      if (s?.user) {
+        fresh = s;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    const user = fresh?.user || null;
+
+    await initialiserProfilEtLancerJeu(fresh || null);
 
     updateAuthUI(user);
     return;
@@ -244,7 +245,7 @@ function openHelpOverlay(auto = false) {
 
 (async () => {
 
-  const session = supa.auth.onAuthStateChange();
+  const session = supa.auth.session();
 
   if (session) {
     await initialiserProfilEtLancerJeu(session);
@@ -298,7 +299,7 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    const session = supa.auth.onAuthStateChange();
+    const session = supa.auth.session();
     const accessToken = session?.access_token;
     if (!accessToken) return false;
 
@@ -1183,7 +1184,6 @@ function undoLastMove() {
 
   const last = validatedSegments.pop();
 
-  resumeGame()
   undoCount++;
   autoSave();
   document.getElementById("undoCount").textContent = undoCount;
@@ -1332,7 +1332,7 @@ async function checkGameOver() {
     }
 
     // Ensuite seulement, on tente d'envoyer le score (sans bloquer)
-    const session = supa.auth.onAuthStateChange();
+    const session = supa.auth.session();
 const user = session?.user || null;
 
 
@@ -2052,7 +2052,7 @@ if (burgerAuthBtn) {
   });
 
   document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-    const session = supa.auth.onAuthStateChange();
+    const session = supa.auth.session();
     const user = session?.user || null;
 
     if (!user) return;
@@ -2132,11 +2132,10 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 2. Récupérer la session (v2)
-  const { data: sessionData, error: sessionError } = await supa.auth.onAuthStateChange();
-
+  // 2. Récupérer la session
+  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
+  
   if (sessionError || !sessionData.session) {
-    console.error("Erreur récupération session :", sessionError);
     alert("Impossible de récupérer la session après l'inscription.");
     return;
   }
@@ -2219,7 +2218,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   // --- CORRECTION ICI ---
   document.getElementById("authOverlay").classList.add("hidden");
 
-  const session = supa.auth.onAuthStateChange();
+  const session = supa.auth.session();
   updateAuthUI(session?.user || null);
 
   if (session?.user) {
@@ -2283,18 +2282,10 @@ function launchFlowOnce(userFromEvent) {
   // Sécurité : lancer même sans event
   initialFlowTimeout = setTimeout(() => {
 
-    const session = supa.auth.onAuthStateChange();
+    const session = supa.auth.session();
     const user = session?.user || null;
 
     launchFlowOnce(user);
   }, 300);
 
 });
-
-
-
-
-
-
-
-
