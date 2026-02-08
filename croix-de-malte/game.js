@@ -88,7 +88,6 @@ function playSound(id) {
 // ===============================
 
 async function fetchPlayerPseudo(userId) {
-console.log("1 fetch")
   const { data, error } = await supa
     .from("players")
     .select("pseudo")
@@ -111,12 +110,11 @@ async function updateAuthUI(user = null) {
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
   const btn = document.getElementById("authBtn");
-console.log("entré dans updateAuthUI")
+
   if (btn) btn.style.display = "none";
-console.log("1 entré dans updateAuthUI")
+
   // ÉTAT DÉCONNECTÉ
   if (!user) {
-console.log("2 entré dans updateAuthUI")
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
     return;
@@ -157,7 +155,6 @@ function lancerJeuComplet() {
 }
 
 async function initialiserProfilEtLancerJeu(session) {
-console.log("1 initialiser")
   if (!session) return;
 
   try {
@@ -175,7 +172,6 @@ console.log("1 initialiser")
 
     if (player?.pseudo) {
       localStorage.setItem("playerPseudo", player.pseudo);
-      console.log("Profil initialisé avec succès pour :", player.pseudo);
     }
   } catch (err) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
@@ -206,7 +202,6 @@ async function ouvrirProfil() {
 // ===============================
 
 supa.auth.onAuthStateChange(async (event, session) => {
-console.log("1 listener")
   if (event === "SIGNED_IN") {
 
     // On attend que la session soit réellement disponible
@@ -260,7 +255,6 @@ function openHelpOverlay(auto = false) {
 
 (async () => {
   // Récupère la session de manière asynchrone
-console.log("0 Session au démarrage")
 
   const { data: { session }, error } = await supa.auth.getSession();
 
@@ -269,12 +263,12 @@ console.log("0 Session au démarrage")
   }
 
   if (session) {
-console.log("1 Session au démarrage")
+
     await initialiserProfilEtLancerJeu(session);
   }
 
   // Met à jour l'UI avec l'utilisateur de la session (ou null)
-console.log("2 Session au démarrage")
+
   updateAuthUI(session.user);
 
 
@@ -1736,7 +1730,6 @@ function initGame() {
 // ===============================
 
 function handleFirstLaunchFlow(userFromEvent) {
-  console.log("1 FIRST LAUNCH FLOW")
 
   const helpAlreadySeen = localStorage.getItem(HELP_SEEN_KEY) === "true";
 
@@ -1756,7 +1749,7 @@ let gameStarted = false; // global
 
 
 function initialFlow(user) {
-console.log("1 initial flow")
+
   updateAuthUI(user);
 
   const lastEmail = localStorage.getItem("lastEmail");
@@ -2287,10 +2280,8 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   let initialFlowTimeout = null;
 
 function launchFlowOnce(userFromEvent) {
-console.log("1 Lancement du flux initial avec user :", userFromEvent);
   if (flowAlreadyLaunched) return;   
   flowAlreadyLaunched = true;
-  console.log("2 Lancement du flux initial avec user :", userFromEvent);
 
   handleFirstLaunchFlow(userFromEvent);
 }
