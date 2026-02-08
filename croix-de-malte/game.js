@@ -88,46 +88,50 @@ function playSound(id) {
 // ===============================
 
 async function fetchPlayerPseudo(userId) {
-  const { data, error } = await supa
-    .from("players")
-    .select("pseudo")
-    .eq("id", userId)
-    .single();
+  try {
+    const { data, error } = await supa
+      .from("players")
+      .select("pseudo")
+      .eq("id", userId)
+      .single();
 
-  if (error) {
-    console.error("Erreur fetchPlayerPseudo :", error);
+    if (error) {
+      console.error("Erreur lors de la récupération du pseudo :", error);
+      return null;
+    }
+
+    return data?.pseudo || null;
+  } catch (err) {
+    console.error("Erreur inattendue dans fetchPlayerPseudo :", err);
     return null;
   }
-
-  return data?.pseudo || null;
 }
+
 
 // ===============================
 //   UPDATE AUTH UI (V2)
 // ===============================
 
 async function updateAuthUI(user = null) {
+  console.log("Mise à jour de l'UI avec l'utilisateur :", user); // Log pour vérifier l'utilisateur
+
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
-  const btn = document.getElementById("authBtn");
 
-  if (btn) btn.style.display = "none";
+  console.log("burgerAuthBtn :", burgerAuthBtn); // Log pour vérifier l'élément
+  console.log("burgerPseudo :", burgerPseudo);  // Log pour vérifier l'élément
 
-  // ÉTAT DÉCONNECTÉ
   if (!user) {
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
     return;
   }
 
-  // ÉTAT CONNECTÉ
   if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
 
-  // Valeur par défaut immédiate (depuis localStorage)
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
-  // Mise à jour asynchrone du pseudo depuis Supabase
   try {
     const pseudo = await fetchPlayerPseudo(user.id);
     if (pseudo && burgerPseudo) {
@@ -2225,24 +2229,50 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
 
   localStorage.setItem("lastEmail", email);
 
-  // Connexion 
-  const { data, error } = await supa.auth.signInWithPassword({
-    email,
-    password
-  });
+  try {
+    // Connexion
+    const { data, error } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
 
-  if (error) {
-    alert("Erreur : " + error.message);
-    return;
-  }
+    if (error) {
+      console.error("Erreur de connexion :", error);
+      alert("Erreur : " + error.message);
+      return;
+    }
 
-  // Mise à jour UI
-  document.getElementById("authOverlay").classList.add("hidden");
-  updateAuthUI(data.user);
+    console.log("Connexion réussie, utilisateur :", data.user);
 
-  if (data.user) {
-    const pseudo = await fetchPlayerPseudo(data.user.id);
-    if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+    // Vérifie la session active
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+    if (sessionError) {
+      console.error("Erreur lors de la récupération de la session :", sessionError);
+      alert("Erreur lors de la récupération de la session.");
+      return;
+    }
+
+    console.log("Session active :", session);
+
+    // Mise à jour UI
+    document.getElementById("authOverlay").classList.add("hidden");
+
+    // Met à jour l'UI avec les informations de l'utilisateur
+    await updateAuthUI(data.user).catch(err => {
+      console.error("Erreur dans updateAuthUI :", err);
+    });
+
+    // Récupère et stocke le pseudo
+    if (data.user) {
+      const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
+        console.error("Erreur lors de la récupération du pseudo :", err);
+        return null;
+      });
+      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+    }
+  } catch (err) {
+    console.error("Erreur inattendue lors de la connexion :", err);
+    alert("Une erreur inattendue est survenue.");
   }
 });
 
