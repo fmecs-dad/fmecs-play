@@ -1196,11 +1196,11 @@ function appendHistoryEntry(points, activeCount) {
 // ===============================
 
 function undoLastMove() {
-  resumeGame()
   if (validatedSegments.length === 0) return;
 
   const last = validatedSegments.pop();
 
+  resumeGame()
   undoCount++;
   autoSave();
   document.getElementById("undoCount").textContent = undoCount;
