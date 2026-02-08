@@ -2120,8 +2120,26 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 1. Création du compte (v2)
-  const { data: signUpData, error: signUpError } = await supa.auth.signUp({
+  // Vérification pseudo unique
+  const { data: existing, error: checkError } = await supa
+    .from("players")
+    .select("id")
+    .eq("pseudo", pseudo)
+    .maybeSingle();
+
+  if (checkError) {
+    console.error("Erreur SELECT pseudo :", checkError);
+    alert("Erreur interne lors de la vérification du pseudo.");
+    return;
+  }
+
+  if (existing) {
+    alert("Ce pseudo est déjà pris.");
+    return;
+  }
+
+  // 1. Création du compte
+  const { user, session, error: signUpError } = await supa.auth.signUp({
     email,
     password: crypto.randomUUID()
   });
@@ -2132,33 +2150,19 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 2. Récupérer la session
-  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
-  
-  if (sessionError || !sessionData.session) {
+  // 2. Attendre la session (bug supabase-js v1)
+  await new Promise(resolve => setTimeout(resolve, 300));
+
+  // 3. Récupérer la session fraîche
+  const { data: { session: freshSession }, error: sessionError } = await supa.auth.getSession();
+
+  if (sessionError || !freshSession) {
+    console.error("Erreur récupération session :", sessionError);
     alert("Impossible de récupérer la session après l'inscription.");
     return;
   }
 
-  const userId = sessionData.session.user.id;
-
-  // 3. Vérifier pseudo unique
-  const { data: existing, error: checkError } = await supa
-    .from("players")
-    .select("id")
-    .eq("pseudo", pseudo)
-    .maybeSingle();
-
-  if (checkError && checkError.code !== "PGRST116") {
-    console.error("Erreur SELECT pseudo :", checkError);
-    alert("Erreur interne lors de la vérification du pseudo.");
-    return;
-  }
-
-  if (existing) {
-    alert("Ce pseudo est déjà pris.");
-    return;
-  }
+  const userId = freshSession.user.id;
 
   // 4. Insertion dans players
   const { error: insertError } = await supa
@@ -2171,21 +2175,25 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     });
 
   if (insertError) {
-    console.error("Erreur INSERT player :", insertError);
     alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
 
-  // 5. Mise à jour UI
-  updateAuthUI(sessionData.session.user);
+  // 5. Attendre que Supabase synchronise le cookie REST
+  await new Promise(resolve => setTimeout(resolve, 200));
 
-  // 6. Fermeture modals
+  // 6. Mise à jour UI
+  updateAuthUI(freshSession.user);
+
+  // 7. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
+
 });
+
 
 // --- LOGIN ---
 
