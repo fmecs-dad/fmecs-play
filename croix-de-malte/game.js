@@ -110,11 +110,12 @@ async function updateAuthUI(user = null) {
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
   const btn = document.getElementById("authBtn");
-
+console.log("entré dans updateAuthUI")
   if (btn) btn.style.display = "none";
-
+console.log("1 entré dans updateAuthUI")
   // ÉTAT DÉCONNECTÉ
   if (!user) {
+console.log("2 entré dans updateAuthUI")
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
     return;
@@ -1781,8 +1782,8 @@ function initialFlow(user) {
   // 5. Fallback (ne devrait jamais arriver)
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
-  
 }
+
 function showReadyModal(source) {
   const modal = document.getElementById("readyModal");
   modal.classList.remove("hidden");
