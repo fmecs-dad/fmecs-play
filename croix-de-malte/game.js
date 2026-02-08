@@ -2120,16 +2120,16 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // Vérification pseudo unique
+  // 1. Vérification pseudo unique
   const { data: existing, error: checkError } = await supa
     .from("players")
     .select("id")
     .eq("pseudo", pseudo)
     .maybeSingle();
 
-  if (checkError) {
+  if (checkError && checkError.code !== "PGRST116") {
     console.error("Erreur SELECT pseudo :", checkError);
-    alert("Erreur interne lors de la vérification du pseudo.");
+    alert("Erreur interne.");
     return;
   }
 
@@ -2138,10 +2138,10 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 1. Création du compte
+  // 2. Création du compte (v2)
   const { data: signUpData, error: signUpError } = await supa.auth.signUp({
     email,
-    password: crypto.randomUUID()
+    password: crypto.randomUUID() // Mot de passe aléatoire
   });
 
   if (signUpError) {
@@ -2150,40 +2150,18 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 2. Attendre la session (bug supabase-js v1)
-  await new Promise(resolve => setTimeout(resolve, 300));
+  // 3. Récupérer la session (v2)
+  const { data: { session }, error: sessionError } = await supa.auth.getSession();
 
-  // 3. Récupérer la session fraîche
-  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
-
-  if (sessionError || !sessionData.session) {
+  if (sessionError || !session) {
     console.error("Erreur récupération session :", sessionError);
-    alert("Impossible de récupérer la session après l'inscription.");
+    alert("Impossible de récupérer la session.");
     return;
   }
 
-  const userId = sessionData.session.user.id;
+  const userId = session.user.id;
 
-  // 4. Vérifier pseudo unique (MAINTENANT que tu es connecté)
-  const { data: existing, error: checkError } = await supa
-    .from("players")
-    .select("id")
-    .eq("pseudo", pseudo)
-    .maybeSingle();
-
-
-  if (checkError && checkError.code !== "PGRST116") {
-    console.error("Erreur SELECT pseudo :", checkError);
-    alert("Erreur interne lors de la vérification du pseudo.");
-    return;
-  }
-
-  if (existing) {
-    alert("Ce pseudo est déjà pris.");
-    return;
-  }
-
-  // 5. Insertion dans players
+  // 4. Insertion dans players
   const { error: insertError } = await supa
     .from("players")
     .insert({
@@ -2198,18 +2176,18 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
-  
-  // 6. Mise à jour UI
-  updateAuthUI(sessionData.session.user);
 
-  // 7. Fermeture modals
+  // 5. Mise à jour UI
+  updateAuthUI(session.user);
+
+  // 6. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
-
 });
+
 
 
 // --- LOGIN ---
@@ -2233,25 +2211,26 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
 
   localStorage.setItem("lastEmail", email);
 
-  const { user, error } = await supa.auth.signIn({ email, password });
+  // Connexion (v2)
+  const { data, error } = await supa.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error) {
     alert("Erreur : " + error.message);
     return;
   }
 
-  // --- CORRECTION ICI ---
+  // Mise à jour UI
   document.getElementById("authOverlay").classList.add("hidden");
+  updateAuthUI(data.user);
 
-  const session = supa.auth.session();
-  updateAuthUI(session?.user || null);
-
-  if (session?.user) {
-    const pseudo = await fetchPlayerPseudo(session.user.id);
+  if (data.user) {
+    const pseudo = await fetchPlayerPseudo(data.user.id);
     if (pseudo) localStorage.setItem("playerPseudo", pseudo);
   }
 });
-
 
   // ===============================
   //   WHY SIGNUP
@@ -2290,27 +2269,25 @@ function launchFlowOnce(userFromEvent) {
 }
 
 
-  // Événements Supabase v1
-  supa.auth.onAuthStateChange((event, session) => {
+  // Écoute les changements d'authentification (v2)
+supa.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_IN") {
+    if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+    launchFlowOnce(session?.user || null);
+  }
 
-    if (event === "SIGNED_IN") {
-      if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
-      launchFlowOnce(session?.user || null);
-    }
+  if (event === "SIGNED_OUT") {
+    if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+    launchFlowOnce(null);
+  }
+});
 
-    if (event === "SIGNED_OUT") {
-      if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
-      launchFlowOnce(null);
-    }
-  });
+// Sécurité : lancer même sans event
+initialFlowTimeout = setTimeout(async () => {
+  const { data: { session } } = await supa.auth.getSession();
+  const user = session?.user || null;
+  launchFlowOnce(user);
+}, 300);
 
-  // Sécurité : lancer même sans event
-  initialFlowTimeout = setTimeout(() => {
-
-    const session = supa.auth.session();
-    const user = session?.user || null;
-
-    launchFlowOnce(user);
-  }, 300);
 
 });
