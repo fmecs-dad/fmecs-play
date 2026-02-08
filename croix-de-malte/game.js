@@ -255,11 +255,16 @@ function openHelpOverlay(auto = false) {
   }
 
   if (session) {
+console.log("initialisation")
     await initialiserProfilEtLancerJeu(session);
+console.log("Fin de l'init")
   }
 
   // Met à jour l'UI avec l'utilisateur de la session (ou null)
+console.log("UpdateAuthUI")
   updateAuthUI(session?.user || null);
+console.log("fin UpdateAuthUI")
+
 })();
 
 
