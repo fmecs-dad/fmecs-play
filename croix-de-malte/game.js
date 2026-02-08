@@ -203,30 +203,24 @@ async function ouvrirProfil() {
 
 supa.auth.onAuthStateChange(async (event, session) => {
   if (event === "SIGNED_IN") {
+    // En v2, on utilise `getSession()` pour récupérer la session fraîche
+    const { data: { session: freshSession }, error } = await supa.auth.getSession();
 
-    // On attend que la session soit réellement disponible
-    let fresh = null;
-    for (let i = 0; i < 10; i++) {
-      const s = supa.auth.session();
-      if (s?.user) {
-        fresh = s;
-        break;
-      }
-      await new Promise(r => setTimeout(r, 50));
+    if (error) {
+      console.error("Erreur lors de la récupération de la session :", error);
+      updateAuthUI(null);
+      return;
     }
 
-    const user = fresh?.user || null;
-
-    await initialiserProfilEtLancerJeu(fresh || null);
-
+    const user = freshSession?.user || null;
+    await initialiserProfilEtLancerJeu(freshSession || null);
     updateAuthUI(user);
     return;
   }
 
-  // SIGNED_OUT ou autres
+  // Pour SIGNED_OUT ou autres événements
   updateAuthUI(session?.user || null);
 });
-
 
 // --------------------------------------------------
 // AIDE
