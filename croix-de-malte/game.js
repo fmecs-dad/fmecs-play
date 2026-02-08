@@ -2282,7 +2282,7 @@ function launchFlowOnce(userFromEvent) {
   handleFirstLaunchFlow(userFromEvent);
 }
 
-
+console.log("flux initial")
   // Écoute les changements d'authentification (v2)
 supa.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_IN") {
