@@ -157,16 +157,25 @@ function lancerJeuComplet() {
 async function initialiserProfilEtLancerJeu(session) {
   if (!session) return;
 
-  const userId = session.user.id;
+  try {
+    const userId = session.user.id;
+    const { data: player, error } = await supa
+      .from("players")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", userId)
-    .single();
+    if (error) {
+      console.error("Erreur lors de la récupération du joueur :", error);
+      return;
+    }
 
-  if (player?.pseudo) {
-    localStorage.setItem("playerPseudo", player.pseudo);
+    if (player?.pseudo) {
+      localStorage.setItem("playerPseudo", player.pseudo);
+      console.log("Profil initialisé avec succès pour :", player.pseudo);
+    }
+  } catch (err) {
+    console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
   }
 }
 
@@ -2173,7 +2182,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     return;
   }
 
-  // 3. Récupérer la session (v2)
+  // 3. Récupérer la session 
   const { data: { session }, error: sessionError } = await supa.auth.getSession();
 
   if (sessionError || !session) {
@@ -2234,7 +2243,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
 
   localStorage.setItem("lastEmail", email);
 
-  // Connexion (v2)
+  // Connexion 
   const { data, error } = await supa.auth.signInWithPassword({
     email,
     password
