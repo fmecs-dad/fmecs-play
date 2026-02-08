@@ -113,13 +113,8 @@ async function fetchPlayerPseudo(userId) {
 // ===============================
 
 async function updateAuthUI(user = null) {
-  console.log("Mise à jour de l'UI avec l'utilisateur :", user); // Log pour vérifier l'utilisateur
-
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
-
-  console.log("burgerAuthBtn :", burgerAuthBtn); // Log pour vérifier l'élément
-  console.log("burgerPseudo :", burgerPseudo);  // Log pour vérifier l'élément
 
   if (!user) {
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
@@ -133,13 +128,15 @@ async function updateAuthUI(user = null) {
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
-    const pseudo = await fetchPlayerPseudo(user.id);
-    if (pseudo && burgerPseudo) {
-      burgerPseudo.textContent = pseudo;
-      localStorage.setItem("playerPseudo", pseudo);
+    if (user) {
+      const pseudo = await fetchPlayerPseudo(user.id);
+      if (pseudo && burgerPseudo) {
+        burgerPseudo.textContent = pseudo;
+        localStorage.setItem("playerPseudo", pseudo);
+      }
     }
   } catch (err) {
-    console.warn("⚠️ Impossible de récupérer le pseudo :", err);
+    console.error("Impossible de récupérer le pseudo :", err);
   }
 }
 
@@ -169,13 +166,17 @@ async function initialiserProfilEtLancerJeu(session) {
       .eq("id", userId)
       .single();
 
-    if (error) {
+    if (error && error.code !== "PGRST116") {
       console.error("Erreur lors de la récupération du joueur :", error);
       return;
     }
 
-    if (player?.pseudo) {
+    if (!player) {
+      console.log("Nouveau joueur détecté, affichage de l'aide...");
+      openHelpOverlay(true);
+    } else {
       localStorage.setItem("playerPseudo", player.pseudo);
+      console.log("Profil initialisé avec succès pour :", player.pseudo);
     }
   } catch (err) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
@@ -210,6 +211,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
 
   if (event === "SIGNED_IN") {
     const user = session?.user || null;
+    console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
     return;
