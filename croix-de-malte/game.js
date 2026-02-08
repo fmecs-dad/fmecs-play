@@ -1739,46 +1739,60 @@ let gameStarted = false; // global
 
 
 function initialFlow(user) {
+  console.log("initialFlow appelé avec user :", user);
 
   updateAuthUI(user);
 
   const lastEmail = localStorage.getItem("lastEmail");
   const skip = localStorage.getItem("skipWhySignup") === "1";
 
+  console.log("lastEmail :", lastEmail);
+  console.log("skip :", skip);
+
   // 1. Utilisateur connecté → readyModal
   if (user) {
+    console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
     return;
   }
 
   // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
   if (skip) {
+    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
     showReadyModal("skipWhySignup");
     return;
   }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
+    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
   if (!lastEmail) {
+    console.log("Nouveau joueur, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 5. Fallback (ne devrait jamais arriver)
+  console.log("Fallback, affichage de authOverlay...");
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
 }
 
-function showReadyModal(source) {
+function showReadyModal(reason) {
+  console.log(`Affichage de readyModal pour la raison : ${reason}`);
   const modal = document.getElementById("readyModal");
-  modal.classList.remove("hidden");
+  if (modal) {
+    modal.classList.remove("hidden");
+    console.log("readyModal affichée.");
+  } else {
+    console.error("Élément readyModal non trouvé dans le DOM.");
+  }
 }
-
 function closeReady() {
   document.getElementById("readyModal").classList.add("hidden");
 }
