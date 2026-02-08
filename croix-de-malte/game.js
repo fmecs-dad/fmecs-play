@@ -2139,7 +2139,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   // 1. Création du compte
-  const { user, session, error: signUpError } = await supa.auth.signUp({
+  const { data: signUpData, error: signUpError } = await supa.auth.signUp({
     email,
     password: crypto.randomUUID()
   });
@@ -2154,17 +2154,36 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   await new Promise(resolve => setTimeout(resolve, 300));
 
   // 3. Récupérer la session fraîche
-  const { data: { session: freshSession }, error: sessionError } = await supa.auth.getSession();
+  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
 
-  if (sessionError || !freshSession) {
+  if (sessionError || !sessionData.session) {
     console.error("Erreur récupération session :", sessionError);
     alert("Impossible de récupérer la session après l'inscription.");
     return;
   }
 
-  const userId = freshSession.user.id;
+  const userId = sessionData.session.user.id;
 
-  // 4. Insertion dans players
+  // 4. Vérifier pseudo unique (MAINTENANT que tu es connecté)
+  const { data: existing, error: checkError } = await supa
+    .from("players")
+    .select("id")
+    .eq("pseudo", pseudo)
+    .maybeSingle();
+
+
+  if (checkError && checkError.code !== "PGRST116") {
+    console.error("Erreur SELECT pseudo :", checkError);
+    alert("Erreur interne lors de la vérification du pseudo.");
+    return;
+  }
+
+  if (existing) {
+    alert("Ce pseudo est déjà pris.");
+    return;
+  }
+
+  // 5. Insertion dans players
   const { error: insertError } = await supa
     .from("players")
     .insert({
@@ -2175,15 +2194,13 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     });
 
   if (insertError) {
+    console.error("Erreur INSERT player :", insertError);
     alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
-
-  // 5. Attendre que Supabase synchronise le cookie REST
-  await new Promise(resolve => setTimeout(resolve, 200));
-
+  
   // 6. Mise à jour UI
-  updateAuthUI(freshSession.user);
+  updateAuthUI(sessionData.session.user);
 
   // 7. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
