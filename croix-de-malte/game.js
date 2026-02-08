@@ -258,6 +258,8 @@ function openHelpOverlay(auto = false) {
 
 (async () => {
   // Récupère la session de manière asynchrone
+console.log("0 Session au démarrage")
+
   const { data: { session }, error } = await supa.auth.getSession();
 
   if (error) {
