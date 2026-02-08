@@ -269,7 +269,7 @@ function openHelpOverlay(auto = false) {
   }
 
   // Met à jour l'UI avec l'utilisateur de la session (ou null)
-
+console.log("Session au démarrage")
   updateAuthUI(session.user);
 
 
