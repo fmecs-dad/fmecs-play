@@ -1196,6 +1196,7 @@ function appendHistoryEntry(points, activeCount) {
 // ===============================
 
 function undoLastMove() {
+  pauseGame()
   if (validatedSegments.length === 0) return;
 
   const last = validatedSegments.pop();
