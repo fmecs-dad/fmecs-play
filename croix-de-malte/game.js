@@ -1782,7 +1782,7 @@ function initialFlow(user) {
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
   }
-
+}
 function showReadyModal(source) {
   const modal = document.getElementById("readyModal");
   modal.classList.remove("hidden");
