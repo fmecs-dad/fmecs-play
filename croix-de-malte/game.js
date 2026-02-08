@@ -220,7 +220,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
     //  await new Promise(r => setTimeout(r, 50));
     //}
 
-    const user = fresh?.user || null;
+    //const user = fresh?.user || null;
 
     await initialiserProfilEtLancerJeu(fresh || null);
 
