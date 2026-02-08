@@ -1781,7 +1781,7 @@ function initialFlow(user) {
   // 5. Fallback (ne devrait jamais arriver)
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
-  }
+  
 }
 function showReadyModal(source) {
   const modal = document.getElementById("readyModal");
@@ -1963,9 +1963,9 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   // ===============================
 
   document.getElementById("closeHelpBtn").addEventListener("click", () => {
-  playClickSound();
-  closeHelp();
-});
+    playClickSound();
+    closeHelp();
+  });
 
 
   // ===============================
@@ -2164,21 +2164,6 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   if (existing) {
     alert("Ce pseudo est déjà pris.");
-    return;
-  }
-  
-  const { error: insertError } = await supa
-    .from("players")
-    .insert({
-      id: userId,
-      pseudo: pseudo,
-      created_at: new Date().toISOString(),
-      premium: false
-    });
-
-  if (insertError) {
-    console.error("Erreur INSERT player :", insertError);
-    alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
 
