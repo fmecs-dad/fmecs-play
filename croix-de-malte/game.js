@@ -2281,6 +2281,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
 function launchFlowOnce(userFromEvent) {
   if (flowAlreadyLaunched) return;   
   flowAlreadyLaunched = true;
+  console.log("Lancement du flux initial avec user :", userFromEvent);
 
   handleFirstLaunchFlow(userFromEvent);
 }
