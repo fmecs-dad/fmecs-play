@@ -88,6 +88,7 @@ function playSound(id) {
 // ===============================
 
 async function fetchPlayerPseudo(userId) {
+console.log("1 fetch")
   const { data, error } = await supa
     .from("players")
     .select("pseudo")
@@ -156,6 +157,7 @@ function lancerJeuComplet() {
 }
 
 async function initialiserProfilEtLancerJeu(session) {
+console.log("1 initialiser")
   if (!session) return;
 
   try {
@@ -204,7 +206,7 @@ async function ouvrirProfil() {
 // ===============================
 
 supa.auth.onAuthStateChange(async (event, session) => {
-
+console.log("1 listener")
   if (event === "SIGNED_IN") {
 
     // On attend que la session soit réellement disponible
