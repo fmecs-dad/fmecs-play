@@ -1984,12 +1984,12 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   });
 
   // ===============================
-//   AUTH BURGER (v1)
-// ===============================
+  //   AUTH BURGER (v1)
+  // ===============================
 
-const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+ const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-if (burgerAuthBtn) {
+ if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
     playClickSound();
 
@@ -2007,7 +2007,7 @@ if (burgerAuthBtn) {
     await supa.auth.signOut();
     updateAuthUI();
   });
-}
+ }
 
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
@@ -2106,30 +2106,30 @@ if (burgerAuthBtn) {
     document.getElementById("profileModal").style.display = "none";
   });
 
-// ===============================
-//   AUTHENTIFICATION (v1)
-// ===============================
+ // ===============================
+ //   AUTHENTIFICATION (v1)
+ // ===============================
 
-document.getElementById("closeAuthBtn").addEventListener("click", () => {
+ document.getElementById("closeAuthBtn").addEventListener("click", () => {
   playClickSound();
   closeLogin();
-});
+ });
 
-// --- SIGNUP ---
+ // --- SIGNUP ---
 
-document.getElementById("signupBtn").addEventListener("click", () => {
+ document.getElementById("signupBtn").addEventListener("click", () => {
   playClickSound();
   const modal = document.getElementById("signupModal");
   modal.classList.remove("hidden");
-});
+ });
 
-document.getElementById("signupCloseBtn").addEventListener("click", () => {
+ document.getElementById("signupCloseBtn").addEventListener("click", () => {
   playClickSound();
   const modal = document.getElementById("signupModal");
   modal.classList.add("hidden");   // ❗ suppression du style.display
-});
+ });
 
-document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+ document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
   const email = document.getElementById("authEmail").value.trim();
@@ -2194,13 +2194,13 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
-});
+ });
 
 
 
-// --- LOGIN ---
+ // --- LOGIN ---
 
-document.getElementById("loginBtn").addEventListener("click", async (e) => {
+ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
   playClickSound();
 
@@ -2264,7 +2264,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     console.error("Erreur inattendue lors de la connexion :", err);
     alert("Une erreur inattendue est survenue.");
   }
-});
+  });
 
   // ===============================
   //   WHY SIGNUP
@@ -2274,7 +2274,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   playClickSound();
   closeWhySignup();
   document.getElementById("authOverlay").classList.remove("hidden");
-});
+  });
 
 
   document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
@@ -2285,7 +2285,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
 
   closeWhySignup();
   document.getElementById("readyModal").classList.remove("hidden");
-});
+ });
 
 
   // ===============================
@@ -2295,15 +2295,15 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   let flowAlreadyLaunched = false;
   let initialFlowTimeout = null;
 
-function launchFlowOnce(userFromEvent) {
+ function launchFlowOnce(userFromEvent) {
   if (flowAlreadyLaunched) return;   
   flowAlreadyLaunched = true;
 
   handleFirstLaunchFlow(userFromEvent);
-}
+ }
 
   // Écoute les changements d'authentification (v2)
-supa.auth.onAuthStateChange((event, session) => {
+ supa.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_IN") {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
     launchFlowOnce(session?.user || null);
@@ -2313,14 +2313,14 @@ supa.auth.onAuthStateChange((event, session) => {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
     launchFlowOnce(null);
   }
-});
+ });
 
-// Sécurité : lancer même sans event
-initialFlowTimeout = setTimeout(async () => {
+ // Sécurité : lancer même sans event
+ initialFlowTimeout = setTimeout(async () => {
   const { data: { session } } = await supa.auth.getSession();
   const user = session?.user || null;
   launchFlowOnce(user);
-}, 300);
+ }, 300);
 
 
 });
