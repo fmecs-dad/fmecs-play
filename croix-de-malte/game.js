@@ -206,18 +206,11 @@ async function ouvrirProfil() {
 // ===============================
 
 supa.auth.onAuthStateChange(async (event, session) => {
+  console.log(`Événement d'authentification : ${event}, session :`, session);
+
   if (event === "SIGNED_IN") {
-    // En v2, on utilise `getSession()` pour récupérer la session fraîche
-    const { data: { session: freshSession }, error } = await supa.auth.getSession();
-
-    if (error) {
-      console.error("Erreur lors de la récupération de la session :", error);
-      updateAuthUI(null);
-      return;
-    }
-
-    const user = freshSession?.user || null;
-    await initialiserProfilEtLancerJeu(freshSession || null);
+    const user = session?.user || null;
+    await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
     return;
   }
@@ -252,28 +245,23 @@ function openHelpOverlay(auto = false) {
 // ===============================
 
 (async () => {
-  // Récupère la session de manière asynchrone
+  try {
+    const { data: { session }, error } = await supa.auth.getSession();
 
-  const { data: { session }, error } = await supa.auth.getSession();
+    if (error) {
+      console.error("Erreur lors de la récupération de la session :", error);
+    }
 
-  if (error) {
-    console.error("Erreur lors de la récupération de la session :", error);
+    if (session) {
+      console.log("Session récupérée au démarrage :", session);
+      await initialiserProfilEtLancerJeu(session);
+    }
+
+    updateAuthUI(session?.user || null);
+  } catch (err) {
+    console.error("Erreur inattendue au démarrage :", err);
   }
-  
-  updateAuthUI(session?.user || null);
-
-  if (session) {
-
-    await initialiserProfilEtLancerJeu(session);
-  }
-
-  // Met à jour l'UI avec l'utilisateur de la session (ou null)
-
-  //updateAuthUI(session.user);
-
-
 })();
-
 
 // ===============================	
 //   VARIABLES DE JEU
