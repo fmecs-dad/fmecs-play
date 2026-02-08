@@ -2276,13 +2276,13 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   let initialFlowTimeout = null;
 
 function launchFlowOnce(userFromEvent) {
+console.log("flux launch")
   if (flowAlreadyLaunched) return;   
   flowAlreadyLaunched = true;
 
   handleFirstLaunchFlow(userFromEvent);
 }
 
-console.log("flux initial")
   // Écoute les changements d'authentification (v2)
 supa.auth.onAuthStateChange((event, session) => {
   if (event === "SIGNED_IN") {
