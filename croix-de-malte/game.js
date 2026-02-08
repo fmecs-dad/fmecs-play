@@ -1753,6 +1753,7 @@ let gameStarted = false; // global
 
 
 function initialFlow(user) {
+console.log("1 initial flow")
   updateAuthUI(user);
 
   const lastEmail = localStorage.getItem("lastEmail");
