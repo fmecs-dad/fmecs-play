@@ -92,7 +92,7 @@ async function fetchPlayerPseudo(userId) {
     .from("players")
     .select("pseudo")
     .eq("id", userId)
-    .single(); // Utilise .single() pour récupérer un seul enregistrement
+    .single();
 
   if (error) {
     console.error("Erreur fetchPlayerPseudo :", error);
