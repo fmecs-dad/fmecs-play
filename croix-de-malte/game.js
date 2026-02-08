@@ -206,23 +206,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
 
   if (event === "SIGNED_IN") {
     // Charge les données utilisateur depuis Supabase - fonction @2
-    loadUserData(session.user.id);
-
-    // Fonction @1
-    //// On attend que la session soit réellement disponible
-    //let fresh = null;
-    //for (let i = 0; i < 10; i++) {
-    //  //const s = supa.onAuthStateChange();
-    //  if (s?.user) {
-    //    fresh = s;
-    //    break;
-    //  }
-    //  await new Promise(r => setTimeout(r, 50));
-    //}
-
-    //const user = fresh?.user || null;
-
-    await initialiserProfilEtLancerJeu(fresh || null);
+    initialiserProfilEtLancerJeu(session.user.id);
 
     updateAuthUI(user);
     return;
