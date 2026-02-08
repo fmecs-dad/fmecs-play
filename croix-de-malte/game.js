@@ -171,7 +171,7 @@ async function initialiserProfilEtLancerJeu(session) {
 }
 
 async function ouvrirProfil() {
-  const session = supa.auth.session();
+  const { data: { session }, error } = await supa.auth.getSession();
   const user = session?.user || null;
 
   if (!user) return;
@@ -255,15 +255,13 @@ function openHelpOverlay(auto = false) {
   }
 
   if (session) {
-console.log("initialisation")
     await initialiserProfilEtLancerJeu(session);
-console.log("Fin de l'init")
   }
 
   // Met à jour l'UI avec l'utilisateur de la session (ou null)
-console.log("UpdateAuthUI")
-  updateAuthUI(session?.user || null);
-console.log("fin UpdateAuthUI")
+
+  updateAuthUI(session.user);
+
 
 })();
 
@@ -1823,7 +1821,15 @@ function closeWhySignup() {
 //   DOMContentLoaded
 // ===============================
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  // Vérifie la session au démarrage
+  const { data: { session }, error } = await supa.auth.getSession();
+  if (session) {
+    await initialiserProfilEtLancerJeu(session);
+    updateAuthUI(session.user);
+  } else {
+    updateAuthUI(null);
+  }
 
 //enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
 enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
@@ -2166,18 +2172,6 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
     alert("Erreur lors de l’enregistrement du joueur.");
     return;
   }
-
-  //// 2. Création du compte (v2)
-  //const { data: signUpData, error: signUpError } = await supa.auth.signUp({
-  //  email,
-  //  password: crypto.randomUUID() // Mot de passe aléatoire
-  //});
-  //
-  //if (signUpError) {
-  //  console.error("Erreur signUp :", signUpError);
-  //  alert("Erreur : " + signUpError.message);
-  //  return;
-  //}
 
   // 3. Récupérer la session (v2)
   const { data: { session }, error: sessionError } = await supa.auth.getSession();
