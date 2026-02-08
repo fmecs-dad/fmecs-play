@@ -202,25 +202,6 @@ async function ouvrirProfil() {
   modal.classList.remove("hidden");
 }
 
-// ===============================
-//   LISTENER AUTH SUPABASE (v1)
-// ===============================
-
-supa.auth.onAuthStateChange(async (event, session) => {
-  console.log(`Événement d'authentification : ${event}, session :`, session);
-
-  if (event === "SIGNED_IN") {
-    const user = session?.user || null;
-    console.log("Utilisateur connecté :", user);
-    await initialiserProfilEtLancerJeu(session);
-    updateAuthUI(user);
-    return;
-  }
-
-  // Pour SIGNED_OUT ou autres événements
-  updateAuthUI(session?.user || null);
-});
-
 // --------------------------------------------------
 // AIDE
 // --------------------------------------------------
@@ -2306,35 +2287,43 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   //   FLUX INITIAL 
   // ===============================
 
-  let flowAlreadyLaunched = false;
-  let initialFlowTimeout = null;
+let flowAlreadyLaunched = false;
+let initialFlowTimeout = null;
 
- function launchFlowOnce(userFromEvent) {
-  if (flowAlreadyLaunched) return;   
+function launchFlowOnce(userFromEvent) {
+  if (flowAlreadyLaunched) return;
   flowAlreadyLaunched = true;
-
   handleFirstLaunchFlow(userFromEvent);
- }
+}
 
-  // Écoute les changements d'authentification (v2)
- supa.auth.onAuthStateChange((event, session) => {
+supa.auth.onAuthStateChange(async (event, session) => {
+  console.log(`Événement d'authentification : ${event}, session :`, session);
+
   if (event === "SIGNED_IN") {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
-    launchFlowOnce(session?.user || null);
+    const user = session?.user || null;
+    console.log("Utilisateur connecté :", user);
+    await initialiserProfilEtLancerJeu(session);
+    updateAuthUI(user);
+    launchFlowOnce(user);
+    return;
   }
 
   if (event === "SIGNED_OUT") {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+    updateAuthUI(null);
     launchFlowOnce(null);
   }
- });
+});
 
- // Sécurité : lancer même sans event
- initialFlowTimeout = setTimeout(async () => {
+// Sécurité : lancer même sans événement
+initialFlowTimeout = setTimeout(async () => {
   const { data: { session } } = await supa.auth.getSession();
   const user = session?.user || null;
+  console.log("Vérification de la session au démarrage :", user);
+  updateAuthUI(user);
   launchFlowOnce(user);
- }, 300);
+}, 300);
 
 
 });
