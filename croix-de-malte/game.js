@@ -249,8 +249,8 @@ function openHelpOverlay(auto = false) {
   window.helpAutoOpened = auto;
 }
 
-// ===============================
-//   SESSION AU DÉMARRAGE (v2)
+// ===============================	
+//   SESSION AU DÉMARRAGE 
 // ===============================
 
 (async () => {
@@ -261,6 +261,8 @@ function openHelpOverlay(auto = false) {
   if (error) {
     console.error("Erreur lors de la récupération de la session :", error);
   }
+  
+  updateAuthUI(session?.user || null);
 
   if (session) {
 
