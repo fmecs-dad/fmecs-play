@@ -92,18 +92,21 @@ async function fetchPlayerPseudo(userId) {
     .from("players")
     .select("pseudo")
     .eq("id", userId)
-    .single();
+    .single(); // Utilise .single() pour récupérer un seul enregistrement
 
-  if (error) return null;
-  return data.pseudo;
+  if (error) {
+    console.error("Erreur fetchPlayerPseudo :", error);
+    return null;
+  }
+
+  return data?.pseudo || null;
 }
 
 // ===============================
-//   UPDATE AUTH UI (VERSION FINALE)
+//   UPDATE AUTH UI (V2)
 // ===============================
 
-function updateAuthUI(user = null) {
-
+async function updateAuthUI(user = null) {
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
   const btn = document.getElementById("authBtn");
@@ -120,20 +123,20 @@ function updateAuthUI(user = null) {
   // ÉTAT CONNECTÉ
   if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
 
-  // Valeur par défaut immédiate
+  // Valeur par défaut immédiate (depuis localStorage)
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
-  // Mise à jour asynchrone
-  fetchPlayerPseudo(user.id)
-    .then(pseudo => {
-      if (!pseudo) return;
-      if (burgerPseudo) burgerPseudo.textContent = pseudo;
+  // Mise à jour asynchrone du pseudo depuis Supabase
+  try {
+    const pseudo = await fetchPlayerPseudo(user.id);
+    if (pseudo && burgerPseudo) {
+      burgerPseudo.textContent = pseudo;
       localStorage.setItem("playerPseudo", pseudo);
-    })
-    .catch(err => {
-      console.warn("⚠️ fetchPlayerPseudo a échoué :", err);
-    });
+    }
+  } catch (err) {
+    console.warn("⚠️ Impossible de récupérer le pseudo :", err);
+  }
 }
 
 // ===============================
