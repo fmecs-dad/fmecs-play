@@ -2279,9 +2279,10 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   let initialFlowTimeout = null;
 
 function launchFlowOnce(userFromEvent) {
+console.log("1 Lancement du flux initial avec user :", userFromEvent);
   if (flowAlreadyLaunched) return;   
   flowAlreadyLaunched = true;
-  console.log("Lancement du flux initial avec user :", userFromEvent);
+  console.log("2 Lancement du flux initial avec user :", userFromEvent);
 
   handleFirstLaunchFlow(userFromEvent);
 }
