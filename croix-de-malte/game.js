@@ -2287,7 +2287,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
 
 
   // ===============================
-  //   FLUX INITIAL (SUPABASE v1)
+  //   FLUX INITIAL 
   // ===============================
 
   let flowAlreadyLaunched = false;
