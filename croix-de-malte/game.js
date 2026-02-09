@@ -91,7 +91,7 @@ function playSound(id) {
 // Dans la fonction fetchPlayerPseudo
 async function fetchPlayerPseudo(userId) {
   try {
-    console.log("Récupération du pseudo pour l'utilisateur :", userId);
+    //console.log("Récupération du pseudo pour l'utilisateur :", userId);
     const { data, error } = await supa
       .from("players")
       .select("pseudo")
@@ -103,7 +103,7 @@ async function fetchPlayerPseudo(userId) {
       return null;
     }
 
-    console.log("Pseudo récupéré :", data?.pseudo);
+    //console.log("Pseudo récupéré :", data?.pseudo);
     return data?.pseudo || null;
   } catch (err) {
     console.error("Erreur inattendue dans fetchPlayerPseudo :", err);
@@ -116,7 +116,7 @@ async function fetchPlayerPseudo(userId) {
 // ===============================
 
 async function updateAuthUI(user = null) {
-  console.log("Mise à jour de l'UI avec l'utilisateur :", user);
+  //console.log("Mise à jour de l'UI avec l'utilisateur :", user);
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
@@ -134,7 +134,7 @@ async function updateAuthUI(user = null) {
   try {
     if (user) {
       const pseudo = await fetchPlayerPseudo(user.id);
-      console.log("Pseudo après récupération :", pseudo);
+      //console.log("Pseudo après récupération :", pseudo);
       if (pseudo && burgerPseudo) {
         burgerPseudo.textContent = pseudo;
         localStorage.setItem("playerPseudo", pseudo);
@@ -1731,7 +1731,8 @@ let gameStarted = false; // global
 
 
 function initialFlow(user) {
-  console.log("initialFlow appelé avec user :", user);
+  
+//console.log("initialFlow appelé avec user :", user);
 
   let lastEmail;
   let skip;
@@ -1745,39 +1746,39 @@ function initialFlow(user) {
     skip = false;
   }
 
-  console.log("lastEmail :", lastEmail);
-  console.log("skip :", skip);
+  //console.log("lastEmail :", lastEmail);
+  //console.log("skip :", skip);
 
   // 1. Utilisateur connecté → readyModal
   if (user) {
-    console.log("Utilisateur connecté, affichage de readyModal...");
+    //console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
     return;
   }
 
   // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
   if (skip) {
-    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
+    //console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
     showReadyModal("skipWhySignup");
     return;
   }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
-    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
+    //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
   if (!lastEmail) {
-    console.log("Nouveau joueur, affichage de whySignupModal...");
+    //console.log("Nouveau joueur, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 5. Fallback (ne devrait jamais arriver)
-  console.log("Fallback, affichage de authOverlay...");
+  //console.log("Fallback, affichage de authOverlay...");
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
 }
@@ -2218,7 +2219,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   const userId = session.user.id;
-  console.log("ID de l'utilisateur :", userId);
+  //console.log("ID de l'utilisateur :", userId);
 
   // Vérifier si le joueur existe déjà dans la table players
   const { data: existingPlayer, error: checkPlayerError } = await supa
@@ -2237,7 +2238,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
 // Dans la fonction de confirmation de création de compte
 if (existingPlayer) {
-  console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+  //console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
 
   // Mise à jour du pseudo existant sans `updated_at`
   const { error: updateError } = await supa
@@ -2251,10 +2252,10 @@ if (existingPlayer) {
     console.error("Erreur UPDATE player :", updateError);
     alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
   } else {
-    console.log("Pseudo mis à jour avec succès dans la table players.");
+    //console.log("Pseudo mis à jour avec succès dans la table players.");
   }
 } else {
-  console.log("Insertion d'un nouveau joueur dans la table players...");
+  //console.log("Insertion d'un nouveau joueur dans la table players...");
   const { error: insertError } = await supa
     .from("players")
     .insert({
@@ -2268,7 +2269,7 @@ if (existingPlayer) {
     console.error("Erreur INSERT player :", insertError);
     alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
   } else {
-    console.log("Joueur inséré avec succès dans la table players.");
+    //console.log("Joueur inséré avec succès dans la table players.");
   }
 }
 
@@ -2302,7 +2303,7 @@ if (existingPlayer) {
   }
 
   try {
-    console.log("Tentative de connexion avec l'email :", email);
+    //console.log("Tentative de connexion avec l'email :", email);
 
     const { data, error } = await supa.auth.signInWithPassword({
       email,
@@ -2315,7 +2316,7 @@ if (existingPlayer) {
       return;
     }
 
-    console.log("Connexion réussie, utilisateur :", data.user);
+    //console.log("Connexion réussie, utilisateur :", data.user);
 
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
     if (sessionError) {
@@ -2324,7 +2325,7 @@ if (existingPlayer) {
       return;
     }
 
-    console.log("Session active :", session);
+    //console.log("Session active :", session);
 
     document.getElementById("authOverlay").classList.add("hidden");
 
@@ -2383,18 +2384,18 @@ function launchFlowOnce(userFromEvent) {
 
 // Assure-toi que cet écouteur est enregistré une seule fois
 supa.auth.onAuthStateChange(async (event, session) => {
-  console.log(`Événement d'authentification : ${event}, session :`, session);
+  //console.log(`Événement d'authentification : ${event}, session :`, session);
 
   if (event === "SIGNED_IN") {
     const user = session?.user || null;
-    console.log("Utilisateur connecté :", user);
+    //console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
     return;
   }
 
   if (event === "SIGNED_OUT") {
-    console.log("Utilisateur déconnecté");
+    //console.log("Utilisateur déconnecté");
     updateAuthUI(null);
   }
 });
