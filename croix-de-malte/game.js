@@ -2132,29 +2132,36 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
 
  document.getElementById("closeAuthBtn").addEventListener("click", () => {
   playClickSound();
-  closeLogin();
+  document.getElementById("authOverlay").classList.add("hidden");
+ });
+
+ document.getElementById("closeSignupBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.remove("hidden");
  });
 
  // --- SIGNUP ---
 
  document.getElementById("signupBtn").addEventListener("click", () => {
   playClickSound();
-  const modal = document.getElementById("signupModal");
-  modal.classList.remove("hidden");
- });
+  document.getElementById("authOverlay").classList.add("hidden");
+  document.getElementById("signupModal").classList.remove("hidden");
+});
 
- document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
   const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
   const pseudo = document.getElementById("signupPseudoInput").value.trim();
 
-  if (!email || !pseudo) {
+  if (!email || !password || !pseudo) {
     alert("Merci de remplir tous les champs.");
     return;
   }
 
-  // 1. Vérification pseudo unique
+  // Vérification pseudo unique
   const { data: existingPseudo, error: checkPseudoError } = await supa
     .from("players")
     .select("id")
@@ -2172,10 +2179,10 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  // 2. Inscription de l'utilisateur
+  // Inscription de l'utilisateur avec le mot de passe saisi
   const { data: signupData, error: signupError } = await supa.auth.signUp({
     email,
-    password: "mot_de_passe_par_defaut" // Remplace par un mot de passe sécurisé ou demande-le à l'utilisateur
+    password
   });
 
   if (signupError) {
@@ -2184,10 +2191,10 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  // 3. Connexion automatique après l'inscription
+  // Connexion automatique après l'inscription
   const { error: signinError } = await supa.auth.signInWithPassword({
     email,
-    password: "mot_de_passe_par_defaut" // Utilise le même mot de passe que pour l'inscription
+    password
   });
 
   if (signinError) {
@@ -2196,7 +2203,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  // 4. Récupérer la session après la connexion
+  // Récupérer la session après la connexion
   const { data: { session }, error: sessionError } = await supa.auth.getSession();
 
   if (sessionError || !session) {
@@ -2206,9 +2213,9 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   }
 
   const userId = session.user.id;
-  console.log("ID de l'utilisateur :", userId); // Log pour vérifier l'ID de l'utilisateur
+  console.log("ID de l'utilisateur :", userId);
 
-  // 5. Vérifier si le joueur existe déjà dans la table players
+  // Vérifier si le joueur existe déjà dans la table players
   const { data: existingPlayer, error: checkPlayerError } = await supa
     .from("players")
     .select("id")
@@ -2221,7 +2228,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  // 6. Insertion dans players
+  // Insertion dans players
   if (!existingPlayer) {
     console.log("Insertion d'un nouveau joueur dans la table players...");
     const { error: insertError } = await supa
@@ -2244,12 +2251,11 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     console.log("Le joueur existe déjà dans la table players.");
   }
 
-  // 7. Mise à jour UI
+  // Mise à jour UI
   updateAuthUI(session.user);
 
-  // 8. Fermeture modals
+  // Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
-  document.getElementById("authOverlay").classList.add("hidden");
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
@@ -2275,10 +2281,9 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  localStorage.setItem("lastEmail", email);
-
   try {
-    // Connexion
+    console.log("Tentative de connexion avec l'email :", email);
+
     const { data, error } = await supa.auth.signInWithPassword({
       email,
       password
@@ -2290,9 +2295,8 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
       return;
     }
 
-    //console.log("Connexion réussie, utilisateur :", data.user);
+    console.log("Connexion réussie, utilisateur :", data.user);
 
-    // Vérifie la session active
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
     if (sessionError) {
       console.error("Erreur lors de la récupération de la session :", sessionError);
@@ -2300,17 +2304,14 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
       return;
     }
 
-    //console.log("Session active :", session);
+    console.log("Session active :", session);
 
-    // Mise à jour UI
     document.getElementById("authOverlay").classList.add("hidden");
 
-    // Met à jour l'UI avec les informations de l'utilisateur
     await updateAuthUI(data.user).catch(err => {
       console.error("Erreur dans updateAuthUI :", err);
     });
 
-    // Récupère et stocke le pseudo
     if (data.user) {
       const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
         console.error("Erreur lors de la récupération du pseudo :", err);
@@ -2322,7 +2323,8 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     console.error("Erreur inattendue lors de la connexion :", err);
     alert("Une erreur inattendue est survenue.");
   }
-  });
+});
+
 
   // ===============================
   //   WHY SIGNUP
