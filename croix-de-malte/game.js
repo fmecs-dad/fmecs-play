@@ -1997,7 +1997,7 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
- if (burgerAuthBtn) {
+if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
     playClickSound();
 
@@ -2006,16 +2006,23 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     // OUVERTURE DE LA FENÊTRE DE CONNEXION
     if (!isConnected) {
       const auth = document.getElementById("authOverlay");
-      auth.classList.remove("hidden");   // OK
+      auth.classList.remove("hidden");
       pauseGame();
       return;
     }
 
     // DÉCONNEXION
-    await supa.auth.signOut();
-    updateAuthUI();
+    const { error } = await supa.auth.signOut();
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      alert("Erreur lors de la déconnexion.");
+      return;
+    }
+
+    // Mise à jour de l'UI avec un utilisateur null
+    updateAuthUI(null);
   });
- }
+}
 
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
