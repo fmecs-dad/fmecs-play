@@ -286,14 +286,18 @@ let tutorialRunning = false;
 
 let readyModalAlreadyShown = false;
 
-
 const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    const session = supa.auth.getSession();
+    // Récupère la session de manière asynchrone
+    const { data: { session }, error } = await supa.auth.getSession();
     const accessToken = session?.access_token;
-    if (!accessToken) return false;
+
+    if (!accessToken) {
+      console.warn("Aucun jeton d'accès disponible.");
+      return false;
+    }
 
     const res = await fetch("https://gjzqghhqpycbcwykxvgw.supabase.co/functions/v1/submit-score", {
       method: "POST",
@@ -302,6 +306,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
         "Authorization": `Bearer ${accessToken}`
       },
       body: JSON.stringify({
+        user_id: userId, // Ajoute l'ID de l'utilisateur dans le payload
         score,
         duration_ms: durationMs,
         undo_count: undoCount,
@@ -309,9 +314,14 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
       })
     });
 
-    return res.ok; // <— IMPORTANT : on renvoie un vrai booléen
+    if (!res.ok) {
+      console.error("Erreur lors de l'envoi du score :", res.status, res.statusText);
+      return false;
+    }
+
+    return true; // Retourne true si tout s'est bien passé
   } catch (err) {
-    console.error("Erreur envoi score via Edge Function :", err);
+    console.error("Erreur lors de l'envoi du score via Edge Function :", err);
     return false;
   }
 }
