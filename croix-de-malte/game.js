@@ -2136,12 +2136,6 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   modal.classList.remove("hidden");
  });
 
- document.getElementById("signupCloseBtn").addEventListener("click", () => {
-  playClickSound();
-  const modal = document.getElementById("signupModal");
-  modal.classList.add("hidden");   // ❗ suppression du style.display
- });
-
  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
@@ -2154,19 +2148,19 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   }
 
   // 1. Vérification pseudo unique
-  const { data: existing, error: checkError } = await supa
+  const { data: existingPseudo, error: checkPseudoError } = await supa
     .from("players")
     .select("id")
     .eq("pseudo", pseudo)
     .maybeSingle();
 
-  if (checkError && checkError.code !== "PGRST116") {
-    console.error("Erreur SELECT pseudo :", checkError);
+  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
+    console.error("Erreur SELECT pseudo :", checkPseudoError);
     alert("Erreur interne.");
     return;
   }
 
-  if (existing) {
+  if (existingPseudo) {
     alert("Ce pseudo est déjà pris.");
     return;
   }
@@ -2184,7 +2178,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   }
 
   // 3. Connexion automatique après l'inscription
-  const { data: signinData, error: signinError } = await supa.auth.signInWithPassword({
+  const { error: signinError } = await supa.auth.signInWithPassword({
     email,
     password: "mot_de_passe_par_defaut" // Utilise le même mot de passe que pour l'inscription
   });
@@ -2205,27 +2199,48 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   }
 
   const userId = session.user.id;
+  console.log("ID de l'utilisateur :", userId); // Log pour vérifier l'ID de l'utilisateur
 
-  // 5. Insertion dans players
-  const { error: insertError } = await supa
+  // 5. Vérifier si le joueur existe déjà dans la table players
+  const { data: existingPlayer, error: checkPlayerError } = await supa
     .from("players")
-    .insert({
-      id: userId,
-      pseudo: pseudo,
-      created_at: new Date().toISOString(),
-      premium: false
-    });
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
 
-  if (insertError) {
-    console.error("Erreur INSERT player :", insertError);
-    alert("Erreur lors de l’enregistrement du joueur.");
+  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
+    console.error("Erreur SELECT player :", checkPlayerError);
+    alert("Erreur interne.");
     return;
   }
 
-  // 6. Mise à jour UI
+  // 6. Insertion dans players
+  if (!existingPlayer) {
+    console.log("Insertion d'un nouveau joueur dans la table players...");
+    const { error: insertError } = await supa
+      .from("players")
+      .insert({
+        id: userId,
+        pseudo: pseudo,
+        created_at: new Date().toISOString(),
+        premium: false
+      });
+
+    if (insertError) {
+      console.error("Erreur INSERT player :", insertError);
+      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
+      return;
+    } else {
+      console.log("Joueur inséré avec succès dans la table players.");
+    }
+  } else {
+    console.log("Le joueur existe déjà dans la table players.");
+  }
+
+  // 7. Mise à jour UI
   updateAuthUI(session.user);
 
-  // 7. Fermeture modals
+  // 8. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
