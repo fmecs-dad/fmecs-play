@@ -2239,12 +2239,11 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 if (existingPlayer) {
   console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
 
-  // Mise à jour du pseudo existant
+  // Mise à jour du pseudo existant sans `updated_at`
   const { error: updateError } = await supa
     .from("players")
     .update({
-      pseudo: pseudo,
-      updated_at: new Date().toISOString()
+      pseudo: pseudo
     })
     .eq("id", userId);
 
