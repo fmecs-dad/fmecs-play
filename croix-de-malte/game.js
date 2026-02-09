@@ -87,9 +87,10 @@ function playSound(id) {
 //   AUTH : UTILITAIRES
 // ===============================
 
+// Dans la fonction fetchPlayerPseudo
 async function fetchPlayerPseudo(userId) {
   try {
-    console.log("Récupération du pseudo pour l'utilisateur :", userId); // Log pour vérifier l'ID de l'utilisateur
+    console.log("Récupération du pseudo pour l'utilisateur :", userId);
     const { data, error } = await supa
       .from("players")
       .select("pseudo")
@@ -101,18 +102,21 @@ async function fetchPlayerPseudo(userId) {
       return null;
     }
 
-    console.log("Pseudo récupéré :", data?.pseudo); // Log pour vérifier le pseudo récupéré
+    console.log("Pseudo récupéré :", data?.pseudo);
     return data?.pseudo || null;
   } catch (err) {
     console.error("Erreur inattendue dans fetchPlayerPseudo :", err);
     return null;
   }
 }
+
 // ===============================
 //   UPDATE AUTH UI
 // ===============================
 
+// Dans la fonction updateAuthUI
 async function updateAuthUI(user = null) {
+  console.log("Mise à jour de l'UI avec l'utilisateur :", user);
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
@@ -130,6 +134,7 @@ async function updateAuthUI(user = null) {
   try {
     if (user) {
       const pseudo = await fetchPlayerPseudo(user.id);
+      console.log("Pseudo après récupération :", pseudo);
       if (pseudo && burgerPseudo) {
         burgerPseudo.textContent = pseudo;
         localStorage.setItem("playerPseudo", pseudo);
@@ -2231,27 +2236,23 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   // Insertion dans players
   if (!existingPlayer) {
-    console.log("Pseudo à insérer :", pseudo);
-    console.log("Insertion d'un nouveau joueur dans la table players...");
-    const { error: insertError } = await supa
-      .from("players")
-      .insert({
-        id: userId,
-        pseudo: pseudo, // Assure-toi que le pseudo saisi est bien utilisé ici
-        created_at: new Date().toISOString(),
-        premium: false
-      });
+  console.log("Insertion d'un nouveau joueur dans la table players avec le pseudo :", pseudo);
+  const { error: insertError } = await supa
+    .from("players")
+    .insert({
+      id: userId,
+      pseudo: pseudo,
+      created_at: new Date().toISOString(),
+      premium: false
+    });
 
-    if (insertError) {
-      console.error("Erreur INSERT player :", insertError);
-      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
-      return;
-    } else {
-      console.log("Joueur inséré avec succès dans la table players.");
-    }
+  if (insertError) {
+    console.error("Erreur INSERT player :", insertError);
+    alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
   } else {
-    console.log("Le joueur existe déjà dans la table players.");
+    console.log("Joueur inséré avec succès dans la table players.");
   }
+}
 
   // Mise à jour UI
   updateAuthUI(session.user);
@@ -2362,24 +2363,21 @@ function launchFlowOnce(userFromEvent) {
   handleFirstLaunchFlow(userFromEvent);
 }
 
+// Assure-toi que cet écouteur est enregistré une seule fois
 supa.auth.onAuthStateChange(async (event, session) => {
   console.log(`Événement d'authentification : ${event}, session :`, session);
 
   if (event === "SIGNED_IN") {
-    if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
     const user = session?.user || null;
     console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
-    launchFlowOnce(user);
     return;
   }
 
   if (event === "SIGNED_OUT") {
-    if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
     console.log("Utilisateur déconnecté");
     updateAuthUI(null);
-    launchFlowOnce(null);
   }
 });
 
