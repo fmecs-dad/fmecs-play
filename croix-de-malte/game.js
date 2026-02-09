@@ -2367,7 +2367,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
     const user = session?.user || null;
     //console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
-    updateAuthUI(session.user);
+    updateAuthUI(user);
     launchFlowOnce(user);
     return;
   }
