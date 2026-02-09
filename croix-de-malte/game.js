@@ -2360,12 +2360,12 @@ function launchFlowOnce(userFromEvent) {
 }
 
 supa.auth.onAuthStateChange(async (event, session) => {
-  //console.log(`Événement d'authentification : ${event}, session :`, session);
+  console.log(`Événement d'authentification : ${event}, session :`, session);
 
   if (event === "SIGNED_IN") {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
     const user = session?.user || null;
-    //console.log("Utilisateur connecté :", user);
+    console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
     launchFlowOnce(user);
@@ -2374,6 +2374,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
 
   if (event === "SIGNED_OUT") {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+    console.log("Utilisateur déconnecté");
     updateAuthUI(null);
     launchFlowOnce(null);
   }
