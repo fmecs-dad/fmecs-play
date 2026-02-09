@@ -109,7 +109,7 @@ async function fetchPlayerPseudo(userId) {
 
 
 // ===============================
-//   UPDATE AUTH UI (V2)
+//   UPDATE AUTH UI
 // ===============================
 
 async function updateAuthUI(user = null) {
@@ -166,7 +166,7 @@ async function initialiserProfilEtLancerJeu(session) {
       .eq("id", userId)
       .single();
 
-    if (error && error.code !== "PGRST116") {
+    if (error && error.code) {
       console.error("Erreur lors de la récupération du joueur :", error);
       return;
     }
@@ -477,12 +477,13 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  const user = supa.auth.user();
+  // Récupère la session de manière asynchrone
+  const { data: { session }, error } = await supa.auth.getSession();
+  const user = session?.user || null;
   const isLoggedIn = !!user;
 
   const list = await fetchLeaderboard();
   renderLeaderboard(list, isLoggedIn, user?.id || null);
-
 });
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
@@ -1176,6 +1177,7 @@ function undoLastMove() {
 
   const last = validatedSegments.pop();
 
+  resumeGame();
   undoCount++;
   autoSave();
   document.getElementById("undoCount").textContent = undoCount;
@@ -1292,10 +1294,8 @@ function isBetterThan(a, b) {
 }
 
 async function checkGameOver() {
-
   const moves = getPossibleMoves();
   if (moves.length === 0) {
-
     gameOver = true;
     autoSave();
     stopTimer();
@@ -1313,7 +1313,6 @@ async function checkGameOver() {
     const best = loadBestScore();
     const isNewRecord = isBetterThan(current, best);
 
-    // On affiche d'abord la fenêtre (record ou fin de partie)
     if (isNewRecord) {
       saveBestScore(current);
       updateBestScoreTop();
@@ -1323,10 +1322,9 @@ async function checkGameOver() {
       showEndGamePanel();
     }
 
-    // Ensuite seulement, on tente d'envoyer le score (sans bloquer)
-    const session = supa.auth.session();
-const user = session?.user || null;
-
+    // Récupère la session de manière asynchrone
+    const { data: { session }, error } = await supa.auth.getSession();
+    const user = session?.user || null;
 
     if (user) {
       await sendScoreToSupabase(
@@ -1337,8 +1335,6 @@ const user = session?.user || null;
         current.jokersUsed
       );
     }
-
-    // Si pas connecté → on ne fait rien pour l'instant
   }
 }
 
@@ -2063,43 +2059,48 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   // ===============================
 
   document.getElementById("profileCloseBtn").addEventListener("click", () => {
-    document.getElementById("profileModal").style.display = "none";
-  });
+  document.getElementById("profileModal").style.display = "none";
+});
 
-  document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-    const session = supa.auth.session();
-    const user = session?.user || null;
+document.getElementById("profileSaveBtn").addEventListener("click", async () => {
+  // Récupère la session de manière asynchrone
+  const { data: { session }, error } = await supa.auth.getSession();
+  const user = session?.user || null;
 
-    if (!user) return;
+  if (!user) return;
 
-    const pseudo = document.getElementById("profilePseudoInput").value.trim();
-    const avatarFile = document.getElementById("profileAvatarInput").files[0];
+  const pseudo = document.getElementById("profilePseudoInput").value.trim();
+  const avatarFile = document.getElementById("profileAvatarInput").files[0];
 
-    let avatarUrl = null;
+  let avatarUrl = null;
 
-    if (avatarFile) {
-      const path = `avatars/${user.id}.png`;
+  if (avatarFile) {
+    const path = `avatars/${user.id}.png`;
 
-      await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+    // Upload de l'avatar
+    await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
 
-      const { data } = supa.storage.from("avatars").getPublicUrl(path);
-      avatarUrl = data.publicUrl;
-    }
+    // Récupère l'URL publique de manière asynchrone
+    const { data } = await supa.storage.from("avatars").getPublicUrl(path);
+    avatarUrl = data.publicUrl;
+  }
 
-    await supa
-      .from("players")
-      .update({
-        pseudo: pseudo,
-        ...(avatarUrl && { avatar_url: avatarUrl })
-      })
-      .eq("id", user.id);
+  // Met à jour le profil du joueur
+  await supa
+    .from("players")
+    .update({
+      pseudo: pseudo,
+      ...(avatarUrl && { avatar_url: avatarUrl })
+    })
+    .eq("id", user.id);
 
-    localStorage.setItem("playerPseudo", pseudo);
+  localStorage.setItem("playerPseudo", pseudo);
 
-    updateAuthUI();
+  // Met à jour l'UI
+  await updateAuthUI(user);
 
-    document.getElementById("profileModal").style.display = "none";
-  });
+  document.getElementById("profileModal").style.display = "none";
+});
 
  // ===============================
  //   AUTHENTIFICATION (v1)
