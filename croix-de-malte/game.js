@@ -88,6 +88,7 @@ function playSound(id) {
 // ===============================
 
 // Dans la fonction fetchPlayerPseudo
+// Dans la fonction fetchPlayerPseudo
 async function fetchPlayerPseudo(userId) {
   try {
     console.log("Récupération du pseudo pour l'utilisateur :", userId);
@@ -114,7 +115,6 @@ async function fetchPlayerPseudo(userId) {
 //   UPDATE AUTH UI
 // ===============================
 
-// Dans la fonction updateAuthUI
 async function updateAuthUI(user = null) {
   console.log("Mise à jour de l'UI avec l'utilisateur :", user);
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
@@ -2154,7 +2154,6 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   document.getElementById("signupModal").classList.remove("hidden");
 });
 
-// Dans la fonction de confirmation de création de compte
 document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
@@ -2235,8 +2234,28 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   }
 
   // Insertion dans players
-  if (!existingPlayer) {
-  console.log("Insertion d'un nouveau joueur dans la table players avec le pseudo :", pseudo);
+
+// Dans la fonction de confirmation de création de compte
+if (existingPlayer) {
+  console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+
+  // Mise à jour du pseudo existant
+  const { error: updateError } = await supa
+    .from("players")
+    .update({
+      pseudo: pseudo,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", userId);
+
+  if (updateError) {
+    console.error("Erreur UPDATE player :", updateError);
+    alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
+  } else {
+    console.log("Pseudo mis à jour avec succès dans la table players.");
+  }
+} else {
+  console.log("Insertion d'un nouveau joueur dans la table players...");
   const { error: insertError } = await supa
     .from("players")
     .insert({
