@@ -291,7 +291,7 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    const session = supa.auth.session();
+    const session = supa.auth.getSession();
     const accessToken = session?.access_token;
     if (!accessToken) return false;
 
