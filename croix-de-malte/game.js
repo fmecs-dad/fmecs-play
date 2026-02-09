@@ -1726,46 +1726,53 @@ let gameStarted = false; // global
 
 
 function initialFlow(user) {
-  //console.log("initialFlow appelé avec user :", user);
+  console.log("initialFlow appelé avec user :", user);
 
-  updateAuthUI(user);
+  let lastEmail;
+  let skip;
 
-  const lastEmail = localStorage.getItem("lastEmail");
-  const skip = localStorage.getItem("skipWhySignup") === "1";
+  try {
+    lastEmail = localStorage.getItem("lastEmail");
+    skip = localStorage.getItem("skipWhySignup") === "1";
+  } catch (err) {
+    console.error("Erreur d'accès à localStorage :", err);
+    lastEmail = null;
+    skip = false;
+  }
 
-  //console.log("lastEmail :", lastEmail);
-  //console.log("skip :", skip);
+  console.log("lastEmail :", lastEmail);
+  console.log("skip :", skip);
 
   // 1. Utilisateur connecté → readyModal
   if (user) {
-    //console.log("Utilisateur connecté, affichage de readyModal...");
+    console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
     return;
   }
 
   // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
   if (skip) {
-    //console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
+    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
     showReadyModal("skipWhySignup");
     return;
   }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
-    //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
+    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
   if (!lastEmail) {
-    //console.log("Nouveau joueur, affichage de whySignupModal...");
+    console.log("Nouveau joueur, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 5. Fallback (ne devrait jamais arriver)
-  //console.log("Fallback, affichage de authOverlay...");
+  console.log("Fallback, affichage de authOverlay...");
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
 }
