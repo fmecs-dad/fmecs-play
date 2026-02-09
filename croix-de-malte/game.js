@@ -89,6 +89,7 @@ function playSound(id) {
 
 async function fetchPlayerPseudo(userId) {
   try {
+    console.log("Récupération du pseudo pour l'utilisateur :", userId); // Log pour vérifier l'ID de l'utilisateur
     const { data, error } = await supa
       .from("players")
       .select("pseudo")
@@ -100,13 +101,13 @@ async function fetchPlayerPseudo(userId) {
       return null;
     }
 
+    console.log("Pseudo récupéré :", data?.pseudo); // Log pour vérifier le pseudo récupéré
     return data?.pseudo || null;
   } catch (err) {
     console.error("Erreur inattendue dans fetchPlayerPseudo :", err);
     return null;
   }
 }
-
 // ===============================
 //   UPDATE AUTH UI
 // ===============================
@@ -2230,6 +2231,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   // Insertion dans players
   if (!existingPlayer) {
+    console.log("Pseudo à insérer :", pseudo);
     console.log("Insertion d'un nouveau joueur dans la table players...");
     const { error: insertError } = await supa
       .from("players")
