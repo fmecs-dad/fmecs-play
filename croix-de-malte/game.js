@@ -2171,7 +2171,31 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  // 3. Récupérer la session 
+  // 2. Inscription de l'utilisateur
+  const { data: signupData, error: signupError } = await supa.auth.signUp({
+    email,
+    password: "mot_de_passe_par_defaut" // Remplace par un mot de passe sécurisé ou demande-le à l'utilisateur
+  });
+
+  if (signupError) {
+    console.error("Erreur lors de l'inscription :", signupError);
+    alert("Erreur lors de l'inscription : " + signupError.message);
+    return;
+  }
+
+  // 3. Connexion automatique après l'inscription
+  const { data: signinData, error: signinError } = await supa.auth.signInWithPassword({
+    email,
+    password: "mot_de_passe_par_defaut" // Utilise le même mot de passe que pour l'inscription
+  });
+
+  if (signinError) {
+    console.error("Erreur lors de la connexion après inscription :", signinError);
+    alert("Erreur lors de la connexion : " + signinError.message);
+    return;
+  }
+
+  // 4. Récupérer la session après la connexion
   const { data: { session }, error: sessionError } = await supa.auth.getSession();
 
   if (sessionError || !session) {
@@ -2182,7 +2206,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
 
   const userId = session.user.id;
 
-  // 4. Insertion dans players
+  // 5. Insertion dans players
   const { error: insertError } = await supa
     .from("players")
     .insert({
@@ -2198,17 +2222,16 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
     return;
   }
 
-  // 5. Mise à jour UI
+  // 6. Mise à jour UI
   updateAuthUI(session.user);
 
-  // 6. Fermeture modals
+  // 7. Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.add("hidden");
 
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
- });
-
+});
 
 
  // --- LOGIN ---
