@@ -172,11 +172,11 @@ async function initialiserProfilEtLancerJeu(session) {
     }
 
     if (!player) {
-      console.log("Nouveau joueur détecté, affichage de l'aide...");
+      //console.log("Nouveau joueur détecté, affichage de l'aide...");
       openHelpOverlay(true);
     } else {
       localStorage.setItem("playerPseudo", player.pseudo);
-      console.log("Profil initialisé avec succès pour :", player.pseudo);
+      //console.log("Profil initialisé avec succès pour :", player.pseudo);
     }
   } catch (err) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
@@ -236,7 +236,7 @@ function openHelpOverlay(auto = false) {
     }
 
     if (session) {
-      console.log("Session récupérée au démarrage :", session);
+      //console.log("Session récupérée au démarrage :", session);
       await initialiserProfilEtLancerJeu(session);
     }
 
@@ -1716,56 +1716,56 @@ let gameStarted = false; // global
 
 
 function initialFlow(user) {
-  console.log("initialFlow appelé avec user :", user);
+  //console.log("initialFlow appelé avec user :", user);
 
   updateAuthUI(user);
 
   const lastEmail = localStorage.getItem("lastEmail");
   const skip = localStorage.getItem("skipWhySignup") === "1";
 
-  console.log("lastEmail :", lastEmail);
-  console.log("skip :", skip);
+  //console.log("lastEmail :", lastEmail);
+  //console.log("skip :", skip);
 
   // 1. Utilisateur connecté → readyModal
   if (user) {
-    console.log("Utilisateur connecté, affichage de readyModal...");
+    //console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
     return;
   }
 
   // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
   if (skip) {
-    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
+    //console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
     showReadyModal("skipWhySignup");
     return;
   }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
-    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
+    //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
   if (!lastEmail) {
-    console.log("Nouveau joueur, affichage de whySignupModal...");
+    //console.log("Nouveau joueur, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 5. Fallback (ne devrait jamais arriver)
-  console.log("Fallback, affichage de authOverlay...");
+  //console.log("Fallback, affichage de authOverlay...");
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
 }
 
 function showReadyModal(reason) {
-  console.log(`Affichage de readyModal pour la raison : ${reason}`);
+  //console.log(`Affichage de readyModal pour la raison : ${reason}`);
   const modal = document.getElementById("readyModal");
   if (modal) {
     modal.classList.remove("hidden");
-    console.log("readyModal affichée.");
+    //console.log("readyModal affichée.");
   } else {
     console.error("Élément readyModal non trouvé dans le DOM.");
   }
@@ -2228,7 +2228,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
       return;
     }
 
-    console.log("Connexion réussie, utilisateur :", data.user);
+    //console.log("Connexion réussie, utilisateur :", data.user);
 
     // Vérifie la session active
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
@@ -2238,7 +2238,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
       return;
     }
 
-    console.log("Session active :", session);
+    //console.log("Session active :", session);
 
     // Mise à jour UI
     document.getElementById("authOverlay").classList.add("hidden");
@@ -2298,12 +2298,12 @@ function launchFlowOnce(userFromEvent) {
 }
 
 supa.auth.onAuthStateChange(async (event, session) => {
-  console.log(`Événement d'authentification : ${event}, session :`, session);
+  //console.log(`Événement d'authentification : ${event}, session :`, session);
 
   if (event === "SIGNED_IN") {
     if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
     const user = session?.user || null;
-    console.log("Utilisateur connecté :", user);
+    //console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
     launchFlowOnce(user);
@@ -2321,7 +2321,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
 initialFlowTimeout = setTimeout(async () => {
   const { data: { session } } = await supa.auth.getSession();
   const user = session?.user || null;
-  console.log("Vérification de la session au démarrage :", user);
+  //console.log("Vérification de la session au démarrage :", user);
   updateAuthUI(user);
   launchFlowOnce(user);
 }, 300);
