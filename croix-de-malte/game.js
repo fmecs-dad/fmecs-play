@@ -107,7 +107,6 @@ async function fetchPlayerPseudo(userId) {
   }
 }
 
-
 // ===============================
 //   UPDATE AUTH UI
 // ===============================
@@ -2149,6 +2148,7 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   document.getElementById("signupModal").classList.remove("hidden");
 });
 
+// Dans la fonction de confirmation de création de compte
 document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
@@ -2235,7 +2235,7 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
       .from("players")
       .insert({
         id: userId,
-        pseudo: pseudo,
+        pseudo: pseudo, // Assure-toi que le pseudo saisi est bien utilisé ici
         created_at: new Date().toISOString(),
         premium: false
       });
@@ -2260,7 +2260,6 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
-
 
  // --- LOGIN ---
 
