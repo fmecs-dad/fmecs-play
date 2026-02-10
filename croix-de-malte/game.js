@@ -2337,9 +2337,8 @@ if (existingPlayer) {
     const userId = session.user.id;
 
     // Récupérer le meilleur score depuis Supabase
-    const bestScore = await fetchBestScore(userId);
-    if (bestScore !== null) {
-      const bestScoreData = { score: bestScore, duration: 0, returnsUsed: 0, jokersUsed: 0 };
+    const bestScoreData = await fetchBestScore(userId);
+    if (bestScoreData) {
       saveBestScore(bestScoreData);
       console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
     }
@@ -2371,9 +2370,11 @@ if (existingPlayer) {
 async function fetchBestScore(userId) {
   try {
     const { data, error } = await supa
-      .from("players")
-      .select("best_score")
-      .eq("id", userId)
+      .from("scores")
+      .select("score, duration, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
@@ -2381,7 +2382,7 @@ async function fetchBestScore(userId) {
       return null;
     }
 
-    return data?.best_score || 0;
+    return data;
   } catch (err) {
     console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
     return null;
