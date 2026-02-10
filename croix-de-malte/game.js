@@ -294,6 +294,7 @@ let currentPage = 1;
 const limit = 20;
 let isLoading = false;
 let allScoresLoaded = false;
+let loadedScores = [];
 
 const HELP_SEEN_KEY = "helpSeen";
 
@@ -363,8 +364,15 @@ async function loadMoreScores() {
     return;
   }
 
-  renderLeaderboard(list, isLoggedIn, user?.id || null, true);
-  currentPage++;
+  // Vérifie si les scores sont déjà chargés
+  const newScores = list.filter(score => !loadedScores.some(loadedScore => loadedScore.created_at === score.created_at && loadedScore.score === score.score));
+  loadedScores = [...loadedScores, ...newScores];
+
+  if (newScores.length > 0) {
+    renderLeaderboard(newScores, isLoggedIn, user?.id || null, true);
+    currentPage++;
+  }
+
   isLoading = false;
 }
 
@@ -511,7 +519,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     const date = formatDate(entry.created_at);
 
     // Calculer le rang correctement
-    const rank = append ? (currentPage - 1) * limit + index + 1 : index + 1;
+    const rank = append ? loadedScores.findIndex(score => score.created_at === entry.created_at && score.score === entry.score) + 1 : index + 1;
 
     row.innerHTML = `
       <span class="rank">${rank}</span>
@@ -554,12 +562,14 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const user = session?.user || null;
   const isLoggedIn = !!user;
 
-  // Réinitialiser les variables de pagination
+  // Réinitialiser les variables de chargement
   currentPage = 1;
   isLoading = false;
   allScoresLoaded = false;
+  loadedScores = [];
 
   const list = await fetchLeaderboard(currentPage, limit);
+  loadedScores = [...list];
   renderLeaderboard(list, isLoggedIn, user?.id || null);
 });
 
