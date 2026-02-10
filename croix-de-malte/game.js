@@ -577,6 +577,9 @@ function updateBestScoreTop() {
 function showBestScorePanel() {
   const panel = document.getElementById("bestScoreContent");
   if (!panel) return;
+  
+  const pauseBtn = document.getElementById("pauseBtn");
+  const undoBtn = document.getElementById("undoBtn");
 
   const best = loadBestScore();
   if (!best) {
