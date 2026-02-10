@@ -2371,7 +2371,7 @@ async function fetchBestScore(userId) {
   try {
     const { data, error } = await supa
       .from("scores")
-      .select("score, duration, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
       .eq("player_id", userId)
       .order("score", { ascending: false })
       .limit(1)
@@ -2382,13 +2382,18 @@ async function fetchBestScore(userId) {
       return null;
     }
 
+    // Convertir duration_ms en secondes pour correspondre à ton format actuel
+    if (data) {
+      data.duration = Math.floor(data.duration_ms / 1000);
+      delete data.duration_ms; // Supprimer duration_ms pour éviter toute confusion
+    }
+
     return data;
   } catch (err) {
     console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
     return null;
   }
 }
-
 
   // ===============================
   //   WHY SIGNUP
