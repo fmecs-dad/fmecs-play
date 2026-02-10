@@ -460,20 +460,21 @@ async function renderLeaderboard(list, isLoggedIn, userId = null, append = false
     container.innerHTML = "";
   }
 
-  // Filtrer les scores pour afficher uniquement les 10 meilleurs scores du joueur connecté
+  // Créer une copie de la liste pour éviter de modifier l'originale
   let filteredList = [...list];
+
   if (userId) {
+    // Extraire les scores du joueur connecté
     const userScores = list.filter(entry => entry.players?.id === userId);
+
+    // Trier les scores du joueur par ordre décroissant et prendre les 10 meilleurs
     const topUserScores = userScores.sort((a, b) => b.score - a.score).slice(0, 10);
+
+    // Filtrer les scores des autres joueurs
     const otherScores = list.filter(entry => entry.players?.id !== userId);
 
+    // Combiner les 10 meilleurs scores du joueur avec les autres scores
     filteredList = [...topUserScores, ...otherScores];
-  }
-
-  // Trouver la meilleure ligne du joueur
-  let bestIndex = null;
-  if (userId) {
-    bestIndex = filteredList.findIndex(entry => entry.players?.id === userId);
   }
 
   // Ligne d’en-tête
@@ -510,9 +511,9 @@ async function renderLeaderboard(list, isLoggedIn, userId = null, append = false
       <span class="date">${date}</span>
     `;
 
-    // Mettre en avant uniquement la meilleure ligne du joueur
-    if (index === bestIndex) {
-      row.classList.add("my-best-score");
+    // Mettre en avant les lignes du joueur connecté
+    if (entry.players?.id === userId) {
+      row.classList.add("my-score");
     }
 
     container.appendChild(row);
