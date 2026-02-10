@@ -581,6 +581,16 @@ function showBestScorePanel() {
   const pauseBtn = document.getElementById("pauseBtn");
   const undoBtn = document.getElementById("undoBtn");
 
+  if (pauseBtn) {
+    pauseBtn.disabled = true;
+    pauseBtn.classList.add("disabled");
+  }
+
+  if (undoBtn) {
+    undoBtn.disabled = true;
+    undoBtn.classList.add("disabled");
+  }
+
   const best = loadBestScore();
   if (!best) {
     panel.innerHTML = "<p>Aucun record enregistré pour le moment.</p>";
