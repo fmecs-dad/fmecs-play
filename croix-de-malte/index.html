@@ -883,17 +883,16 @@ body {
   background: rgba(255,255,255,0.1);
 }
 
-.transparent-footer {
+footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: #333;
-  /*background-color: rgba(0, 0, 0, 0); /* Fond transparent */*/
-  padding: 40px;
+  background-color: rgba(0, 0, 0, 0.8); /* Fond légèrement transparent ou une couleur solide */
+  padding: 20px; /* Augmente cette valeur pour ajouter de l'espace en haut et en bas */
   display: flex;
   align-items: center;
-  z-index: 1000; /* Assure que le footer reste au-dessus des autres éléments */
+  z-index: 1000;
 }
 
 .footer-content {
@@ -903,19 +902,18 @@ body {
 }
 
 .footer-logo {
-  height: 60px; /* Ajuste la hauteur en fonction de ton logo */
-  margin-left: 15px;
-  margin-right: 30px;
+  height: 60px; /* Taille du logo */
+  margin-right: 10px;
 }
 
 .footer-text {
   margin-right: 15px;
-  color: #ffffff; /* Couleur par défaut du texte */
+  color: #ffffff; /* Couleur du texte */
 }
 
 .footer-link {
   margin-right: 15px;
-  color: #ffffff; /* Couleur par défaut du lien */
+  color: #ffffff; /* Couleur du lien */
   text-decoration: none;
 }
 
@@ -924,9 +922,10 @@ body {
 }
 
 .footer-copyright {
-  margin-left: auto; /* Décale le copyright à droite */
-  color: #ffffff; /* Couleur par défaut du copyright */
+  margin-left: auto;
+  color: #ffffff; /* Couleur du copyright */
 }
+
   </style>
 </head>
 
