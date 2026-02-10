@@ -2371,19 +2371,21 @@ if (existingPlayer) {
 async function fetchBestScore(userId) {
   try {
     const { data, error } = await supa
-      .from("players")
-      .select("best_score")
-      .eq("id", userId)
+      .from("score")
+      .select("score, duration, returnsUsed, jokersUsed")
+      .eq("user_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
       .single();
 
     if (error) {
-      console.error("Erreur lors de la récupération du meilleur score :", error);
+      console.error("Erreur lors de la récupération du meilleur score depuis Supabase :", error);
       return null;
     }
 
-    return data?.best_score || 0;
+    return data;
   } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    console.error("Erreur inattendue lors de la récupération du meilleur score depuis Supabase :", err);
     return null;
   }
 }
