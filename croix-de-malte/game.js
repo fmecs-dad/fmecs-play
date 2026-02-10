@@ -447,6 +447,10 @@ function renderLeaderboardHeader(isLoggedIn) {
    AFFICHAGE DU LEADERBOARD (scroll + snapping)
    ============================================================ */
 
+function truncatePseudo(pseudo) {
+  return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
+}
+
 function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   renderLeaderboardHeader(isLoggedIn);
 
