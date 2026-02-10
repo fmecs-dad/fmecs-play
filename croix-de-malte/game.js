@@ -2316,8 +2316,6 @@ if (existingPlayer) {
   }
 
   try {
-    //console.log("Tentative de connexion avec l'email :", email);
-
     const { data, error } = await supa.auth.signInWithPassword({
       email,
       password
@@ -2329,8 +2327,6 @@ if (existingPlayer) {
       return;
     }
 
-    //console.log("Connexion réussie, utilisateur :", data.user);
-
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
     if (sessionError) {
       console.error("Erreur lors de la récupération de la session :", sessionError);
@@ -2338,7 +2334,15 @@ if (existingPlayer) {
       return;
     }
 
-    //console.log("Session active :", session);
+    const userId = session.user.id;
+
+    // Récupérer le meilleur score depuis Supabase
+    const bestScore = await fetchBestScore(userId);
+    if (bestScore !== null) {
+      const bestScoreData = { score: bestScore, duration: 0, returnsUsed: 0, jokersUsed: 0 };
+      saveBestScore(bestScoreData);
+      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+    }
 
     document.getElementById("authOverlay").classList.add("hidden");
 
@@ -2353,11 +2357,36 @@ if (existingPlayer) {
       });
       if (pseudo) localStorage.setItem("playerPseudo", pseudo);
     }
+
+    // Mettre à jour l'affichage du meilleur score
+    updateBestScoreTop();
   } catch (err) {
     console.error("Erreur inattendue lors de la connexion :", err);
     alert("Une erreur inattendue est survenue.");
   }
 });
+
+
+// Fonction pour récupérer le meilleur score depuis Supabase
+async function fetchBestScore(userId) {
+  try {
+    const { data, error } = await supa
+      .from("players")
+      .select("best_score")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du meilleur score :", error);
+      return null;
+    }
+
+    return data?.best_score || 0;
+  } catch (err) {
+    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    return null;
+  }
+}
 
 
   // ===============================
