@@ -530,7 +530,7 @@ async function renderLeaderboard(list, isLoggedIn, userId = null, append = false
    ============================================================ */
 
 // --- OUVERTURE LEADERBOARD ---
-// Chargement initial
+
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
   pauseGame();
@@ -542,8 +542,7 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const user = session?.user || null;
   const isLoggedIn = !!user;
 
-  currentPage = 1;
-  const list = await fetchLeaderboard(currentPage, limit);
+  const list = await fetchLeaderboard();
   renderLeaderboard(list, isLoggedIn, user?.id || null);
 });
 
