@@ -683,10 +683,11 @@ body {
 /* C’est LUI qui contient toutes les lignes */
 
 #leaderboardContainer {
-  max-height: 360px !important;        /* 10 lignes visibles */
-  overflow-y: auto !important;         /* scroll vertical */
+  max-height: 360px !important;
+  overflow-y: auto !important;
   scroll-snap-type: y mandatory;
   scroll-padding-top: 6px;
+  scroll-behavior: smooth; /* Ajoute un défilement fluide */
 }
 
 

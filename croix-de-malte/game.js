@@ -88,7 +88,6 @@ function playSound(id) {
 // ===============================
 
 // Dans la fonction fetchPlayerPseudo
-// Dans la fonction fetchPlayerPseudo
 async function fetchPlayerPseudo(userId) {
   try {
     //console.log("Récupération du pseudo pour l'utilisateur :", userId);
@@ -291,6 +290,10 @@ let tutorialRunning = false;
 
 let readyModalAlreadyShown = false;
 
+let currentPage = 1;
+const limit = 20;
+let isLoading = false;
+
 const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
@@ -341,10 +344,33 @@ const tutorialSteps = [
 //   MEILLEUR SCORE
 // ===============================
 
+async function loadMoreScores() {
+  if (isLoading) return;
 
-async function fetchLeaderboard() {
+  isLoading = true;
+  const container = document.getElementById("leaderboardContainer");
+  const { data: { session }, error } = await supa.auth.getSession();
+  const user = session?.user || null;
+  const isLoggedIn = !!user;
+
+  const list = await fetchLeaderboard(currentPage, limit);
+
+  renderLeaderboard(list, isLoggedIn, user?.id || null, currentPage > 1);
+  currentPage++;
+  isLoading = false;
+}
+
+document.getElementById("leaderboardContainer").addEventListener("scroll", async () => {
+  const container = document.getElementById("leaderboardContainer");
+  if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+    await loadMoreScores();
+  }
+});
+
+async function fetchLeaderboard(page = 1, limit = 20) {
+  const offset = (page - 1) * limit;
   const response = await fetch(
-    "https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=100",
+    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=${limit}&offset=${offset}`,
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -355,7 +381,6 @@ async function fetchLeaderboard() {
 
   return await response.json();
 }
-
 
 async function fetchPlayerScores(userId) {
   const response = await fetch(
@@ -375,23 +400,22 @@ function formatDuration(ms) {
   const totalSec = Math.floor(ms / 1000);
   const min = Math.floor(totalSec / 60);
   const sec = totalSec % 60;
-  return `${min}:${sec.toString().padStart(2, "0")}`;
-}
-
-function truncatePseudo(pseudo) {
-  return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
+  return `${min}m ${sec.toString().padStart(2, "0")}s`;
 }
 
 function formatDate(value) {
   if (!value) return "";
 
-  // Normalise les dates Supabase "2026-02-02 17:30:30"
   const normalized = value.replace(" ", "T");
-
   const d = new Date(normalized);
+
   if (isNaN(d.getTime())) return "";
 
-  return d.toLocaleDateString("fr-FR");
+  return d.toLocaleDateString("fr-FR", {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit'
+  });
 }
 
 /* ============================================================
@@ -423,13 +447,15 @@ function renderLeaderboardHeader(isLoggedIn) {
    AFFICHAGE DU LEADERBOARD (scroll + snapping)
    ============================================================ */
 
-function renderLeaderboard(list, isLoggedIn, userId = null) {
+function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   renderLeaderboardHeader(isLoggedIn);
 
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
 
-  container.innerHTML = "";
+  if (!append) {
+    container.innerHTML = "";
+  }
 
   // Trouver la meilleure ligne du joueur
   let bestIndex = null;
@@ -437,23 +463,24 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
     bestIndex = list.findIndex(entry => entry.players?.id === userId);
   }
 
-  // Ligne d’en-tête
-  const header = document.createElement("div");
-  header.className = "leaderboard-row leaderboard-header";
-  header.innerHTML = `
-    <span class="rank">#</span>
-    <span class="pseudo">Pseudo</span>
-    <span class="score">🏆</span>
-    <span class="duration">⏱️</span>
-    <span class="undo">↩️</span>
-    <span class="jokers">🃏</span>
-    <span class="date">📅</span>
-  `;
-  container.appendChild(header);
+  // Ligne d’en-tête (uniquement si ce n'est pas un append)
+  if (!append) {
+    const header = document.createElement("div");
+    header.className = "leaderboard-row leaderboard-header";
+    header.innerHTML = `
+      <span class="rank">#</span>
+      <span class="pseudo">Pseudo</span>
+      <span class="score">🏆</span>
+      <span class="duration">⏱️</span>
+      <span class="undo">↩️</span>
+      <span class="jokers">🃏</span>
+      <span class="date">📅</span>
+    `;
+    container.appendChild(header);
+  }
 
   // Lignes du leaderboard
   list.forEach((entry, index) => {
-
     const row = document.createElement("div");
     row.className = "leaderboard-row";
 
@@ -461,7 +488,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
     const date = formatDate(entry.created_at);
 
     row.innerHTML = `
-      <span class="rank">${index + 1}</span>
+      <span class="rank">${append ? (currentPage - 1) * limit + index + 1 : index + 1}</span>
       <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
       <span class="duration">${formatDuration(entry.duration_ms)}</span>
@@ -479,12 +506,12 @@ function renderLeaderboard(list, isLoggedIn, userId = null) {
   });
 }
 
-
 /* ============================================================
    OUVERTURE / FERMETURE DU LEADERBOARD
    ============================================================ */
 
 // --- OUVERTURE LEADERBOARD ---
+// Chargement initial
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
   playClickSound();
   pauseGame();
@@ -492,13 +519,21 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.remove("hidden");
 
-  // Récupère la session de manière asynchrone
   const { data: { session }, error } = await supa.auth.getSession();
   const user = session?.user || null;
   const isLoggedIn = !!user;
 
-  const list = await fetchLeaderboard();
+  currentPage = 1;
+  const list = await fetchLeaderboard(currentPage, limit);
   renderLeaderboard(list, isLoggedIn, user?.id || null);
+});
+
+// Ajout du scroll event pour le chargement par lots
+document.getElementById("leaderboardContainer").addEventListener("scroll", async () => {
+  const container = document.getElementById("leaderboardContainer");
+  if (container.scrollTop + container.clientHeight >= container.scrollHeight - 10) {
+    await loadMoreScores();
+  }
 });
 
 // --- FERMETURE LEADERBOARD (fonction centralisée) ---
