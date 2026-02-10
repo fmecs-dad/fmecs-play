@@ -300,39 +300,59 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    // Récupère la session de manière asynchrone
-    const { data: { session }, error } = await supa.auth.getSession();
-    const accessToken = session?.access_token;
+    // Récupérer les scores existants du joueur
+    const { data: existingScores, error: fetchError } = await supa
+      .from("scores")
+      .select("score")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(10);
 
-    if (!accessToken) {
-      console.warn("Aucun jeton d'accès disponible.");
-      return false;
+    if (fetchError) {
+      console.error("Erreur lors de la récupération des scores du joueur :", fetchError);
+      return;
     }
 
-    const res = await fetch("https://gjzqghhqpycbcwykxvgw.supabase.co/functions/v1/submit-score", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${accessToken}`
-      },
-      body: JSON.stringify({
-        user_id: userId, // Ajoute l'ID de l'utilisateur dans le payload
-        score,
-        duration_ms: durationMs,
-        undo_count: undoCount,
-        jokers_used: jokersUsed
-      })
-    });
+    // Vérifier si le nouveau score est parmi les 10 meilleurs
+    const worstBestScore = existingScores.length >= 10 ? existingScores[existingScores.length - 1].score : 0;
 
-    if (!res.ok) {
-      console.error("Erreur lors de l'envoi du score :", res.status, res.statusText);
-      return false;
+    if (existingScores.length < 10 || score > worstBestScore) {
+      // Si le joueur a moins de 10 scores ou si le nouveau score est meilleur que le pire des 10 meilleurs
+      if (existingScores.length >= 10) {
+        // Supprimer le pire score
+        const worstScoreEntry = existingScores[existingScores.length - 1];
+        const { error: deleteError } = await supa
+          .from("scores")
+          .delete()
+          .eq("player_id", userId)
+          .eq("score", worstScoreEntry.score)
+          .order("score", { ascending: true })
+          .limit(1);
+
+        if (deleteError) {
+          console.error("Erreur lors de la suppression du pire score :", deleteError);
+          return;
+        }
+      }
+
+      // Ajouter le nouveau score
+      const { error: insertError } = await supa
+        .from("scores")
+        .insert({
+          player_id: userId,
+          score: score,
+          duration_ms: durationMs,
+          undo_count: undoCount,
+          jokers_used: jokersUsed,
+          created_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error("Erreur lors de l'insertion du score :", insertError);
+      }
     }
-
-    return true; // Retourne true si tout s'est bien passé
   } catch (err) {
-    console.error("Erreur lors de l'envoi du score via Edge Function :", err);
-    return false;
+    console.error("Erreur inattendue lors de l'enregistrement du score :", err);
   }
 }
 
