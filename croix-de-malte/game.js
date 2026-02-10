@@ -367,10 +367,9 @@ document.getElementById("leaderboardContainer").addEventListener("scroll", async
   }
 });
 
-async function fetchLeaderboard(page = 1, limit = 20) {
-  const offset = (page - 1) * limit;
+async function fetchLeaderboard(limit = 100) {
   const response = await fetch(
-    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=${limit}&offset=${offset}`,
+    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=${limit}`,
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -451,7 +450,7 @@ function truncatePseudo(pseudo) {
   return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
 }
 
-function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
+async function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   renderLeaderboardHeader(isLoggedIn);
 
   const container = document.getElementById("leaderboardContainer");
@@ -461,13 +460,23 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     container.innerHTML = "";
   }
 
+  // Filtrer les scores pour afficher uniquement les 10 meilleurs scores du joueur connecté
+  let filteredList = [...list];
+  if (userId) {
+    const userScores = list.filter(entry => entry.players?.id === userId);
+    const topUserScores = userScores.sort((a, b) => b.score - a.score).slice(0, 10);
+    const otherScores = list.filter(entry => entry.players?.id !== userId);
+
+    filteredList = [...topUserScores, ...otherScores];
+  }
+
   // Trouver la meilleure ligne du joueur
   let bestIndex = null;
   if (userId) {
-    bestIndex = list.findIndex(entry => entry.players?.id === userId);
+    bestIndex = filteredList.findIndex(entry => entry.players?.id === userId);
   }
 
-  // Ligne d’en-tête (uniquement si ce n'est pas un append)
+  // Ligne d’en-tête
   if (!append) {
     const header = document.createElement("div");
     header.className = "leaderboard-row leaderboard-header";
@@ -484,7 +493,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   }
 
   // Lignes du leaderboard
-  list.forEach((entry, index) => {
+  filteredList.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
 
@@ -492,7 +501,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     const date = formatDate(entry.created_at);
 
     row.innerHTML = `
-      <span class="rank">${append ? (currentPage - 1) * limit + index + 1 : index + 1}</span>
+      <span class="rank">${index + 1}</span>
       <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
       <span class="duration">${formatDuration(entry.duration_ms)}</span>
@@ -508,6 +517,11 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
 
     container.appendChild(row);
   });
+
+  // Réinitialiser le scroll en haut
+  if (!append) {
+    container.scrollTop = 0;
+  }
 }
 
 /* ============================================================
