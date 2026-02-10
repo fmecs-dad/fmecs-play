@@ -883,17 +883,47 @@ body {
   background: rgba(255,255,255,0.1);
 }
 
-#footerContainer {
-  z-index: 10000;
-  background-color: transparent; }
-  opacity: 0.4; // or use rgba() where a opacity.
+.transparent-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0); /* Fond transparent */
+  padding: 10px 20px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  z-index: 1000; /* Assure que le footer reste au-dessus des autres éléments */
 }
 
-.footeritem a{
-color: #000;
-text-decoration: none;
+.footer-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.footer-logo {
+  height: 30px; /* Ajuste la hauteur en fonction de ton logo */
+  margin-right: 10px;
+}
+
+.footer-text {
+  margin-right: 15px;
+  color: #ffffff; /* Couleur par défaut du texte */
+}
+
+.footer-link {
+  margin-right: 15px;
+  color: #ffffff; /* Couleur par défaut du lien */
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  margin-left: auto; /* Décale le copyright à droite */
+  color: #ffffff; /* Couleur par défaut du copyright */
 }
   </style>
 </head>
@@ -1187,15 +1217,12 @@ text-decoration: none;
 </div>
 <footer class="transparent-footer">
   <div class="footer-content">
-    <div class="footer-logo">
-      <img src="images/logo-fmecs-logo.png" alt="Logo" class="logo-img">
-    </div>
-    <div class="footer-text">
-      <p>© 2026 Morpion Solitaire - Croix de Malte. Tous droits réservés.</p>
-    </div>
-    <div class="footer-link">
-      <a href="https://www.artmajeur.com/alainaudet" target="_blank" class="link">Photo</a>
-    </div>
+    <img src="chemin/vers/ton/logo.png" alt="Logo" class="footer-logo" />
+    <span class="footer-text">Morpion Solitaire - Croix de Malte</span>
+    <a href="https://ton-url.com" class="footer-link">Site Web</a>
+    <span class="footer-copyright">© 2026 Morpion Solitaire - Croix de Malte. Tous droits réservés.</span>
+  </div>
+</footer>
  
 <!script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/croix-de-malte/lib/supabase.js"></script>
