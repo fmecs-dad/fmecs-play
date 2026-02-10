@@ -480,18 +480,13 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   // Créer une copie de la liste pour éviter de modifier l'originale
   let filteredList = [...list];
 
+  // Trouver le meilleur score du joueur connecté
+  let bestScore = null;
   if (userId) {
-    // Extraire les scores du joueur connecté
     const userScores = list.filter(entry => entry.players?.id === userId);
-
-    // Trier les scores du joueur par ordre décroissant et prendre les 10 meilleurs
-    const topUserScores = userScores.sort((a, b) => b.score - a.score).slice(0, 10);
-
-    // Filtrer les scores des autres joueurs
-    const otherScores = list.filter(entry => entry.players?.id !== userId);
-
-    // Combiner les 10 meilleurs scores du joueur avec les autres scores
-    filteredList = [...topUserScores, ...otherScores];
+    if (userScores.length > 0) {
+      bestScore = Math.max(...userScores.map(score => score.score));
+    }
   }
 
   // Ligne d’en-tête (uniquement si ce n'est pas un append)
@@ -519,7 +514,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     const date = formatDate(entry.created_at);
 
     // Calculer le rang correctement
-    const rank = append ? loadedScores.findIndex(score => score.created_at === entry.created_at && score.score === entry.score) + 1 : index + 1;
+    const rank = append ? (currentPage - 1) * limit + index + 1 : index + 1;
 
     row.innerHTML = `
       <span class="rank">${rank}</span>
@@ -531,9 +526,9 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
       <span class="date">${date}</span>
     `;
 
-    // Mettre en avant les lignes du joueur connecté
-    if (entry.players?.id === userId) {
-      row.classList.add("my-score");
+    // Mettre en avant UNIQUEMENT la ligne du MEILLEUR score du joueur
+    if (userId && entry.players?.id === userId && entry.score === bestScore) {
+      row.classList.add("my-best-score");
     }
 
     container.appendChild(row);
