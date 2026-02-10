@@ -293,6 +293,7 @@ let readyModalAlreadyShown = false;
 let currentPage = 1;
 const limit = 20;
 let isLoading = false;
+let allScoresLoaded = false;
 
 const HELP_SEEN_KEY = "helpSeen";
 
@@ -345,7 +346,7 @@ const tutorialSteps = [
 // ===============================
 
 async function loadMoreScores() {
-  if (isLoading) return;
+  if (isLoading || allScoresLoaded) return;
 
   isLoading = true;
   const container = document.getElementById("leaderboardContainer");
@@ -355,7 +356,14 @@ async function loadMoreScores() {
 
   const list = await fetchLeaderboard(currentPage, limit);
 
-  renderLeaderboard(list, isLoggedIn, user?.id || null, currentPage > 1);
+  // Vérifie si des scores ont été retournés
+  if (list.length === 0) {
+    allScoresLoaded = true;
+    isLoading = false;
+    return;
+  }
+
+  renderLeaderboard(list, isLoggedIn, user?.id || null, true);
   currentPage++;
   isLoading = false;
 }
@@ -367,9 +375,10 @@ document.getElementById("leaderboardContainer").addEventListener("scroll", async
   }
 });
 
-async function fetchLeaderboard(limit = 100) {
+async function fetchLeaderboard(page = 1, limit = 20) {
+  const offset = (page - 1) * limit;
   const response = await fetch(
-    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=${limit}`,
+    `https://gjzqghhqpycbcwykxvgw.supabase.co/rest/v1/scores?select=score,duration_ms,undo_count,jokers_used,created_at,players(id,pseudo)&order=score.desc,duration_ms.asc,undo_count.asc,jokers_used.asc&limit=${limit}&offset=${offset}`,
     {
       headers: {
         "apikey": SUPABASE_ANON_KEY,
@@ -450,7 +459,7 @@ function truncatePseudo(pseudo) {
   return pseudo.length > 12 ? pseudo.slice(0, 12) + "…" : pseudo;
 }
 
-async function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
+function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   renderLeaderboardHeader(isLoggedIn);
 
   const container = document.getElementById("leaderboardContainer");
@@ -477,7 +486,7 @@ async function renderLeaderboard(list, isLoggedIn, userId = null, append = false
     filteredList = [...topUserScores, ...otherScores];
   }
 
-  // Ligne d’en-tête
+  // Ligne d’en-tête (uniquement si ce n'est pas un append)
   if (!append) {
     const header = document.createElement("div");
     header.className = "leaderboard-row leaderboard-header";
@@ -501,8 +510,11 @@ async function renderLeaderboard(list, isLoggedIn, userId = null, append = false
     const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
     const date = formatDate(entry.created_at);
 
+    // Calculer le rang correctement
+    const rank = append ? (currentPage - 1) * limit + index + 1 : index + 1;
+
     row.innerHTML = `
-      <span class="rank">${index + 1}</span>
+      <span class="rank">${rank}</span>
       <span class="pseudo">${pseudo}</span>
       <span class="score">${entry.score}</span>
       <span class="duration">${formatDuration(entry.duration_ms)}</span>
@@ -519,7 +531,7 @@ async function renderLeaderboard(list, isLoggedIn, userId = null, append = false
     container.appendChild(row);
   });
 
-  // Réinitialiser le scroll en haut
+  // Réinitialiser le scroll en haut uniquement si ce n'est pas un append
   if (!append) {
     container.scrollTop = 0;
   }
@@ -542,7 +554,12 @@ document.getElementById("burgerLeaderboardBtn").addEventListener("click", async 
   const user = session?.user || null;
   const isLoggedIn = !!user;
 
-  const list = await fetchLeaderboard();
+  // Réinitialiser les variables de pagination
+  currentPage = 1;
+  isLoading = false;
+  allScoresLoaded = false;
+
+  const list = await fetchLeaderboard(currentPage, limit);
   renderLeaderboard(list, isLoggedIn, user?.id || null);
 });
 
