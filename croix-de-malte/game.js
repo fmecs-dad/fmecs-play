@@ -300,10 +300,10 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    // Récupérer les scores existants du joueur
+    // Récupérer les scores existants du joueur connecté
     const { data: existingScores, error: fetchError } = await supa
       .from("scores")
-      .select("score")
+      .select("id, score")
       .eq("player_id", userId)
       .order("score", { ascending: false })
       .limit(10);
@@ -313,43 +313,37 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
       return;
     }
 
-    // Vérifier si le nouveau score est parmi les 10 meilleurs
-    const worstBestScore = existingScores.length >= 10 ? existingScores[existingScores.length - 1].score : 0;
+    // Vérifier si le joueur a déjà 10 scores
+    if (existingScores.length >= 10) {
+      // Trouver le score le plus faible parmi les 10 meilleurs du joueur
+      const worstScore = existingScores[existingScores.length - 1];
 
-    if (existingScores.length < 10 || score > worstBestScore) {
-      // Si le joueur a moins de 10 scores ou si le nouveau score est meilleur que le pire des 10 meilleurs
-      if (existingScores.length >= 10) {
-        // Supprimer le pire score
-        const worstScoreEntry = existingScores[existingScores.length - 1];
-        const { error: deleteError } = await supa
-          .from("scores")
-          .delete()
-          .eq("player_id", userId)
-          .eq("score", worstScoreEntry.score)
-          .order("score", { ascending: true })
-          .limit(1);
-
-        if (deleteError) {
-          console.error("Erreur lors de la suppression du pire score :", deleteError);
-          return;
-        }
-      }
-
-      // Ajouter le nouveau score
-      const { error: insertError } = await supa
+      // Supprimer le score le plus faible du joueur
+      const { error: deleteError } = await supa
         .from("scores")
-        .insert({
-          player_id: userId,
-          score: score,
-          duration_ms: durationMs,
-          undo_count: undoCount,
-          jokers_used: jokersUsed,
-          created_at: new Date().toISOString()
-        });
+        .delete()
+        .eq("id", worstScore.id);
 
-      if (insertError) {
-        console.error("Erreur lors de l'insertion du score :", insertError);
+      if (deleteError) {
+        console.error("Erreur lors de la suppression du pire score :", deleteError);
+        return;
       }
+    }
+
+    // Ajouter le nouveau score
+    const { error: insertError } = await supa
+      .from("scores")
+      .insert({
+        player_id: userId,
+        score: score,
+        duration_ms: durationMs,
+        undo_count: undoCount,
+        jokers_used: jokersUsed,
+        created_at: new Date().toISOString()
+      });
+
+    if (insertError) {
+      console.error("Erreur lors de l'insertion du score :", insertError);
     }
   } catch (err) {
     console.error("Erreur inattendue lors de l'enregistrement du score :", err);
