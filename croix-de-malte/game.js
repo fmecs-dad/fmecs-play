@@ -122,7 +122,8 @@ async function updateAuthUI(user = null) {
   if (!user) {
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
-    localStorage.clear();
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
     return;
   }
 
