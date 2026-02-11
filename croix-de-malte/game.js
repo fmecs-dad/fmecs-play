@@ -302,58 +302,32 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    // Récupérer les scores existants du joueur connecté
-    const { data: existingScores, error: fetchError } = await supa
-      .from("scores")
-      .select("id, score")
-      .eq("player_id", userId)
-      .order("score", { ascending: false })
-      .limit(10);
-
-    if (fetchError) {
-      console.error("Erreur lors de la récupération des scores du joueur :", fetchError);
-      return;
-    }
-
-    // Vérifier si le joueur a déjà 10 scores
-    if (existingScores.length >= 10) {
-      // Trouver le score le plus faible parmi les 10 meilleurs du joueur
-      const worstScore = existingScores[existingScores.length - 1];
-
-      // Supprimer le score le plus faible du joueur
-      const { error: deleteError } = await supa
-        .from("scores")
-        .delete()
-        .eq("id", worstScore.id);
-
-      if (deleteError) {
-        console.error("Erreur lors de la suppression du pire score :", deleteError);
-        return;
-      }
-    }
+    console.log("Inserting score for user:", userId); // Log pour vérifier l'ID du joueur
 
     // Créer un message unique basé sur les données du score
     const message = `${userId}-${score}-${durationMs}-${undoCount}-${jokersUsed}-${Date.now()}`;
 
     // Générer le hash
     const hash = await sha256(message);
-    console.log(hash)
+
     // Ajouter le nouveau score
-    const { error: insertError } = await supa
+    const { data, error: insertError } = await supa
       .from("scores")
       .insert({
         player_id: userId,
-        pseudo: pseudo,
         score: score,
         duration_ms: durationMs,
         undo_count: undoCount,
         jokers_used: jokersUsed,
         hash: hash,
         created_at: new Date().toISOString()
-      });
+      })
+      .select();
 
     if (insertError) {
       console.error("Erreur lors de l'insertion du score :", insertError);
+    } else {
+      console.log("Score inserted successfully:", data); // Log pour vérifier les données insérées
     }
   } catch (err) {
     console.error("Erreur inattendue lors de l'enregistrement du score :", err);
@@ -1451,9 +1425,10 @@ async function checkGameOver() {
 
     // Récupère la session de manière asynchrone
     const { data: { session }, error } = await supa.auth.getSession();
-    const user = session?.user || null;
+    const user = session?.user;
 
     if (user) {
+      console.log("User ID:", user.id); // Vérifie que l'ID est correct
       await sendScoreToSupabase(
         user.id,
         current.score,
