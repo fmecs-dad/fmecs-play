@@ -337,7 +337,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
 
     // Générer le hash
     const hash = await sha256(message);
-
+    console.log(hash)
     // Ajouter le nouveau score
     const { error: insertError } = await supa
       .from("scores")
