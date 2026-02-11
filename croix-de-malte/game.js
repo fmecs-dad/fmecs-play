@@ -332,6 +332,12 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
       }
     }
 
+    // Créer un message unique basé sur les données du score
+    const message = `${userId}-${score}-${durationMs}-${undoCount}-${jokersUsed}-${Date.now()}`;
+
+    // Générer le hash
+    const hash = await sha256(message);
+
     // Ajouter le nouveau score
     const { error: insertError } = await supa
       .from("scores")
@@ -341,6 +347,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
         duration_ms: durationMs,
         undo_count: undoCount,
         jokers_used: jokersUsed,
+        hash: hash,
         created_at: new Date().toISOString()
       });
 
