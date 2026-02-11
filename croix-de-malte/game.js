@@ -343,6 +343,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
       .from("scores")
       .insert({
         player_id: userId,
+        pseudo: pseudo,
         score: score,
         duration_ms: durationMs,
         undo_count: undoCount,
