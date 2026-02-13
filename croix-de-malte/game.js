@@ -122,12 +122,10 @@ window.addEventListener('blur', () => {
 let abortController = null;
 
 async function fetchPlayerPseudo(userId) {
-  // Annuler la requête précédente si elle existe
   if (abortController) {
     abortController.abort();
   }
 
-  // Créer un nouveau contrôleur d'annulation
   abortController = new AbortController();
 
   try {
@@ -189,7 +187,7 @@ async function updateAuthUI(user = null) {
 
   try {
     if (user) {
-      const pseudo = await fetchPlayerPseudo(userId);
+      const pseudo = await fetchPlayerPseudo(user.id);
       if (pseudo && burgerPseudo) {
         burgerPseudo.textContent = pseudo;
         localStorage.setItem("playerPseudo", pseudo);
@@ -2185,7 +2183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
   // Fonction de déconnexion
-  async function logout() {
+async function logout() {
   console.log("Début de la fonction logout");
 
   const { error } = await supa.auth.signOut();
@@ -2200,20 +2198,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   localStorage.removeItem("bestScoreData");
 
   updateAuthUI(null);
+}
 
-  // Forcer le rafraîchissement de la page
-  window.location.href = window.location.href.split('?')[0]; // Supprime les paramètres de requête pour éviter les problèmes de cache
-  }
-
-
-
-  if (burgerAuthBtn) {
+// Écouteur de clic sur le bouton d'authentification
+if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
     console.log("Clic sur le bouton d'authentification");
     playClickSound();
 
-    const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
-    console.log("Statut de connexion :", isConnected);
+    const { data: { session } } = await supa.auth.getSession();
+    const user = session?.user || null;
+    const isConnected = !!user;
+
+    console.log("Statut de connexion vérifié :", isConnected);
 
     if (!isConnected) {
       console.log("Ouverture de la fenêtre de connexion");
@@ -2224,9 +2221,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     console.log("Début de la déconnexion");
-      await logout();
-    });
-  }
+    await logout();
+    window.location.reload(); // Forcer le rechargement de la page après déconnexion
+  });
+}
 
 
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
@@ -2355,89 +2353,86 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value.trim();
-    const pseudo = document.getElementById("signupPseudoInput").value.trim();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
+  const pseudo = document.getElementById("signupPseudoInput").value.trim();
 
-    if (!email || !password || !pseudo) {
-      alert("Merci de remplir tous les champs.");
-      return;
-    }
+  if (!email || !password || !pseudo) {
+    alert("Merci de remplir tous les champs.");
+    return;
+  }
 
-    // Vérification pseudo unique
-    const { data: existingPseudo, error: checkPseudoError } = await supa
-      .from("players")
-      .select("id")
-      .eq("pseudo", pseudo)
-      .maybeSingle();
+  // Vérification pseudo unique
+  const { data: existingPseudo, error: checkPseudoError } = await supa
+    .from("players")
+    .select("id")
+    .eq("pseudo", pseudo)
+    .maybeSingle();
 
-    if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
-      console.error("Erreur SELECT pseudo :", checkPseudoError);
-      alert("Erreur interne.");
-      return;
-    }
+  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
+    console.error("Erreur SELECT pseudo :", checkPseudoError);
+    alert("Erreur interne.");
+    return;
+  }
 
-    if (existingPseudo) {
-      alert("Ce pseudo est déjà pris.");
-      return;
-    }
+  if (existingPseudo) {
+    alert("Ce pseudo est déjà pris.");
+    return;
+  }
 
-    // Inscription de l'utilisateur avec le mot de passe saisi
-    const { data: signupData, error: signupError } = await supa.auth.signUp({
-      email,
-      password
-    });
+  // Inscription de l'utilisateur avec le mot de passe saisi
+  const { data: signupData, error: signupError } = await supa.auth.signUp({
+    email,
+    password
+  });
 
-    if (signupError) {
-      console.error("Erreur lors de l'inscription :", signupError);
-      alert("Erreur lors de l'inscription : " + signupError.message);
-      return;
-    }
+  if (signupError) {
+    console.error("Erreur lors de l'inscription :", signupError);
+    alert("Erreur lors de l'inscription : " + signupError.message);
+    return;
+  }
 
-    // Connexion automatique après l'inscription
-    const { error: signinError } = await supa.auth.signInWithPassword({
-      email,
-      password
-    });
+  // Connexion automatique après l'inscription
+  const { error: signinError } = await supa.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    if (signinError) {
-      console.error("Erreur lors de la connexion après inscription :", signinError);
-      alert("Erreur lors de la connexion : " + signinError.message);
-      return;
-    }
+  if (signinError) {
+    console.error("Erreur lors de la connexion après inscription :", signinError);
+    alert("Erreur lors de la connexion : " + signinError.message);
+    return;
+  }
 
-    // Récupérer la session après la connexion
-    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+  // Récupérer la session après la connexion
+  const { data: { session }, error: sessionError } = await supa.auth.getSession();
 
-    if (sessionError || !session) {
-      console.error("Erreur récupération session :", sessionError);
-      alert("Impossible de récupérer la session.");
-      return;
-    }
+  if (sessionError || !session) {
+    console.error("Erreur récupération session :", sessionError);
+    alert("Impossible de récupérer la session.");
+    return;
+  }
 
-    const userId = session.user.id;
-    console.log("ID de l'utilisateur :", userId);
+  const userId = session.user.id;
+  console.log("ID de l'utilisateur :", userId);
 
-    // Vérifier si le joueur existe déjà dans la table players
-    const { data: existingPlayer, error: checkPlayerError } = await supa
-      .from("players")
-      .select("id")
-      .eq("id", userId)
-      .maybeSingle();
+  // Vérifier si le joueur existe déjà dans la table players
+  const { data: existingPlayer, error: checkPlayerError } = await supa
+    .from("players")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
 
-    if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
-      console.error("Erreur SELECT player :", checkPlayerError);
-      alert("Erreur interne.");
-      return;
-    }
+  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
+    console.error("Erreur SELECT player :", checkPlayerError);
+    alert("Erreur interne.");
+    return;
+  }
 
-    // Insertion dans players
-
-  // Dans la fonction de confirmation de création de compte
+  // Insertion dans players
   if (existingPlayer) {
     console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
 
-    // Mise à jour du pseudo existant sans `updated_at`
     const { error: updateError } = await supa
       .from("players")
       .update({
@@ -2550,32 +2545,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   // Fonction pour récupérer le meilleur score depuis Supabase
   async function fetchBestScore(userId) {
-    try {
-      const { data, error } = await supa
-        .from("scores")
-        .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
-        .eq("player_id", userId)
-        .order("score", { ascending: false })
-        .limit(1)
-        .single();
+  try {
+    const { data, error } = await supa
+      .from("scores")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
+      .single();
 
-      if (error) {
-        console.error("Erreur lors de la récupération du meilleur score :", error);
-        return null;
-      }
-
-      // Convertir duration_ms en secondes pour correspondre à ton format actuel
-      if (data) {
-        data.duration = Math.floor(data.duration_ms / 1000);
-        delete data.duration_ms; // Supprimer duration_ms pour éviter toute confusion
-      }
-
-      return data;
-    } catch (err) {
-      console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    if (error) {
+      console.error("Erreur lors de la récupération du meilleur score :", error);
       return null;
     }
+
+    if (data) {
+      data.duration = Math.floor(data.duration_ms / 1000);
+      delete data.duration_ms;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    return null;
   }
+}
+
   // ===============================
   //   WHY SIGNUP
   // ===============================
@@ -2615,17 +2610,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   let isInitialSessionCheckDone = false;
 
   function setupInitialFlow() {
-    if (isInitialSessionCheckDone) return;
-    isInitialSessionCheckDone = true;
+  setTimeout(async () => {
+    const { data: { session } } = await supa.auth.getSession();
+    const user = session?.user || null;
+    console.log("Vérification de la session au démarrage :", user);
+    updateAuthUI(user);
+    launchFlowOnce(user);
+  }, 300);
+}
 
-    setTimeout(async () => {
-      const { data: { session } } = await supa.auth.getSession();
-      const user = session?.user || null;
-      console.log("Vérification de la session au démarrage :", user);
-      updateAuthUI(user);
-      launchFlowOnce(user);
-    }, 300);
-  }
 
   setupInitialFlow();
 
@@ -2647,17 +2640,9 @@ function setupAuthListener() {
     console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
-
-    // Vérifier l'état du bouton après la connexion
-    const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-    console.log("Texte du bouton après connexion :", burgerAuthBtn.textContent);
   } else if (event === "SIGNED_OUT") {
     console.log("Utilisateur déconnecté");
     updateAuthUI(null);
-
-    // Vérifier l'état du bouton après la déconnexion
-    const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-    console.log("Texte du bouton après déconnexion :", burgerAuthBtn.textContent);
   }
 });
 
