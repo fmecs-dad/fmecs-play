@@ -87,6 +87,17 @@ function playSound(id) {
 //   AUTH : UTILITAIRES
 // ===============================
 
+window.addEventListener('focus', async () => {
+  const { data: { session } } = await supa.auth.getSession();
+  const user = session?.user || null;
+  console.log("Focus regained, checking session:", user);
+  updateAuthUI(user);
+});
+
+window.addEventListener('blur', () => {
+  // Optionnel : actions à effectuer lors de la perte de focus
+});
+
 // Dans la fonction fetchPlayerPseudo
 async function fetchPlayerPseudo(userId) {
   try {
@@ -114,8 +125,15 @@ async function fetchPlayerPseudo(userId) {
 //   UPDATE AUTH UI
 // ===============================
 
+let lastUIUpdateUserId = null;
+
 async function updateAuthUI(user = null) {
+  const userId = user?.id || null;
+  if (userId === lastUIUpdateUserId) return;
+  lastUIUpdateUserId = userId;
+
   console.log("Mise à jour de l'UI avec l'utilisateur :", user);
+
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
@@ -2147,15 +2165,18 @@ if (burgerAuthBtn) {
     }
 
     // DÉCONNEXION
-    const { error } = await supa.auth.signOut();
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-      alert("Erreur lors de la déconnexion.");
-      return;
-    }
+    async function logout() {
+  const { error } = await supa.auth.signOut();
 
-    // Mise à jour de l'UI avec un utilisateur null
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  } else {
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
     updateAuthUI(null);
+    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
+  }
+}
+
   });
 }
 
@@ -2546,23 +2567,45 @@ function launchFlowOnce(userFromEvent) {
   handleFirstLaunchFlow(userFromEvent);
 }
 
-// Assure-toi que cet écouteur est enregistré une seule fois
-supa.auth.onAuthStateChange(async (event, session) => {
-  console.log(`Événement d'authentification : ${event}, session :`, session);
+function setupInitialFlow() {
+  if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
 
-  if (event === "SIGNED_IN") {
+  initialFlowTimeout = setTimeout(async () => {
+    const { data: { session } } = await supa.auth.getSession();
     const user = session?.user || null;
-    console.log("Utilisateur connecté :", user);
-    await initialiserProfilEtLancerJeu(session);
+    console.log("Vérification de la session au démarrage :", user);
     updateAuthUI(user);
-    return;
-  }
+    launchFlowOnce(user);
+  }, 300);
+}
 
-  if (event === "SIGNED_OUT") {
-    console.log("Utilisateur déconnecté");
-    updateAuthUI(null);
-  }
-});
+setupInitialFlow();
+
+let authStateChangeListenerAdded = false;
+
+function setupAuthListener() {
+  if (authStateChangeListenerAdded) return;
+  authStateChangeListenerAdded = true;
+
+  supa.auth.onAuthStateChange(async (event, session) => {
+    console.log(`Événement d'authentification : ${event}, session :`, session);
+
+    if (event === "SIGNED_IN") {
+      const user = session?.user || null;
+      console.log("Utilisateur connecté :", user);
+      await initialiserProfilEtLancerJeu(session);
+      updateAuthUI(user);
+      return;
+    }
+
+    if (event === "SIGNED_OUT") {
+      console.log("Utilisateur déconnecté");
+      updateAuthUI(null);
+    }
+  });
+}
+
+setupAuthListener();
 
 // Sécurité : lancer même sans événement
 initialFlowTimeout = setTimeout(async () => {
