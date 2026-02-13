@@ -98,25 +98,32 @@ window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
 });
 
-// Dans la fonction fetchPlayerPseudo
+let abortController = new AbortController();
+
 async function fetchPlayerPseudo(userId) {
+  abortController.abort();
+  abortController = new AbortController();
+
   try {
-    console.log("Récupération du pseudo pour l'utilisateur :", userId);
     const { data, error } = await supa
       .from("players")
       .select("pseudo")
       .eq("id", userId)
-      .single();
+      .single()
+      .abortSignal(abortController.signal);
 
     if (error) {
       console.error("Erreur lors de la récupération du pseudo :", error);
       return null;
     }
 
-    console.log("Pseudo récupéré :", data?.pseudo);
-    return data?.pseudo || null;
+    return data.pseudo;
   } catch (err) {
-    console.error("Erreur inattendue dans fetchPlayerPseudo :", err);
+    if (err.name === 'AbortError') {
+      console.log('Requête annulée');
+    } else {
+      console.error("Erreur inattendue :", err);
+    }
     return null;
   }
 }
@@ -160,7 +167,9 @@ async function updateAuthUI(user = null) {
       }
     }
   } catch (err) {
-    console.error("Impossible de récupérer le pseudo :", err);
+    if (err.name !== 'AbortError') {
+      console.error("Impossible de récupérer le pseudo :", err);
+    }
   }
 }
 
