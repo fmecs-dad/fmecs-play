@@ -89,6 +89,7 @@ function playSound(id) {
 
 let isCheckingSessionOnFocus = false;
 let focusTimeout = null;
+let lastKnownUserId = null;
 
 window.addEventListener('focus', async () => {
   if (isCheckingSessionOnFocus) return;
@@ -100,15 +101,19 @@ window.addEventListener('focus', async () => {
     try {
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user || null;
-      if (user) {
+      const userId = user?.id || null;
+
+      if (userId && userId !== lastKnownUserId) {
         console.log("Focus regained, checking session:", user);
         updateAuthUI(user);
+        lastKnownUserId = userId;
       }
     } finally {
       isCheckingSessionOnFocus = false;
     }
   }, 300);
 });
+
 
 window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
@@ -2590,54 +2595,46 @@ document.addEventListener("DOMContentLoaded", async () => {
     handleFirstLaunchFlow(userFromEvent);
   }
 
+  let isInitialSessionCheckDone = false;
+
   function setupInitialFlow() {
-    if (isCheckingInitialSession) return;
-    isCheckingInitialSession = true;
+    if (isInitialSessionCheckDone) return;
+    isInitialSessionCheckDone = true;
 
-    if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
-
-    initialFlowTimeout = setTimeout(async () => {
-      try {
-        const { data: { session } } = await supa.auth.getSession();
-        const user = session?.user || null;
-        console.log("Vérification de la session au démarrage :", user);
-        updateAuthUI(user);
-        launchFlowOnce(user);
-      } finally {
-        isCheckingInitialSession = false;
-      }
+    setTimeout(async () => {
+      const { data: { session } } = await supa.auth.getSession();
+      const user = session?.user || null;
+      console.log("Vérification de la session au démarrage :", user);
+      updateAuthUI(user);
+      launchFlowOnce(user);
     }, 300);
   }
 
   setupInitialFlow();
 
+  let isAuthListenerSetup = false;
+
   function setupAuthListener() {
-    if (isHandlingAuthEvent) return;
-    isHandlingAuthEvent = true;
+    if (isAuthListenerSetup) return;
+    isAuthListenerSetup = true;
 
     supa.auth.onAuthStateChange(async (event, session) => {
-      if (isHandlingAuthEvent) return;
-      isHandlingAuthEvent = true;
+      console.log(`Événement d'authentification : ${event}, session :`, session);
 
-      try {
-        console.log(`Événement d'authentification : ${event}, session :`, session);
-
-        if (event === "SIGNED_IN") {
-          const user = session?.user || null;
-          console.log("Utilisateur connecté :", user);
-          await initialiserProfilEtLancerJeu(session);
-          updateAuthUI(user);
-        } else if (event === "SIGNED_OUT") {
-          console.log("Utilisateur déconnecté");
-          updateAuthUI(null);
-        }
-      } finally {
-        isHandlingAuthEvent = false;
+      if (event === "SIGNED_IN") {
+        const user = session?.user || null;
+        console.log("Utilisateur connecté :", user);
+        await initialiserProfilEtLancerJeu(session);
+        updateAuthUI(user);
+      } else if (event === "SIGNED_OUT") {
+        console.log("Utilisateur déconnecté");
+        updateAuthUI(null);
       }
     });
   }
 
   setupAuthListener();
+
 });
 
 
