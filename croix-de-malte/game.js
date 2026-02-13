@@ -105,15 +105,16 @@ window.addEventListener('focus', async () => {
 
       if (userId && userId !== lastKnownUserId) {
         console.log("Focus regained, checking session:", user);
-        updateAuthUI(user);
         lastKnownUserId = userId;
+        updateAuthUI(user);
       }
+    } catch (err) {
+      console.error("Erreur lors de la vérification de la session:", err);
     } finally {
       isCheckingSessionOnFocus = false;
     }
   }, 300);
 });
-
 
 window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
@@ -140,6 +141,7 @@ async function fetchPlayerPseudo(userId) {
     return null;
   }
 }
+
 
 // ===============================
 //   UPDATE AUTH UI
@@ -171,9 +173,7 @@ async function updateAuthUI(user = null) {
       localStorage.setItem("playerPseudo", pseudo);
     }
   } catch (err) {
-    if (err.name !== 'AbortError') {
-      console.error("Impossible de récupérer le pseudo :", err);
-    }
+    console.error("Impossible de récupérer le pseudo :", err);
   }
 }
 
@@ -2162,6 +2162,7 @@ const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
 async function logout() {
   console.log("Début de la déconnexion");
+
   const { error } = await supa.auth.signOut();
 
   if (error) {
@@ -2175,13 +2176,15 @@ async function logout() {
   localStorage.removeItem("bestScoreData");
 
   // Mettre à jour l'UI immédiatement
-  if (burgerAuthBtn) {
-    burgerAuthBtn.textContent = "Se connecter";
-  }
+  updateAuthUI(null);
+
+  // Réinitialiser les variables de gestion de focus
+  lastKnownUserId = null;
 
   // Recharger la page pour réinitialiser l'état
   window.location.reload();
 }
+
 
 if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
