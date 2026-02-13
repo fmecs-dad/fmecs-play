@@ -302,7 +302,51 @@ const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
   try {
-    console.log("Inserting score for user:", userId); // Log pour vérifier l'ID du joueur
+    // Récupérer les scores existants du joueur connecté
+    const { data: existingScores, error: fetchError } = await supa
+      .from("scores")
+      .select("id, score")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(10);
+
+    if (fetchError) {
+      console.error("Erreur lors de la récupération des scores du joueur :", fetchError);
+      return;
+    }
+
+    // Vérifier si le joueur a déjà 10 scores
+    if (existingScores.length >= 10) {
+	console.log(">= à 10 score :", existingScores.length);
+
+      // Trouver le score le plus faible parmi les 10 meilleurs du joueur
+      const worstScore = existingScores[existingScores.length - 1];
+
+      // Supprimer le score le plus faible du joueur
+      const { error: deleteError } = await supa
+        .from("scores")
+        .delete()
+        .eq("id", worstScore.id);
+
+      if (deleteError) {
+        console.error("Erreur lors de la suppression du pire score :", deleteError);
+        return;
+      }
+    }
+
+    // Récupérer le pseudo du joueur depuis la table players
+    const { data: playerData, error: playerError } = await supa
+      .from("players")
+      .select("pseudo")
+      .eq("id", userId)
+      .single();
+
+    if (playerError) {
+      console.error("Erreur lors de la récupération du pseudo du joueur :", playerError);
+      return;
+    }
+
+    const pseudo = playerData.pseudo;
 
     // Créer un message unique basé sur les données du score
     const message = `${userId}-${score}-${durationMs}-${undoCount}-${jokersUsed}-${Date.now()}`;
@@ -310,24 +354,22 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
     // Générer le hash
     const hash = await sha256(message);
 
-    // Ajouter le nouveau score
-    const { data, error: insertError } = await supa
+    // Ajouter le nouveau score avec le pseudo
+    const { error: insertError } = await supa
       .from("scores")
       .insert({
         player_id: userId,
+        pseudo: pseudo,  // Ajouter le pseudo
         score: score,
         duration_ms: durationMs,
         undo_count: undoCount,
         jokers_used: jokersUsed,
         hash: hash,
         created_at: new Date().toISOString()
-      })
-      .select();
+      });
 
     if (insertError) {
       console.error("Erreur lors de l'insertion du score :", insertError);
-    } else {
-      console.log("Score inserted successfully:", data); // Log pour vérifier les données insérées
     }
   } catch (err) {
     console.error("Erreur inattendue lors de l'enregistrement du score :", err);
