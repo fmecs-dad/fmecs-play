@@ -117,11 +117,45 @@ const handleFocus = async () => {
   }, 300);
 };
 
-// Écouteurs d'événements
 window.addEventListener('focus', handleFocus);
+
 window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
 });
+
+async function logout() {
+  console.log("Début de la déconnexion");
+
+  // Désactiver les écouteurs de focus pendant la déconnexion
+  focusHandlersActive = false;
+
+  const { error } = await supa.auth.signOut();
+
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+    focusHandlersActive = true; // Réactiver les écouteurs en cas d'erreur
+    return;
+  }
+
+  // Nettoyer les données locales
+  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+  localStorage.removeItem("playerPseudo");
+  localStorage.removeItem("bestScoreData");
+
+  // Mettre à jour l'UI immédiatement
+  updateAuthUI(null);
+
+  // Réinitialiser les variables de gestion de focus
+  lastKnownUserId = null;
+
+  // Réactiver les écouteurs de focus après la déconnexion
+  setTimeout(() => {
+    focusHandlersActive = true;
+  }, 1000);
+
+  // Recharger la page pour réinitialiser l'état
+  window.location.reload();
+}
 
 let abortController = null;
 
@@ -144,7 +178,6 @@ async function fetchPlayerPseudo(userId) {
     return null;
   }
 }
-
 
 // ===============================
 //   UPDATE AUTH UI
@@ -2164,38 +2197,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
 async function logout() {
-    console.log("Début de la déconnexion");
+  console.log("Début de la déconnexion");
 
-    // Désactiver les écouteurs de focus pendant la déconnexion
-    focusHandlersActive = false;
+  // Supprimer les écouteurs de focus pendant la déconnexion
+  window.removeEventListener('focus', handleFocus);
 
-    const { error } = await supa.auth.signOut();
+  const { error } = await supa.auth.signOut();
 
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-      focusHandlersActive = true; // Réactiver les écouteurs en cas d'erreur
-      return;
-    }
-
-    // Nettoyer les données locales
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-
-    // Mettre à jour l'UI immédiatement
-    updateAuthUI(null);
-
-    // Réinitialiser les variables de gestion de focus
-    lastKnownUserId = null;
-
-    // Réactiver les écouteurs de focus après la déconnexion
-    setTimeout(() => {
-      focusHandlersActive = true;
-    }, 1000);
-
-    // Recharger la page pour réinitialiser l'état
-    window.location.reload();
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+    // Réattacher les écouteurs de focus en cas d'erreur
+    window.addEventListener('focus', handleFocus);
+    return;
   }
+
+  // Nettoyer les données locales
+  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+  localStorage.removeItem("playerPseudo");
+  localStorage.removeItem("bestScoreData");
+
+  // Mettre à jour l'UI immédiatement
+  updateAuthUI(null);
+
+  // Réinitialiser les variables de gestion de focus
+  lastKnownUserId = null;
+
+  // Réattacher les écouteurs de focus après la déconnexion
+  setTimeout(() => {
+    window.addEventListener('focus', handleFocus);
+  }, 1000);
+
+  // Recharger la page pour réinitialiser l'état
+  window.location.reload();
+}
 
 if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
