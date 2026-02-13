@@ -90,9 +90,10 @@ function playSound(id) {
 let isCheckingSessionOnFocus = false;
 let focusTimeout = null;
 let lastKnownUserId = null;
+let focusHandlersActive = true;
 
-window.addEventListener('focus', async () => {
-  if (isCheckingSessionOnFocus) return;
+const handleFocus = async () => {
+  if (!focusHandlersActive || isCheckingSessionOnFocus) return;
   isCheckingSessionOnFocus = true;
 
   if (focusTimeout) clearTimeout(focusTimeout);
@@ -114,8 +115,10 @@ window.addEventListener('focus', async () => {
       isCheckingSessionOnFocus = false;
     }
   }, 300);
-});
+};
 
+// Écouteurs d'événements
+window.addEventListener('focus', handleFocus);
 window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
 });
@@ -2161,30 +2164,38 @@ document.addEventListener("DOMContentLoaded", async () => {
 const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
 async function logout() {
-  console.log("Début de la déconnexion");
+    console.log("Début de la déconnexion");
 
-  const { error } = await supa.auth.signOut();
+    // Désactiver les écouteurs de focus pendant la déconnexion
+    focusHandlersActive = false;
 
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-    return;
+    const { error } = await supa.auth.signOut();
+
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      focusHandlersActive = true; // Réactiver les écouteurs en cas d'erreur
+      return;
+    }
+
+    // Nettoyer les données locales
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+
+    // Mettre à jour l'UI immédiatement
+    updateAuthUI(null);
+
+    // Réinitialiser les variables de gestion de focus
+    lastKnownUserId = null;
+
+    // Réactiver les écouteurs de focus après la déconnexion
+    setTimeout(() => {
+      focusHandlersActive = true;
+    }, 1000);
+
+    // Recharger la page pour réinitialiser l'état
+    window.location.reload();
   }
-
-  // Nettoyer les données locales
-  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-  localStorage.removeItem("playerPseudo");
-  localStorage.removeItem("bestScoreData");
-
-  // Mettre à jour l'UI immédiatement
-  updateAuthUI(null);
-
-  // Réinitialiser les variables de gestion de focus
-  lastKnownUserId = null;
-
-  // Recharger la page pour réinitialiser l'état
-  window.location.reload();
-}
-
 
 if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
