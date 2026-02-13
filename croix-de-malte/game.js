@@ -155,8 +155,6 @@ async function fetchPlayerPseudo(userId) {
 
 let lastUIUpdateUserId = null;
 
-let lastUIUpdateUserId = null;
-
 async function updateAuthUI(user = null) {
   const userId = user?.id || null;
   if (userId === lastUIUpdateUserId) return;
