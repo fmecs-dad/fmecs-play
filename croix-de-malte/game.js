@@ -2017,14 +2017,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateAuthUI(null);
   }
 
-//enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
-enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
-enableModalBehavior("authOverlay", ".panel", closeLogin);
-enableModalBehavior("profileModal", ".panel", closeProfile);
-enableModalBehavior("helpOverlay", ".panel", closeHelp);
-enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
-enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+  //enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
+  enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+  enableModalBehavior("authOverlay", ".panel", closeLogin);
+  enableModalBehavior("profileModal", ".panel", closeProfile);
+  enableModalBehavior("helpOverlay", ".panel", closeHelp);
+  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+  enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+  enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
 
 
@@ -2120,7 +2120,6 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     }
 
   });
-
   // ===============================
   //   BOUTONS TOP BAR
   // ===============================
@@ -2168,30 +2167,29 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     playClickSound();
     await ouvrirProfil();
   });
+  // ===============================
+  //   AUTH BURGER (v1)
+  // ===============================
 
-// ===============================
-//   AUTH BURGER (v1)
-// ===============================
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  // Fonction de déconnexion
+  async function logout() {
+    const { error } = await supa.auth.signOut();
 
-// Fonction de déconnexion
-async function logout() {
-  const { error } = await supa.auth.signOut();
-
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-  } else {
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-    updateAuthUI(null);
-    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+    } else {
+      localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+      localStorage.removeItem("playerPseudo");
+      localStorage.removeItem("bestScoreData");
+      updateAuthUI(null);
+      window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
+    }
   }
-}
 
-if (burgerAuthBtn) {
-  burgerAuthBtn.addEventListener("click", async () => {
+  if (burgerAuthBtn) {
+    burgerAuthBtn.addEventListener("click", async () => {
     playClickSound();
 
     const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
@@ -2206,10 +2204,10 @@ if (burgerAuthBtn) {
 
     // DÉCONNEXION
     await logout();
-  });
-}
+    });
+  }
 
-  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+ document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
     localStorage.removeItem("currentGameState");
     startNewGame();
@@ -2268,188 +2266,187 @@ if (burgerAuthBtn) {
 
   document.getElementById("profileCloseBtn").addEventListener("click", () => {
   document.getElementById("profileModal").style.display = "none";
-});
-
-document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-  // Récupère la session de manière asynchrone
-  const { data: { session }, error } = await supa.auth.getSession();
-  const user = session?.user || null;
-
-  if (!user) return;
-
-  const pseudo = document.getElementById("profilePseudoInput").value.trim();
-  const avatarFile = document.getElementById("profileAvatarInput").files[0];
-
-  let avatarUrl = null;
-
-  if (avatarFile) {
-    const path = `avatars/${user.id}.png`;
-
-    // Upload de l'avatar
-    await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
-
-    // Récupère l'URL publique de manière asynchrone
-    const { data } = await supa.storage.from("avatars").getPublicUrl(path);
-    avatarUrl = data.publicUrl;
-  }
-
-  // Met à jour le profil du joueur
-  await supa
-    .from("players")
-    .update({
-      pseudo: pseudo,
-      ...(avatarUrl && { avatar_url: avatarUrl })
-    })
-    .eq("id", user.id);
-
-  localStorage.setItem("playerPseudo", pseudo);
-
-  // Met à jour l'UI
-  await updateAuthUI(user);
-
-  document.getElementById("profileModal").style.display = "none";
-});
-
- // ===============================
- //   AUTHENTIFICATION (v1)
- // ===============================
-
- document.getElementById("closeAuthBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("authOverlay").classList.add("hidden");
- });
-
- document.getElementById("closeSignupBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("signupModal").classList.add("hidden");
-  document.getElementById("authOverlay").classList.remove("hidden");
- });
-
- // --- SIGNUP ---
-
- document.getElementById("signupBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("authOverlay").classList.add("hidden");
-  document.getElementById("signupModal").classList.remove("hidden");
-});
-
-document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
-  playClickSound();
-
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value.trim();
-  const pseudo = document.getElementById("signupPseudoInput").value.trim();
-
-  if (!email || !password || !pseudo) {
-    alert("Merci de remplir tous les champs.");
-    return;
-  }
-
-  // Vérification pseudo unique
-  const { data: existingPseudo, error: checkPseudoError } = await supa
-    .from("players")
-    .select("id")
-    .eq("pseudo", pseudo)
-    .maybeSingle();
-
-  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
-    console.error("Erreur SELECT pseudo :", checkPseudoError);
-    alert("Erreur interne.");
-    return;
-  }
-
-  if (existingPseudo) {
-    alert("Ce pseudo est déjà pris.");
-    return;
-  }
-
-  // Inscription de l'utilisateur avec le mot de passe saisi
-  const { data: signupData, error: signupError } = await supa.auth.signUp({
-    email,
-    password
   });
 
-  if (signupError) {
-    console.error("Erreur lors de l'inscription :", signupError);
-    alert("Erreur lors de l'inscription : " + signupError.message);
-    return;
-  }
+  document.getElementById("profileSaveBtn").addEventListener("click", async () => {
+    // Récupère la session de manière asynchrone
+    const { data: { session }, error } = await supa.auth.getSession();
+    const user = session?.user || null;
 
-  // Connexion automatique après l'inscription
-  const { error: signinError } = await supa.auth.signInWithPassword({
-    email,
-    password
+    if (!user) return;
+
+    const pseudo = document.getElementById("profilePseudoInput").value.trim();
+    const avatarFile = document.getElementById("profileAvatarInput").files[0];
+
+    let avatarUrl = null;
+
+    if (avatarFile) {
+      const path = `avatars/${user.id}.png`;
+
+      // Upload de l'avatar
+      await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+
+      // Récupère l'URL publique de manière asynchrone
+      const { data } = await supa.storage.from("avatars").getPublicUrl(path);
+      avatarUrl = data.publicUrl;
+    }
+
+    // Met à jour le profil du joueur
+    await supa
+      .from("players")
+      .update({
+        pseudo: pseudo,
+        ...(avatarUrl && { avatar_url: avatarUrl })
+      })
+      .eq("id", user.id);
+
+    localStorage.setItem("playerPseudo", pseudo);
+
+    // Met à jour l'UI
+    await updateAuthUI(user);
+
+    document.getElementById("profileModal").style.display = "none";
+  });
+  // ===============================
+  //   AUTHENTIFICATION (v1)
+  // ===============================
+
+  document.getElementById("closeAuthBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("authOverlay").classList.add("hidden");
   });
 
-  if (signinError) {
-    console.error("Erreur lors de la connexion après inscription :", signinError);
-    alert("Erreur lors de la connexion : " + signinError.message);
-    return;
-  }
+  document.getElementById("closeSignupBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("signupModal").classList.add("hidden");
+    document.getElementById("authOverlay").classList.remove("hidden");
+  });
 
-  // Récupérer la session après la connexion
-  const { data: { session }, error: sessionError } = await supa.auth.getSession();
+  // --- SIGNUP ---
 
-  if (sessionError || !session) {
-    console.error("Erreur récupération session :", sessionError);
-    alert("Impossible de récupérer la session.");
-    return;
-  }
+  document.getElementById("signupBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("authOverlay").classList.add("hidden");
+    document.getElementById("signupModal").classList.remove("hidden");
+  });
 
-  const userId = session.user.id;
-  console.log("ID de l'utilisateur :", userId);
+  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+  playClickSound();
 
-  // Vérifier si le joueur existe déjà dans la table players
-  const { data: existingPlayer, error: checkPlayerError } = await supa
-    .from("players")
-    .select("id")
-    .eq("id", userId)
-    .maybeSingle();
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value.trim();
+    const pseudo = document.getElementById("signupPseudoInput").value.trim();
 
-  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
-    console.error("Erreur SELECT player :", checkPlayerError);
-    alert("Erreur interne.");
-    return;
-  }
+    if (!email || !password || !pseudo) {
+      alert("Merci de remplir tous les champs.");
+      return;
+    }
 
-  // Insertion dans players
+    // Vérification pseudo unique
+    const { data: existingPseudo, error: checkPseudoError } = await supa
+      .from("players")
+      .select("id")
+      .eq("pseudo", pseudo)
+      .maybeSingle();
 
-// Dans la fonction de confirmation de création de compte
-if (existingPlayer) {
-  console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+    if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
+      console.error("Erreur SELECT pseudo :", checkPseudoError);
+      alert("Erreur interne.");
+      return;
+    }
 
-  // Mise à jour du pseudo existant sans `updated_at`
-  const { error: updateError } = await supa
-    .from("players")
-    .update({
-      pseudo: pseudo
-    })
-    .eq("id", userId);
+    if (existingPseudo) {
+      alert("Ce pseudo est déjà pris.");
+      return;
+    }
 
-  if (updateError) {
-    console.error("Erreur UPDATE player :", updateError);
-    alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
-  } else {
-    console.log("Pseudo mis à jour avec succès dans la table players.");
-  }
-} else {
-  console.log("Insertion d'un nouveau joueur dans la table players...");
-  const { error: insertError } = await supa
-    .from("players")
-    .insert({
-      id: userId,
-      pseudo: pseudo,
-      created_at: new Date().toISOString(),
-      premium: false
+    // Inscription de l'utilisateur avec le mot de passe saisi
+    const { data: signupData, error: signupError } = await supa.auth.signUp({
+      email,
+      password
     });
 
-  if (insertError) {
-    console.error("Erreur INSERT player :", insertError);
-    alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
+    if (signupError) {
+      console.error("Erreur lors de l'inscription :", signupError);
+      alert("Erreur lors de l'inscription : " + signupError.message);
+      return;
+    }
+
+    // Connexion automatique après l'inscription
+    const { error: signinError } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (signinError) {
+      console.error("Erreur lors de la connexion après inscription :", signinError);
+      alert("Erreur lors de la connexion : " + signinError.message);
+      return;
+    }
+
+    // Récupérer la session après la connexion
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+
+    if (sessionError || !session) {
+      console.error("Erreur récupération session :", sessionError);
+      alert("Impossible de récupérer la session.");
+      return;
+    }
+
+    const userId = session.user.id;
+    console.log("ID de l'utilisateur :", userId);
+
+    // Vérifier si le joueur existe déjà dans la table players
+    const { data: existingPlayer, error: checkPlayerError } = await supa
+      .from("players")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
+      console.error("Erreur SELECT player :", checkPlayerError);
+      alert("Erreur interne.");
+      return;
+    }
+
+    // Insertion dans players
+
+  // Dans la fonction de confirmation de création de compte
+  if (existingPlayer) {
+    console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+
+    // Mise à jour du pseudo existant sans `updated_at`
+    const { error: updateError } = await supa
+      .from("players")
+      .update({
+        pseudo: pseudo
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Erreur UPDATE player :", updateError);
+      alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
+    } else {
+      console.log("Pseudo mis à jour avec succès dans la table players.");
+    }
   } else {
-    console.log("Joueur inséré avec succès dans la table players.");
+    console.log("Insertion d'un nouveau joueur dans la table players...");
+    const { error: insertError } = await supa
+      .from("players")
+      .insert({
+        id: userId,
+        pseudo: pseudo,
+        created_at: new Date().toISOString(),
+        premium: false
+      });
+
+    if (insertError) {
+      console.error("Erreur INSERT player :", insertError);
+      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
+    } else {
+      console.log("Joueur inséré avec succès dans la table players.");
+    }
   }
-}
 
   // Mise à jour UI
   updateAuthUI(session.user);
@@ -2461,187 +2458,186 @@ if (existingPlayer) {
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
 
- // --- LOGIN ---
+  // --- LOGIN ---
 
- document.getElementById("loginBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
-  playClickSound();
+  document.getElementById("loginBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    playClickSound();
 
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value.trim();
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value.trim();
 
-  if (!email || !password) {
-    alert("Veuillez remplir tous les champs.");
-    return;
-  }
-
-  if (!email.includes("@") || !email.includes(".")) {
-    alert("Adresse email invalide.");
-    return;
-  }
-
-  try {
-    const { data, error } = await supa.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      console.error("Erreur de connexion :", error);
-      alert("Erreur : " + error.message);
+    if (!email || !password) {
+      alert("Veuillez remplir tous les champs.");
       return;
     }
 
-    const { data: { session }, error: sessionError } = await supa.auth.getSession();
-    if (sessionError) {
-      console.error("Erreur lors de la récupération de la session :", sessionError);
-      alert("Erreur lors de la récupération de la session.");
+    if (!email.includes("@") || !email.includes(".")) {
+      alert("Adresse email invalide.");
       return;
     }
 
-    const userId = session.user.id;
-
-    // Récupérer le meilleur score depuis Supabase
-    const bestScoreData = await fetchBestScore(userId);
-    if (bestScoreData) {
-      saveBestScore(bestScoreData);
-      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
-    }
-
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    await updateAuthUI(data.user).catch(err => {
-      console.error("Erreur dans updateAuthUI :", err);
-    });
-
-    if (data.user) {
-      const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
-        console.error("Erreur lors de la récupération du pseudo :", err);
-        return null;
+    try {
+      const { data, error } = await supa.auth.signInWithPassword({
+        email,
+        password
       });
-      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+
+      if (error) {
+        console.error("Erreur de connexion :", error);
+        alert("Erreur : " + error.message);
+        return;
+      }
+
+      const { data: { session }, error: sessionError } = await supa.auth.getSession();
+      if (sessionError) {
+        console.error("Erreur lors de la récupération de la session :", sessionError);
+        alert("Erreur lors de la récupération de la session.");
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // Récupérer le meilleur score depuis Supabase
+      const bestScoreData = await fetchBestScore(userId);
+      if (bestScoreData) {
+        saveBestScore(bestScoreData);
+        console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+      }
+
+      document.getElementById("authOverlay").classList.add("hidden");
+
+      await updateAuthUI(data.user).catch(err => {
+        console.error("Erreur dans updateAuthUI :", err);
+      });
+
+      if (data.user) {
+        const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
+          console.error("Erreur lors de la récupération du pseudo :", err);
+          return null;
+        });
+        if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+      }
+
+      // Mettre à jour l'affichage du meilleur score
+      updateBestScoreTop();
+    } catch (err) {
+      console.error("Erreur inattendue lors de la connexion :", err);
+      alert("Une erreur inattendue est survenue.");
     }
+  });
+  // Fonction pour récupérer le meilleur score depuis Supabase
+  async function fetchBestScore(userId) {
+    try {
+      const { data, error } = await supa
+        .from("scores")
+        .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+        .eq("player_id", userId)
+        .order("score", { ascending: false })
+        .limit(1)
+        .single();
 
-    // Mettre à jour l'affichage du meilleur score
-    updateBestScoreTop();
-  } catch (err) {
-    console.error("Erreur inattendue lors de la connexion :", err);
-    alert("Une erreur inattendue est survenue.");
-  }
-});
+      if (error) {
+        console.error("Erreur lors de la récupération du meilleur score :", error);
+        return null;
+      }
 
+      // Convertir duration_ms en secondes pour correspondre à ton format actuel
+      if (data) {
+        data.duration = Math.floor(data.duration_ms / 1000);
+        delete data.duration_ms; // Supprimer duration_ms pour éviter toute confusion
+      }
 
-// Fonction pour récupérer le meilleur score depuis Supabase
-async function fetchBestScore(userId) {
-  try {
-    const { data, error } = await supa
-      .from("scores")
-      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
-      .eq("player_id", userId)
-      .order("score", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error("Erreur lors de la récupération du meilleur score :", error);
+      return data;
+    } catch (err) {
+      console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
       return null;
     }
-
-    // Convertir duration_ms en secondes pour correspondre à ton format actuel
-    if (data) {
-      data.duration = Math.floor(data.duration_ms / 1000);
-      delete data.duration_ms; // Supprimer duration_ms pour éviter toute confusion
-    }
-
-    return data;
-  } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
-    return null;
   }
-}
-
   // ===============================
   //   WHY SIGNUP
   // ===============================
 
   document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-  playClickSound();
-  closeWhySignup();
-  document.getElementById("authOverlay").classList.remove("hidden");
+    playClickSound();
+    closeWhySignup();
+    document.getElementById("authOverlay").classList.remove("hidden");
   });
 
 
   document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-  playClickSound();
+    playClickSound();
 
-  const dontRemind = document.getElementById("whySignupDontRemind").checked;
-  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+    const dontRemind = document.getElementById("whySignupDontRemind").checked;
+    if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
-  closeWhySignup();
-  document.getElementById("readyModal").classList.remove("hidden");
- });
+    closeWhySignup();
+    document.getElementById("readyModal").classList.remove("hidden");
+  });
 
+  // ===============================
+  //   FLUX INITIAL
+  // ===============================
 
-// ===============================
-//   FLUX INITIAL
-// ===============================
+  let flowAlreadyLaunched = false;
+  let initialFlowTimeout = null;
+  let isCheckingInitialSession = false;
+  let isHandlingAuthEvent = false;
 
-let flowAlreadyLaunched = false;
-let initialFlowTimeout = null;
-let isCheckingInitialSession = false;
-let isHandlingAuthEvent = false;
+  function launchFlowOnce(userFromEvent) {
+    if (flowAlreadyLaunched) return;
+    flowAlreadyLaunched = true;
+    handleFirstLaunchFlow(userFromEvent);
+  }
 
-function launchFlowOnce(userFromEvent) {
-  if (flowAlreadyLaunched) return;
-  flowAlreadyLaunched = true;
-  handleFirstLaunchFlow(userFromEvent);
-}
+  function setupInitialFlow() {
+    if (isCheckingInitialSession) return;
+    isCheckingInitialSession = true;
 
-function setupInitialFlow() {
-  if (isCheckingInitialSession) return;
-  isCheckingInitialSession = true;
+    if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
 
-  if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
+    initialFlowTimeout = setTimeout(async () => {
+      try {
+        const { data: { session } } = await supa.auth.getSession();
+        const user = session?.user || null;
+        console.log("Vérification de la session au démarrage :", user);
+        updateAuthUI(user);
+        launchFlowOnce(user);
+      } finally {
+        isCheckingInitialSession = false;
+      }
+    }, 300);
+  }
 
-  initialFlowTimeout = setTimeout(async () => {
-    try {
-      const { data: { session } } = await supa.auth.getSession();
-      const user = session?.user || null;
-      console.log("Vérification de la session au démarrage :", user);
-      updateAuthUI(user);
-      launchFlowOnce(user);
-    } finally {
-      isCheckingInitialSession = false;
-    }
-  }, 300);
-}
+  setupInitialFlow();
 
-setupInitialFlow();
-
-function setupAuthListener() {
-  if (isHandlingAuthEvent) return;
-  isHandlingAuthEvent = true;
-
-  supa.auth.onAuthStateChange(async (event, session) => {
+  function setupAuthListener() {
     if (isHandlingAuthEvent) return;
     isHandlingAuthEvent = true;
 
-    try {
-      console.log(`Événement d'authentification : ${event}, session :`, session);
+    supa.auth.onAuthStateChange(async (event, session) => {
+      if (isHandlingAuthEvent) return;
+      isHandlingAuthEvent = true;
 
-      if (event === "SIGNED_IN") {
-        const user = session?.user || null;
-        console.log("Utilisateur connecté :", user);
-        await initialiserProfilEtLancerJeu(session);
-        updateAuthUI(user);
-      } else if (event === "SIGNED_OUT") {
-        console.log("Utilisateur déconnecté");
-        updateAuthUI(null);
+      try {
+        console.log(`Événement d'authentification : ${event}, session :`, session);
+
+        if (event === "SIGNED_IN") {
+          const user = session?.user || null;
+          console.log("Utilisateur connecté :", user);
+          await initialiserProfilEtLancerJeu(session);
+          updateAuthUI(user);
+        } else if (event === "SIGNED_OUT") {
+          console.log("Utilisateur déconnecté");
+          updateAuthUI(null);
+        }
+      } finally {
+        isHandlingAuthEvent = false;
       }
-    } finally {
-      isHandlingAuthEvent = false;
-    }
-  });
-}
+    });
+  }
 
-setupAuthListener();
+  setupAuthListener();
+});
+
+
