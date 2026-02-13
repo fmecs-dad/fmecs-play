@@ -121,11 +121,15 @@ window.addEventListener('blur', () => {
 
 let abortController = null;
 
+let abortController = null;
+
 async function fetchPlayerPseudo(userId) {
+  // Annuler la requête précédente si elle existe
   if (abortController) {
     abortController.abort();
   }
 
+  // Créer un nouveau contrôleur d'annulation
   abortController = new AbortController();
 
   try {
@@ -158,6 +162,8 @@ async function fetchPlayerPseudo(userId) {
 
 let lastUIUpdateUserId = null;
 
+let lastUIUpdateUserId = null;
+
 async function updateAuthUI(user = null) {
   const userId = user?.id || null;
   if (userId === lastUIUpdateUserId) return;
@@ -187,7 +193,7 @@ async function updateAuthUI(user = null) {
 
   try {
     if (user) {
-      const pseudo = await fetchPlayerPseudo(user.id);
+      const pseudo = await fetchPlayerPseudo(userId);
       if (pseudo && burgerPseudo) {
         burgerPseudo.textContent = pseudo;
         localStorage.setItem("playerPseudo", pseudo);
