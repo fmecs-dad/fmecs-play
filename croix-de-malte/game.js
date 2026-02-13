@@ -155,17 +155,20 @@ async function fetchPlayerPseudo(userId) {
 
 let lastUIUpdateUserId = null;
 
+let lastUIUpdateUserId = null;
+
 async function updateAuthUI(user = null) {
   const userId = user?.id || null;
   if (userId === lastUIUpdateUserId) return;
   lastUIUpdateUserId = userId;
 
-  console.log("Mise à jour de l'UI avec l'utilisateur :", user);
+  console.log("Mise à jour de l'UI avec l'utilisateur :", user); // Log pour vérifier la mise à jour de l'UI
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
   if (!user) {
+    console.log("Utilisateur non connecté, mise à jour du bouton en 'Se connecter'"); // Log pour vérifier la mise à jour du bouton
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
     localStorage.removeItem("playerPseudo");
@@ -2178,29 +2181,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-  // Fonction de déconnexion
-  async function logout() {
-    const { error } = await supa.auth.signOut();
+// Fonction de déconnexion
+async function logout() {
+  console.log("Début de la fonction logout"); // Log pour vérifier que la fonction est appelée
 
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-    } else {
-      localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-      localStorage.removeItem("playerPseudo");
-      localStorage.removeItem("bestScoreData");
-      updateAuthUI(null);
-      window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
-    }
+  const { error } = await supa.auth.signOut();
+
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  } else {
+    console.log("Déconnexion réussie"); // Log pour vérifier que la déconnexion a réussi
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+    updateAuthUI(null);
+    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
   }
+}
 
-  if (burgerAuthBtn) {
-    burgerAuthBtn.addEventListener("click", async () => {
+if (burgerAuthBtn) {
+  burgerAuthBtn.addEventListener("click", async () => {
+    console.log("Clic sur le bouton d'authentification"); // Log pour vérifier que l'écouteur de clic est déclenché
     playClickSound();
 
     const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
+    console.log("Statut de connexion :", isConnected); // Log pour vérifier le statut de connexion
 
     // OUVERTURE DE LA FENÊTRE DE CONNEXION
     if (!isConnected) {
+      console.log("Ouverture de la fenêtre de connexion"); // Log pour vérifier l'ouverture de la fenêtre de connexion
       const auth = document.getElementById("authOverlay");
       auth.classList.remove("hidden");
       pauseGame();
@@ -2208,9 +2217,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // DÉCONNEXION
+    console.log("Début de la déconnexion"); // Log pour vérifier le début de la déconnexion
     await logout();
-    });
-  }
+  });
+}
+
 
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
