@@ -90,8 +90,9 @@ function playSound(id) {
 window.addEventListener('focus', async () => {
   const { data: { session } } = await supa.auth.getSession();
   const user = session?.user || null;
-  console.log("Focus regained, checking session:", user);
-  updateAuthUI(user);
+  if (user) {
+    updateAuthUI(user);
+  }
 });
 
 window.addEventListener('blur', () => {
