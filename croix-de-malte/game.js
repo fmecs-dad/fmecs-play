@@ -165,16 +165,14 @@ async function updateAuthUI(user = null) {
   if (userId === lastUIUpdateUserId) return;
   lastUIUpdateUserId = userId;
 
-  console.log("Mise à jour de l'UI avec l'utilisateur :", user);
-
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
   if (!user) {
-    console.log("Utilisateur non connecté, mise à jour du bouton en 'Se connecter'");
     if (burgerAuthBtn) {
-      burgerAuthBtn.textContent = "Se connecter";
-      console.log("Texte du bouton mis à jour en 'Se connecter'");
+      requestAnimationFrame(() => {
+        burgerAuthBtn.textContent = "Se connecter";
+      });
     }
     if (burgerPseudo) burgerPseudo.textContent = "";
     localStorage.removeItem("playerPseudo");
@@ -182,7 +180,11 @@ async function updateAuthUI(user = null) {
     return;
   }
 
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+  if (burgerAuthBtn) {
+    requestAnimationFrame(() => {
+      burgerAuthBtn.textContent = "Se déconnecter";
+    });
+  }
 
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
@@ -190,7 +192,6 @@ async function updateAuthUI(user = null) {
   try {
     if (user) {
       const pseudo = await fetchPlayerPseudo(user.id);
-      console.log("Pseudo après récupération :", pseudo);
       if (pseudo && burgerPseudo) {
         burgerPseudo.textContent = pseudo;
         localStorage.setItem("playerPseudo", pseudo);
@@ -2186,29 +2187,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Fonction de déconnexion
   async function logout() {
-    console.log("Début de la fonction logout");
+  console.log("Début de la fonction logout");
 
-    const { error } = await supa.auth.signOut();
-    console.log("Après l'appel à supa.auth.signOut");
+  const { error } = await supa.auth.signOut();
 
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-      return;
-    }
-
-    console.log("Déconnexion réussie");
-
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    console.log("Token supprimé du localStorage");
-
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-
-    console.log("Avant l'appel à updateAuthUI(null)");
-    updateAuthUI(null);
-    console.log("Après l'appel à updateAuthUI(null)");
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+    return;
   }
 
+  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+  localStorage.removeItem("playerPseudo");
+  localStorage.removeItem("bestScoreData");
+
+  updateAuthUI(null);
+
+  // Forcer le rafraîchissement de la page
+  window.location.href = window.location.href.split('?')[0]; // Supprime les paramètres de requête pour éviter les problèmes de cache
+}
 
   if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
@@ -2634,26 +2630,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   let isAuthListenerSetup = false;
 
-  function setupAuthListener() {
-    if (isAuthListenerSetup) return;
-    isAuthListenerSetup = true;
+  let authStateChangeListenerAdded = false;
 
-    supa.auth.onAuthStateChange(async (event, session) => {
-      console.log(`Événement d'authentification : ${event}, session :`, session);
-
-      if (event === "SIGNED_IN") {
-        const user = session?.user || null;
-        console.log("Utilisateur connecté :", user);
-        await initialiserProfilEtLancerJeu(session);
-        updateAuthUI(user);
-      } else if (event === "SIGNED_OUT") {
-        console.log("Utilisateur déconnecté");
-        updateAuthUI(null);
-      }
-    });
+function setupAuthListener() {
+  if (authStateChangeListenerAdded) {
+    // Supprimer l'écouteur précédent s'il existe
+    supa.auth.onAuthStateChange(() => {}); // Réinitialise l'écouteur
   }
 
-  setupAuthListener();
+  supa.auth.onAuthStateChange(async (event, session) => {
+    console.log(`Événement d'authentification : ${event}, session :`, session);
+
+    if (event === "SIGNED_IN") {
+      const user = session?.user || null;
+      console.log("Utilisateur connecté :", user);
+      await initialiserProfilEtLancerJeu(session);
+      updateAuthUI(user);
+    } else if (event === "SIGNED_OUT") {
+      console.log("Utilisateur déconnecté");
+      updateAuthUI(null);
+    }
+  });
+
+  authStateChangeListenerAdded = true;
+}
+
+setupAuthListener();
 
 });
 
