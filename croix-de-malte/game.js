@@ -87,12 +87,27 @@ function playSound(id) {
 //   AUTH : UTILITAIRES
 // ===============================
 
+let isCheckingSessionOnFocus = false;
+let focusTimeout = null;
+
 window.addEventListener('focus', async () => {
-  const { data: { session } } = await supa.auth.getSession();
-  const user = session?.user || null;
-  if (user) {
-    updateAuthUI(user);
-  }
+  if (isCheckingSessionOnFocus) return;
+  isCheckingSessionOnFocus = true;
+
+  if (focusTimeout) clearTimeout(focusTimeout);
+
+  focusTimeout = setTimeout(async () => {
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const user = session?.user || null;
+      if (user) {
+        console.log("Focus regained, checking session:", user);
+        updateAuthUI(user);
+      }
+    } finally {
+      isCheckingSessionOnFocus = false;
+    }
+  }, 300);
 });
 
 window.addEventListener('blur', () => {
@@ -2567,12 +2582,14 @@ async function fetchBestScore(userId) {
  });
 
 
-  // ===============================
-  //   FLUX INITIAL 
-  // ===============================
+// ===============================
+//   FLUX INITIAL
+// ===============================
 
 let flowAlreadyLaunched = false;
 let initialFlowTimeout = null;
+let isCheckingInitialSession = false;
+let isHandlingAuthEvent = false;
 
 function launchFlowOnce(userFromEvent) {
   if (flowAlreadyLaunched) return;
@@ -2581,53 +2598,50 @@ function launchFlowOnce(userFromEvent) {
 }
 
 function setupInitialFlow() {
+  if (isCheckingInitialSession) return;
+  isCheckingInitialSession = true;
+
   if (initialFlowTimeout) clearTimeout(initialFlowTimeout);
 
   initialFlowTimeout = setTimeout(async () => {
-    const { data: { session } } = await supa.auth.getSession();
-    const user = session?.user || null;
-    console.log("Vérification de la session au démarrage :", user);
-    updateAuthUI(user);
-    launchFlowOnce(user);
+    try {
+      const { data: { session } } = await supa.auth.getSession();
+      const user = session?.user || null;
+      console.log("Vérification de la session au démarrage :", user);
+      updateAuthUI(user);
+      launchFlowOnce(user);
+    } finally {
+      isCheckingInitialSession = false;
+    }
   }, 300);
 }
 
 setupInitialFlow();
 
-let authStateChangeListenerAdded = false;
-
 function setupAuthListener() {
-  if (authStateChangeListenerAdded) return;
-  authStateChangeListenerAdded = true;
+  if (isHandlingAuthEvent) return;
+  isHandlingAuthEvent = true;
 
   supa.auth.onAuthStateChange(async (event, session) => {
-    console.log(`Événement d'authentification : ${event}, session :`, session);
+    if (isHandlingAuthEvent) return;
+    isHandlingAuthEvent = true;
 
-    if (event === "SIGNED_IN") {
-      const user = session?.user || null;
-      console.log("Utilisateur connecté :", user);
-      await initialiserProfilEtLancerJeu(session);
-      updateAuthUI(user);
-      return;
-    }
+    try {
+      console.log(`Événement d'authentification : ${event}, session :`, session);
 
-    if (event === "SIGNED_OUT") {
-      console.log("Utilisateur déconnecté");
-      updateAuthUI(null);
+      if (event === "SIGNED_IN") {
+        const user = session?.user || null;
+        console.log("Utilisateur connecté :", user);
+        await initialiserProfilEtLancerJeu(session);
+        updateAuthUI(user);
+      } else if (event === "SIGNED_OUT") {
+        console.log("Utilisateur déconnecté");
+        updateAuthUI(null);
+      }
+    } finally {
+      isHandlingAuthEvent = false;
     }
   });
 }
 
 setupAuthListener();
-
-// Sécurité : lancer même sans événement
-initialFlowTimeout = setTimeout(async () => {
-  const { data: { session } } = await supa.auth.getSession();
-  const user = session?.user || null;
-  console.log("Vérification de la session au démarrage :", user);
-  updateAuthUI(user);
-  launchFlowOnce(user);
-}, 300);
-
-
-});
