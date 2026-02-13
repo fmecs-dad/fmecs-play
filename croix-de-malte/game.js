@@ -2144,11 +2144,26 @@ enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     await ouvrirProfil();
   });
 
-  // ===============================
-  //   AUTH BURGER (v1)
-  // ===============================
+// ===============================
+//   AUTH BURGER (v1)
+// ===============================
 
- const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+
+// Fonction de déconnexion
+async function logout() {
+  const { error } = await supa.auth.signOut();
+
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  } else {
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+    updateAuthUI(null);
+    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
+  }
+}
 
 if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
@@ -2165,21 +2180,9 @@ if (burgerAuthBtn) {
     }
 
     // DÉCONNEXION
-    async function logout() {
-  const { error } = await supa.auth.signOut();
-
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-  } else {
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    updateAuthUI(null);
-    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
-  }
-}
-
+    await logout();
   });
 }
-
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
