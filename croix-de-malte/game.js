@@ -453,15 +453,14 @@ async function loadMoreScores() {
   const isLoggedIn = !!user;
 
   const list = await fetchLeaderboard(currentPage, limit);
+  console.log("Liste des scores récupérés :", list); // Log pour vérifier les scores récupérés
 
-  // Vérifie si des scores ont été retournés
   if (list.length === 0) {
     allScoresLoaded = true;
     isLoading = false;
     return;
   }
 
-  // Vérifie si les scores sont déjà chargés
   const newScores = list.filter(score => !loadedScores.some(loadedScore => loadedScore.created_at === score.created_at && loadedScore.score === score.score));
   loadedScores = [...loadedScores, ...newScores];
 
@@ -491,8 +490,9 @@ async function fetchLeaderboard(page = 1, limit = 20) {
       }
     }
   );
-
-  return await response.json();
+  const data = await response.json();
+  console.log("Scores récupérés depuis Supabase :", data); // Log pour vérifier les données retournées
+  return data;
 }
 
 async function fetchPlayerScores(userId) {
@@ -506,7 +506,9 @@ async function fetchPlayerScores(userId) {
     }
   );
 
-  return await response.json();
+  const data = await response.json();
+  console.log("Scores de l'utilisateur connecté :", data); // Log pour vérifier les scores de l'utilisateur
+  return data;
 }
 
 function formatDuration(ms) {
@@ -570,14 +572,14 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
 
+  console.log("Liste des scores à afficher :", list); // Log pour vérifier les scores à afficher
+
   if (!append) {
     container.innerHTML = "";
   }
 
-  // Créer une copie de la liste pour éviter de modifier l'originale
   let filteredList = [...list];
 
-  // Trouver le meilleur score du joueur connecté
   let bestScore = null;
   if (userId) {
     const userScores = list.filter(entry => entry.players?.id === userId);
@@ -586,7 +588,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     }
   }
 
-  // Ligne d’en-tête (uniquement si ce n'est pas un append)
   if (!append) {
     const header = document.createElement("div");
     header.className = "leaderboard-row leaderboard-header";
@@ -602,7 +603,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     container.appendChild(header);
   }
 
-  // Lignes du leaderboard
   filteredList.forEach((entry, index) => {
     const row = document.createElement("div");
     row.className = "leaderboard-row";
@@ -610,7 +610,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     const pseudo = truncatePseudo(entry.players?.pseudo ?? "???");
     const date = formatDate(entry.created_at);
 
-    // Calculer le rang correctement
     const rank = append ? (currentPage - 1) * limit + index + 1 : index + 1;
 
     row.innerHTML = `
@@ -623,7 +622,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
       <span class="date">${date}</span>
     `;
 
-    // Mettre en avant UNIQUEMENT la ligne du MEILLEUR score du joueur
     if (userId && entry.players?.id === userId && entry.score === bestScore) {
       row.classList.add("my-best-score");
     }
@@ -631,7 +629,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
     container.appendChild(row);
   });
 
-  // Réinitialiser le scroll en haut uniquement si ce n'est pas un append
   if (!append) {
     container.scrollTop = 0;
   }
