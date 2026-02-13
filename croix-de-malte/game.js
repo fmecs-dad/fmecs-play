@@ -156,18 +156,17 @@ async function fetchPlayerPseudo(userId) {
 let lastUIUpdateUserId = null;
 
 async function updateAuthUI(user = null) {
-  const userId = user?.id || null;
-  if (userId === lastUIUpdateUserId) return;
-  lastUIUpdateUserId = userId;
-
-  console.log("Mise à jour de l'UI avec l'utilisateur :", user); // Log pour vérifier la mise à jour de l'UI
+  console.log("Mise à jour de l'UI avec l'utilisateur :", user);
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
   if (!user) {
-    console.log("Utilisateur non connecté, mise à jour du bouton en 'Se connecter'"); // Log pour vérifier la mise à jour du bouton
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
+    console.log("Utilisateur non connecté, mise à jour du bouton en 'Se connecter'");
+    if (burgerAuthBtn) {
+      burgerAuthBtn.textContent = "Se connecter";
+      console.log("Texte du bouton mis à jour en 'Se connecter'");
+    }
     if (burgerPseudo) burgerPseudo.textContent = "";
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
@@ -175,7 +174,6 @@ async function updateAuthUI(user = null) {
   }
 
   if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
-
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
@@ -194,6 +192,7 @@ async function updateAuthUI(user = null) {
     }
   }
 }
+
 
 // ===============================
 //   PROFIL & JEU
@@ -2181,21 +2180,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Fonction de déconnexion
 async function logout() {
-  console.log("Début de la fonction logout"); // Log pour vérifier que la fonction est appelée
+  console.log("Début de la fonction logout");
 
   const { error } = await supa.auth.signOut();
+  console.log("Après l'appel à supa.auth.signOut"); // Log pour vérifier que l'appel à signOut est terminé
 
   if (error) {
     console.error("Erreur lors de la déconnexion :", error);
-  } else {
-    console.log("Déconnexion réussie"); // Log pour vérifier que la déconnexion a réussi
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-    updateAuthUI(null);
-    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
+    return;
   }
+
+  console.log("Déconnexion réussie");
+
+  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+  console.log("Token supprimé du localStorage");
+
+  localStorage.removeItem("playerPseudo");
+  localStorage.removeItem("bestScoreData");
+
+  console.log("Avant l'appel à updateAuthUI(null)");
+  updateAuthUI(null);
+  console.log("Après l'appel à updateAuthUI(null)");
+
+  window.location.reload();
+  console.log("Cette ligne ne devrait jamais être atteinte à cause du reload");
 }
+
 
 if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
