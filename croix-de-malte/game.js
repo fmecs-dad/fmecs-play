@@ -122,7 +122,6 @@ window.addEventListener('blur', () => {
 let abortController = null;
 
 async function fetchPlayerPseudo(userId) {
-  // Annuler la requête précédente si elle existe
   if (abortController) {
     abortController.abort();
   }
@@ -145,14 +144,13 @@ async function fetchPlayerPseudo(userId) {
     return data.pseudo;
   } catch (err) {
     if (err.name === 'AbortError') {
-      console.log('Requête annulée');
+      console.log('Requête de récupération du pseudo annulée');
     } else {
       console.error("Erreur inattendue lors de la récupération du pseudo :", err);
     }
     return null;
   }
 }
-
 
 // ===============================
 //   UPDATE AUTH UI
@@ -170,10 +168,15 @@ async function updateAuthUI(user = null) {
 
   if (!user) {
     if (burgerAuthBtn) {
-      requestAnimationFrame(() => {
-        burgerAuthBtn.textContent = "Se connecter";
-      });
+      burgerAuthBtn.textContent = "Se connecter";
+      console.log("Texte du bouton mis à jour en 'Se connecter'");
     }
+  } else {
+    if (burgerAuthBtn) {
+      burgerAuthBtn.textContent = "Se déconnecter";
+      console.log("Texte du bouton mis à jour en 'Se déconnecter'");
+    }
+  }
     if (burgerPseudo) burgerPseudo.textContent = "";
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
@@ -625,6 +628,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
 
     if (userId && entry.players?.id === userId && entry.score === bestScore) {
       row.classList.add("my-best-score");
+      console.log("Meilleur score de l'utilisateur mis en évidence :", entry.score);
     }
 
     container.appendChild(row);
@@ -2204,7 +2208,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Forcer le rafraîchissement de la page
   window.location.href = window.location.href.split('?')[0]; // Supprime les paramètres de requête pour éviter les problèmes de cache
-}
+  }
+
+
 
   if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
@@ -2639,18 +2645,26 @@ function setupAuthListener() {
   }
 
   supa.auth.onAuthStateChange(async (event, session) => {
-    console.log(`Événement d'authentification : ${event}, session :`, session);
+  console.log(`Événement d'authentification : ${event}, session :`, session);
 
-    if (event === "SIGNED_IN") {
-      const user = session?.user || null;
-      console.log("Utilisateur connecté :", user);
-      await initialiserProfilEtLancerJeu(session);
-      updateAuthUI(user);
-    } else if (event === "SIGNED_OUT") {
-      console.log("Utilisateur déconnecté");
-      updateAuthUI(null);
-    }
-  });
+  if (event === "SIGNED_IN") {
+    const user = session?.user || null;
+    console.log("Utilisateur connecté :", user);
+    await initialiserProfilEtLancerJeu(session);
+    updateAuthUI(user);
+
+    // Vérifier l'état du bouton après la connexion
+    const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+    console.log("Texte du bouton après connexion :", burgerAuthBtn.textContent);
+  } else if (event === "SIGNED_OUT") {
+    console.log("Utilisateur déconnecté");
+    updateAuthUI(null);
+
+    // Vérifier l'état du bouton après la déconnexion
+    const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+    console.log("Texte du bouton après déconnexion :", burgerAuthBtn.textContent);
+  }
+});
 
   authStateChangeListenerAdded = true;
 }
