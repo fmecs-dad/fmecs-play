@@ -119,10 +119,14 @@ window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
 });
 
-let abortController = new AbortController();
+let abortController = null;
 
 async function fetchPlayerPseudo(userId) {
-  abortController.abort();
+  // Annuler la requête précédente si elle existe
+  if (abortController) {
+    abortController.abort();
+  }
+
   abortController = new AbortController();
 
   try {
@@ -143,11 +147,12 @@ async function fetchPlayerPseudo(userId) {
     if (err.name === 'AbortError') {
       console.log('Requête annulée');
     } else {
-      console.error("Erreur inattendue :", err);
+      console.error("Erreur inattendue lors de la récupération du pseudo :", err);
     }
     return null;
   }
 }
+
 
 // ===============================
 //   UPDATE AUTH UI
@@ -156,6 +161,10 @@ async function fetchPlayerPseudo(userId) {
 let lastUIUpdateUserId = null;
 
 async function updateAuthUI(user = null) {
+  const userId = user?.id || null;
+  if (userId === lastUIUpdateUserId) return;
+  lastUIUpdateUserId = userId;
+
   console.log("Mise à jour de l'UI avec l'utilisateur :", user);
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
@@ -174,6 +183,7 @@ async function updateAuthUI(user = null) {
   }
 
   if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
@@ -192,7 +202,6 @@ async function updateAuthUI(user = null) {
     }
   }
 }
-
 
 // ===============================
 //   PROFIL & JEU
@@ -2178,57 +2187,52 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-// Fonction de déconnexion
-async function logout() {
-  console.log("Début de la fonction logout");
+  // Fonction de déconnexion
+  async function logout() {
+    console.log("Début de la fonction logout");
 
-  const { error } = await supa.auth.signOut();
-  console.log("Après l'appel à supa.auth.signOut"); // Log pour vérifier que l'appel à signOut est terminé
+    const { error } = await supa.auth.signOut();
+    console.log("Après l'appel à supa.auth.signOut");
 
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-    return;
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      return;
+    }
+
+    console.log("Déconnexion réussie");
+
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    console.log("Token supprimé du localStorage");
+
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+
+    console.log("Avant l'appel à updateAuthUI(null)");
+    updateAuthUI(null);
+    console.log("Après l'appel à updateAuthUI(null)");
   }
 
-  console.log("Déconnexion réussie");
 
-  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-  console.log("Token supprimé du localStorage");
-
-  localStorage.removeItem("playerPseudo");
-  localStorage.removeItem("bestScoreData");
-
-  console.log("Avant l'appel à updateAuthUI(null)");
-  updateAuthUI(null);
-  console.log("Après l'appel à updateAuthUI(null)");
-
-  window.location.reload();
-  console.log("Cette ligne ne devrait jamais être atteinte à cause du reload");
-}
-
-
-if (burgerAuthBtn) {
+  if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
-    console.log("Clic sur le bouton d'authentification"); // Log pour vérifier que l'écouteur de clic est déclenché
+    console.log("Clic sur le bouton d'authentification");
     playClickSound();
 
     const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
-    console.log("Statut de connexion :", isConnected); // Log pour vérifier le statut de connexion
+    console.log("Statut de connexion :", isConnected);
 
-    // OUVERTURE DE LA FENÊTRE DE CONNEXION
     if (!isConnected) {
-      console.log("Ouverture de la fenêtre de connexion"); // Log pour vérifier l'ouverture de la fenêtre de connexion
+      console.log("Ouverture de la fenêtre de connexion");
       const auth = document.getElementById("authOverlay");
       auth.classList.remove("hidden");
       pauseGame();
       return;
     }
 
-    // DÉCONNEXION
-    console.log("Début de la déconnexion"); // Log pour vérifier le début de la déconnexion
-    await logout();
-  });
-}
+    console.log("Début de la déconnexion");
+      await logout();
+    });
+  }
 
 
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
