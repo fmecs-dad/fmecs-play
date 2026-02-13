@@ -122,19 +122,12 @@ window.addEventListener('blur', () => {
 let abortController = null;
 
 async function fetchPlayerPseudo(userId) {
-  if (abortController) {
-    abortController.abort();
-  }
-
-  abortController = new AbortController();
-
   try {
     const { data, error } = await supa
       .from("players")
       .select("pseudo")
       .eq("id", userId)
-      .single()
-      .abortSignal(abortController.signal);
+      .single();
 
     if (error) {
       console.error("Erreur lors de la récupération du pseudo :", error);
@@ -143,11 +136,7 @@ async function fetchPlayerPseudo(userId) {
 
     return data.pseudo;
   } catch (err) {
-    if (err.name === 'AbortError') {
-      console.log('Requête de récupération du pseudo annulée');
-    } else {
-      console.error("Erreur inattendue lors de la récupération du pseudo :", err);
-    }
+    console.error("Erreur inattendue lors de la récupération du pseudo :", err);
     return null;
   }
 }
@@ -159,39 +148,27 @@ async function fetchPlayerPseudo(userId) {
 let lastUIUpdateUserId = null;
 
 async function updateAuthUI(user = null) {
-  const userId = user?.id || null;
-  if (userId === lastUIUpdateUserId) return;
-  lastUIUpdateUserId = userId;
-
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
   if (!user) {
-    if (burgerAuthBtn) {
-      burgerAuthBtn.textContent = "Se connecter";
-      console.log("Texte du bouton mis à jour en 'Se connecter'");
-    }
+    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
     return;
   }
 
-  if (burgerAuthBtn) {
-    burgerAuthBtn.textContent = "Se déconnecter";
-    console.log("Texte du bouton mis à jour en 'Se déconnecter'");
-  }
+  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
 
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
-    if (user) {
-      const pseudo = await fetchPlayerPseudo(user.id);
-      if (pseudo && burgerPseudo) {
-        burgerPseudo.textContent = pseudo;
-        localStorage.setItem("playerPseudo", pseudo);
-      }
+    const pseudo = await fetchPlayerPseudo(user.id);
+    if (pseudo && burgerPseudo) {
+      burgerPseudo.textContent = pseudo;
+      localStorage.setItem("playerPseudo", pseudo);
     }
   } catch (err) {
     if (err.name !== 'AbortError') {
@@ -199,6 +176,7 @@ async function updateAuthUI(user = null) {
     }
   }
 }
+
 
 // ===============================
 //   PROFIL & JEU
@@ -2183,8 +2161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
 async function logout() {
-  console.log("Début de la fonction logout");
-
+  console.log("Début de la déconnexion");
   const { error } = await supa.auth.signOut();
 
   if (error) {
@@ -2192,19 +2169,18 @@ async function logout() {
     return;
   }
 
-  console.log("Déconnexion réussie");
-
+  // Nettoyer les données locales
   localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
   localStorage.removeItem("playerPseudo");
   localStorage.removeItem("bestScoreData");
 
-  // Mettre à jour l'UI avant de recharger la page
-  updateAuthUI(null).then(() => {
-    console.log("UI mise à jour après déconnexion");
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  });
+  // Mettre à jour l'UI immédiatement
+  if (burgerAuthBtn) {
+    burgerAuthBtn.textContent = "Se connecter";
+  }
+
+  // Recharger la page pour réinitialiser l'état
+  window.location.reload();
 }
 
 if (burgerAuthBtn) {
@@ -2213,12 +2189,9 @@ if (burgerAuthBtn) {
     playClickSound();
 
     const { data: { session } } = await supa.auth.getSession();
-    const user = session?.user || null;
-    const isConnected = !!user;
+    const user = session?.user;
 
-    console.log("Statut de connexion vérifié :", isConnected);
-
-    if (!isConnected) {
+    if (!user) {
       console.log("Ouverture de la fenêtre de connexion");
       const auth = document.getElementById("authOverlay");
       auth.classList.remove("hidden");
@@ -2640,7 +2613,7 @@ function setupAuthListener() {
   console.log(`Événement d'authentification : ${event}, session :`, session);
 
   if (event === "SIGNED_IN") {
-    const user = session?.user || null;
+    const user = session?.user;
     console.log("Utilisateur connecté :", user);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(user);
