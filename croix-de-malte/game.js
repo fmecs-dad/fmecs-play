@@ -2180,9 +2180,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   //   AUTH BURGER (v1)
   // ===============================
 
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-  // Fonction de déconnexion
 async function logout() {
   console.log("Début de la fonction logout");
 
@@ -2199,15 +2198,15 @@ async function logout() {
   localStorage.removeItem("playerPseudo");
   localStorage.removeItem("bestScoreData");
 
-  updateAuthUI(null);
-
-  console.log("Redirection vers le rechargement de la page...");
-  setTimeout(() => {
-    window.location.reload();
-  }, 500); // Ajout d'un délai pour permettre aux logs d'apparaître
+  // Mettre à jour l'UI avant de recharger la page
+  updateAuthUI(null).then(() => {
+    console.log("UI mise à jour après déconnexion");
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  });
 }
 
-// Écouteur de clic sur le bouton d'authentification
 if (burgerAuthBtn) {
   burgerAuthBtn.addEventListener("click", async () => {
     console.log("Clic sur le bouton d'authentification");
@@ -2231,7 +2230,6 @@ if (burgerAuthBtn) {
     await logout();
   });
 }
-
 
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
@@ -2651,6 +2649,7 @@ function setupAuthListener() {
     updateAuthUI(null);
   }
 });
+
 
   authStateChangeListenerAdded = true;
 }
