@@ -158,6 +158,8 @@ async function fetchPlayerPseudo(userId) {
 
 let lastUIUpdateUserId = null;
 
+let lastUIUpdateUserId = null;
+
 async function updateAuthUI(user = null) {
   const userId = user?.id || null;
   if (userId === lastUIUpdateUserId) return;
@@ -2193,11 +2195,18 @@ async function logout() {
     return;
   }
 
+  console.log("Déconnexion réussie");
+
   localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
   localStorage.removeItem("playerPseudo");
   localStorage.removeItem("bestScoreData");
 
   updateAuthUI(null);
+
+  console.log("Redirection vers le rechargement de la page...");
+  setTimeout(() => {
+    window.location.reload();
+  }, 500); // Ajout d'un délai pour permettre aux logs d'apparaître
 }
 
 // Écouteur de clic sur le bouton d'authentification
@@ -2222,7 +2231,6 @@ if (burgerAuthBtn) {
 
     console.log("Début de la déconnexion");
     await logout();
-    window.location.reload(); // Forcer le rechargement de la page après déconnexion
   });
 }
 
