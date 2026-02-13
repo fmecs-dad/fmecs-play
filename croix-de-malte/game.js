@@ -171,12 +171,6 @@ async function updateAuthUI(user = null) {
       burgerAuthBtn.textContent = "Se connecter";
       console.log("Texte du bouton mis à jour en 'Se connecter'");
     }
-  } else {
-    if (burgerAuthBtn) {
-      burgerAuthBtn.textContent = "Se déconnecter";
-      console.log("Texte du bouton mis à jour en 'Se déconnecter'");
-    }
-  }
     if (burgerPseudo) burgerPseudo.textContent = "";
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
@@ -184,9 +178,8 @@ async function updateAuthUI(user = null) {
   }
 
   if (burgerAuthBtn) {
-    requestAnimationFrame(() => {
-      burgerAuthBtn.textContent = "Se déconnecter";
-    });
+    burgerAuthBtn.textContent = "Se déconnecter";
+    console.log("Texte du bouton mis à jour en 'Se déconnecter'");
   }
 
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
