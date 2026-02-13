@@ -121,8 +121,6 @@ window.addEventListener('blur', () => {
 
 let abortController = null;
 
-let abortController = null;
-
 async function fetchPlayerPseudo(userId) {
   // Annuler la requête précédente si elle existe
   if (abortController) {
