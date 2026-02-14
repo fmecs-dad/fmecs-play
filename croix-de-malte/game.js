@@ -265,29 +265,6 @@ function openHelpOverlay(auto = false) {
 }
 
 // ===============================	
-//   SESSION AU DÉMARRAGE 
-// ===============================
-
-(async () => {
-  try {
-    const { data: { session }, error } = await supa.auth.getSession();
-
-    if (error) {
-      console.error("Erreur lors de la récupération de la session :", error);
-    }
-
-    if (session) {
-      console.log("Session récupérée au démarrage :", session);
-      await initialiserProfilEtLancerJeu(session);
-    }
-
-    updateAuthUI(session?.user || null);
-  } catch (err) {
-    console.error("Erreur inattendue au démarrage :", err);
-  }
-})();
-
-// ===============================	
 //   VARIABLES DE JEU
 // ===============================
 
@@ -2327,7 +2304,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // --- SIGNUP ---
-
   document.getElementById("signupBtn").addEventListener("click", () => {
     playClickSound();
     document.getElementById("authOverlay").classList.add("hidden");
@@ -2490,6 +2466,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      // Stocker le JWT après connexion
+      localStorage.setItem('supabase.access.token', data.session.access_token);
+      localStorage.setItem('supabase.refresh.token', data.session.refresh_token);
+
       const { data: { session }, error: sessionError } = await supa.auth.getSession();
       if (sessionError) {
         console.error("Erreur lors de la récupération de la session :", sessionError);
@@ -2497,36 +2477,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      const userId = session.user.id;
-
-      // Récupérer le meilleur score depuis Supabase
-      const bestScoreData = await fetchBestScore(userId);
-      if (bestScoreData) {
-        saveBestScore(bestScoreData);
-        console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
-      }
-
-      document.getElementById("authOverlay").classList.add("hidden");
-
-      await updateAuthUI(data.user).catch(err => {
-        console.error("Erreur dans updateAuthUI :", err);
-      });
-
-      if (data.user) {
-        const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
-          console.error("Erreur lors de la récupération du pseudo :", err);
-          return null;
-        });
-        if (pseudo) localStorage.setItem("playerPseudo", pseudo);
-      }
-
-      // Mettre à jour l'affichage du meilleur score
-      updateBestScoreTop();
+      // ... (le reste du code inchangé)
     } catch (err) {
       console.error("Erreur inattendue lors de la connexion :", err);
       alert("Une erreur inattendue est survenue.");
     }
   });
+
   // Fonction pour récupérer le meilleur score depuis Supabase
   async function fetchBestScore(userId) {
   try {
@@ -2605,33 +2562,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupInitialFlow();
 
-  let isAuthListenerSetup = false;
-
-  let authStateChangeListenerAdded = false;
-
-  function setupAuthListener() {
-    if (authStateChangeListenerAdded) {
-      // Supprimer l'écouteur précédent s'il existe
-      supa.auth.onAuthStateChange(() => {}); // Réinitialise l'écouteur
-    }
-
-    supa.auth.onAuthStateChange(async (event, session) => {
-      console.log(`Événement d'authentification : ${event}, session :`, session);
-
-      if (event === "SIGNED_IN") {
-        const user = session?.user;
-        console.log("Utilisateur connecté :", user);
-        await initialiserProfilEtLancerJeu(session);
-        updateAuthUI(user);
-      } else if (event === "SIGNED_OUT") {
-        console.log("Utilisateur déconnecté");
-        updateAuthUI(null);
-      }
-    });
-
-    authStateChangeListenerAdded = true;
-  }
-
-  setupAuthListener();
 });
 
