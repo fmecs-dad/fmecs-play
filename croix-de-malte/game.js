@@ -92,22 +92,29 @@ let focusTimeout = null;
 let lastKnownUserId = null;
 let focusHandlersActive = true;
 
-const handleFocus = async () => {
+const handleFocusWithReconnect = async () => {
   if (!focusHandlersActive || isCheckingSessionOnFocus) return;
   isCheckingSessionOnFocus = true;
+
+  console.log("Focus regained, starting session check..."); // Log pour vérifier que la fonction est appelée
 
   if (focusTimeout) clearTimeout(focusTimeout);
 
   focusTimeout = setTimeout(async () => {
     try {
+      console.log("Checking session after focus regained..."); // Log supplémentaire
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user || null;
       const userId = user?.id || null;
 
-      if (userId && userId !== lastKnownUserId) {
-        console.log("Focus regained, checking session:", user);
+      console.log("Current user ID:", userId, "Last known user ID:", lastKnownUserId); // Log supplémentaire
+
+      if (userId) {
+        console.log("Focus regained, checking session:", user); // Log principal
         lastKnownUserId = userId;
         updateAuthUI(user);
+      } else {
+        console.log("No active session detected."); // Log supplémentaire
       }
     } catch (err) {
       console.error("Erreur lors de la vérification de la session:", err);
@@ -117,11 +124,12 @@ const handleFocus = async () => {
   }, 300);
 };
 
-window.addEventListener('focus', handleFocus);
+window.addEventListener('focus', handleFocusWithReconnect);
 
 window.addEventListener('blur', () => {
-  // Optionnel : actions à effectuer lors de la perte de focus
+  console.log("Window lost focus."); // Log supplémentaire
 });
+
 
 // Fonction pour vérifier et rétablir la connexion si nécessaire
 async function checkAndRestoreSession() {
