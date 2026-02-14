@@ -130,7 +130,6 @@ window.addEventListener('blur', () => {
   console.log("Window lost focus."); // Log supplémentaire
 });
 
-
 // Fonction pour vérifier et rétablir la connexion si nécessaire
 async function checkAndRestoreSession() {
   try {
@@ -2273,7 +2272,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       await logout();
     });
   }
-
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
     localStorage.removeItem("currentGameState");
@@ -2698,3 +2696,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupAuthListener();
 });
+
