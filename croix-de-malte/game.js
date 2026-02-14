@@ -149,17 +149,8 @@ const handleFocus = async () => {
   }, 300);
 };
 
-// Fonction pour réinitialiser les écouteurs de focus
-function resetFocusListeners() {
-  // Supprimer les écouteurs existants
-  window.removeEventListener('focus', handleFocus);
-
-  // Réattacher les écouteurs
-  window.addEventListener('focus', handleFocus);
-}
-
 // Initialiser les écouteurs de focus
-resetFocusListeners();
+window.addEventListener('focus', handleFocus);
 
 window.addEventListener('blur', () => {
   console.log("Window lost focus.");
@@ -2207,32 +2198,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Début de la déconnexion");
 
     // Désactiver les écouteurs de focus pendant la déconnexion
-    window.removeEventListener('focus', handleFocus);
     focusHandlersActive = false;
 
-    const { error } = await supa.auth.signOut();
+    try {
+      const { error } = await supa.auth.signOut();
 
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
+      if (error) {
+        console.error("Erreur lors de la déconnexion :", error);
+        throw new Error("Erreur lors de la déconnexion");
+      }
+
+      // Nettoyer les données locales
+      localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+      localStorage.removeItem("playerPseudo");
+      localStorage.removeItem("bestScoreData");
+
+      // Mettre à jour l'UI immédiatement
+      updateAuthUI(null);
+
+      // Réinitialiser les variables de gestion de focus
+      lastKnownUserId = null;
+
+      // Recharger la page pour réinitialiser l'état
+      window.location.reload();
+    } catch (err) {
+      console.error("Erreur lors de la déconnexion :", err);
       // Réactiver les écouteurs de focus en cas d'erreur
-      resetFocusListeners();
       focusHandlersActive = true;
-      return;
     }
-
-    // Nettoyer les données locales
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-
-    // Mettre à jour l'UI immédiatement
-    updateAuthUI(null);
-
-    // Réinitialiser les variables de gestion de focus
-    lastKnownUserId = null;
-
-    // Recharger la page pour réinitialiser l'état
-    window.location.reload();
   }
 
   if (burgerAuthBtn) {
