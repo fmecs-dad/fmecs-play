@@ -2174,7 +2174,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Désactiver les écouteurs de focus pendant la déconnexion
     window.removeEventListener('focus', handleFocus);
-    focusHandlersActive = false;
 
     try {
       const { error } = await supa.auth.signOut();
@@ -2183,7 +2182,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Erreur lors de la déconnexion :", error);
         // Réactiver les écouteurs de focus en cas d'erreur
         window.addEventListener('focus', handleFocus);
-        focusHandlersActive = true;
         return;
       }
 
@@ -2198,13 +2196,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Réinitialiser les variables de gestion de focus
       lastKnownUserId = null;
 
-      // Recharger la page pour réinitialiser l'état
-      window.location.reload();
+      // Rediriger vers la page de connexion
+      window.location.href = window.location.origin + window.location.pathname;
     } catch (err) {
       console.error("Erreur inattendue lors de la déconnexion :", err);
       // Réactiver les écouteurs de focus en cas d'erreur
       window.addEventListener('focus', handleFocus);
-      focusHandlersActive = true;
     }
   }
 
@@ -2657,3 +2654,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupAuthListener();
 });
+
