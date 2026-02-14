@@ -123,42 +123,6 @@ window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
 });
 
-async function logout() {
-  console.log("Début de la déconnexion");
-
-  // Désactiver les écouteurs de focus pendant la déconnexion
-  focusHandlersActive = false;
-
-  const { error } = await supa.auth.signOut();
-
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-    focusHandlersActive = true; // Réactiver les écouteurs en cas d'erreur
-    return;
-  }
-
-  // Nettoyer les données locales
-  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-  localStorage.removeItem("playerPseudo");
-  localStorage.removeItem("bestScoreData");
-
-  // Mettre à jour l'UI immédiatement
-  updateAuthUI(null);
-
-  // Réinitialiser les variables de gestion de focus
-  lastKnownUserId = null;
-
-  // Réactiver les écouteurs de focus après la déconnexion
-  setTimeout(() => {
-    focusHandlersActive = true;
-  }, 1000);
-
-  // Recharger la page pour réinitialiser l'état
-  window.location.reload();
-}
-
-let abortController = null;
-
 async function fetchPlayerPseudo(userId) {
   try {
     const { data, error } = await supa
@@ -212,7 +176,6 @@ async function updateAuthUI(user = null) {
     console.error("Impossible de récupérer le pseudo :", err);
   }
 }
-
 
 // ===============================
 //   PROFIL & JEU
@@ -2190,67 +2153,66 @@ document.addEventListener("DOMContentLoaded", async () => {
     playClickSound();
     await ouvrirProfil();
   });
+
   // ===============================
   //   AUTH BURGER (v1)
   // ===============================
 
-const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-async function logout() {
-  console.log("Début de la déconnexion");
+  async function logout() {
+    console.log("Début de la déconnexion");
 
-  // Supprimer les écouteurs de focus pendant la déconnexion
-  window.removeEventListener('focus', handleFocus);
+    // Désactiver complètement les écouteurs de focus
+    window.removeEventListener('focus', handleFocus);
+    focusHandlersActive = false;
 
-  const { error } = await supa.auth.signOut();
+    const { error } = await supa.auth.signOut();
 
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-    // Réattacher les écouteurs de focus en cas d'erreur
-    window.addEventListener('focus', handleFocus);
-    return;
-  }
-
-  // Nettoyer les données locales
-  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-  localStorage.removeItem("playerPseudo");
-  localStorage.removeItem("bestScoreData");
-
-  // Mettre à jour l'UI immédiatement
-  updateAuthUI(null);
-
-  // Réinitialiser les variables de gestion de focus
-  lastKnownUserId = null;
-
-  // Réattacher les écouteurs de focus après la déconnexion
-  setTimeout(() => {
-    window.addEventListener('focus', handleFocus);
-  }, 1000);
-
-  // Recharger la page pour réinitialiser l'état
-  window.location.reload();
-}
-
-if (burgerAuthBtn) {
-  burgerAuthBtn.addEventListener("click", async () => {
-    console.log("Clic sur le bouton d'authentification");
-    playClickSound();
-
-    const { data: { session } } = await supa.auth.getSession();
-    const user = session?.user;
-
-    if (!user) {
-      console.log("Ouverture de la fenêtre de connexion");
-      const auth = document.getElementById("authOverlay");
-      auth.classList.remove("hidden");
-      pauseGame();
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      // Réactiver les écouteurs de focus en cas d'erreur
+      window.addEventListener('focus', handleFocus);
+      focusHandlersActive = true;
       return;
     }
 
-    console.log("Début de la déconnexion");
-    await logout();
-  });
-}
+    // Nettoyer les données locales
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+
+    // Mettre à jour l'UI immédiatement
+    updateAuthUI(null);
+
+    // Réinitialiser les variables de gestion de focus
+    lastKnownUserId = null;
+
+    // Ne pas réactiver les écouteurs de focus après la déconnexion
+    // On recharge la page pour réinitialiser l'état
+    window.location.reload();
+  }
+
+  if (burgerAuthBtn) {
+    burgerAuthBtn.addEventListener("click", async () => {
+      console.log("Clic sur le bouton d'authentification");
+      playClickSound();
+
+      const { data: { session } } = await supa.auth.getSession();
+      const user = session?.user;
+
+      if (!user) {
+        console.log("Ouverture de la fenêtre de connexion");
+        const auth = document.getElementById("authOverlay");
+        auth.classList.remove("hidden");
+        pauseGame();
+        return;
+      }
+
+      console.log("Début de la déconnexion");
+      await logout();
+    });
+  }
 
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
@@ -2352,6 +2314,7 @@ if (burgerAuthBtn) {
 
     document.getElementById("profileModal").style.display = "none";
   });
+
   // ===============================
   //   AUTHENTIFICATION (v1)
   // ===============================
@@ -2635,15 +2598,14 @@ if (burgerAuthBtn) {
   let isInitialSessionCheckDone = false;
 
   function setupInitialFlow() {
-  setTimeout(async () => {
-    const { data: { session } } = await supa.auth.getSession();
-    const user = session?.user || null;
-    console.log("Vérification de la session au démarrage :", user);
-    updateAuthUI(user);
-    launchFlowOnce(user);
-  }, 300);
-}
-
+    setTimeout(async () => {
+      const { data: { session } } = await supa.auth.getSession();
+      const user = session?.user || null;
+      console.log("Vérification de la session au démarrage :", user);
+      updateAuthUI(user);
+      launchFlowOnce(user);
+    }, 300);
+  }
 
   setupInitialFlow();
 
@@ -2651,32 +2613,29 @@ if (burgerAuthBtn) {
 
   let authStateChangeListenerAdded = false;
 
-function setupAuthListener() {
-  if (authStateChangeListenerAdded) {
-    // Supprimer l'écouteur précédent s'il existe
-    supa.auth.onAuthStateChange(() => {}); // Réinitialise l'écouteur
+  function setupAuthListener() {
+    if (authStateChangeListenerAdded) {
+      // Supprimer l'écouteur précédent s'il existe
+      supa.auth.onAuthStateChange(() => {}); // Réinitialise l'écouteur
+    }
+
+    supa.auth.onAuthStateChange(async (event, session) => {
+      console.log(`Événement d'authentification : ${event}, session :`, session);
+
+      if (event === "SIGNED_IN") {
+        const user = session?.user;
+        console.log("Utilisateur connecté :", user);
+        await initialiserProfilEtLancerJeu(session);
+        updateAuthUI(user);
+      } else if (event === "SIGNED_OUT") {
+        console.log("Utilisateur déconnecté");
+        updateAuthUI(null);
+      }
+    });
+
+    authStateChangeListenerAdded = true;
   }
 
-  supa.auth.onAuthStateChange(async (event, session) => {
-  console.log(`Événement d'authentification : ${event}, session :`, session);
-
-  if (event === "SIGNED_IN") {
-    const user = session?.user;
-    console.log("Utilisateur connecté :", user);
-    await initialiserProfilEtLancerJeu(session);
-    updateAuthUI(user);
-  } else if (event === "SIGNED_OUT") {
-    console.log("Utilisateur déconnecté");
-    updateAuthUI(null);
-  }
+  setupAuthListener();
 });
-
-
-  authStateChangeListenerAdded = true;
-}
-
-setupAuthListener();
-
-});
-
 
