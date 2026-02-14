@@ -1904,8 +1904,8 @@ console.log("initialFlow appelé avec user :", user);
     skip = false;
   }
 
-  //console.log("lastEmail :", lastEmail);
-  //console.log("skip :", skip);
+  console.log("lastEmail :", lastEmail);
+  console.log("skip :", skip);
 
   // 1. Utilisateur connecté → readyModal
   if (user) {
@@ -2200,7 +2200,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user;
-
+      console.log("user: ", user)
       if (!user) {
         console.log("Ouverture de la fenêtre de connexion");
         const auth = document.getElementById("authOverlay");
