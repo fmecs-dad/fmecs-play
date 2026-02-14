@@ -2246,6 +2246,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+// ===============================
+//   AUTRES ÉCOUTEURS DE BOUTONS
+// ===============================
+
  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
     localStorage.removeItem("currentGameState");
