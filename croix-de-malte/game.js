@@ -89,12 +89,21 @@ function playSound(id) {
 
 // Fonction pour vérifier la session au démarrage
 async function checkSessionOnStartup() {
-  const user = await getSession();
-  if (user) {
-    console.log("Session valide, utilisateur connecté :", user);
-    updateAuthUI(user);
+  // Récupérer la session Supabase
+  const { data: { session }, error } = await supa.auth.getSession();
+
+  if (error) {
+    console.error("Erreur lors de la récupération de la session :", error);
+    updateAuthUI(null);
+    return;
+  }
+
+  // Si une session existe, stocker le JWT et mettre à jour l'UI
+  if (session) {
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+    updateAuthUI(session.user);
   } else {
-    console.log("Aucune session valide.");
     updateAuthUI(null);
   }
 }
@@ -102,7 +111,7 @@ async function checkSessionOnStartup() {
 // Appeler cette fonction au démarrage
 checkSessionOnStartup();
 
-// Fonction pour récupérer la session
+// Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   const token = localStorage.getItem('supabase.access.token');
 
@@ -130,6 +139,7 @@ async function fetchPlayerPseudo(userId) {
     return null;
   }
 
+  // Configurer le client Supabase avec le JWT
   supa.auth.setSession(token);
 
   try {
@@ -2288,29 +2298,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("profileModal").style.display = "none";
   });
 
-  // ===============================
-  //   AUTHENTIFICATION (v1)
-  // ===============================
+// ===============================
+//   AUTHENTIFICATION (v1)
+// ===============================
 
-  document.getElementById("closeAuthBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("authOverlay").classList.add("hidden");
-  });
+document.getElementById("closeAuthBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("authOverlay").classList.add("hidden");
+});
 
-  document.getElementById("closeSignupBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("signupModal").classList.add("hidden");
-    document.getElementById("authOverlay").classList.remove("hidden");
-  });
+document.getElementById("closeSignupBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
 
-  // --- SIGNUP ---
-  document.getElementById("signupBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("authOverlay").classList.add("hidden");
-    document.getElementById("signupModal").classList.remove("hidden");
-  });
+// --- SIGNUP ---
+document.getElementById("signupBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("authOverlay").classList.add("hidden");
+  document.getElementById("signupModal").classList.remove("hidden");
+});
 
-  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
 
   const email = document.getElementById("authEmail").value.trim();
@@ -2340,7 +2350,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // Inscription de l'utilisateur avec le mot de passe saisi
+  // Inscription de l'utilisateur
   const { data: signupData, error: signupError } = await supa.auth.signUp({
     email,
     password
@@ -2353,7 +2363,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Connexion automatique après l'inscription
-  const { error: signinError } = await supa.auth.signInWithPassword({
+  const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
     email,
     password
   });
@@ -2372,6 +2382,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     alert("Impossible de récupérer la session.");
     return;
   }
+
+  // Stocker le JWT après connexion
+  localStorage.setItem('supabase.access.token', session.access_token);
+  localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
   const userId = session.user.id;
   console.log("ID de l'utilisateur :", userId);
@@ -2435,58 +2449,89 @@ document.addEventListener("DOMContentLoaded", async () => {
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
 
-  // --- LOGIN ---
+// --- LOGIN ---
+document.getElementById("loginBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  playClickSound();
 
-  document.getElementById("loginBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-    playClickSound();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
 
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value.trim();
+  if (!email || !password) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
 
-    if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
+  if (!email.includes("@") || !email.includes(".")) {
+    alert("Adresse email invalide.");
+    return;
+  }
 
-    if (!email.includes("@") || !email.includes(".")) {
-      alert("Adresse email invalide.");
-      return;
-    }
-
-    try {
-      const { data, error } = await supa.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        console.error("Erreur de connexion :", error);
-        alert("Erreur : " + error.message);
-        return;
-      }
-
-      // Stocker le JWT après connexion
-      localStorage.setItem('supabase.access.token', data.session.access_token);
-      localStorage.setItem('supabase.refresh.token', data.session.refresh_token);
-
-      const { data: { session }, error: sessionError } = await supa.auth.getSession();
-      if (sessionError) {
-        console.error("Erreur lors de la récupération de la session :", sessionError);
-        alert("Erreur lors de la récupération de la session.");
-        return;
-      }
-
-      // ... (le reste du code inchangé)
-    } catch (err) {
-      console.error("Erreur inattendue lors de la connexion :", err);
-      alert("Une erreur inattendue est survenue.");
-    }
-  });
-
-  // Fonction pour récupérer le meilleur score depuis Supabase
-  async function fetchBestScore(userId) {
   try {
+    const { data, error } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      console.error("Erreur de connexion :", error);
+      alert("Erreur : " + error.message);
+      return;
+    }
+
+    // Récupérer la session après la connexion
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+
+    if (sessionError || !session) {
+      console.error("Erreur récupération session :", sessionError);
+      alert("Impossible de récupérer la session.");
+      return;
+    }
+
+    // Stocker le JWT après connexion
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+
+    // Récupérer le meilleur score depuis Supabase
+    const bestScoreData = await fetchBestScore(session.user.id);
+    if (bestScoreData) {
+      saveBestScore(bestScoreData);
+      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+    }
+
+    document.getElementById("authOverlay").classList.add("hidden");
+
+    await updateAuthUI(session.user).catch(err => {
+      console.error("Erreur dans updateAuthUI :", err);
+    });
+
+    if (session.user) {
+      const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
+        console.error("Erreur lors de la récupération du pseudo :", err);
+        return null;
+      });
+      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+    }
+
+    // Mettre à jour l'affichage du meilleur score
+    updateBestScoreTop();
+  } catch (err) {
+    console.error("Erreur inattendue lors de la connexion :", err);
+    alert("Une erreur inattendue est survenue.");
+  }
+});
+
+// Fonction pour récupérer le meilleur score depuis Supabase
+async function fetchBestScore(userId) {
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.error("Aucun JWT trouvé.");
+      return null;
+    }
+
+    supa.auth.setSession(token);
+
     const { data, error } = await supa
       .from("scores")
       .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
@@ -2512,55 +2557,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 }
 
-  // ===============================
-  //   WHY SIGNUP
-  // ===============================
+// ===============================
+//   WHY SIGNUP
+// ===============================
 
-  document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-    playClickSound();
-    closeWhySignup();
-    document.getElementById("authOverlay").classList.remove("hidden");
-  });
+document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
+  playClickSound();
+  closeWhySignup();
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
 
+document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
+  playClickSound();
 
-  document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-    playClickSound();
+  const dontRemind = document.getElementById("whySignupDontRemind").checked;
+  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
-    const dontRemind = document.getElementById("whySignupDontRemind").checked;
-    if (dontRemind) localStorage.setItem("skipWhySignup", "1");
-
-    closeWhySignup();
-    document.getElementById("readyModal").classList.remove("hidden");
-  });
-
-  // ===============================
-  //   FLUX INITIAL
-  // ===============================
-
-  let flowAlreadyLaunched = false;
-  let initialFlowTimeout = null;
-  let isCheckingInitialSession = false;
-  let isHandlingAuthEvent = false;
-
-  function launchFlowOnce(userFromEvent) {
-    if (flowAlreadyLaunched) return;
-    flowAlreadyLaunched = true;
-    handleFirstLaunchFlow(userFromEvent);
-  }
-
-  let isInitialSessionCheckDone = false;
-
-  function setupInitialFlow() {
-    setTimeout(async () => {
-      const { data: { session } } = await supa.auth.getSession();
-      const user = session?.user || null;
-      console.log("Vérification de la session au démarrage :", user);
-      updateAuthUI(user);
-      launchFlowOnce(user);
-    }, 300);
-  }
-
-  setupInitialFlow();
-
+  closeWhySignup();
+  document.getElementById("readyModal").classList.remove("hidden");
+});
 });
 
