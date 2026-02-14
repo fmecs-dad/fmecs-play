@@ -2240,7 +2240,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     soundEnabled = !soundEnabled;
     updateSoundButton();
   });
-});
+
 
   // ===============================
   //   READY BUTTON
