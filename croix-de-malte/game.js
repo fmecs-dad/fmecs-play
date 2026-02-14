@@ -2198,7 +2198,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Clic sur le bouton d'authentification");
       playClickSound();
 
-      const { data: { session } } = await supa.auth.getUser();
+      const { data: { session } } = await supa.auth.getSession();
       const user = session?.user;
       
       if (!user) {
