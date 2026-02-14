@@ -2198,9 +2198,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Clic sur le bouton d'authentification");
       playClickSound();
 
-      const { data: { session } } = await supa.auth.getSession();
+      const { data: { session } } = await supa.auth.getUser();
       const user = session?.user;
-      console.log("user: ", user)
+      
       if (!user) {
         console.log("Ouverture de la fenêtre de connexion");
         const auth = document.getElementById("authOverlay");
