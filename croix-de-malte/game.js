@@ -211,41 +211,6 @@ async function updateAuthUI(user = null) {
 }
 
 // ===============================
-//   UPDATE AUTH UI
-// ===============================
-
-let lastUIUpdateUserId = null;
-
-async function updateAuthUI(user = null) {
-  console.log("Updating UI with user:", user); // Log supplémentaire
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  const burgerPseudo = document.getElementById("burgerPseudo");
-
-  if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
-    if (burgerPseudo) burgerPseudo.textContent = "";
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-    return;
-  }
-
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
-
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
-  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
-
-  try {
-    const pseudo = await fetchPlayerPseudo(user.id);
-    if (pseudo && burgerPseudo) {
-      burgerPseudo.textContent = pseudo;
-      localStorage.setItem("playerPseudo", pseudo);
-    }
-  } catch (err) {
-    console.error("Impossible de récupérer le pseudo :", err);
-  }
-}
-
-// ===============================
 //   PROFIL & JEU
 // ===============================
 
