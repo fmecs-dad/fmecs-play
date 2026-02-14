@@ -108,6 +108,8 @@ async function checkAndRestoreSession() {
         console.log("Session rétablie avec succès :", restoredUser);
         updateAuthUI(restoredUser);
       }
+    } else {
+      console.log("Session active détectée :", user);
     }
   } catch (err) {
     console.error("Erreur lors de la vérification de la session :", err);
@@ -170,6 +172,41 @@ async function fetchPlayerPseudo(userId) {
   } catch (err) {
     console.error("Erreur inattendue lors de la récupération du pseudo :", err);
     return null;
+  }
+}
+
+// ===============================
+//   UPDATE AUTH UI
+// ===============================
+
+let lastUIUpdateUserId = null;
+
+async function updateAuthUI(user = null) {
+  console.log("Updating UI with user:", user);
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  const burgerPseudo = document.getElementById("burgerPseudo");
+
+  if (!user) {
+    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
+    if (burgerPseudo) burgerPseudo.textContent = "";
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+    return;
+  }
+
+  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+
+  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
+  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
+
+  try {
+    const pseudo = await fetchPlayerPseudo(user.id);
+    if (pseudo && burgerPseudo) {
+      burgerPseudo.textContent = pseudo;
+      localStorage.setItem("playerPseudo", pseudo);
+    }
+  } catch (err) {
+    console.error("Impossible de récupérer le pseudo :", err);
   }
 }
 
@@ -2191,37 +2228,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-async function logout() {
-  console.log("Début de la déconnexion");
+  async function logout() {
+    console.log("Début de la déconnexion");
 
-  // Désactiver complètement les écouteurs de focus
-  window.removeEventListener('focus', handleFocusWithReconnect);
-  focusHandlersActive = false;
+    // Désactiver complètement les écouteurs de focus
+    window.removeEventListener('focus', handleFocusWithReconnect);
+    focusHandlersActive = false;
 
-  const { error } = await supa.auth.signOut();
+    const { error } = await supa.auth.signOut();
 
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-    // Réactiver les écouteurs de focus en cas d'erreur
-    window.addEventListener('focus', handleFocusWithReconnect);
-    focusHandlersActive = true;
-    return;
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      // Réactiver les écouteurs de focus en cas d'erreur
+      window.addEventListener('focus', handleFocusWithReconnect);
+      focusHandlersActive = true;
+      return;
+    }
+
+    // Nettoyer les données locales
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+
+    // Mettre à jour l'UI immédiatement
+    updateAuthUI(null);
+
+    // Réinitialiser les variables de gestion de focus
+    lastKnownUserId = null;
+
+    // Recharger la page pour réinitialiser l'état
+    window.location.reload();
   }
-
-  // Nettoyer les données locales
-  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-  localStorage.removeItem("playerPseudo");
-  localStorage.removeItem("bestScoreData");
-
-  // Mettre à jour l'UI immédiatement
-  updateAuthUI(null);
-
-  // Réinitialiser les variables de gestion de focus
-  lastKnownUserId = null;
-
-  // Recharger la page pour réinitialiser l'état
-  window.location.reload();
-}
 
   if (burgerAuthBtn) {
     burgerAuthBtn.addEventListener("click", async () => {
@@ -2230,7 +2267,7 @@ async function logout() {
 
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user;
-      
+
       if (!user) {
         console.log("Ouverture de la fenêtre de connexion");
         const auth = document.getElementById("authOverlay");
@@ -2668,4 +2705,6 @@ async function logout() {
 
   setupAuthListener();
 });
+
+
 
