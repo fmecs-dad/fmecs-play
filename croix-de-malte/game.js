@@ -92,22 +92,29 @@ let focusTimeout = null;
 let lastKnownUserId = null;
 let focusHandlersActive = true;
 
-const handleFocus = async () => {
+const handleFocusWithReconnect = async () => {
   if (!focusHandlersActive || isCheckingSessionOnFocus) return;
   isCheckingSessionOnFocus = true;
+
+  console.log("Focus regained, starting session check..."); // Log pour vérifier que la fonction est appelée
 
   if (focusTimeout) clearTimeout(focusTimeout);
 
   focusTimeout = setTimeout(async () => {
     try {
+      console.log("Checking session after focus regained..."); // Log supplémentaire
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user || null;
       const userId = user?.id || null;
 
-      if (userId && userId !== lastKnownUserId) {
-        console.log("Focus regained, checking session:", user);
+      console.log("Current user ID:", userId, "Last known user ID:", lastKnownUserId); // Log supplémentaire
+
+      if (userId) {
+        console.log("Focus regained, checking session:", user); // Log principal
         lastKnownUserId = userId;
         updateAuthUI(user);
+      } else {
+        console.log("No active session detected."); // Log supplémentaire
       }
     } catch (err) {
       console.error("Erreur lors de la vérification de la session:", err);
@@ -117,10 +124,10 @@ const handleFocus = async () => {
   }, 300);
 };
 
-window.addEventListener('focus', handleFocus);
+window.addEventListener('focus', handleFocusWithReconnect);
 
 window.addEventListener('blur', () => {
-  // Optionnel : actions à effectuer lors de la perte de focus
+  console.log("Window lost focus."); // Log supplémentaire
 });
 
 // Fonction pour vérifier et rétablir la connexion si nécessaire
@@ -203,6 +210,7 @@ async function fetchPlayerPseudo(userId) {
 let lastUIUpdateUserId = null;
 
 async function updateAuthUI(user = null) {
+  console.log("Updating UI with user:", user); // Log supplémentaire
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
@@ -2213,38 +2221,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
 
-  async function logout() {
-    console.log("Début de la déconnexion");
+async function logout() {
+  console.log("Début de la déconnexion");
 
-    // Désactiver complètement les écouteurs de focus
-    window.removeEventListener('focus', handleFocus);
-    focusHandlersActive = false;
+  // Désactiver complètement les écouteurs de focus
+  window.removeEventListener('focus', handleFocusWithReconnect);
+  focusHandlersActive = false;
 
-    const { error } = await supa.auth.signOut();
+  const { error } = await supa.auth.signOut();
 
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-      // Réactiver les écouteurs de focus en cas d'erreur
-      window.addEventListener('focus', handleFocus);
-      focusHandlersActive = true;
-      return;
-    }
-
-    // Nettoyer les données locales
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-
-    // Mettre à jour l'UI immédiatement
-    updateAuthUI(null);
-
-    // Réinitialiser les variables de gestion de focus
-    lastKnownUserId = null;
-
-    // Ne pas réactiver les écouteurs de focus après la déconnexion
-    // On recharge la page pour réinitialiser l'état
-    window.location.reload();
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+    // Réactiver les écouteurs de focus en cas d'erreur
+    window.addEventListener('focus', handleFocusWithReconnect);
+    focusHandlersActive = true;
+    return;
   }
+
+  // Nettoyer les données locales
+  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+  localStorage.removeItem("playerPseudo");
+  localStorage.removeItem("bestScoreData");
+
+  // Mettre à jour l'UI immédiatement
+  updateAuthUI(null);
+
+  // Réinitialiser les variables de gestion de focus
+  lastKnownUserId = null;
+
+  // Recharger la page pour réinitialiser l'état
+  window.location.reload();
+}
 
   if (burgerAuthBtn) {
     burgerAuthBtn.addEventListener("click", async () => {
