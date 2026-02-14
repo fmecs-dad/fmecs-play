@@ -89,12 +89,12 @@ function playSound(id) {
 
 // Fonction pour vérifier la session au démarrage
 async function checkSessionOnStartup() {
-  // Récupérer la session Supabase
   const { data: { session }, error } = await supa.auth.getSession();
 
   if (error) {
     console.error("Erreur lors de la récupération de la session :", error);
     updateAuthUI(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
     return;
   }
 
@@ -103,11 +103,12 @@ async function checkSessionOnStartup() {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
     updateAuthUI(session.user);
+    initialFlow(session.user); // Appeler initialFlow avec l'utilisateur connecté
   } else {
     updateAuthUI(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
   }
 }
-
 // Appeler cette fonction au démarrage
 checkSessionOnStartup();
 
@@ -1878,10 +1879,8 @@ function handleFirstLaunchFlow(userFromEvent) {
 
 let gameStarted = false; // global
 
-
 function initialFlow(user) {
-  
-console.log("initialFlow appelé avec user :", user);
+  console.log("initialFlow appelé avec user :", user);
 
   let lastEmail;
   let skip;
@@ -1937,20 +1936,21 @@ function showReadyModal(reason) {
   const modal = document.getElementById("readyModal");
   if (modal) {
     modal.classList.remove("hidden");
-    //console.log("readyModal affichée.");
   } else {
     console.error("Élément readyModal non trouvé dans le DOM.");
   }
 }
+
 function closeReady() {
   document.getElementById("readyModal").classList.add("hidden");
 }
+
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
   overlay.classList.add("hidden");
 
   if (window.helpAutoOpened) {
-    localStorage.setItem(HELP_SEEN_KEY, "true");
+    localStorage.setItem("helpSeen", "true");
     document.getElementById("readyModal").classList.remove("hidden");
     startNewGame();
   }
@@ -1964,7 +1964,6 @@ function closeLogin() {
 function closeEndGame() {
   const overlay = document.getElementById("endGameOverlay");
   overlay.classList.add("hidden");
-
 }
 
 function closeBestScore() {
@@ -1977,7 +1976,7 @@ function closeProfile() {
 }
 
 function closeWhySignup() {
- document.getElementById("whySignupModal").classList.add("hidden"); 
+  document.getElementById("whySignupModal").classList.add("hidden");
 }
 
 // ===============================
