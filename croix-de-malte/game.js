@@ -123,6 +123,59 @@ window.addEventListener('blur', () => {
   // Optionnel : actions à effectuer lors de la perte de focus
 });
 
+// Fonction pour vérifier et rétablir la connexion si nécessaire
+async function checkAndRestoreSession() {
+  try {
+    const { data: { session } } = await supa.auth.getSession();
+    const user = session?.user || null;
+
+    if (!user) {
+      console.log("Aucune session active détectée, tentative de reconnexion...");
+      const { data: { user: restoredUser }, error } = await supa.auth.refreshSession();
+
+      if (error) {
+        console.error("Erreur lors de la reconnexion :", error);
+      } else if (restoredUser) {
+        console.log("Session rétablie avec succès :", restoredUser);
+        updateAuthUI(restoredUser);
+      }
+    }
+  } catch (err) {
+    console.error("Erreur lors de la vérification de la session :", err);
+  }
+}
+
+// Modifiez la fonction handleFocus pour inclure la vérification et la reconnexion
+const handleFocusWithReconnect = async () => {
+  if (!focusHandlersActive || isCheckingSessionOnFocus) return;
+  isCheckingSessionOnFocus = true;
+
+  if (focusTimeout) clearTimeout(focusTimeout);
+
+  focusTimeout = setTimeout(async () => {
+    try {
+      await checkAndRestoreSession();
+      const { data: { session } } = await supa.auth.getSession();
+      const user = session?.user || null;
+      const userId = user?.id || null;
+
+      if (userId && userId !== lastKnownUserId) {
+        console.log("Focus regained, checking session:", user);
+        lastKnownUserId = userId;
+        updateAuthUI(user);
+      }
+    } catch (err) {
+      console.error("Erreur lors de la vérification de la session:", err);
+    } finally {
+      isCheckingSessionOnFocus = false;
+    }
+  }, 300);
+};
+
+// Remplacez l'écouteur de focus existant
+window.removeEventListener('focus', handleFocus);
+window.addEventListener('focus', handleFocusWithReconnect);
+
 async function fetchPlayerPseudo(userId) {
   try {
     const { data, error } = await supa
@@ -2164,7 +2217,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Début de la déconnexion");
 
     // Désactiver complètement les écouteurs de focus
-    window.removeEventListener('focus', handleFocus);
+    window.removeEventListener('focus', handleFocusWithReconnect);
     focusHandlersActive = false;
 
     const { error } = await supa.auth.signOut();
@@ -2172,7 +2225,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (error) {
       console.error("Erreur lors de la déconnexion :", error);
       // Réactiver les écouteurs de focus en cas d'erreur
-      window.addEventListener('focus', handleFocus);
+      window.addEventListener('focus', handleFocusWithReconnect);
       focusHandlersActive = true;
       return;
     }
@@ -2188,8 +2241,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Réinitialiser les variables de gestion de focus
     lastKnownUserId = null;
 
-    // Ne pas réactiver les écouteurs de focus après la déconnexion
-    // On recharge la page pour réinitialiser l'état
+    // Recharger la page pour réinitialiser l'état
     window.location.reload();
   }
 
@@ -2200,7 +2252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user;
-      
+
       if (!user) {
         console.log("Ouverture de la fenêtre de connexion");
         const auth = document.getElementById("authOverlay");
@@ -2638,4 +2690,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupAuthListener();
 });
-
