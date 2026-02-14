@@ -92,30 +92,6 @@ let focusTimeout = null;
 let lastKnownUserId = null;
 let focusHandlersActive = true;
 
-// Fonction pour vérifier et rétablir la connexion si nécessaire
-async function checkAndRestoreSession() {
-  try {
-    const { data: { session } } = await supa.auth.getSession();
-    const user = session?.user || null;
-
-    if (!user) {
-      console.log("Aucune session active détectée, tentative de reconnexion...");
-      const { data: { user: restoredUser }, error } = await supa.auth.refreshSession();
-
-      if (error) {
-        console.error("Erreur lors de la reconnexion :", error);
-      } else if (restoredUser) {
-        console.log("Session rétablie avec succès :", restoredUser);
-        updateAuthUI(restoredUser);
-      }
-    } else {
-      console.log("Session active détectée :", user);
-    }
-  } catch (err) {
-    console.error("Erreur lors de la vérification de la session :", err);
-  }
-}
-
 // Fonction pour gérer la reprise de focus
 const handleFocus = async () => {
   if (!focusHandlersActive || isCheckingSessionOnFocus) return;
@@ -127,7 +103,6 @@ const handleFocus = async () => {
 
   focusTimeout = setTimeout(async () => {
     try {
-      await checkAndRestoreSession();
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user || null;
       const userId = user?.id || null;
@@ -149,7 +124,7 @@ const handleFocus = async () => {
   }, 300);
 };
 
-// Initialiser les écouteurs de focus
+// Écouteurs d'événements
 window.addEventListener('focus', handleFocus);
 
 window.addEventListener('blur', () => {
@@ -2198,6 +2173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Début de la déconnexion");
 
     // Désactiver les écouteurs de focus pendant la déconnexion
+    window.removeEventListener('focus', handleFocus);
     focusHandlersActive = false;
 
     try {
@@ -2205,7 +2181,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (error) {
         console.error("Erreur lors de la déconnexion :", error);
-        throw new Error("Erreur lors de la déconnexion");
+        // Réactiver les écouteurs de focus en cas d'erreur
+        window.addEventListener('focus', handleFocus);
+        focusHandlersActive = true;
+        return;
       }
 
       // Nettoyer les données locales
@@ -2222,8 +2201,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Recharger la page pour réinitialiser l'état
       window.location.reload();
     } catch (err) {
-      console.error("Erreur lors de la déconnexion :", err);
+      console.error("Erreur inattendue lors de la déconnexion :", err);
       // Réactiver les écouteurs de focus en cas d'erreur
+      window.addEventListener('focus', handleFocus);
       focusHandlersActive = true;
     }
   }
