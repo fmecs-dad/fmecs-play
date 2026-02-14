@@ -2443,9 +2443,14 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   // Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
-
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
+});
+
+document.getElementById("signupCloseBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.remove("hidden");
 });
 
 // --- LOGIN ---
