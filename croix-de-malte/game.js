@@ -116,6 +116,22 @@ async function checkAndRestoreSession() {
   }
 }
 
+// Fonction pour réinitialiser le client Supabase
+async function resetSupabaseClient() {
+  try {
+    // Réinitialiser le client Supabase
+    await supa.auth.signOut();
+    const { data, error } = await supa.auth.refreshSession();
+    if (error) {
+      console.error("Erreur lors de la réinitialisation du client Supabase :", error);
+    } else {
+      console.log("Client Supabase réinitialisé avec succès");
+    }
+  } catch (err) {
+    console.error("Erreur lors de la réinitialisation du client Supabase :", err);
+  }
+}
+
 const handleFocusWithReconnect = async () => {
   if (!focusHandlersActive || isCheckingSessionOnFocus) return;
   isCheckingSessionOnFocus = true;
@@ -127,6 +143,7 @@ const handleFocusWithReconnect = async () => {
   focusTimeout = setTimeout(async () => {
     try {
       await checkAndRestoreSession();
+      await resetSupabaseClient(); // Réinitialiser le client Supabase
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user || null;
       const userId = user?.id || null;
@@ -2674,6 +2691,3 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setupAuthListener();
 });
-
-
-
