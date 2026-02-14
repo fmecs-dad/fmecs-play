@@ -116,23 +116,8 @@ async function checkAndRestoreSession() {
   }
 }
 
-// Fonction pour réinitialiser le client Supabase
-async function resetSupabaseClient() {
-  try {
-    // Réinitialiser le client Supabase
-    await supa.auth.signOut();
-    const { data, error } = await supa.auth.refreshSession();
-    if (error) {
-      console.error("Erreur lors de la réinitialisation du client Supabase :", error);
-    } else {
-      console.log("Client Supabase réinitialisé avec succès");
-    }
-  } catch (err) {
-    console.error("Erreur lors de la réinitialisation du client Supabase :", err);
-  }
-}
-
-const handleFocusWithReconnect = async () => {
+// Fonction pour gérer la reprise de focus
+const handleFocus = async () => {
   if (!focusHandlersActive || isCheckingSessionOnFocus) return;
   isCheckingSessionOnFocus = true;
 
@@ -143,7 +128,6 @@ const handleFocusWithReconnect = async () => {
   focusTimeout = setTimeout(async () => {
     try {
       await checkAndRestoreSession();
-      await resetSupabaseClient(); // Réinitialiser le client Supabase
       const { data: { session } } = await supa.auth.getSession();
       const user = session?.user || null;
       const userId = user?.id || null;
@@ -165,8 +149,17 @@ const handleFocusWithReconnect = async () => {
   }, 300);
 };
 
-// Écouteurs d'événements
-window.addEventListener('focus', handleFocusWithReconnect);
+// Fonction pour réinitialiser les écouteurs de focus
+function resetFocusListeners() {
+  // Supprimer les écouteurs existants
+  window.removeEventListener('focus', handleFocus);
+
+  // Réattacher les écouteurs
+  window.addEventListener('focus', handleFocus);
+}
+
+// Initialiser les écouteurs de focus
+resetFocusListeners();
 
 window.addEventListener('blur', () => {
   console.log("Window lost focus.");
@@ -2213,8 +2206,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function logout() {
     console.log("Début de la déconnexion");
 
-    // Désactiver complètement les écouteurs de focus
-    window.removeEventListener('focus', handleFocusWithReconnect);
+    // Désactiver les écouteurs de focus pendant la déconnexion
+    window.removeEventListener('focus', handleFocus);
     focusHandlersActive = false;
 
     const { error } = await supa.auth.signOut();
@@ -2222,7 +2215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (error) {
       console.error("Erreur lors de la déconnexion :", error);
       // Réactiver les écouteurs de focus en cas d'erreur
-      window.addEventListener('focus', handleFocusWithReconnect);
+      resetFocusListeners();
       focusHandlersActive = true;
       return;
     }
@@ -2263,11 +2256,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-// ===============================
-//   AUTRES ÉCOUTEURS DE BOUTONS
-// ===============================
+  // ===============================
+  //   AUTRES ÉCOUTEURS DE BOUTONS
+  // ===============================
 
- document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     playClickSound();
     localStorage.removeItem("currentGameState");
     startNewGame();
