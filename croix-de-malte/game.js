@@ -2322,7 +2322,7 @@ async function updateProfileInfo() {
   if (!user) {
     profileBtn.disabled = true;
     document.getElementById("profilePseudoDisplay").textContent = "";
-    document.getElementById("profileAvatar").src = "images/avatardefault.png";
+    document.getElementById("profileAvatar").src = "images/avatarDefault.png";
     return;
   } else {
     profileBtn.disabled = false;
