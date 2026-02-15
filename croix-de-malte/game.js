@@ -2241,7 +2241,7 @@ async function ouvrirProfil() {
     .single();
 
   document.getElementById("profilePseudoInput").value = player.pseudo || "";
-  document.getElementById("profileAvatarPreview").src = player.avatar_url || "default.png";
+  document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
 
   const modal = document.getElementById("profileModal");
   modal.classList.remove("hidden");
@@ -2514,6 +2514,7 @@ document.getElementById("signupCloseBtn").addEventListener("click", () => {
 });
 
 // --- LOGIN ---
+
 document.getElementById("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
   playClickSound();
@@ -2556,25 +2557,18 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
+    // Fermer la fenêtre de connexion
+    document.getElementById("authOverlay").classList.add("hidden");
+
+    // Mettre à jour l'UI
+    await updateAuthUI(session.user);
+    await updateProfileInfo();
+
     // Récupérer le meilleur score depuis Supabase
     const bestScoreData = await fetchBestScore(session.user.id);
     if (bestScoreData) {
       saveBestScore(bestScoreData);
       console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
-    }
-
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    await updateAuthUI(session.user).catch(err => {
-      console.error("Erreur dans updateAuthUI :", err);
-    });
-
-    if (session.user) {
-      const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
-        console.error("Erreur lors de la récupération du pseudo :", err);
-        return null;
-      });
-      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
     }
 
     // Mettre à jour l'affichage du meilleur score
