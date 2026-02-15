@@ -157,6 +157,7 @@ body {
   vertical-align: middle;
 }
 
+
 /* Burger */
 .burger-btn {
   font-size: 20px;
@@ -190,6 +191,93 @@ body {
   cursor: not-allowed;
   pointer-events: none;
 }
+
+/* Menu Profil */
+#profileWrapper {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: white;
+  font-size: 14px;
+}
+
+.profile-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avatar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: #222;
+  padding: 12px;
+  border-radius: 6px;
+  min-width: 250px;
+  z-index: 99999;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profile-dropdown.show {
+  display: flex;
+}
+
+.profile-info {
+  margin-bottom: 10px;
+}
+
+.profile-info p {
+  margin: 5px 0;
+}
+
+#editProfileBtn, #logoutProfileBtn {
+  padding: 8px 12px;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#editProfileBtn:hover, #logoutProfileBtn:hover {
+  background: #555;
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.overlay-center {
+  display: flex;
+}
+
 
 /* === HELP CLOSE BUTTON === */
 
@@ -471,91 +559,6 @@ body {
   z-index: 200000 !important;
 }
 
-/* Menu Profil */
-#profileWrapper {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-}
-
-.profile-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  color: white;
-  font-size: 14px;
-}
-
-.profile-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.avatar-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid white;
-}
-
-.profile-dropdown {
-  position: absolute;
-  top: 60px;
-  right: 20px;
-  background: #222;
-  padding: 12px;
-  border-radius: 6px;
-  min-width: 250px;
-  z-index: 99999;
-  display: none;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.profile-dropdown.show {
-  display: flex;
-}
-
-.profile-info {
-  margin-bottom: 10px;
-}
-
-.profile-info p {
-  margin: 5px 0;
-}
-
-#editProfileBtn, #logoutProfileBtn {
-  padding: 8px 12px;
-  background: #444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#editProfileBtn:hover, #logoutProfileBtn:hover {
-  background: #555;
-}
-
-.toggle-password {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.overlay-center {
-  display: flex;
-}
 
 /* === PANELS INTERNES === */
 
@@ -1074,24 +1077,6 @@ footer {
   </div>
 </div>
 
-<!-- Profil -->
-<div id="profileWrapper">
-  <button id="profileBtn" class="profile-btn" aria-label="Profil" disabled>
-    <img id="profileAvatar" src="/chemin/vers/default.png" class="avatar-icon">
-    <span id="profilePseudoDisplay"></span>
-  </button>
-
-  <!-- Bloc déroulant du profil -->
-  <div id="profileDropdown" class="profile-dropdown hidden">
-    <div class="profile-info">
-      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-      <p><strong>Date de création:</strong> <span id="profileCreationDate"></span></p>
-      <p><strong>Mot de passe:</strong> <span id="profilePassword">••••••••</span> <button id="togglePasswordVisibility" class="toggle-password">👁️</button></p>
-    </div>
-    <button id="editProfileBtn">Modifier le Profil</button>
-    <button id="logoutProfileBtn">Se Déconnecter</button>
-  </div>
-</div>
 
 <!-- === HELP OVERLAY === -->
 <div id="helpOverlay" class="overlay overlay-center hidden">
@@ -1171,7 +1156,26 @@ footer {
     <!-- Bloc 5 : Meilleur score -->
     <span id="bestScoreTop" class="best-score-info"></span>
 
+    <!-- Bloc 6 : Menu Profil -->
+    <div id="profileWrapper">
+      <button id="profileBtn" class="profile-btn" aria-label="Profil" disabled>
+        <img id="profileAvatar" src="/chemin/vers/default.png" class="avatar-icon">
+        <span id="profilePseudoDisplay"></span>
+      </button>
+
+    <!-- Bloc déroulant du profil -->
+    <div id="profileDropdown" class="profile-dropdown hidden">
+      <div class="profile-info">
+        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+        <p><strong>Date de création:</strong> <span id="profileCreationDate"></span></p>
+        <p><strong>Mot de passe:</strong> <span id="profilePassword">••••••••</span> <button id="togglePasswordVisibility" class="toggle-password">👁️</button></p>
+      </div>
+      <button id="editProfileBtn">Modifier le Profil</button>
+      <button id="logoutProfileBtn">Se Déconnecter</button>
+    </div>
   </div>
+  </div>
+
   <!-- === /TOP BAR === -->
 
 
