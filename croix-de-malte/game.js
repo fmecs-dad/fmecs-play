@@ -235,25 +235,6 @@ async function initialiserProfilEtLancerJeu(session) {
   }
 }
 
-async function ouvrirProfil() {
-  const { data: { session }, error } = await supa.auth.getSession();
-  const user = session?.user || null;
-
-  if (!user) return;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  document.getElementById("profilePseudoInput").value = player.pseudo || "";
-  document.getElementById("profileAvatarPreview").src = player.avatar_url || "default.png";
-
-  const modal = document.getElementById("profileModal");
-  modal.classList.remove("hidden");
-}
-
 // --------------------------------------------------
 // AIDE
 // --------------------------------------------------
@@ -2139,10 +2120,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  document.getElementById("burgerProfileBtn").addEventListener("click", async () => {
-    playClickSound();
-    await ouvrirProfil();
-  });
 
   // ===============================
   //   AUTH BURGER (v1)
@@ -2249,53 +2226,136 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => playStartGameSound(), 1500);
   });
 
-  // ===============================
-  //   PROFIL
-  // ===============================
+// ===============================
+//   PROFIL
+// ===============================
 
-  document.getElementById("profileCloseBtn").addEventListener("click", () => {
-  document.getElementById("profileModal").style.display = "none";
-  });
+async function ouvrirProfil() {
+  const user = await getSession();
+  if (!user) return;
 
-  document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-    // Récupère la session de manière asynchrone
-    const { data: { session }, error } = await supa.auth.getSession();
-    const user = session?.user || null;
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
-    if (!user) return;
+  document.getElementById("profilePseudoInput").value = player.pseudo || "";
+  document.getElementById("profileAvatarPreview").src = player.avatar_url || "default.png";
 
-    const pseudo = document.getElementById("profilePseudoInput").value.trim();
-    const avatarFile = document.getElementById("profileAvatarInput").files[0];
+  const modal = document.getElementById("profileModal");
+  modal.classList.remove("hidden");
+}
 
-    let avatarUrl = null;
+// Écouteurs existants
+document.getElementById("profileCloseBtn").addEventListener("click", () => {
+  document.getElementById("profileModal").classList.add("hidden");
+});
 
-    if (avatarFile) {
-      const path = `avatars/${user.id}.png`;
+document.getElementById("profileSaveBtn").addEventListener("click", async () => {
+  const user = await getSession();
+  if (!user) return;
 
-      // Upload de l'avatar
-      await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+  const pseudo = document.getElementById("profilePseudoInput").value.trim();
+  const avatarFile = document.getElementById("profileAvatarInput").files[0];
 
-      // Récupère l'URL publique de manière asynchrone
-      const { data } = await supa.storage.from("avatars").getPublicUrl(path);
-      avatarUrl = data.publicUrl;
-    }
+  let avatarUrl = null;
 
-    // Met à jour le profil du joueur
-    await supa
-      .from("players")
-      .update({
-        pseudo: pseudo,
-        ...(avatarUrl && { avatar_url: avatarUrl })
-      })
-      .eq("id", user.id);
+  if (avatarFile) {
+    const path = `avatars/${user.id}.png`;
 
-    localStorage.setItem("playerPseudo", pseudo);
+    // Upload de l'avatar
+    await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
 
-    // Met à jour l'UI
-    await updateAuthUI(user);
+    // Récupère l'URL publique de manière asynchrone
+    const { data } = await supa.storage.from("avatars").getPublicUrl(path);
+    avatarUrl = data.publicUrl;
+  }
 
-    document.getElementById("profileModal").style.display = "none";
-  });
+  // Met à jour le profil du joueur
+  await supa
+    .from("players")
+    .update({
+      pseudo: pseudo,
+      ...(avatarUrl && { avatar_url: avatarUrl })
+    })
+    .eq("id", user.id);
+
+  localStorage.setItem("playerPseudo", pseudo);
+
+  // Met à jour l'UI
+  await updateAuthUI(user);
+  await updateProfileInfo(); // Mettre à jour les informations du profil
+
+  document.getElementById("profileModal").classList.add("hidden");
+});
+
+// Nouveaux écouteurs pour le menu profil
+document.getElementById("profileBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+});
+
+document.addEventListener("click", (e) => {
+  const profileDropdown = document.getElementById("profileDropdown");
+  const profileBtn = document.getElementById("profileBtn");
+
+  if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+    profileDropdown.classList.remove("show");
+  }
+});
+
+document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
+  const passwordSpan = document.getElementById("profilePassword");
+  if (passwordSpan.textContent === "••••••••") {
+    passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
+  } else {
+    passwordSpan.textContent = "••••••••";
+  }
+});
+
+async function updateProfileInfo() {
+  const user = await getSession();
+  const profileBtn = document.getElementById("profileBtn");
+
+  if (!user) {
+    profileBtn.disabled = true;
+    document.getElementById("profilePseudoDisplay").textContent = "";
+    document.getElementById("profileAvatar").src = "default.png";
+    return;
+  } else {
+    profileBtn.disabled = false;
+  }
+
+  const { data: player, error } = await supa
+    .from("players")
+    .select("pseudo, avatar_url, created_at")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Erreur lors de la récupération des informations du profil :", error);
+    return;
+  }
+
+  document.getElementById("profilePseudoDisplay").textContent = player.pseudo || "";
+  document.getElementById("profileAvatar").src = player.avatar_url || "default.png";
+  document.getElementById("profileEmail").textContent = user.email || "";
+  document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
+}
+
+document.getElementById("logoutProfileBtn").addEventListener("click", async () => {
+  await logout();
+  document.getElementById("profileDropdown").classList.remove("show");
+});
+
+document.getElementById("editProfileBtn").addEventListener("click", async () => {
+  await ouvrirProfil();
+});
+
+// Appeler updateProfileInfo au démarrage et après connexion/déconnexion
+updateProfileInfo();
 
 // ===============================
 //   AUTHENTIFICATION (v1)
