@@ -2574,12 +2574,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   FIN DE PARTIE
   // ===============================
-  const closeEndGame = document.getElementById("closeEndGame");
-  if (closeEndGame) {
-    closeEndGame.addEventListener("click", () => {
-      const endGameOverlay = document.getElementById("endGameOverlay");
-      if (endGameOverlay) endGameOverlay.classList.add("hidden");
-    });
+  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
+  if (closeEndGameButton) {
+    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
   }
 
   // ===============================
