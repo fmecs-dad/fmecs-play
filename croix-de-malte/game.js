@@ -1960,10 +1960,6 @@ function closeWhySignup() {
   document.getElementById("whySignupModal").classList.add("hidden");
 }
 
-// ===============================
-//   DOMContentLoaded
-// ===============================
-
 document.addEventListener("DOMContentLoaded", async () => {
   // Vérifie la session au démarrage
   const { data: { session }, error } = await supa.auth.getSession();
@@ -1974,7 +1970,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateAuthUI(null);
   }
 
-  //enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
+  // Activation des comportements des modales
   enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
   enableModalBehavior("authOverlay", ".panel", closeLogin);
   enableModalBehavior("profileModal", ".panel", closeProfile);
@@ -1983,8 +1979,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
   enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
-
-
   // Références DOM essentielles
   canvas = document.getElementById("gameCanvas");
   ctx = canvas.getContext("2d");
@@ -1992,17 +1986,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   CALCUL RÉEL DU CANVAS + GRILLE
   // ===============================
-
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
-
   spacing = canvas.width / (size + 1);
   offset = spacing;
 
   // ===============================
   //   POSITIONNEMENT DES REPÈRES
   // ===============================
-
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
@@ -2021,9 +2012,158 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ===============================
+  //   GESTION DU MENU PROFIL
+  // ===============================
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      profileDropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileDropdown.classList.remove("show");
+      }
+    });
+  } else {
+    console.error("Élément(s) du menu profil manquant(s)");
+  }
+
+  // Écouteur pour afficher/masquer le mot de passe
+  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
+  if (togglePasswordVisibilityBtn) {
+    togglePasswordVisibilityBtn.addEventListener("click", () => {
+      const passwordSpan = document.getElementById("profilePassword");
+      if (passwordSpan) {
+        if (passwordSpan.textContent === "••••••••") {
+          passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
+        } else {
+          passwordSpan.textContent = "••••••••";
+        }
+      }
+    });
+  }
+
+  // Écouteur pour la déconnexion
+  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
+  if (logoutProfileBtn) {
+    logoutProfileBtn.addEventListener("click", async () => {
+      await logout();
+      if (profileDropdown) profileDropdown.classList.remove("show");
+    });
+  }
+
+  // Écouteur pour ouvrir la modale de modification du profil
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", async () => {
+      await ouvrirProfil();
+    });
+  }
+
+  // ===============================
+  //   MENU BURGER
+  // ===============================
+  document.getElementById("burgerBtn").addEventListener("click", () => {
+    playClickSound();
+    const ov = document.getElementById("burgerOverlay");
+    ov.classList.toggle("show");
+  });
+
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("burgerOverlay");
+    const burger = document.getElementById("burgerBtn");
+    if (!menu.contains(e.target) && e.target !== burger) {
+      menu.classList.remove("show");
+    }
+  });
+
+  // ===============================
+  //   AUTH BURGER (v1)
+  // ===============================
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+
+  async function logout() {
+    console.log("Début de la déconnexion");
+    localStorage.removeItem('supabase.access.token');
+    localStorage.removeItem('supabase.refresh.token');
+    const { error } = await supa.auth.signOut();
+    if (error) console.error("Erreur lors de la déconnexion :", error);
+    updateAuthUI(null);
+    window.location.reload();
+  }
+
+  if (burgerAuthBtn) {
+    burgerAuthBtn.addEventListener("click", async () => {
+      console.log("Clic sur le bouton d'authentification");
+      playClickSound();
+      const user = await getSession();
+      if (!user) {
+        console.log("Ouverture de la fenêtre de connexion");
+        document.getElementById("authOverlay").classList.remove("hidden");
+        pauseGame();
+        return;
+      }
+      console.log("Début de la déconnexion");
+      await logout();
+    });
+  }
+
+  // ===============================
+  //   AUTRES ÉCOUTEURS DE BOUTONS
+  // ===============================
+  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+    playClickSound();
+    localStorage.removeItem("currentGameState");
+    startNewGame();
+    initGame();
+  });
+
+  document.getElementById("burgerStepBtn").addEventListener("click", () => {
+    playClickSound();
+    if (!tutorialRunning) {
+      localStorage.removeItem("currentGameState");
+      document.getElementById("readyModal").classList.add("hidden");
+      resetGameState();
+      initMaltaCross();
+      redrawEverything();
+      initGame();
+      runTutorial();
+    }
+  });
+
+  document.getElementById("burgerHelpBtn").addEventListener("click", () => {
+    openHelpOverlay(false);
+    pauseGame();
+  });
+
+  document.getElementById("burgerSoundBtn").addEventListener("click", () => {
+    playClickSound();
+    soundEnabled = !soundEnabled;
+    updateSoundButton();
+  });
+
+  // ===============================
+  //   READY BUTTON
+  // ===============================
+  document.getElementById("readyBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("readyModal").classList.add("hidden");
+    initGame();
+    const board = document.getElementById("canvasContainer");
+    board.classList.remove("show");
+    board.classList.add("slide-in-premium");
+    void board.offsetWidth;
+    board.classList.add("show");
+    setTimeout(() => playStartGameSound(), 1500);
+  });
+
+  // ===============================
   //   FIN DE PARTIE
   // ===============================
-
   document.getElementById("closeEndGame").addEventListener("click", () => {
     document.getElementById("endGameOverlay").classList.add("hidden");
   });
@@ -2031,9 +2171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   CLIC SUR LA GRILLE
   // ===============================
-
   canvas.addEventListener("click", (e) => {
-
     if (gameOver) return;
     if (!tutorialRunning && !timerRunning) startTimer();
     if (tutorialRunning) return;
@@ -2075,612 +2213,82 @@ document.addEventListener("DOMContentLoaded", async () => {
       appendHistoryEntry(result.points, result.activeCount);
       checkGameOver();
     }
-
-  });
-  // ===============================
-  //   BOUTONS TOP BAR
-  // ===============================
-
-  document.getElementById("undoBtn").addEventListener("click", () => {
-    playClickSound();
-    if (!tutorialRunning) undoLastMove();
-  });
-
-  document.getElementById("pauseBtn").addEventListener("click", () => {
-    playClickSound();
-    if (!tutorialRunning) togglePause();
   });
 
   // ===============================
   //   AIDE
   // ===============================
-
   document.getElementById("closeHelpBtn").addEventListener("click", () => {
     playClickSound();
     closeHelp();
   });
 
-
   // ===============================
-  //   MENU BURGER
+  //   PROFIL
   // ===============================
+  async function ouvrirProfil() {
+    const user = await getSession();
+    if (!user) return;
 
-  document.getElementById("burgerBtn").addEventListener("click", () => {
-    playClickSound();
-    const ov = document.getElementById("burgerOverlay");
-    ov.classList.toggle("show");
-  });
+    const { data: player } = await supa
+      .from("players")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-  document.addEventListener("click", (e) => {
-    const menu = document.getElementById("burgerOverlay");
-    const burger = document.getElementById("burgerBtn");
+    document.getElementById("profilePseudoInput").value = player.pseudo || "";
+    document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
 
-    if (!menu.contains(e.target) && e.target !== burger) {
-      menu.classList.remove("show");
-    }
-  });
-
-
-  // ===============================
-  //   AUTH BURGER (v1)
-  // ===============================
-
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-
-  async function logout() {
-    console.log("Début de la déconnexion");
-
-    // Supprimer les tokens du localStorage
-    localStorage.removeItem('supabase.access.token');
-    localStorage.removeItem('supabase.refresh.token');
-
-    // Déconnecter l'utilisateur de Supabase
-    const { error } = await supa.auth.signOut();
-
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-    }
-
-    // Mettre à jour l'UI immédiatement
-    updateAuthUI(null);
-
-    // Recharger la page pour réinitialiser l'état
-    window.location.reload();
+    const modal = document.getElementById("profileModal");
+    modal.classList.remove("hidden");
   }
 
-  if (burgerAuthBtn) {
-    burgerAuthBtn.addEventListener("click", async () => {
-      console.log("Clic sur le bouton d'authentification");
-      playClickSound();
-
-      const user = await getSession();
-
-      if (!user) {
-        console.log("Ouverture de la fenêtre de connexion");
-        const auth = document.getElementById("authOverlay");
-        auth.classList.remove("hidden");
-        pauseGame();
-        return;
-      }
-
-      console.log("Début de la déconnexion");
-      await logout();
-    });
-  }
-
-  // ===============================
-  //   AUTRES ÉCOUTEURS DE BOUTONS
-  // ===============================
-
-  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
-    playClickSound();
-    localStorage.removeItem("currentGameState");
-    startNewGame();
-    initGame();
-  });
-
-  document.getElementById("burgerStepBtn").addEventListener("click", () => {
-    playClickSound();
-
-    if (!tutorialRunning) {
-      localStorage.removeItem("currentGameState");
-      document.getElementById("readyModal").classList.add("hidden");
-      resetGameState();
-      initMaltaCross();
-      redrawEverything();
-      initGame();
-      runTutorial();
-    }
-  });
-
-  document.getElementById("burgerHelpBtn").addEventListener("click", () => {
-    openHelpOverlay(false);
-    pauseGame();
-  });
-
-  document.getElementById("burgerSoundBtn").addEventListener("click", () => {
-    playClickSound();
-    soundEnabled = !soundEnabled;
-    updateSoundButton();
-  });
-
-
-  // ===============================
-  //   READY BUTTON
-  // ===============================
-
-  document.getElementById("readyBtn").addEventListener("click", () => {
-
-    playClickSound()
-
-    document.getElementById("readyModal").classList.add("hidden");
-
-    initGame();
-
-    const board = document.getElementById("canvasContainer");
-    board.classList.remove("show");
-    board.classList.add("slide-in-premium");
-    void board.offsetWidth;
-    board.classList.add("show");
-
-    setTimeout(() => playStartGameSound(), 1500);
-  });
-
-// ===============================
-//   PROFIL
-// ===============================
-
-async function ouvrirProfil() {
-  const user = await getSession();
-  if (!user) return;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  document.getElementById("profilePseudoInput").value = player.pseudo || "";
-  document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
-
-  const modal = document.getElementById("profileModal");
-  modal.classList.remove("hidden");
-}
-
-// Écouteurs existants
-document.getElementById("profileCloseBtn").addEventListener("click", () => {
-  document.getElementById("profileModal").classList.add("hidden");
-});
-
-document.getElementById("profileSaveBtn").addEventListener("click", async () => {
-  const user = await getSession();
-  if (!user) return;
-
-  const pseudo = document.getElementById("profilePseudoInput").value.trim();
-  const avatarFile = document.getElementById("profileAvatarInput").files[0];
-
-  let avatarUrl = null;
-
-  if (avatarFile) {
-    const path = `avatars/${user.id}.png`;
-
-    // Upload de l'avatar
-    await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
-
-    // Récupère l'URL publique de manière asynchrone
-    const { data } = await supa.storage.from("avatars").getPublicUrl(path);
-    avatarUrl = data.publicUrl;
-  }
-
-  // Met à jour le profil du joueur
-  await supa
-    .from("players")
-    .update({
-      pseudo: pseudo,
-      ...(avatarUrl && { avatar_url: avatarUrl })
-    })
-    .eq("id", user.id);
-
-  localStorage.setItem("playerPseudo", pseudo);
-
-  // Met à jour l'UI
-  await updateAuthUI(user);
-  await updateProfileInfo(); // Mettre à jour les informations du profil
-
-  document.getElementById("profileModal").classList.add("hidden");
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const profileBtn = document.getElementById("profileBtn");
-  if (profileBtn) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const dropdown = document.getElementById("profileDropdown");
-      if (dropdown) {
-        dropdown.classList.toggle("show");
-      } else {
-        console.error("Élément profileDropdown non trouvé.");
-      }
-    });
-  } else {
-    console.error("Élément profileBtn non trouvé.");
-  }
-
-  // Fermer le menu déroulant en cliquant ailleurs
-  document.addEventListener("click", (e) => {
-    const profileDropdown = document.getElementById("profileDropdown");
+  // Mettre à jour les informations du profil
+  async function updateProfileInfo() {
+    const user = await getSession();
     const profileBtn = document.getElementById("profileBtn");
 
-    if (profileDropdown && !profileDropdown.contains(e.target) && profileBtn && !profileBtn.contains(e.target)) {
-      profileDropdown.classList.remove("show");
-    }
-  });
-
-  // Fonction pour afficher/masquer le mot de passe
-  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
-  if (togglePasswordVisibilityBtn) {
-    togglePasswordVisibilityBtn.addEventListener("click", () => {
-      const passwordSpan = document.getElementById("profilePassword");
-      if (passwordSpan) {
-        if (passwordSpan.textContent === "••••••••") {
-          passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
-        } else {
-          passwordSpan.textContent = "••••••••";
-        }
+    if (!user) {
+      if (profileBtn) {
+        profileBtn.disabled = true;
+        document.getElementById("profilePseudoDisplay").textContent = "";
+        document.getElementById("profilePseudoDisplay").title = "";
+        const profileAvatar = document.getElementById("profileAvatar");
+        if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
       }
-    });
-  }
-});
-
-// Mettre à jour les informations du profil
-async function updateProfileInfo() {
-  const user = await getSession();
-  const profileBtn = document.getElementById("profileBtn");
-
-  if (!user) {
-    if (profileBtn) {
-      profileBtn.disabled = true;
-      document.getElementById("profilePseudoDisplay").textContent = "";
-      document.getElementById("profilePseudoDisplay").title = "";
-      const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) {
-        profileAvatar.src = "images/avatarDefault.png";
-      }
-    }
-    return;
-  } else {
-    if (profileBtn) {
-      profileBtn.disabled = false;
-    }
-  }
-
-  const { data: player, error } = await supa
-    .from("players")
-    .select("pseudo, avatar_url, created_at")
-    .eq("id", user.id)
-    .single();
-
-  if (error) {
-    console.error("Erreur lors de la récupération des informations du profil :", error);
-    return;
-  }
-
-  const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-  if (pseudoDisplay) {
-    pseudoDisplay.textContent = player.pseudo || "";
-    pseudoDisplay.title = player.pseudo || "";
-  }
-
-  const profileAvatar = document.getElementById("profileAvatar");
-  if (profileAvatar) {
-    profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
-  }
-
-  const profileEmail = document.getElementById("profileEmail");
-  if (profileEmail) {
-    profileEmail.textContent = user.email || "";
-  }
-
-  const profileCreationDate = document.getElementById("profileCreationDate");
-  if (profileCreationDate) {
-    profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
-  }
-}
-
-// Écouteur pour la déconnexion
-document.getElementById("logoutProfileBtn")?.addEventListener("click", async () => {
-  await logout();
-  const dropdown = document.getElementById("profileDropdown");
-  if (dropdown) {
-    dropdown.classList.remove("show");
-  }
-});
-
-// Écouteur pour ouvrir la modale de modification du profil
-document.getElementById("editProfileBtn")?.addEventListener("click", async () => {
-  await ouvrirProfil();
-});
-
-// Appeler updateProfileInfo au démarrage et après connexion/déconnexion
-updateProfileInfo();
-
-
-// ===============================
-//   AUTHENTIFICATION (v1)
-// ===============================
-
-document.getElementById("closeAuthBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("authOverlay").classList.add("hidden");
-});
-
-document.getElementById("closeSignupBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("signupModal").classList.add("hidden");
-  document.getElementById("authOverlay").classList.remove("hidden");
-});
-
-// --- SIGNUP ---
-document.getElementById("signupBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("authOverlay").classList.add("hidden");
-  document.getElementById("signupModal").classList.remove("hidden");
-});
-
-document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
-  playClickSound();
-
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value.trim();
-  const pseudo = document.getElementById("signupPseudoInput").value.trim();
-
-  if (!email || !password || !pseudo) {
-    alert("Merci de remplir tous les champs.");
-    return;
-  }
-
-  // Vérification pseudo unique
-  const { data: existingPseudo, error: checkPseudoError } = await supa
-    .from("players")
-    .select("id")
-    .eq("pseudo", pseudo)
-    .maybeSingle();
-
-  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
-    console.error("Erreur SELECT pseudo :", checkPseudoError);
-    alert("Erreur interne.");
-    return;
-  }
-
-  if (existingPseudo) {
-    alert("Ce pseudo est déjà pris.");
-    return;
-  }
-
-  // Inscription de l'utilisateur
-  const { data: signupData, error: signupError } = await supa.auth.signUp({
-    email,
-    password
-  });
-
-  if (signupError) {
-    console.error("Erreur lors de l'inscription :", signupError);
-    alert("Erreur lors de l'inscription : " + signupError.message);
-    return;
-  }
-
-  // Connexion automatique après l'inscription
-  const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (signinError) {
-    console.error("Erreur lors de la connexion après inscription :", signinError);
-    alert("Erreur lors de la connexion : " + signinError.message);
-    return;
-  }
-
-  // Récupérer la session après la connexion
-  const { data: { session }, error: sessionError } = await supa.auth.getSession();
-
-  if (sessionError || !session) {
-    console.error("Erreur récupération session :", sessionError);
-    alert("Impossible de récupérer la session.");
-    return;
-  }
-
-  // Stocker le JWT après connexion
-  localStorage.setItem('supabase.access.token', session.access_token);
-  localStorage.setItem('supabase.refresh.token', session.refresh_token);
-
-  const userId = session.user.id;
-  console.log("ID de l'utilisateur :", userId);
-
-  // Vérifier si le joueur existe déjà dans la table players
-  const { data: existingPlayer, error: checkPlayerError } = await supa
-    .from("players")
-    .select("id")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
-    console.error("Erreur SELECT player :", checkPlayerError);
-    alert("Erreur interne.");
-    return;
-  }
-
-  // Insertion dans players
-  if (existingPlayer) {
-    console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
-
-    const { error: updateError } = await supa
-      .from("players")
-      .update({
-        pseudo: pseudo
-      })
-      .eq("id", userId);
-
-    if (updateError) {
-      console.error("Erreur UPDATE player :", updateError);
-      alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
-    } else {
-      console.log("Pseudo mis à jour avec succès dans la table players.");
-    }
-  } else {
-    console.log("Insertion d'un nouveau joueur dans la table players...");
-    const { error: insertError } = await supa
-      .from("players")
-      .insert({
-        id: userId,
-        pseudo: pseudo,
-        created_at: new Date().toISOString(),
-        premium: false
-      });
-
-    if (insertError) {
-      console.error("Erreur INSERT player :", insertError);
-      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
-    } else {
-      console.log("Joueur inséré avec succès dans la table players.");
-    }
-  }
-
-  // Mise à jour UI
-  updateAuthUI(session.user);
-
-  // Fermeture modals
-  document.getElementById("signupModal").classList.add("hidden");
-  playSound("successSound");
-  alert("Compte créé ! Bienvenue dans le jeu.");
-});
-
-document.getElementById("signupCloseBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("signupModal").classList.add("hidden");
-  document.getElementById("authOverlay").classList.remove("hidden");
-});
-
-// --- LOGIN ---
-
-document.getElementById("loginBtn").addEventListener("click", async (e) => {
-  e.preventDefault();
-  playClickSound();
-
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value.trim();
-
-  if (!email || !password) {
-    alert("Veuillez remplir tous les champs.");
-    return;
-  }
-
-  if (!email.includes("@") || !email.includes(".")) {
-    alert("Adresse email invalide.");
-    return;
-  }
-
-  try {
-    const { data, error } = await supa.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      console.error("Erreur de connexion :", error);
-      alert("Erreur : " + error.message);
       return;
+    } else {
+      if (profileBtn) profileBtn.disabled = false;
     }
 
-    // Récupérer la session après la connexion
-    const { data: { session }, error: sessionError } = await supa.auth.getSession();
-
-    if (sessionError || !session) {
-      console.error("Erreur récupération session :", sessionError);
-      alert("Impossible de récupérer la session.");
-      return;
-    }
-
-    // Stocker le JWT après connexion
-    localStorage.setItem('supabase.access.token', session.access_token);
-    localStorage.setItem('supabase.refresh.token', session.refresh_token);
-
-    // Fermer la fenêtre de connexion
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    // Mettre à jour l'UI
-    await updateAuthUI(session.user);
-    await updateProfileInfo();
-
-    // Récupérer le meilleur score depuis Supabase
-    const bestScoreData = await fetchBestScore(session.user.id);
-    if (bestScoreData) {
-      saveBestScore(bestScoreData);
-      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
-    }
-
-    // Mettre à jour l'affichage du meilleur score
-    updateBestScoreTop();
-  } catch (err) {
-    console.error("Erreur inattendue lors de la connexion :", err);
-    alert("Une erreur inattendue est survenue.");
-  }
-});
-
-// Fonction pour récupérer le meilleur score depuis Supabase
-async function fetchBestScore(userId) {
-  try {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) {
-      console.error("Aucun JWT trouvé.");
-      return null;
-    }
-
-    supa.auth.setSession(token);
-
-    const { data, error } = await supa
-      .from("scores")
-      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
-      .eq("player_id", userId)
-      .order("score", { ascending: false })
-      .limit(1)
+    const { data: player, error } = await supa
+      .from("players")
+      .select("pseudo, avatar_url, created_at")
+      .eq("id", user.id)
       .single();
 
     if (error) {
-      console.error("Erreur lors de la récupération du meilleur score :", error);
-      return null;
+      console.error("Erreur lors de la récupération des informations du profil :", error);
+      return;
     }
 
-    if (data) {
-      data.duration = Math.floor(data.duration_ms / 1000);
-      delete data.duration_ms;
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) {
+      pseudoDisplay.textContent = player.pseudo || "";
+      pseudoDisplay.title = player.pseudo || "";
     }
 
-    return data;
-  } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
-    return null;
+    const profileAvatar = document.getElementById("profileAvatar");
+    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
+
+    const profileEmail = document.getElementById("profileEmail");
+    if (profileEmail) profileEmail.textContent = user.email || "";
+
+    const profileCreationDate = document.getElementById("profileCreationDate");
+    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
   }
-}
 
-// ===============================
-//   WHY SIGNUP
-// ===============================
-
-document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-  playClickSound();
-  closeWhySignup();
-  document.getElementById("authOverlay").classList.remove("hidden");
-});
-
-document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-  playClickSound();
-
-  const dontRemind = document.getElementById("whySignupDontRemind").checked;
-  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
-
-  closeWhySignup();
-  document.getElementById("readyModal").classList.remove("hidden");
-});
+  // Appeler updateProfileInfo au démarrage
+  updateProfileInfo();
 });
 
