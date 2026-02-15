@@ -424,6 +424,10 @@ body {
   z-index: 2000;
 }
 
+.overlay-center {
+  display: flex;
+}
+
 .overlay.hidden {
   display: none !important;
   pointer-events: none !important;
@@ -544,14 +548,18 @@ body {
   display: flex;
 }
 
-.overlay.hidden {
-  display: none !important;
-  pointer-events: none !important;
-}
-
 /* === PANELS INTERNES === */
 
-
+.panel {
+  background: #fff;
+  padding: 24px 30px;
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
 
 /* Bouton de fermeture */
 .close-btn {
