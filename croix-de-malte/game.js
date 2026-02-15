@@ -487,6 +487,61 @@ document.getElementById("leaderboardContainer").addEventListener("scroll", async
   }
 });
 
+// Fonction pour récupérer le meilleur score depuis Supabase
+async function fetchBestScore(userId) {
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.error("Aucun JWT trouvé.");
+      return null;
+    }
+
+    supa.auth.setSession(token);
+
+    const { data, error } = await supa
+      .from("scores")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du meilleur score :", error);
+      return null;
+    }
+
+    if (data) {
+      data.duration = Math.floor(data.duration_ms / 1000);
+      delete data.duration_ms;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    return null;
+  }
+}
+
+// Fonction pour sauvegarder le meilleur score
+function saveBestScore(bestScoreData) {
+  if (bestScoreData) {
+    localStorage.setItem("bestScoreData", JSON.stringify(bestScoreData));
+  }
+}
+
+// Fonction pour mettre à jour l'affichage du meilleur score
+function updateBestScoreTop() {
+  const bestScoreData = localStorage.getItem("bestScoreData");
+  if (bestScoreData) {
+    const scoreData = JSON.parse(bestScoreData);
+    const bestScoreElement = document.getElementById("bestScoreTop");
+    if (bestScoreElement) {
+      bestScoreElement.textContent = `Meilleur score: ${scoreData.score} en ${scoreData.duration} secondes`;
+    }
+  }
+}
+
 async function fetchLeaderboard(page = 1, limit = 20) {
   const offset = (page - 1) * limit;
   const response = await fetch(
@@ -2025,10 +2080,6 @@ function closeWhySignup() {
 //   DOMContentLoaded
 // ===============================
 
-// ===============================
-//   DOMContentLoaded
-// ===============================
-
 document.addEventListener("DOMContentLoaded", async () => {
   // Vérifie la session au démarrage
   const { data: { session }, error } = await supa.auth.getSession();
@@ -2141,14 +2192,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         await updateProfileInfo();
 
         // Récupérer le meilleur score depuis Supabase
-        const bestScoreData = await fetchBestScore(session.user.id);
-        if (bestScoreData) {
-          saveBestScore(bestScoreData);
-          console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+        if (typeof fetchBestScore === 'function') {
+          const bestScoreData = await fetchBestScore(session.user.id);
+          if (bestScoreData) {
+            if (typeof saveBestScore === 'function') {
+              saveBestScore(bestScoreData);
+              console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+            }
+          }
         }
 
         // Mettre à jour l'affichage du meilleur score
-        if (typeof updateBestScoreTop === 'function') updateBestScoreTop();
+        if (typeof updateBestScoreTop === 'function') {
+          updateBestScoreTop();
+        }
       } catch (err) {
         console.error("Erreur inattendue lors de la connexion :", err);
         alert("Une erreur inattendue est survenue.");
