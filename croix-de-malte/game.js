@@ -2044,29 +2044,69 @@ function showReadyModal(reason) {
 //  document.getElementById("readyModal").classList.add("hidden");
 //}
 
-// Fonction pour fermer la modale ready
-function closeReady() {
-  const modal = document.getElementById("readyModal");
-  if (modal) modal.classList.add("hidden");
-}
-
-// Fonction pour fermer la modale de fin de jeu
+// Déclarez toutes les fonctions de fermeture avant DOMContentLoaded
 function closeEndGame() {
   const overlay = document.getElementById("endGameOverlay");
   if (overlay) overlay.classList.add("hidden");
 }
 
-// Fonction pour fermer la modale "Pourquoi s'inscrire"
 function closeWhySignup() {
   const overlay = document.getElementById("whySignupModal");
   if (overlay) overlay.classList.add("hidden");
 }
 
-// Fonction pour fermer la modale de connexion
 function closeLogin() {
   const auth = document.getElementById("authOverlay");
   if (auth) auth.classList.add("hidden");
 }
+
+function closeProfile() {
+  const overlay = document.getElementById("profileModal");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+function closeHelp() {
+  const overlay = document.getElementById("helpOverlay");
+  if (overlay) {
+    overlay.classList.add("hidden");
+    if (window.helpAutoOpened) {
+      localStorage.setItem("helpSeen", "true");
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) readyModal.classList.remove("hidden");
+      if (typeof startNewGame === 'function') startNewGame();
+    }
+  }
+}
+
+function closeLeaderboard() {
+  const overlay = document.getElementById("leaderboardOverlay");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+function closeBestScore() {
+  const overlay = document.getElementById("bestScoreOverlay");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+// Assurez-vous que enableModalBehavior est définie
+function enableModalBehavior(modalId, panelSelector, closeFunction) {
+  const modal = document.getElementById(modalId);
+  if (!modal) {
+    console.error(`Modal ${modalId} not found`);
+    return;
+  }
+
+  const closeBtn = modal.querySelector('.close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeFunction);
+  }
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeFunction();
+    }
+  });
+}}
 
 // Fonction pour fermer la modale de profil
 function closeProfile() {
@@ -2145,15 +2185,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Activation des comportements des modales
-  if (typeof enableModalBehavior === 'function') {
-    enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
-    enableModalBehavior("authOverlay", ".panel", closeLogin);
-    enableModalBehavior("profileModal", ".panel", closeProfile);
-    enableModalBehavior("helpOverlay", ".panel", closeHelp);
-    enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-    enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
-    enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
-  }
+  enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+  enableModalBehavior("authOverlay", ".panel", closeLogin);
+  enableModalBehavior("profileModal", ".panel", closeProfile);
+  enableModalBehavior("helpOverlay", ".panel", closeHelp);
+  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+  enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+  enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
   // Références DOM essentielles
   const canvas = document.getElementById("gameCanvas");
