@@ -2340,7 +2340,7 @@ async function updateProfileInfo() {
   }
 
   document.getElementById("profilePseudoDisplay").textContent = player.pseudo || "";
-  document.getElementById("profileAvatar").src = player.avatar_url || "default.png";
+  document.getElementById("profileAvatar").src = player.avatar_url || "avatarDefault.png";
   document.getElementById("profileEmail").textContent = user.email || "";
   document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
 }
