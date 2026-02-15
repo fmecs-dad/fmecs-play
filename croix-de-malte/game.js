@@ -2044,38 +2044,75 @@ function closeReady() {
   document.getElementById("readyModal").classList.add("hidden");
 }
 
+// Fonction pour fermer la modale de fin de jeu
 function closeEndGame() {
   const overlay = document.getElementById("endGameOverlay");
-  overlay.classList.add("hidden");
+  if (overlay) overlay.classList.add("hidden");
 }
 
+// Fonction pour fermer la modale "Pourquoi s'inscrire"
 function closeWhySignup() {
-  document.getElementById("whySignupModal").classList.add("hidden");
+  const overlay = document.getElementById("whySignupModal");
+  if (overlay) overlay.classList.add("hidden");
 }
 
+// Fonction pour fermer la modale de connexion
 function closeLogin() {
   const auth = document.getElementById("authOverlay");
-  auth.classList.add("hidden");
+  if (auth) auth.classList.add("hidden");
 }
 
+// Fonction pour fermer la modale de profil
 function closeProfile() {
   const overlay = document.getElementById("profileModal");
   if (overlay) overlay.classList.add("hidden");
 }
+
+// Fonction pour fermer la modale d'aide
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
-  overlay.classList.add("hidden");
+  if (overlay) {
+    overlay.classList.add("hidden");
 
-  if (window.helpAutoOpened) {
-    localStorage.setItem("helpSeen", "true");
-    document.getElementById("readyModal").classList.remove("hidden");
-    startNewGame();
+    if (window.helpAutoOpened) {
+      localStorage.setItem("helpSeen", "true");
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) readyModal.classList.remove("hidden");
+      if (typeof startNewGame === 'function') startNewGame();
+    }
   }
 }
 
+// Fonction pour fermer la modale du leaderboard
+function closeLeaderboard() {
+  const overlay = document.getElementById("leaderboardOverlay");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+// Fonction pour fermer la modale du meilleur score
 function closeBestScore() {
   const overlay = document.getElementById("bestScoreOverlay");
-  overlay.classList.add("hidden");
+  if (overlay) overlay.classList.add("hidden");
+}
+
+// Fonction pour activer le comportement des modales
+function enableModalBehavior(modalId, panelSelector, closeFunction) {
+  const modal = document.getElementById(modalId);
+  if (!modal) {
+    console.error(`Modal ${modalId} not found`);
+    return;
+  }
+
+  const closeBtn = modal.querySelector('.close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeFunction);
+  }
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeFunction();
+    }
+  });
 }
 
 // ===============================
@@ -2089,15 +2126,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (session) {
       localStorage.setItem('supabase.access.token', session.access_token);
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
-      updateAuthUI(session.user);
+      if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
       if (typeof initialFlow === 'function') initialFlow(session.user);
     } else {
-      updateAuthUI(null);
+      if (typeof updateAuthUI === 'function') updateAuthUI(null);
       if (typeof initialFlow === 'function') initialFlow(null);
     }
   } catch (err) {
     console.error("Erreur lors de la vérification de la session:", err);
-    updateAuthUI(null);
+    if (typeof updateAuthUI === 'function') updateAuthUI(null);
     if (typeof initialFlow === 'function') initialFlow(null);
   }
 
