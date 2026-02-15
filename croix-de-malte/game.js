@@ -2290,43 +2290,47 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   document.getElementById("profileModal").classList.add("hidden");
 });
 
-// Nouveaux écouteurs pour le menu profil
-document.getElementById("profileBtn").addEventListener("click", (e) => {
-  e.stopPropagation();
-  const dropdown = document.getElementById("profileDropdown");
-  dropdown.classList.toggle("show");
-});
-
-document.addEventListener("click", (e) => {
-  const profileDropdown = document.getElementById("profileDropdown");
+document.addEventListener('DOMContentLoaded', () => {
   const profileBtn = document.getElementById("profileBtn");
-
-  if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-    profileDropdown.classList.remove("show");
-  }
-});
-
-document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
-  const passwordSpan = document.getElementById("profilePassword");
-  if (passwordSpan.textContent === "••••••••") {
-    passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
+  if (profileBtn) {
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dropdown = document.getElementById("profileDropdown");
+      if (dropdown) {
+        dropdown.classList.toggle("show");
+      } else {
+        console.error("Élément profileDropdown non trouvé.");
+      }
+    });
   } else {
-    passwordSpan.textContent = "••••••••";
+    console.error("Élément profileBtn non trouvé.");
   }
+
+  // Fermer le menu déroulant en cliquant ailleurs
+  document.addEventListener("click", (e) => {
+    const profileDropdown = document.getElementById("profileDropdown");
+    const profileBtn = document.getElementById("profileBtn");
+
+    if (profileDropdown && !profileDropdown.contains(e.target) && profileBtn && !profileBtn.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+    }
+  });
 });
 
+// Mettre à jour les informations du profil
 async function updateProfileInfo() {
   const user = await getSession();
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
-    profileBtn.disabled = true;
-    document.getElementById("profilePseudoDisplay").textContent = "";
-    document.getElementById("profilePseudoDisplay").title = "";
-    document.getElementById("profileAvatar").src = "/chemin/vers/default.png";
+    if (profileBtn) {
+      profileBtn.disabled = true;
+    }
     return;
   } else {
-    profileBtn.disabled = false;
+    if (profileBtn) {
+      profileBtn.disabled = false;
+    }
   }
 
   const { data: player, error } = await supa
@@ -2341,21 +2345,26 @@ async function updateProfileInfo() {
   }
 
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-  pseudoDisplay.textContent = player.pseudo || "";
-  pseudoDisplay.title = player.pseudo || ""; // Ajouter le pseudo complet dans le tooltip
-  document.getElementById("profileAvatar").src = player.avatar_url || "images/avatarDefault.png";
-  document.getElementById("profileEmail").textContent = user.email || "";
-  document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
+  if (pseudoDisplay) {
+    pseudoDisplay.textContent = player.pseudo || "";
+    pseudoDisplay.title = player.pseudo || "";
+  }
+
+  const profileAvatar = document.getElementById("profileAvatar");
+  if (profileAvatar) {
+    profileAvatar.src = player.avatar_url || "/chemin/vers/default.png";
+  }
+
+  const profileEmail = document.getElementById("profileEmail");
+  if (profileEmail) {
+    profileEmail.textContent = user.email || "";
+  }
+
+  const profileCreationDate = document.getElementById("profileCreationDate");
+  if (profileCreationDate) {
+    profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+  }
 }
-
-document.getElementById("logoutProfileBtn").addEventListener("click", async () => {
-  await logout();
-  document.getElementById("profileDropdown").classList.remove("show");
-});
-
-document.getElementById("editProfileBtn").addEventListener("click", async () => {
-  await ouvrirProfil();
-});
 
 // Appeler updateProfileInfo au démarrage et après connexion/déconnexion
 updateProfileInfo();
