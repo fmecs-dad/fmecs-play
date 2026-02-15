@@ -414,8 +414,6 @@ body {
 
 /* === GENERIC OVERLAY === */
 
-/* === GENERIC OVERLAY === */
-
 .overlay {
   position: fixed;
   inset: 0;
@@ -429,6 +427,44 @@ body {
 .overlay.hidden {
   display: none !important;
   pointer-events: none !important;
+}
+
+/* === MODAL GÉNÉRIQUE === */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  padding: 20px; /* important pour petits écrans */
+  overflow: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  margin: auto;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-size: 18px;
+
+  /* Adaptation automatique */
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+#readyModal {
+  z-index: 200000 !important;
 }
 
 /* Menu Profil */
@@ -607,43 +643,6 @@ body {
   display: none;
 }
 
-/* === MODAL GÉNÉRIQUE === */
-
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 20000;
-  padding: 20px; /* important pour petits écrans */
-  overflow: hidden;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.modal-content {
-  margin: auto;
-  background: white;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  font-size: 18px;
-
-  /* Adaptation automatique */
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow: auto;
-  box-sizing: border-box;
-}
-
-#readyModal {
-  z-index: 200000 !important;
-}
 
 /* === ANIMATIONS === */
 
