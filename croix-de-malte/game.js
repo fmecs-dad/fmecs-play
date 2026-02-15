@@ -2044,6 +2044,24 @@ function closeReady() {
   document.getElementById("readyModal").classList.add("hidden");
 }
 
+function closeEndGame() {
+  const overlay = document.getElementById("endGameOverlay");
+  overlay.classList.add("hidden");
+}
+
+function closeWhySignup() {
+  document.getElementById("whySignupModal").classList.add("hidden");
+}
+
+function closeLogin() {
+  const auth = document.getElementById("authOverlay");
+  auth.classList.add("hidden");
+}
+
+function closeProfile() {
+  const overlay = document.getElementById("profileModal");
+  if (overlay) overlay.classList.add("hidden");
+}
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
   overlay.classList.add("hidden");
@@ -2055,27 +2073,9 @@ function closeHelp() {
   }
 }
 
-function closeLogin() {
-  const auth = document.getElementById("authOverlay");
-  auth.classList.add("hidden");
-}
-
-function closeEndGame() {
-  const overlay = document.getElementById("endGameOverlay");
-  overlay.classList.add("hidden");
-}
-
 function closeBestScore() {
   const overlay = document.getElementById("bestScoreOverlay");
   overlay.classList.add("hidden");
-}
-
-function closeProfile() {
-  document.getElementById("profileModal").classList.add("hidden");
-}
-
-function closeWhySignup() {
-  document.getElementById("whySignupModal").classList.add("hidden");
 }
 
 // ===============================
