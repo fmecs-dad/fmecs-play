@@ -115,16 +115,12 @@ checkSessionOnStartup();
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   const token = localStorage.getItem('supabase.access.token');
-  console.log("Token:", token); // Log pour vérifier le token
-
   if (!token) {
     console.log("Aucun JWT trouvé.");
     return null;
   }
 
   const { data: { user }, error } = await supa.auth.getUser(token);
-  console.log("User:", user); // Log pour vérifier l'utilisateur
-
   if (error) {
     console.error("Erreur lors de la récupération de l'utilisateur :", error);
     return null;
@@ -165,36 +161,60 @@ async function fetchPlayerPseudo(userId) {
 }
 
 // Fonction pour mettre à jour l'UI
-async function updateAuthUI(user = null) {
-  console.log("Updating UI with user:", user);
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  const burgerPseudo = document.getElementById("burgerPseudo");
+
+async function updateProfileInfo() {
+  const user = await getSession();
+  const profileBtn = document.getElementById("profileBtn");
+
+  console.log("User in updateProfileInfo:", user);
 
   if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
-    if (burgerPseudo) burgerPseudo.textContent = "";
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      console.log("Bouton désactivé");
+      document.getElementById("profilePseudoDisplay").textContent = "";
+      document.getElementById("profilePseudoDisplay").title = "";
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+    }
     return;
+  } else {
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.removeAttribute('disabled'); // Suppression explicite de l'attribut disabled
+      console.log("Bouton activé, disabled:", profileBtn.disabled);
+    }
   }
-
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
-
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
-  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
-    const pseudo = await fetchPlayerPseudo(user.id);
-    if (pseudo && burgerPseudo) {
-      burgerPseudo.textContent = pseudo;
-      localStorage.setItem("playerPseudo", pseudo);
-    }
-  } catch (err) {
-    console.error("Impossible de récupérer le pseudo :", err);
-  }
-}
+    const { data: player, error } = await supa
+      .from("players")
+      .select("pseudo, avatar_url, created_at")
+      .eq("id", user.id)
+      .single();
 
-// ===============================
+    if (error) {
+      throw error;
+    }
+
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) {
+      pseudoDisplay.textContent = player.pseudo || "";
+      pseudoDisplay.title = player.pseudo || "";
+    }
+
+    const profileAvatar = document.getElementById("profileAvatar");
+    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
+
+    const profileEmail = document.getElementById("profileEmail");
+    if (profileEmail) profileEmail.textContent = user.email || "";
+
+    const profileCreationDate = document.getElementById("profileCreationDate");
+    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+  } catch (error) {
+    console.error("Erreur lors de la récupération des informations du profil :", error);
+  }
+}// ===============================
 //   PROFIL & JEU
 // ===============================
 
@@ -2017,19 +2037,91 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ===============================
-  //   GESTION DU MENU PROFIL
-  // ===============================
+// ===============================
+//   GESTION DU MENU PROFIL
+// ===============================
+
+// Fonction pour récupérer la session
+async function getSession() {
+  const token = localStorage.getItem('supabase.access.token');
+  if (!token) {
+    console.log("Aucun JWT trouvé.");
+    return null;
+  }
+
+  const { data: { user }, error } = await supa.auth.getUser(token);
+  if (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur :", error);
+    return null;
+  }
+
+  return user;
+}
+
+// Fonction pour mettre à jour les informations du profil
+async function updateProfileInfo() {
+  const user = await getSession();
+  const profileBtn = document.getElementById("profileBtn");
+
+  console.log("User in updateProfileInfo:", user);
+
+  if (!user) {
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      console.log("Bouton désactivé");
+      document.getElementById("profilePseudoDisplay").textContent = "";
+      document.getElementById("profilePseudoDisplay").title = "";
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+    }
+    return;
+  } else {
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.removeAttribute('disabled'); // Suppression explicite de l'attribut disabled
+      console.log("Bouton activé, disabled:", profileBtn.disabled);
+    }
+  }
+
+  try {
+    const { data: player, error } = await supa
+      .from("players")
+      .select("pseudo, avatar_url, created_at")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) {
+      pseudoDisplay.textContent = player.pseudo || "";
+      pseudoDisplay.title = player.pseudo || "";
+    }
+
+    const profileAvatar = document.getElementById("profileAvatar");
+    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
+
+    const profileEmail = document.getElementById("profileEmail");
+    if (profileEmail) profileEmail.textContent = user.email || "";
+
+    const profileCreationDate = document.getElementById("profileCreationDate");
+    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+  } catch (error) {
+    console.error("Erreur lors de la récupération des informations du profil :", error);
+  }
+}
+
+// Fonction pour ouvrir le menu profil
+function setupProfileMenu() {
   const profileBtn = document.getElementById("profileBtn");
   const profileDropdown = document.getElementById("profileDropdown");
 
-  console.log("profileBtn:", profileBtn); // Log pour vérifier l'existence de profileBtn
-  console.log("profileDropdown:", profileDropdown); // Log pour vérifier l'existence de profileDropdown
-
   if (profileBtn && profileDropdown) {
     profileBtn.addEventListener("click", (e) => {
-      console.log("Clic sur profileBtn"); // Log pour vérifier le clic
       e.stopPropagation();
+      console.log("Clic sur profileBtn");
       profileDropdown.classList.toggle("show");
     });
 
@@ -2041,6 +2133,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   } else {
     console.error("Élément(s) du menu profil manquant(s)");
   }
+}
+
+// Fonction pour ouvrir la modale de modification du profil
+async function ouvrirProfil() {
+  const user = await getSession();
+  if (!user) return;
+
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  document.getElementById("profilePseudoInput").value = player.pseudo || "";
+  document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
+
+  const modal = document.getElementById("profileModal");
+  modal.classList.remove("hidden");
+}
+
+// Initialisation du menu profil
+document.addEventListener('DOMContentLoaded', () => {
+  setupProfileMenu();
 
   // Écouteur pour afficher/masquer le mot de passe
   const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
@@ -2062,7 +2177,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (logoutProfileBtn) {
     logoutProfileBtn.addEventListener("click", async () => {
       await logout();
-      if (profileDropdown) profileDropdown.classList.remove("show");
+      const dropdown = document.getElementById("profileDropdown");
+      if (dropdown) dropdown.classList.remove("show");
     });
   }
 
@@ -2073,6 +2189,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       await ouvrirProfil();
     });
   }
+
+  // Mettre à jour les informations du profil
+  updateProfileInfo();
+});
+
+// Fonction pour gérer la déconnexion
+async function logout() {
+  console.log("Début de la déconnexion");
+
+  // Supprimer les tokens du localStorage
+  localStorage.removeItem('supabase.access.token');
+  localStorage.removeItem('supabase.refresh.token');
+
+  // Déconnecter l'utilisateur de Supabase
+  const { error } = await supa.auth.signOut();
+
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  }
+
+  // Mettre à jour l'UI immédiatement
+  updateAuthUI(null);
+
+  // Recharger la page pour réinitialiser l'état
+  window.location.reload();
+}
 
   // ===============================
   //   MENU BURGER
@@ -2233,76 +2375,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     closeHelp();
   });
 
-  // ===============================
-  //   PROFIL
-  // ===============================
-  async function ouvrirProfil() {
-    const user = await getSession();
-    if (!user) return;
-
-    const { data: player } = await supa
-      .from("players")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    document.getElementById("profilePseudoInput").value = player.pseudo || "";
-    document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
-
-    const modal = document.getElementById("profileModal");
-    modal.classList.remove("hidden");
-  }
-
-  // Mettre à jour les informations du profil
-  async function updateProfileInfo() {
-    const user = await getSession();
-    const profileBtn = document.getElementById("profileBtn");
-
-  console.log("User in updateProfileInfo:", user); // Log pour vérifier l'utilisateur
-
-  if (!user) {
-    if (profileBtn) {
-      profileBtn.disabled = true;
-      console.log("Bouton désactivé"); // Log pour vérifier l'état du bouton
-      document.getElementById("profilePseudoDisplay").textContent = "";
-      document.getElementById("profilePseudoDisplay").title = "";
-      const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
-    }
-    return;
-  } else {
-    if (profileBtn) {
-      profileBtn.disabled = false;
-      console.log("Bouton activé"); // Log pour vérifier l'état du bouton
-    }
-  }
-    const { data: player, error } = await supa
-      .from("players")
-      .select("pseudo, avatar_url, created_at")
-      .eq("id", user.id)
-      .single();
-
-    if (error) {
-      console.error("Erreur lors de la récupération des informations du profil :", error);
-      return;
-    }
-
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    if (pseudoDisplay) {
-      pseudoDisplay.textContent = player.pseudo || "";
-      pseudoDisplay.title = player.pseudo || "";
-    }
-
-    const profileAvatar = document.getElementById("profileAvatar");
-    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
-
-    const profileEmail = document.getElementById("profileEmail");
-    if (profileEmail) profileEmail.textContent = user.email || "";
-
-    const profileCreationDate = document.getElementById("profileCreationDate");
-    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
-  }
-
-  // Appeler updateProfileInfo au démarrage
-  updateProfileInfo();
 });
