@@ -79,7 +79,7 @@ body {
   padding: 12px 20px;
   width: 100%;
   height: 110px;
-  overflow: hidden;
+  overflow: visible !important; /* Assurez-vous que l'overflow est visible */
 }
 
 /* Bloc titre + sous-titre */
@@ -200,6 +200,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
+  z-index: 10002; /* Assurez-vous que ce z-index est supérieur à celui de la topbar */
 }
 
 .profile-btn {
@@ -212,14 +213,13 @@ body {
   gap: 5px;
   color: white;
   font-size: 14px;
-  pointer-events: auto;
+  pointer-events: auto !important; /* Assurez-vous que les événements de la souris sont activés */
 }
 
 .profile-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .avatar-icon {
   width: 40px;
   height: 40px;
@@ -250,10 +250,10 @@ body {
   gap: 10px;
   visibility: visible;
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: auto !important; /* Assurez-vous que les événements de la souris sont activés */
   border: 2px solid red; /* Bordure rouge pour le débogage */
+  transform: translateY(0); /* Assurez-vous qu'il n'y a pas de transformation */
 }
-
 .profile-dropdown.show {
   display: flex;
   border: 2px solid green; /* Bordure verte pour le débogage */
