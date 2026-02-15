@@ -2322,7 +2322,8 @@ async function updateProfileInfo() {
   if (!user) {
     profileBtn.disabled = true;
     document.getElementById("profilePseudoDisplay").textContent = "";
-    document.getElementById("profileAvatar").src = "images/avatarDefault.png";
+    document.getElementById("profilePseudoDisplay").title = "";
+    document.getElementById("profileAvatar").src = "/chemin/vers/default.png";
     return;
   } else {
     profileBtn.disabled = false;
@@ -2339,7 +2340,9 @@ async function updateProfileInfo() {
     return;
   }
 
-  document.getElementById("profilePseudoDisplay").textContent = player.pseudo || "";
+  const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+  pseudoDisplay.textContent = player.pseudo || "";
+  pseudoDisplay.title = player.pseudo || ""; // Ajouter le pseudo complet dans le tooltip
   document.getElementById("profileAvatar").src = player.avatar_url || "images/avatarDefault.png";
   document.getElementById("profileEmail").textContent = user.email || "";
   document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
