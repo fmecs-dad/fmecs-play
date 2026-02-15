@@ -2315,6 +2315,21 @@ document.addEventListener('DOMContentLoaded', () => {
       profileDropdown.classList.remove("show");
     }
   });
+
+  // Fonction pour afficher/masquer le mot de passe
+  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
+  if (togglePasswordVisibilityBtn) {
+    togglePasswordVisibilityBtn.addEventListener("click", () => {
+      const passwordSpan = document.getElementById("profilePassword");
+      if (passwordSpan) {
+        if (passwordSpan.textContent === "••••••••") {
+          passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
+        } else {
+          passwordSpan.textContent = "••••••••";
+        }
+      }
+    });
+  }
 });
 
 // Mettre à jour les informations du profil
@@ -2323,13 +2338,20 @@ async function updateProfileInfo() {
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
-    profileBtn.disabled = true;
-    document.getElementById("profilePseudoDisplay").textContent = "";
-    document.getElementById("profilePseudoDisplay").title = "";
-    document.getElementById("profileAvatar").src = "/chemin/vers/default.png";
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      document.getElementById("profilePseudoDisplay").textContent = "";
+      document.getElementById("profilePseudoDisplay").title = "";
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) {
+        profileAvatar.src = "/chemin/vers/default.png";
+      }
+    }
     return;
   } else {
-    profileBtn.disabled = false;
+    if (profileBtn) {
+      profileBtn.disabled = false;
+    }
   }
 
   const { data: player, error } = await supa
@@ -2344,15 +2366,44 @@ async function updateProfileInfo() {
   }
 
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-  pseudoDisplay.textContent = player.pseudo || "";
-  pseudoDisplay.title = player.pseudo || ""; // Ajouter le pseudo complet dans le tooltip
-  document.getElementById("profileAvatar").src = player.avatar_url || "images/avatarDefault.png";
-  document.getElementById("profileEmail").textContent = user.email || "";
-  document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
+  if (pseudoDisplay) {
+    pseudoDisplay.textContent = player.pseudo || "";
+    pseudoDisplay.title = player.pseudo || "";
+  }
+
+  const profileAvatar = document.getElementById("profileAvatar");
+  if (profileAvatar) {
+    profileAvatar.src = player.avatar_url || "/chemin/vers/default.png";
+  }
+
+  const profileEmail = document.getElementById("profileEmail");
+  if (profileEmail) {
+    profileEmail.textContent = user.email || "";
+  }
+
+  const profileCreationDate = document.getElementById("profileCreationDate");
+  if (profileCreationDate) {
+    profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+  }
 }
+
+// Écouteur pour la déconnexion
+document.getElementById("logoutProfileBtn")?.addEventListener("click", async () => {
+  await logout();
+  const dropdown = document.getElementById("profileDropdown");
+  if (dropdown) {
+    dropdown.classList.remove("show");
+  }
+});
+
+// Écouteur pour ouvrir la modale de modification du profil
+document.getElementById("editProfileBtn")?.addEventListener("click", async () => {
+  await ouvrirProfil();
+});
 
 // Appeler updateProfileInfo au démarrage et après connexion/déconnexion
 updateProfileInfo();
+
 
 // ===============================
 //   AUTHENTIFICATION (v1)
