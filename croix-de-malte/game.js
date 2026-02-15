@@ -2344,7 +2344,7 @@ async function updateProfileInfo() {
       document.getElementById("profilePseudoDisplay").title = "";
       const profileAvatar = document.getElementById("profileAvatar");
       if (profileAvatar) {
-        profileAvatar.src = "/chemin/vers/default.png";
+        profileAvatar.src = "images/avatarDefault.png";
       }
     }
     return;
@@ -2373,7 +2373,7 @@ async function updateProfileInfo() {
 
   const profileAvatar = document.getElementById("profileAvatar");
   if (profileAvatar) {
-    profileAvatar.src = player.avatar_url || "/chemin/vers/default.png";
+    profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
   }
 
   const profileEmail = document.getElementById("profileEmail");
