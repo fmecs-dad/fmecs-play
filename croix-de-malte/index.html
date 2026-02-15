@@ -195,12 +195,11 @@ body {
 /* Menu Profil */
 #profileContainer {
   position: relative;
+  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  margin-left: auto;
-  z-index: 10001; /* Assurez-vous que le z-index est suffisamment élevé */
 }
 
 .profile-btn {
@@ -213,14 +212,14 @@ body {
   gap: 5px;
   color: white;
   font-size: 14px;
-  pointer-events: auto; /* Assurez-vous que les événements de la souris sont activés */
+  pointer-events: auto;
 }
 
 .profile-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none; /* Désactive les événements de la souris si le bouton est désactivé */
 }
+
 .avatar-icon {
   width: 40px;
   height: 40px;
@@ -244,14 +243,20 @@ body {
   padding: 12px;
   border-radius: 6px;
   min-width: 250px;
+  min-height: 100px;
   z-index: 99999;
   display: none;
   flex-direction: column;
   gap: 10px;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  border: 2px solid red; /* Bordure rouge pour le débogage */
 }
 
 .profile-dropdown.show {
   display: flex;
+  border: 2px solid green; /* Bordure verte pour le débogage */
 }
 
 .profile-info {
@@ -260,6 +265,7 @@ body {
 
 .profile-info p {
   margin: 5px 0;
+  color: white;
 }
 
 #editProfileBtn, #logoutProfileBtn {
@@ -269,6 +275,7 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  pointer-events: auto;
 }
 
 #editProfileBtn:hover, #logoutProfileBtn:hover {
@@ -280,12 +287,8 @@ body {
   border: none;
   cursor: pointer;
   font-size: 14px;
+  pointer-events: auto;
 }
-
-.overlay-center {
-  display: flex;
-}
-
 
 /* === HELP CLOSE BUTTON === */
 
