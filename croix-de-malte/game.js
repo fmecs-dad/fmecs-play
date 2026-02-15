@@ -276,25 +276,26 @@ async function ouvrirProfil() {
 
 // Fonction pour configurer le menu profil
 function setupProfileMenu() {
-const profileBtn = document.getElementById("profileBtn");
-const profileDropdown = document.getElementById("profileDropdown");
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
 
-if (profileBtn && profileDropdown) {
-  profileBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    console.log("Clic sur profileBtn");
-    profileDropdown.classList.toggle("show");
-    console.log("Menu déroulant affiché:", profileDropdown.classList.contains("show")); // Log de débogage
-    console.log("Style display:", window.getComputedStyle(profileDropdown).display); // Log de débogage
-  });
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      console.log("Clic sur profileBtn");
+      profileDropdown.classList.toggle("show");
+      console.log("Menu déroulant affiché:", profileDropdown.classList.contains("show")); // Log de débogage
+      console.log("Style display:", window.getComputedStyle(profileDropdown).display); // Log de débogage
+    });
 
-  document.addEventListener("click", (e) => {
-    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-      profileDropdown.classList.remove("show");
-    }
-  });
-} else {
-  console.error("Élément(s) du menu profil manquant(s)");
+    document.addEventListener("click", (e) => {
+      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileDropdown.classList.remove("show");
+      }
+    });
+  } else {
+    console.error("Élément(s) du menu profil manquant(s)");
+  }
 }
 // --------------------------------------------------
 // AIDE
@@ -1477,10 +1478,11 @@ function undoLastMove() {
   const historyList = document.getElementById("historyList");
   if (historyList.lastChild) historyList.removeChild(historyList.lastChild);
 
-    updateCounters();
-    redrawEverything();
-  }
+  updateCounters();
+  redrawEverything();
+  
 }
+
 
 // ===============================
 //   FIN DE PARTIE
