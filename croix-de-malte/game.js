@@ -2040,8 +2040,14 @@ function showReadyModal(reason) {
   }
 }
 
+//function closeReady() {
+//  document.getElementById("readyModal").classList.add("hidden");
+//}
+
+// Fonction pour fermer la modale ready
 function closeReady() {
-  document.getElementById("readyModal").classList.add("hidden");
+  const modal = document.getElementById("readyModal");
+  if (modal) modal.classList.add("hidden");
 }
 
 // Fonction pour fermer la modale de fin de jeu
