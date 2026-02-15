@@ -2045,6 +2045,7 @@ function showReadyModal(reason) {
 //}
 
 // Déclarez toutes les fonctions de fermeture avant DOMContentLoaded
+
 function closeEndGame() {
   const overlay = document.getElementById("endGameOverlay");
   if (overlay) overlay.classList.add("hidden");
@@ -2106,61 +2107,7 @@ function enableModalBehavior(modalId, panelSelector, closeFunction) {
       closeFunction();
     }
   });
-}}
-
-// Fonction pour fermer la modale de profil
-function closeProfile() {
-  const overlay = document.getElementById("profileModal");
-  if (overlay) overlay.classList.add("hidden");
 }
-
-// Fonction pour fermer la modale d'aide
-function closeHelp() {
-  const overlay = document.getElementById("helpOverlay");
-  if (overlay) {
-    overlay.classList.add("hidden");
-
-    if (window.helpAutoOpened) {
-      localStorage.setItem("helpSeen", "true");
-      const readyModal = document.getElementById("readyModal");
-      if (readyModal) readyModal.classList.remove("hidden");
-      if (typeof startNewGame === 'function') startNewGame();
-    }
-  }
-}
-
-// Fonction pour fermer la modale du leaderboard
-function closeLeaderboard() {
-  const overlay = document.getElementById("leaderboardOverlay");
-  if (overlay) overlay.classList.add("hidden");
-}
-
-// Fonction pour fermer la modale du meilleur score
-function closeBestScore() {
-  const overlay = document.getElementById("bestScoreOverlay");
-  if (overlay) overlay.classList.add("hidden");
-}
-
-// Fonction pour activer le comportement des modales
-function enableModalBehavior(modalId, panelSelector, closeFunction) {
-  const modal = document.getElementById(modalId);
-  if (!modal) {
-    console.error(`Modal ${modalId} not found`);
-    return;
-  }
-
-  const closeBtn = modal.querySelector('.close-btn');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeFunction);
-  }
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeFunction();
-    }
-  });
-}
-
 // ===============================
 //   DOMContentLoaded
 // ===============================
