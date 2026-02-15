@@ -115,6 +115,7 @@ checkSessionOnStartup();
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   const token = localStorage.getItem('supabase.access.token');
+  console.log("Token:", token); // Log pour vérifier le token
 
   if (!token) {
     console.log("Aucun JWT trouvé.");
@@ -122,6 +123,7 @@ async function getSession() {
   }
 
   const { data: { user }, error } = await supa.auth.getUser(token);
+  console.log("User:", user); // Log pour vérifier l'utilisateur
 
   if (error) {
     console.error("Erreur lors de la récupération de l'utilisateur :", error);
@@ -1960,6 +1962,10 @@ function closeWhySignup() {
   document.getElementById("whySignupModal").classList.add("hidden");
 }
 
+// ===============================
+//   DOMContentLoaded
+// ===============================
+
 document.addEventListener("DOMContentLoaded", async () => {
   // Vérifie la session au démarrage
   const { data: { session }, error } = await supa.auth.getSession();
@@ -2017,8 +2023,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const profileBtn = document.getElementById("profileBtn");
   const profileDropdown = document.getElementById("profileDropdown");
 
+  console.log("profileBtn:", profileBtn); // Log pour vérifier l'existence de profileBtn
+  console.log("profileDropdown:", profileDropdown); // Log pour vérifier l'existence de profileDropdown
+
   if (profileBtn && profileDropdown) {
     profileBtn.addEventListener("click", (e) => {
+      console.log("Clic sur profileBtn"); // Log pour vérifier le clic
       e.stopPropagation();
       profileDropdown.classList.toggle("show");
     });
@@ -2248,19 +2258,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     const user = await getSession();
     const profileBtn = document.getElementById("profileBtn");
 
-    if (!user) {
-      if (profileBtn) {
-        profileBtn.disabled = true;
-        document.getElementById("profilePseudoDisplay").textContent = "";
-        document.getElementById("profilePseudoDisplay").title = "";
-        const profileAvatar = document.getElementById("profileAvatar");
-        if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
-      }
-      return;
-    } else {
-      if (profileBtn) profileBtn.disabled = false;
-    }
+  console.log("User in updateProfileInfo:", user); // Log pour vérifier l'utilisateur
 
+  if (!user) {
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      console.log("Bouton désactivé"); // Log pour vérifier l'état du bouton
+      document.getElementById("profilePseudoDisplay").textContent = "";
+      document.getElementById("profilePseudoDisplay").title = "";
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+    }
+    return;
+  } else {
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      console.log("Bouton activé"); // Log pour vérifier l'état du bouton
+    }
+  }
     const { data: player, error } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
@@ -2291,4 +2306,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Appeler updateProfileInfo au démarrage
   updateProfileInfo();
 });
-

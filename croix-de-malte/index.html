@@ -200,6 +200,7 @@ body {
   justify-content: center;
   height: 100%;
   margin-left: auto;
+  z-index: 10001; /* Assurez-vous que le z-index est suffisamment élevé */
 }
 
 .profile-btn {
@@ -212,13 +213,14 @@ body {
   gap: 5px;
   color: white;
   font-size: 14px;
+  pointer-events: auto; /* Assurez-vous que les événements de la souris sont activés */
 }
 
 .profile-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  pointer-events: none; /* Désactive les événements de la souris si le bouton est désactivé */
 }
-
 .avatar-icon {
   width: 40px;
   height: 40px;
