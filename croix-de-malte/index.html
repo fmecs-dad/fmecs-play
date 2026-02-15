@@ -473,7 +473,13 @@ body {
 
 /* Menu Profil */
 #profileWrapper {
-  position: relative;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
 }
 
 .profile-btn {
@@ -481,10 +487,11 @@ body {
   border: none;
   cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .profile-btn:disabled {
@@ -493,16 +500,17 @@ body {
 }
 
 .avatar-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid white;
 }
 
 .profile-dropdown {
   position: absolute;
-  top: 50px;
-  right: 0;
+  top: 60px;
+  right: 20px;
   background: #222;
   padding: 12px;
   border-radius: 6px;
@@ -544,6 +552,7 @@ body {
   cursor: pointer;
   font-size: 14px;
 }
+
 .overlay-center {
   display: flex;
 }
@@ -1066,9 +1075,9 @@ footer {
 </div>
 
 <!-- Profil -->
-<div id="profileWrapper" style="position: absolute; right: 20px; top: 10px; z-index: 10001;">
+<div id="profileWrapper">
   <button id="profileBtn" class="profile-btn" aria-label="Profil" disabled>
-    <img id="profileAvatar" src="images/avatarDefault.png" class="avatar-icon">
+    <img id="profileAvatar" src="/chemin/vers/default.png" class="avatar-icon">
     <span id="profilePseudoDisplay"></span>
   </button>
 
