@@ -2323,14 +2323,13 @@ async function updateProfileInfo() {
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
-    if (profileBtn) {
-      profileBtn.disabled = true;
-    }
+    profileBtn.disabled = true;
+    document.getElementById("profilePseudoDisplay").textContent = "";
+    document.getElementById("profilePseudoDisplay").title = "";
+    document.getElementById("profileAvatar").src = "/chemin/vers/default.png";
     return;
   } else {
-    if (profileBtn) {
-      profileBtn.disabled = false;
-    }
+    profileBtn.disabled = false;
   }
 
   const { data: player, error } = await supa
@@ -2345,25 +2344,11 @@ async function updateProfileInfo() {
   }
 
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-  if (pseudoDisplay) {
-    pseudoDisplay.textContent = player.pseudo || "";
-    pseudoDisplay.title = player.pseudo || "";
-  }
-
-  const profileAvatar = document.getElementById("profileAvatar");
-  if (profileAvatar) {
-    profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
-  }
-
-  const profileEmail = document.getElementById("profileEmail");
-  if (profileEmail) {
-    profileEmail.textContent = user.email || "";
-  }
-
-  const profileCreationDate = document.getElementById("profileCreationDate");
-  if (profileCreationDate) {
-    profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
-  }
+  pseudoDisplay.textContent = player.pseudo || "";
+  pseudoDisplay.title = player.pseudo || ""; // Ajouter le pseudo complet dans le tooltip
+  document.getElementById("profileAvatar").src = player.avatar_url || "images/avatarDefault.png";
+  document.getElementById("profileEmail").textContent = user.email || "";
+  document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
 }
 
 // Appeler updateProfileInfo au démarrage et après connexion/déconnexion
