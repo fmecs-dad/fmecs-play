@@ -1480,7 +1480,7 @@ function undoLastMove() {
     updateCounters();
     redrawEverything();
   }
-
+}
 
 // ===============================
 //   FIN DE PARTIE
@@ -1885,7 +1885,7 @@ function playTutorialStep() {
   redrawEverything();
   flash("A vous de jouer", "info");
   return;
-}
+  }
 
 
   // 3) Mise à jour visuelle
