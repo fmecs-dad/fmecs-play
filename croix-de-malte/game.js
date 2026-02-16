@@ -2146,18 +2146,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (canvas) {
     const ctx = canvas.getContext("2d");
 
-    // ===============================
-    //   CALCUL RÉEL DU CANVAS + GRILLE
-    // ===============================
-    canvas.width = canvas.clientWidth;
+// ===============================
+//   CALCUL RÉEL DU CANVAS + GRILLE
+// ===============================
+  canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     if (typeof size !== 'undefined') {
       const spacing = canvas.width / (size + 1);
       const offset = spacing;
 
-      // ===============================
-      //   POSITIONNEMENT DES REPÈRES
-      // ===============================
+// ===============================
+//   POSITIONNEMENT DES REPÈRES
+// ===============================
       const topLabels = document.querySelectorAll('#topLabels span');
       const leftLabels = document.querySelectorAll('#leftLabels span');
 
@@ -2178,8 +2178,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 // ===============================
-  //   FIN DE PARTIE
-  // ===============================
+//   FIN DE PARTIE
+// ===============================
   const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
   if (closeEndGameButton) {
     closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
@@ -2235,6 +2235,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
         if (typeof checkGameOver === 'function') checkGameOver();
       }
+    });
+  }
+
+// ===============================
+//   READY BUTTON
+// ===============================
+  const readyBtn = document.getElementById("readyBtn");
+  if (readyBtn) {
+    readyBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) readyModal.classList.add("hidden");
+      if (typeof initGame === 'function') initGame();
+      const board = document.getElementById("canvasContainer");
+      if (board) {
+        board.classList.remove("show");
+        board.classList.add("slide-in-premium");
+        void board.offsetWidth;
+        board.classList.add("show");
+        setTimeout(() => {
+          if (typeof playStartGameSound === 'function') playStartGameSound();
+        }, 1500);
+      }
+    });
+  } 
+
+// ===============================
+//   AIDE
+// ===============================
+  const closeHelpBtn = document.getElementById("closeHelpBtn");
+  if (closeHelpBtn) {
+    closeHelpBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      if (typeof closeHelp === 'function') closeHelp();
     });
   }
 
@@ -2610,39 +2644,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ===============================
-  //   READY BUTTON
-  // ===============================
-  const readyBtn = document.getElementById("readyBtn");
-  if (readyBtn) {
-    readyBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const readyModal = document.getElementById("readyModal");
-      if (readyModal) readyModal.classList.add("hidden");
-      if (typeof initGame === 'function') initGame();
-      const board = document.getElementById("canvasContainer");
-      if (board) {
-        board.classList.remove("show");
-        board.classList.add("slide-in-premium");
-        void board.offsetWidth;
-        board.classList.add("show");
-        setTimeout(() => {
-          if (typeof playStartGameSound === 'function') playStartGameSound();
-        }, 1500);
-      }
-    });
-  }
-
   
-
-  // ===============================
-  //   AIDE
-  // ===============================
-  const closeHelpBtn = document.getElementById("closeHelpBtn");
-  if (closeHelpBtn) {
-    closeHelpBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof closeHelp === 'function') closeHelp();
-    });
-  }
 });
