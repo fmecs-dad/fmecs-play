@@ -1964,47 +1964,61 @@ function handleFirstLaunchFlow(userFromEvent) {
 let gameStarted = false; // global
 
 function initialFlow(user) {
-  console.log("initialFlow appelé avec user :", user);
+  console.log("initialFlow appelé avec user:", user);
 
-  let lastEmail;
-  let skip;
+  // Récupération des valeurs depuis localStorage
+  const lastEmail = localStorage.getItem("lastEmail");
+  const skipWhySignup = localStorage.getItem("skipWhySignup") === "1";
+  const helpSeen = localStorage.getItem("helpSeen") === "true";
 
-  try {
-    lastEmail = localStorage.getItem("lastEmail");
-    skip = localStorage.getItem("skipWhySignup") === "1";
-  } catch (err) {
-    console.error("Erreur d'accès à localStorage :", err);
-    lastEmail = null;
-    skip = false;
-  }
+  console.log({
+    user,
+    lastEmail,
+    skipWhySignup,
+    helpSeen,
+    readyModalExists: !!document.getElementById("readyModal"),
+    whySignupModalExists: !!document.getElementById("whySignupModal")
+  });
 
-  console.log("lastEmail :", lastEmail);
-  console.log("skip :", skip);
-
-  // 1. Utilisateur connecté → readyModal
+  // Cas 1 : Utilisateur connecté → Toujours afficher readyModal
   if (user) {
-    console.log("Utilisateur connecté, affichage de readyModal...");
+    console.log("Utilisateur connecté → affichage de readyModal");
     showReadyModal("connected");
     return;
   }
 
-  // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
-  if (skip) {
-    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
-    showReadyModal("skipWhySignup");
-    return;
-  }
+  // Cas 2 : Utilisateur déconnecté
+  if (!user) {
+    // Sous-cas 2.1 : L'utilisateur a coché "Ne plus me rappeler" → readyModal
+    if (skipWhySignup) {
+      console.log("Utilisateur déconnecté avec skipWhySignup → readyModal");
+      showReadyModal("skipWhySignup");
+      return;
+    }
 
-  // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (lastEmail) {
-    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
-    document.getElementById("whySignupModal").classList.remove("hidden");
-    return;
-  }
+    // Sous-cas 2.2 : L'utilisateur a déjà saisi un email → whySignupModal
+    if (lastEmail) {
+      console.log("Utilisateur déconnecté avec lastEmail → whySignupModal");
+      const whySignupModal = document.getElementById("whySignupModal");
+      if (whySignupModal) {
+        whySignupModal.classList.remove("hidden");
+      } else {
+        console.error("whySignupModal introuvable dans le DOM");
+      }
+      return;
+    }
 
-  // 4. Nouveau joueur → whySignupModal
-  console.log("Nouveau joueur, affichage de whySignupModal...");
-  document.getElementById("whySignupModal").classList.remove("hidden");
+    // Sous-cas 2.3 : Nouveau visiteur → whySignupModal
+    console.log("Nouveau visiteur → whySignupModal");
+    const modal = document.getElementById("whySignupModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+    } else {
+      console.error("whySignupModal introuvable dans le DOM");
+      // Fallback : afficher readyModal si whySignupModal n'existe pas
+      showReadyModal("fallback");
+    }
+  }
 }
 
 function showReadyModal(reason) {
@@ -2061,16 +2075,18 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Vérification de session et initialisation
-  try {
   const { data: { session }, error } = await supa.auth.getSession();
-  if (session) {
-    localStorage.setItem('supabase.access.token', session.access_token);
-    localStorage.setItem('supabase.refresh.token', session.refresh_token);
-    await initialiserProfilEtLancerJeu(session);  // Appel original
-    updateAuthUI(session.user);
-  } else {
-    updateAuthUI(null);
-  }
+if (session) {
+  // Utilisateur connecté
+  localStorage.setItem('supabase.access.token', session.access_token);
+  localStorage.setItem('supabase.refresh.token', session.refresh_token);
+  await initialiserProfilEtLancerJeu(session);
+  updateAuthUI(session.user);
+} else {
+  // Utilisateur déconnecté → Appel explicite à initialFlow(null)
+  updateAuthUI(null);
+  initialFlow(null);  // <-- Cette ligne est CRUCIALE
+}
 } catch (err) {
   console.error("Erreur lors de la vérification de la session:", err);
   updateAuthUI(null);
