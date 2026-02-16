@@ -340,6 +340,7 @@ async function initialiserProfilEtLancerJeu(session) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
   }
 }
+
 // --------------------------------------------------
 // AIDE
 // --------------------------------------------------
@@ -1963,6 +1964,10 @@ function handleFirstLaunchFlow(userFromEvent) {
 //   INITIAL FLOW (VERSION FINALE)
 // ===============================
 
+// ===============================
+//   INITIAL FLOW (VERSION FINALE)
+// ===============================
+
 let gameStarted = false; // global
 
 function initialFlow(user) {
@@ -2332,27 +2337,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   } 
 
-
-  // ===============================
-  //   PROFIL
-  // ===============================
-
-async function ouvrirProfil() {
-  const user = await getSession();
-  if (!user) return;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
- document.getElementById("profilePseudoInput").value = player.pseudo || "";
- document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
-
-  const modal = document.getElementById("profileModal");
-  modal.classList.remove("hidden");
-}
 
 // Écouteurs existants
 document.getElementById("profileCloseBtn").addEventListener("click", () => {
