@@ -309,7 +309,6 @@ async function fetchPlayerPseudo(userId) {
   }
 }
 
-// Fonction pour gérer la déconnexion
 // Fonction de déconnexion
 async function logout() {
   const { error } = await supa.auth.signOut();
@@ -2317,32 +2316,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
-  const burgerReplayBtn = document.getElementById("burgerReplayBtn");
-  if (burgerReplayBtn) {
-    burgerReplayBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      localStorage.removeItem("currentGameState");
-      if (typeof startNewGame === 'function') startNewGame();
-      if (typeof initGame === 'function') initGame();
-    });
-  }
 
-  const burgerStepBtn = document.getElementById("burgerStepBtn");
-  if (burgerStepBtn) {
-    burgerStepBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (!tutorialRunning) {
-        localStorage.removeItem("currentGameState");
-        const readyModal = document.getElementById("readyModal");
-        if (readyModal) readyModal.classList.add("hidden");
-        if (typeof resetGameState === 'function') resetGameState();
-        if (typeof initMaltaCross === 'function') initMaltaCross();
-        if (typeof redrawEverything === 'function') redrawEverything();
-        if (typeof initGame === 'function') initGame();
-        if (typeof runTutorial === 'function') runTutorial();
-      }
-    });
-  }
+  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+    playClickSound();
+    localStorage.removeItem("currentGameState");
+    startNewGame();
+    initGame();
+  });
+
+  document.getElementById("burgerStepBtn").addEventListener("click", () => {
+    playClickSound();
+
+    if (!tutorialRunning) {
+      localStorage.removeItem("currentGameState");
+      document.getElementById("readyModal").classList.add("hidden");
+      resetGameState();
+      initMaltaCross();
+      redrawEverything();
+      initGame();
+      runTutorial();
+    }
+  });
 
   // Écouteur pour le bouton de fermeture de l'aide
 const closeHelpBtn = document.getElementById("closeHelpBtn");
