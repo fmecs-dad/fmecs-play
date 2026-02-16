@@ -2040,9 +2040,9 @@ function showReadyModal(reason) {
   }
 }
 
-//function closeReady() {
-//  document.getElementById("readyModal").classList.add("hidden");
-//}
+function closeReady() {
+ document.getElementById("readyModal").classList.add("hidden");
+}
 
 // Déclarez toutes les fonctions de fermeture avant DOMContentLoaded
 
@@ -2132,15 +2132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (typeof initialFlow === 'function') initialFlow(null);
   }
 
-// ===============================
-//   FIN DE PARTIE
-// ===============================
-  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
-  if (closeEndGameButton) {
-    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
-  }
-
-  // Activation des comportements des modales
+// Activation des comportements des modales
   enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
   enableModalBehavior("authOverlay", ".panel", closeLogin);
   enableModalBehavior("profileModal", ".panel", closeProfile);
@@ -2148,6 +2140,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
   enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
   enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+
+// ===============================
+//   FIN DE PARTIE
+// ===============================
+
+  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
+  if (closeEndGameButton) {
+    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
+  }
 
   // Références DOM essentielles
   const canvas = document.getElementById("gameCanvas");
@@ -2184,7 +2185,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   }
-
 
   // ===============================
   //   CLIC SUR LA GRILLE
@@ -2239,6 +2239,121 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+
+// ===============================
+//   BOUTONS TOP BAR
+// ===============================
+
+  document.getElementById("undoBtn").addEventListener("click", () => {
+    playClickSound();
+    if (!tutorialRunning) undoLastMove();
+  });
+
+  document.getElementById("pauseBtn").addEventListener("click", () => {
+    playClickSound();
+    if (!tutorialRunning) togglePause();
+  });
+
+
+// ===============================
+//   AIDE
+// ===============================
+  const closeHelpBtn = document.getElementById("closeHelpBtn");
+  if (closeHelpBtn) {
+    closeHelpBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      if (typeof closeHelp === 'function') closeHelp();
+    });
+  }
+
+// ===============================
+  //   MENU BURGER
+  // ===============================
+  const burgerBtn = document.getElementById("burgerBtn");
+  if (burgerBtn) {
+    burgerBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      const ov = document.getElementById("burgerOverlay");
+      if (ov) ov.classList.toggle("show");
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("burgerOverlay");
+    const burger = document.getElementById("burgerBtn");
+    if (menu && burger && !menu.contains(e.target) && e.target !== burger) {
+      menu.classList.remove("show");
+    }
+  });
+
+  // ===============================
+  //   AUTH BURGER (v1)
+  // ===============================
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  if (burgerAuthBtn) {
+    burgerAuthBtn.addEventListener("click", async () => {
+      console.log("Clic sur le bouton d'authentification");
+      if (typeof playClickSound === 'function') playClickSound();
+      const user = await getSession();
+      if (!user) {
+        console.log("Ouverture de la fenêtre de connexion");
+        const authOverlay = document.getElementById("authOverlay");
+        if (authOverlay) authOverlay.classList.remove("hidden");
+        if (typeof pauseGame === 'function') pauseGame();
+        return;
+      }
+      console.log("Début de la déconnexion");
+      if (typeof logout === 'function') await logout();
+    });
+  }
+
+// ===============================
+  //   AUTRES ÉCOUTEURS DE BOUTONS
+  // ===============================
+  const burgerReplayBtn = document.getElementById("burgerReplayBtn");
+  if (burgerReplayBtn) {
+    burgerReplayBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      localStorage.removeItem("currentGameState");
+      if (typeof startNewGame === 'function') startNewGame();
+      if (typeof initGame === 'function') initGame();
+    });
+  }
+
+  const burgerStepBtn = document.getElementById("burgerStepBtn");
+  if (burgerStepBtn) {
+    burgerStepBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      if (!tutorialRunning) {
+        localStorage.removeItem("currentGameState");
+        const readyModal = document.getElementById("readyModal");
+        if (readyModal) readyModal.classList.add("hidden");
+        if (typeof resetGameState === 'function') resetGameState();
+        if (typeof initMaltaCross === 'function') initMaltaCross();
+        if (typeof redrawEverything === 'function') redrawEverything();
+        if (typeof initGame === 'function') initGame();
+        if (typeof runTutorial === 'function') runTutorial();
+      }
+    });
+  }
+
+  const burgerHelpBtn = document.getElementById("burgerHelpBtn");
+  if (burgerHelpBtn) {
+    burgerHelpBtn.addEventListener("click", () => {
+      if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
+      if (typeof pauseGame === 'function') pauseGame();
+    });
+  }
+
+  const burgerSoundBtn = document.getElementById("burgerSoundBtn");
+  if (burgerSoundBtn) {
+    burgerSoundBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      soundEnabled = !soundEnabled;
+      if (typeof updateSoundButton === 'function') updateSoundButton();
+    });
+  }
+
 // ===============================
 //   READY BUTTON
 // ===============================
@@ -2261,17 +2376,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   } 
-
-// ===============================
-//   AIDE
-// ===============================
-  const closeHelpBtn = document.getElementById("closeHelpBtn");
-  if (closeHelpBtn) {
-    closeHelpBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof closeHelp === 'function') closeHelp();
-    });
-  }
 
   // ===============================
   //   ÉCOUTEURS DE CONNEXION/INSCRIPTION
@@ -2557,93 +2661,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Mettre à jour les informations du profil
   if (typeof updateProfileInfo === 'function') updateProfileInfo();
 
-  // ===============================
-  //   MENU BURGER
-  // ===============================
-  const burgerBtn = document.getElementById("burgerBtn");
-  if (burgerBtn) {
-    burgerBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const ov = document.getElementById("burgerOverlay");
-      if (ov) ov.classList.toggle("show");
-    });
-  }
+  
 
-  document.addEventListener("click", (e) => {
-    const menu = document.getElementById("burgerOverlay");
-    const burger = document.getElementById("burgerBtn");
-    if (menu && burger && !menu.contains(e.target) && e.target !== burger) {
-      menu.classList.remove("show");
-    }
-  });
-
-  // ===============================
-  //   AUTH BURGER (v1)
-  // ===============================
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  if (burgerAuthBtn) {
-    burgerAuthBtn.addEventListener("click", async () => {
-      console.log("Clic sur le bouton d'authentification");
-      if (typeof playClickSound === 'function') playClickSound();
-      const user = await getSession();
-      if (!user) {
-        console.log("Ouverture de la fenêtre de connexion");
-        const authOverlay = document.getElementById("authOverlay");
-        if (authOverlay) authOverlay.classList.remove("hidden");
-        if (typeof pauseGame === 'function') pauseGame();
-        return;
-      }
-      console.log("Début de la déconnexion");
-      if (typeof logout === 'function') await logout();
-    });
-  }
-
-  // ===============================
-  //   AUTRES ÉCOUTEURS DE BOUTONS
-  // ===============================
-  const burgerReplayBtn = document.getElementById("burgerReplayBtn");
-  if (burgerReplayBtn) {
-    burgerReplayBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      localStorage.removeItem("currentGameState");
-      if (typeof startNewGame === 'function') startNewGame();
-      if (typeof initGame === 'function') initGame();
-    });
-  }
-
-  const burgerStepBtn = document.getElementById("burgerStepBtn");
-  if (burgerStepBtn) {
-    burgerStepBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (!tutorialRunning) {
-        localStorage.removeItem("currentGameState");
-        const readyModal = document.getElementById("readyModal");
-        if (readyModal) readyModal.classList.add("hidden");
-        if (typeof resetGameState === 'function') resetGameState();
-        if (typeof initMaltaCross === 'function') initMaltaCross();
-        if (typeof redrawEverything === 'function') redrawEverything();
-        if (typeof initGame === 'function') initGame();
-        if (typeof runTutorial === 'function') runTutorial();
-      }
-    });
-  }
-
-  const burgerHelpBtn = document.getElementById("burgerHelpBtn");
-  if (burgerHelpBtn) {
-    burgerHelpBtn.addEventListener("click", () => {
-      if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
-      if (typeof pauseGame === 'function') pauseGame();
-    });
-  }
-
-  const burgerSoundBtn = document.getElementById("burgerSoundBtn");
-  if (burgerSoundBtn) {
-    burgerSoundBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      soundEnabled = !soundEnabled;
-      if (typeof updateSoundButton === 'function') updateSoundButton();
-    });
-  }
+  
 
 // ===============================
 //   WHY SIGNUP
