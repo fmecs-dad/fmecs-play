@@ -2108,6 +2108,7 @@ function enableModalBehavior(modalId, panelSelector, closeFunction) {
     }
   });
 }
+
 // ===============================
 //   DOMContentLoaded
 // ===============================
@@ -2174,6 +2175,67 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
       }
     }
+  }
+
+// ===============================
+  //   FIN DE PARTIE
+  // ===============================
+  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
+  if (closeEndGameButton) {
+    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
+  }
+
+  // ===============================
+  //   CLIC SUR LA GRILLE
+  // ===============================
+  if (canvas) {
+    canvas.addEventListener("click", (e) => {
+      if (gameOver) return;
+      if (!tutorialRunning && !timerRunning) {
+        if (typeof startTimer === 'function') startTimer();
+      }
+      if (tutorialRunning) return;
+      if (paused && typeof resumeGame === 'function') resumeGame();
+
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      const nearest = getNearestPoint(mx, my);
+      if (!nearest) {
+        if (typeof flash === 'function') flash("Hors grille", "error");
+        if (typeof playErrorSound === 'function') playErrorSound();
+        selectedStart = null;
+        return;
+      }
+
+      const { x, y } = nearest;
+
+      if (!selectedStart) {
+        selectedStart = { x, y };
+        return;
+      }
+
+      const result = getSegmentBetween(selectedStart, { x, y });
+      selectedStart = null;
+
+      if (result) {
+        if (typeof playSuccessSound === 'function') playSuccessSound();
+        validatedSegments.push(result);
+        if (typeof drawSegment === 'function') drawSegment(result.points);
+        score++;
+
+        const stepBtn = document.getElementById("burgerStepBtn");
+        if (stepBtn) {
+          stepBtn.disabled = true;
+          stepBtn.classList.add("disabled");
+        }
+
+        if (typeof updateCounters === 'function') updateCounters();
+        if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
+        if (typeof checkGameOver === 'function') checkGameOver();
+      }
+    });
   }
 
   // ===============================
@@ -2571,66 +2633,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ===============================
-  //   FIN DE PARTIE
-  // ===============================
-  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
-  if (closeEndGameButton) {
-    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
-  }
-
-  // ===============================
-  //   CLIC SUR LA GRILLE
-  // ===============================
-  if (canvas) {
-    canvas.addEventListener("click", (e) => {
-      if (gameOver) return;
-      if (!tutorialRunning && !timerRunning) {
-        if (typeof startTimer === 'function') startTimer();
-      }
-      if (tutorialRunning) return;
-      if (paused && typeof resumeGame === 'function') resumeGame();
-
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      const nearest = getNearestPoint(mx, my);
-      if (!nearest) {
-        if (typeof flash === 'function') flash("Hors grille", "error");
-        if (typeof playErrorSound === 'function') playErrorSound();
-        selectedStart = null;
-        return;
-      }
-
-      const { x, y } = nearest;
-
-      if (!selectedStart) {
-        selectedStart = { x, y };
-        return;
-      }
-
-      const result = getSegmentBetween(selectedStart, { x, y });
-      selectedStart = null;
-
-      if (result) {
-        if (typeof playSuccessSound === 'function') playSuccessSound();
-        validatedSegments.push(result);
-        if (typeof drawSegment === 'function') drawSegment(result.points);
-        score++;
-
-        const stepBtn = document.getElementById("burgerStepBtn");
-        if (stepBtn) {
-          stepBtn.disabled = true;
-          stepBtn.classList.add("disabled");
-        }
-
-        if (typeof updateCounters === 'function') updateCounters();
-        if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
-        if (typeof checkGameOver === 'function') checkGameOver();
-      }
-    });
-  }
+  
 
   // ===============================
   //   AIDE
