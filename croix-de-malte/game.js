@@ -298,49 +298,6 @@ function setupProfileMenu() {
   }
 }
 
-// ===============================
-//   PROFIL & JEU
-// ===============================
-
-function lancerJeuComplet() {
-  document.getElementById("readyModal").classList.add("hidden");
-  initGame();
-
-  const board = document.getElementById("canvasContainer");
-  board.classList.remove("show");
-  board.classList.add("slide-in-premium");
-  void board.offsetWidth;
-  board.classList.add("show");
-}
-
-async function initialiserProfilEtLancerJeu(session) {
-  if (!session) return;
-
-  try {
-    const userId = session.user.id;
-    const { data: player, error } = await supa
-      .from("players")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error && error.code) {
-      console.error("Erreur lors de la récupération du joueur :", error);
-      return;
-    }
-
-    if (!player) {
-      console.log("Nouveau joueur détecté, affichage de l'aide...");
-      openHelpOverlay(true);
-    } else {
-      localStorage.setItem("playerPseudo", player.pseudo);
-      console.log("Profil initialisé avec succès pour :", player.pseudo);
-    }
-  } catch (err) {
-    console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
-  }
-}
-
 // --------------------------------------------------
 // AIDE
 // --------------------------------------------------
@@ -2348,22 +2305,27 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   document.getElementById("profileModal").classList.add("hidden");
 });
 
-// Nouveaux écouteurs pour le menu profil
-document.getElementById("profileBtn").addEventListener("click", (e) => {
-  e.stopPropagation();
-  const dropdown = document.getElementById("profileDropdown");
-  dropdown.classList.toggle("show");
-});
+// Vérifiez que tous les éléments existent avant d'ajouter des écouteurs
+if (document.getElementById("profileBtn")) {
+  document.getElementById("profileBtn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown) dropdown.classList.toggle("show");
+  });
+}
 
-document.addEventListener("click", (e) => {
-  const profileDropdown = document.getElementById("profileDropdown");
-  const profileBtn = document.getElementById("profileBtn");
-
-  if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-    profileDropdown.classList.remove("show");
-  }
-});
-
+if (document.getElementById("togglePasswordVisibility")) {
+  document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
+    const passwordSpan = document.getElementById("profilePassword");
+    if (passwordSpan) {
+      if (passwordSpan.textContent === "••••••••") {
+        passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
+      } else {
+        passwordSpan.textContent = "••••••••";
+      }
+    }
+  });
+}
 document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
   const passwordSpan = document.getElementById("profilePassword");
   if (passwordSpan.textContent === "••••••••") {
