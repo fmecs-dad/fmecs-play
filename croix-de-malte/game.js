@@ -123,6 +123,7 @@ function lancerJeuComplet() {
   board.classList.add("show");
 }
 
+// Fonction pour initialiser le profil et lancer le jeu
 async function initialiserProfilEtLancerJeu(session) {
   if (!session) return;
 
@@ -148,6 +149,33 @@ async function initialiserProfilEtLancerJeu(session) {
     }
   } catch (err) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
+  }
+}
+
+// Fonction pour vérifier la session au démarrage et afficher les modales appropriées
+async function checkSessionAndShowModals() {
+  try {
+    const { data: { session }, error } = await supa.auth.getSession();
+
+    if (error) {
+      console.error("Erreur lors de la récupération de la session :", error);
+      if (typeof initialFlow === 'function') initialFlow(null);
+      return;
+    }
+
+    if (session) {
+      localStorage.setItem('supabase.access.token', session.access_token);
+      localStorage.setItem('supabase.refresh.token', session.refresh_token);
+      if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
+      if (typeof initialiserProfilEtLancerJeu === 'function') await initialiserProfilEtLancerJeu(session);
+    } else {
+      if (typeof updateAuthUI === 'function') updateAuthUI(null);
+      if (typeof initialFlow === 'function') initialFlow(null);
+    }
+  } catch (err) {
+    console.error("Erreur dans checkSessionAndShowModals:", err);
+    if (typeof updateAuthUI === 'function') updateAuthUI(null);
+    if (typeof initialFlow === 'function') initialFlow(null);
   }
 }
 
@@ -2034,7 +2062,7 @@ function closeWhySignup() {
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Vérifie la session au démarrage
+  // 1. Vérification de la session et initialisation
   try {
     const { data: { session }, error } = await supa.auth.getSession();
     if (session) {
@@ -2052,7 +2080,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (typeof updateAuthUI === 'function') updateAuthUI(null);
   }
 
-  // Activation des comportements des modales
+  // 2. Activation des comportements des modales
   if (typeof enableModalBehavior === 'function') {
     enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
     enableModalBehavior("authOverlay", ".panel", closeLogin);
@@ -2063,21 +2091,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   }
 
-// ===============================
-//   FIN DE PARTIE
-// ===============================
-
-  const closeEndGameBtn = document.getElementById("closeEndGame");
-  if (closeEndGameBtn) {
-    closeEndGameBtn.addEventListener("click", () => {
-      const endGameOverlay = document.getElementById("endGameOverlay");
-      if (endGameOverlay) endGameOverlay.classList.add("hidden");
+  // 3. Écouteurs pour les boutons de modales
+  const readyBtn = document.getElementById("readyBtn");
+  if (readyBtn) {
+    readyBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      closeReady();
+      if (typeof lancerJeuComplet === 'function') lancerJeuComplet();
     });
   }
 
-// ===============================
-//   CALCUL RÉEL DU CANVAS + GRILLE
-// ===============================
+  const closeHelpBtn = document.getElementById("closeHelpBtn");
+  if (closeHelpBtn) {
+    closeHelpBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      if (typeof closeHelp === 'function') closeHelp();
+    });
+  }
+
+  // 4. Initialisation du canvas et de la grille
   canvas = document.getElementById("gameCanvas");
   if (canvas) {
     ctx = canvas.getContext("2d");
@@ -2107,6 +2139,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   } else {
     console.error("Canvas non trouvé");
+  }
+
+// ===============================
+//   FIN DE PARTIE
+// ===============================
+
+  const closeEndGameBtn = document.getElementById("closeEndGame");
+  if (closeEndGameBtn) {
+    closeEndGameBtn.addEventListener("click", () => {
+      const endGameOverlay = document.getElementById("endGameOverlay");
+      if (endGameOverlay) endGameOverlay.classList.add("hidden");
+    });
   }
 
   // ===============================
@@ -2178,18 +2222,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     pauseBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
       if (!tutorialRunning && typeof togglePause === 'function') togglePause();
-    });
-  }
-
-  // ===============================
-  //   AIDE
-  // ===============================
-
-  const closeHelpBtn = document.getElementById("closeHelpBtn");
-  if (closeHelpBtn) {
-    closeHelpBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof closeHelp === 'function') closeHelp();
     });
   }
 
@@ -2281,33 +2313,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ===============================
-  //   READY BUTTON
-  // ===============================
-
-  const readyBtn = document.getElementById("readyBtn");
-if (readyBtn) {
-  readyBtn.addEventListener("click", () => {
-    if (typeof playClickSound === 'function') playClickSound();
-    const readyModal = document.getElementById("readyModal");
-    if (readyModal) readyModal.classList.add("hidden");
-
-    // Initialiser le jeu
-    if (typeof initGame === 'function') initGame();
-
-    // Animation du plateau
-    const board = document.getElementById("canvasContainer");
-    if (board) {
-      board.classList.remove("show");
-      board.classList.add("slide-in-premium");
-      void board.offsetWidth;
-      board.classList.add("show");
-      setTimeout(() => {
-        if (typeof playStartGameSound === 'function') playStartGameSound();
-      }, 1500);
-    }
-  });
-}
+  
 
 // ===============================
   //   PROFIL
