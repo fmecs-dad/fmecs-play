@@ -87,42 +87,36 @@ function playSound(id) {
 //   AUTH : UTILITAIRES
 // ===============================
 
-// Fonction pour vérifier la session au démarrage
-async function checkSessionOnStartup() {
-  const { data: { session }, error } = await supa.auth.getSession();
+// Fonction pour mettre à jour l'UI d'authentification
+function updateAuthUI(user) {
+  console.log("Updating UI with user:", user);
 
-  if (error) {
-    console.error("Erreur lors de la récupération de la session :", error);
-    updateAuthUI(null);
-    initialFlow(null); // Appeler initialFlow avec user = null
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  const burgerPseudo = document.getElementById("burgerPseudo");
+
+  if (!user) {
+    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
+    if (burgerPseudo) burgerPseudo.textContent = "";
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
     return;
   }
 
-  // Si une session existe, stocker le JWT et mettre à jour l'UI
-  if (session) {
-    localStorage.setItem('supabase.access.token', session.access_token);
-    localStorage.setItem('supabase.refresh.token', session.refresh_token);
-    updateAuthUI(session.user);
-    initialFlow(session.user); // Appeler initialFlow avec l'utilisateur connecté
-  } else {
-    updateAuthUI(null);
-    initialFlow(null); // Appeler initialFlow avec user = null
-  }
+  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+
+  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
+  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 }
-// Appeler cette fonction au démarrage
-checkSessionOnStartup();
 
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   const token = localStorage.getItem('supabase.access.token');
-
   if (!token) {
     console.log("Aucun JWT trouvé.");
     return null;
   }
 
   const { data: { user }, error } = await supa.auth.getUser(token);
-
   if (error) {
     console.error("Erreur lors de la récupération de l'utilisateur :", error);
     return null;
@@ -162,33 +156,145 @@ async function fetchPlayerPseudo(userId) {
   }
 }
 
-// Fonction pour mettre à jour l'UI
-async function updateAuthUI(user = null) {
-  console.log("Updating UI with user:", user);
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  const burgerPseudo = document.getElementById("burgerPseudo");
+// Fonction pour gérer la déconnexion
+async function logout() {
+  console.log("Début de la déconnexion");
 
-  if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
-    if (burgerPseudo) burgerPseudo.textContent = "";
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
+  // Supprimer les tokens du localStorage
+  localStorage.removeItem('supabase.access.token');
+  localStorage.removeItem('supabase.refresh.token');
+
+  // Déconnecter l'utilisateur de Supabase
+  const { error } = await supa.auth.signOut();
+
+  if (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  }
+
+  // Mettre à jour l'UI immédiatement
+  updateAuthUI(null);
+
+  // Recharger la page pour réinitialiser l'état
+  window.location.reload();
+}
+
+// Fonction pour vérifier la session au démarrage
+async function checkSessionOnStartup() {
+  const { data: { session }, error } = await supa.auth.getSession();
+
+  if (error) {
+    console.error("Erreur lors de la récupération de la session :", error);
+    updateAuthUI(null);
+    initialFlow(null);
     return;
   }
 
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+  // Si une session existe, stocker le JWT et mettre à jour l'UI
+  if (session) {
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+    updateAuthUI(session.user);
+    initialFlow(session.user);
+  } else {
+    updateAuthUI(null);
+    initialFlow(null);
+  }
+}
 
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
-  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
+// Fonction pour mettre à jour les informations du profil
+async function updateProfileInfo() {
+  const user = await getSession();
+  const profileBtn = document.getElementById("profileBtn");
+
+  console.log("User in updateProfileInfo:", user);
+
+  if (!user) {
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      console.log("Bouton désactivé");
+      document.getElementById("profilePseudoDisplay").textContent = "";
+      document.getElementById("profilePseudoDisplay").title = "";
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+    }
+    return;
+  } else {
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.removeAttribute('disabled');
+      console.log("Bouton activé, disabled:", profileBtn.disabled);
+    }
+  }
 
   try {
-    const pseudo = await fetchPlayerPseudo(user.id);
-    if (pseudo && burgerPseudo) {
-      burgerPseudo.textContent = pseudo;
-      localStorage.setItem("playerPseudo", pseudo);
+    const { data: player, error } = await supa
+      .from("players")
+      .select("pseudo, avatar_url, created_at")
+      .eq("id", user.id)
+      .single();
+
+    if (error) {
+      throw error;
     }
-  } catch (err) {
-    console.error("Impossible de récupérer le pseudo :", err);
+
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) {
+      pseudoDisplay.textContent = player.pseudo || "";
+      pseudoDisplay.title = player.pseudo || "";
+    }
+
+    const profileAvatar = document.getElementById("profileAvatar");
+    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
+
+    const profileEmail = document.getElementById("profileEmail");
+    if (profileEmail) profileEmail.textContent = user.email || "";
+
+    const profileCreationDate = document.getElementById("profileCreationDate");
+    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+  } catch (error) {
+    console.error("Erreur lors de la récupération des informations du profil :", error);
+  }
+}
+
+// Fonction pour ouvrir la modale de modification du profil
+async function ouvrirProfil() {
+  const user = await getSession();
+  if (!user) return;
+
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  document.getElementById("profilePseudoInput").value = player.pseudo || "";
+  document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
+
+  const modal = document.getElementById("profileModal");
+  modal.classList.remove("hidden");
+}
+
+// Fonction pour configurer le menu profil
+function setupProfileMenu() {
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      console.log("Clic sur profileBtn");
+      profileDropdown.classList.toggle("show");
+      console.log("Menu déroulant affiché:", profileDropdown.classList.contains("show")); // Log de débogage
+      console.log("Style display:", window.getComputedStyle(profileDropdown).display); // Log de débogage
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileDropdown.classList.remove("show");
+      }
+    });
+  } else {
+    console.error("Élément(s) du menu profil manquant(s)");
   }
 }
 
@@ -2238,7 +2344,8 @@ async function ouvrirProfil() {
     .single();
 
  document.getElementById("profilePseudoInput").value = player.pseudo || "";
- document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
+ document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
+
   const modal = document.getElementById("profileModal");
   modal.classList.remove("hidden");
 }
