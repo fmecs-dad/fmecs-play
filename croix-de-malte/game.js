@@ -146,6 +146,12 @@ async function initialiserProfilEtLancerJeu(session) {
     } else {
       localStorage.setItem("playerPseudo", player.pseudo);
       console.log("Profil initialisé avec succès pour :", player.pseudo);
+
+      // Affichage de la modale readyModal pour les utilisateurs existants
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) {
+        readyModal.classList.remove("hidden");
+      }
     }
   } catch (err) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
@@ -1997,16 +2003,8 @@ function initialFlow(user) {
   }
 
   // 4. Nouveau joueur → whySignupModal
-  if (!lastEmail) {
-    console.log("Nouveau joueur, affichage de whySignupModal...");
-    document.getElementById("whySignupModal").classList.remove("hidden");
-    return;
-  }
-
-  // 5. Fallback (ne devrait jamais arriver)
-  console.log("Fallback, affichage de authOverlay...");
-  const auth = document.getElementById("authOverlay");
-  auth.classList.remove("hidden");
+  console.log("Nouveau joueur, affichage de whySignupModal...");
+  document.getElementById("whySignupModal").classList.remove("hidden");
 }
 
 function showReadyModal(reason) {
@@ -2063,7 +2061,20 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Vérification de session et initialisation
-  await checkSessionAndShowModals();
+  try {
+  const { data: { session }, error } = await supa.auth.getSession();
+  if (session) {
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+    await initialiserProfilEtLancerJeu(session);  // Appel original
+    updateAuthUI(session.user);
+  } else {
+    updateAuthUI(null);
+  }
+} catch (err) {
+  console.error("Erreur lors de la vérification de la session:", err);
+  updateAuthUI(null);
+}
 
   // 2. Activation des comportements des modales
   if (typeof enableModalBehavior === 'function') {
@@ -2513,24 +2524,14 @@ if (burgerHelpBtn) {
 });
 
   // --- LOGIN --- Version finale corrigée
-document.getElementById("loginBtn")?.addEventListener("click", async function(e) {
+
+// Écouteur pour le bouton "Se connecter" dans la modale d'authentification
+document.getElementById("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
+  playClickSound();
 
-  // 1. Vérification des éléments DOM
-  const emailInput = document.getElementById("authEmail");
-  const passwordInput = document.getElementById("authPassword");
-  const authOverlay = document.getElementById("authOverlay");
-  const loginBtn = this;
-
-  if (!emailInput || !passwordInput || !authOverlay || !loginBtn) {
-    console.error("Éléments DOM manquants");
-    alert("Erreur d'interface. Veuillez actualiser la page.");
-    return;
-  }
-
-  // 2. Validation des entrées
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
 
   if (!email || !password) {
     alert("Veuillez remplir tous les champs.");
@@ -2542,75 +2543,39 @@ document.getElementById("loginBtn")?.addEventListener("click", async function(e)
     return;
   }
 
-  // 3. Préparation de l'UI
   try {
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Connexion en cours...";
+    const { data, error } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
 
-    // 4. Connexion avec Supabase (version simplifiée)
-    let authData, session;
-    try {
-      const authResult = await supa.auth.signInWithPassword({ email, password });
-      authData = authResult.data;
-      if (authResult.error) throw authResult.error;
-    } catch (authError) {
-      throw new Error(authError.message || "Erreur d'authentification");
+    if (error) {
+      console.error("Erreur de connexion :", error);
+      alert("Erreur : " + error.message);
+      return;
     }
 
-    if (!authData?.user) {
-      throw new Error("Aucun utilisateur retourné");
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+    if (sessionError) {
+      console.error("Erreur lors de la récupération de la session :", sessionError);
+      alert("Erreur lors de la récupération de la session.");
+      return;
     }
 
-    // 5. Récupération de la session
-    try {
-      const sessionResult = await supa.auth.getSession();
-      session = sessionResult.data.session;
-      if (sessionResult.error) throw sessionResult.error;
-    } catch (sessionError) {
-      throw new Error(sessionError.message || "Erreur de session");
-    }
-
-    if (!session) {
-      throw new Error("Session non disponible");
-    }
-
-    // 6. Stockage des tokens
+    // Stockage des tokens
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
-    // 7. Mise à jour de l'UI (version sécurisée)
-    if (typeof updateAuthUI === 'function') {
-      try {
-        await updateAuthUI(authData.user);
-      } catch (uiError) {
-        console.error("Erreur updateAuthUI:", uiError);
-      }
-    }
+    // Fermeture de la modale
+    document.getElementById("authOverlay").classList.add("hidden");
 
-    // 8. Récupération du meilleur score (version sécurisée)
-    if (typeof fetchBestScore === 'function') {
-      try {
-        const bestScoreData = await fetchBestScore(authData.user.id);
-        if (bestScoreData && typeof saveBestScore === 'function') {
-          saveBestScore(bestScoreData);
-        }
-      } catch (scoreError) {
-        console.error("Erreur fetchBestScore:", scoreError);
-      }
-    }
-
-    // 9. Fermeture de la modale
-    authOverlay.classList.add("hidden");
-    alert("Connexion réussie !");
+    // Mise à jour de l'UI et relancement du flux d'initialisation
+    await updateAuthUI(data.user);
+    await initialiserProfilEtLancerJeu(session);  // Appel crucial pour afficher readyModal
 
   } catch (err) {
-    console.error("Erreur complète:", err);
-    alert(`Erreur: ${err.message || "Erreur inconnue"}`);
-
-  } finally {
-    // Restauration de l'UI
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Se connecter";
+    console.error("Erreur inattendue lors de la connexion :", err);
+    alert("Une erreur inattendue est survenue.");
   }
 });
 
