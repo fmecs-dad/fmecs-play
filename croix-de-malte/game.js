@@ -113,32 +113,14 @@ function updateAuthUI(user) {
 // ===============================
 
 function lancerJeuComplet() {
-  // Masquer la modale ready
-  const readyModal = document.getElementById("readyModal");
-  if (readyModal) {
-    readyModal.classList.add("hidden");
-  }
+  document.getElementById("readyModal").classList.add("hidden");
+  initGame();
 
-  // Initialiser le jeu
-  if (typeof initGame === 'function') {
-    initGame();
-  }
-
-  // Animation du plateau
   const board = document.getElementById("canvasContainer");
-  if (board) {
-    board.classList.remove("show");
-    board.classList.add("slide-in-premium");
-    void board.offsetWidth; // Force le reflow
-    board.classList.add("show");
-
-    // Jouer le son après l'animation
-    setTimeout(() => {
-      if (typeof playStartGameSound === 'function') {
-        playStartGameSound();
-      }
-    }, 1500);
-  }
+  board.classList.remove("show");
+  board.classList.add("slide-in-premium");
+  void board.offsetWidth;
+  board.classList.add("show");
 }
 
 // Fonction pour initialiser le profil et lancer le jeu
