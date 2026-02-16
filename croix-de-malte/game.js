@@ -2364,6 +2364,250 @@ if (burgerHelpBtn) {
     });
   }
   
+  // ===============================
+  //   AUTHENTIFICATION (v1)
+  // ===============================
+
+  document.getElementById("closeAuthBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("authOverlay").classList.add("hidden");
+  });
+
+  document.getElementById("closeSignupBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("signupModal").classList.add("hidden");
+    document.getElementById("authOverlay").classList.remove("hidden");
+  });
+
+  // --- SIGNUP ---
+
+  document.getElementById("signupBtn").addEventListener("click", () => {
+    playClickSound();
+    document.getElementById("authOverlay").classList.add("hidden");
+    document.getElementById("signupModal").classList.remove("hidden");
+  });
+
+  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+  playClickSound();
+
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
+  const pseudo = document.getElementById("signupPseudoInput").value.trim();
+
+  if (!email || !password || !pseudo) {
+    alert("Merci de remplir tous les champs.");
+    return;
+  }
+
+  // Vérification pseudo unique
+  const { data: existingPseudo, error: checkPseudoError } = await supa
+    .from("players")
+    .select("id")
+    .eq("pseudo", pseudo)
+    .maybeSingle();
+
+  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
+    console.error("Erreur SELECT pseudo :", checkPseudoError);
+    alert("Erreur interne.");
+    return;
+  }
+
+  if (existingPseudo) {
+    alert("Ce pseudo est déjà pris.");
+    return;
+  }
+
+  // Inscription de l'utilisateur avec le mot de passe saisi
+  const { data: signupData, error: signupError } = await supa.auth.signUp({
+    email,
+    password
+  });
+
+  if (signupError) {
+    console.error("Erreur lors de l'inscription :", signupError);
+    alert("Erreur lors de l'inscription : " + signupError.message);
+    return;
+  }
+
+  // Connexion automatique après l'inscription
+  const { error: signinError } = await supa.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (signinError) {
+    console.error("Erreur lors de la connexion après inscription :", signinError);
+    alert("Erreur lors de la connexion : " + signinError.message);
+    return;
+  }
+
+  // Récupérer la session après la connexion
+  const { data: { session }, error: sessionError } = await supa.auth.getSession();
+
+  if (sessionError || !session) {
+    console.error("Erreur récupération session :", sessionError);
+    alert("Impossible de récupérer la session.");
+    return;
+  }
+
+  const userId = session.user.id;
+  console.log("ID de l'utilisateur :", userId);
+
+  // Vérifier si le joueur existe déjà dans la table players
+  const { data: existingPlayer, error: checkPlayerError } = await supa
+    .from("players")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
+    console.error("Erreur SELECT player :", checkPlayerError);
+    alert("Erreur interne.");
+    return;
+  }
+
+  // Insertion dans players
+  if (existingPlayer) {
+    console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+
+    const { error: updateError } = await supa
+      .from("players")
+      .update({
+        pseudo: pseudo
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Erreur UPDATE player :", updateError);
+      alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
+    } else {
+      console.log("Pseudo mis à jour avec succès dans la table players.");
+    }
+  } else {
+    console.log("Insertion d'un nouveau joueur dans la table players...");
+    const { error: insertError } = await supa
+      .from("players")
+      .insert({
+        id: userId,
+        pseudo: pseudo,
+        created_at: new Date().toISOString(),
+        premium: false
+      });
+
+    if (insertError) {
+      console.error("Erreur INSERT player :", insertError);
+      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
+    } else {
+      console.log("Joueur inséré avec succès dans la table players.");
+    }
+  }
+
+  // Mise à jour UI
+  updateAuthUI(session.user);
+
+  // Fermeture modals
+  document.getElementById("signupModal").classList.add("hidden");
+
+  playSound("successSound");
+  alert("Compte créé ! Bienvenue dans le jeu.");
+});
+
+  // --- LOGIN ---
+
+  document.getElementById("loginBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    playClickSound();
+
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value.trim();
+
+    if (!email || !password) {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      alert("Adresse email invalide.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supa.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        console.error("Erreur de connexion :", error);
+        alert("Erreur : " + error.message);
+        return;
+      }
+
+      const { data: { session }, error: sessionError } = await supa.auth.getSession();
+      if (sessionError) {
+        console.error("Erreur lors de la récupération de la session :", sessionError);
+        alert("Erreur lors de la récupération de la session.");
+        return;
+      }
+
+      const userId = session.user.id;
+
+      // Récupérer le meilleur score depuis Supabase
+      const bestScoreData = await fetchBestScore(userId);
+      if (bestScoreData) {
+        saveBestScore(bestScoreData);
+        console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+      }
+
+      document.getElementById("authOverlay").classList.add("hidden");
+
+      await updateAuthUI(data.user).catch(err => {
+        console.error("Erreur dans updateAuthUI :", err);
+      });
+
+      if (data.user) {
+        const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
+          console.error("Erreur lors de la récupération du pseudo :", err);
+          return null;
+        });
+        if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+      }
+
+      // Mettre à jour l'affichage du meilleur score
+      updateBestScoreTop();
+    } catch (err) {
+      console.error("Erreur inattendue lors de la connexion :", err);
+      alert("Une erreur inattendue est survenue.");
+    }
+  });
+  // Fonction pour récupérer le meilleur score depuis Supabase
+  async function fetchBestScore(userId) {
+  try {
+    const { data, error } = await supa
+      .from("scores")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du meilleur score :", error);
+      return null;
+    }
+
+    if (data) {
+      data.duration = Math.floor(data.duration_ms / 1000);
+      delete data.duration_ms;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    return null;
+  }
+}
+
 
   // ===============================
   //   WHY SIGNUP
