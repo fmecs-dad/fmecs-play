@@ -2522,18 +2522,12 @@ document.getElementById("signupConfirmBtn").addEventListener("click", async () =
 
   // Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
+
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
 
-document.getElementById("signupCloseBtn").addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("signupModal").classList.add("hidden");
-  document.getElementById("authOverlay").classList.remove("hidden");
-});
-
 // --- LOGIN ---
-
 document.getElementById("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
   playClickSound();
@@ -2576,18 +2570,25 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
-    // Fermer la fenêtre de connexion
-    document.getElementById("authOverlay").classList.add("hidden");
-
-    // Mettre à jour l'UI
-    await updateAuthUI(session.user);
-    await updateProfileInfo();
-
     // Récupérer le meilleur score depuis Supabase
     const bestScoreData = await fetchBestScore(session.user.id);
     if (bestScoreData) {
       saveBestScore(bestScoreData);
       console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+    }
+
+    document.getElementById("authOverlay").classList.add("hidden");
+
+    await updateAuthUI(session.user).catch(err => {
+      console.error("Erreur dans updateAuthUI :", err);
+    });
+
+    if (session.user) {
+      const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
+        console.error("Erreur lors de la récupération du pseudo :", err);
+        return null;
+      });
+      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
     }
 
     // Mettre à jour l'affichage du meilleur score
