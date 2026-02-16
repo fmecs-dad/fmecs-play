@@ -2228,47 +2228,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 // ===============================
   //   AUTH BURGER (v1)
   // ===============================
-
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-
-  async function logout() {
-    console.log("Début de la déconnexion");
-
-    // Supprimer les tokens du localStorage
-    localStorage.removeItem('supabase.access.token');
-    localStorage.removeItem('supabase.refresh.token');
-
-    // Déconnecter l'utilisateur de Supabase
-    const { error } = await supa.auth.signOut();
-
-    if (error) {
-      console.error("Erreur lors de la déconnexion :", error);
-    }
-
-    // Mettre à jour l'UI immédiatement
-    updateAuthUI(null);
-
-    // Recharger la page pour réinitialiser l'état
-    window.location.reload();
-  }
-
   if (burgerAuthBtn) {
     burgerAuthBtn.addEventListener("click", async () => {
       console.log("Clic sur le bouton d'authentification");
-      playClickSound();
-
+      if (typeof playClickSound === 'function') playClickSound();
       const user = await getSession();
-
       if (!user) {
         console.log("Ouverture de la fenêtre de connexion");
-        const auth = document.getElementById("authOverlay");
-        auth.classList.remove("hidden");
-        pauseGame();
+        const authOverlay = document.getElementById("authOverlay");
+        if (authOverlay) authOverlay.classList.remove("hidden");
+        if (typeof pauseGame === 'function') pauseGame();
         return;
       }
-
       console.log("Début de la déconnexion");
-      await logout();
+      if (typeof logout === 'function') await logout();
     });
   }
 
