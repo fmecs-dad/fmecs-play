@@ -2238,7 +2238,7 @@ async function ouvrirProfil() {
     .single();
 
  document.getElementById("profilePseudoInput").value = player.pseudo || "";
- document.getElementById("profileAvatarPreview").src = player.avatar_url || "avatarDefault.png";
+ document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
   const modal = document.getElementById("profileModal");
   modal.classList.remove("hidden");
 }
