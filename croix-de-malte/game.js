@@ -2274,11 +2274,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   } 
 
-
 // Écouteurs existants
 document.getElementById("profileCloseBtn").addEventListener("click", () => {
   document.getElementById("profileModal").classList.add("hidden");
 });
+
 document.getElementById("profileSaveBtn").addEventListener("click", async () => {
   const user = await getSession();
   if (!user) return;
@@ -2286,12 +2286,14 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   const pseudo = document.getElementById("profilePseudoInput").value.trim();
   const avatarFile = document.getElementById("profileAvatarInput").files[0];
 
- let avatarUrl = null;
+  let avatarUrl = null;
 
   if (avatarFile) {
     const path = `avatars/${user.id}.png`;
- // Upload de l'avatar
+
+    // Upload de l'avatar
     await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+
     // Récupère l'URL publique de manière asynchrone
     const { data } = await supa.storage.from("avatars").getPublicUrl(path);
     avatarUrl = data.publicUrl;
@@ -2315,27 +2317,22 @@ document.getElementById("profileSaveBtn").addEventListener("click", async () => 
   document.getElementById("profileModal").classList.add("hidden");
 });
 
-// Vérifiez que tous les éléments existent avant d'ajouter des écouteurs
-if (document.getElementById("profileBtn")) {
-  document.getElementById("profileBtn").addEventListener("click", (e) => {
-    e.stopPropagation();
-    const dropdown = document.getElementById("profileDropdown");
-    if (dropdown) dropdown.classList.toggle("show");
-  });
-}
+// Nouveaux écouteurs pour le menu profil
+document.getElementById("profileBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+});
 
-if (document.getElementById("togglePasswordVisibility")) {
-  document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
-    const passwordSpan = document.getElementById("profilePassword");
-    if (passwordSpan) {
-      if (passwordSpan.textContent === "••••••••") {
-        passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
-      } else {
-        passwordSpan.textContent = "••••••••";
-      }
-    }
-  });
-}
+document.addEventListener("click", (e) => {
+  const profileDropdown = document.getElementById("profileDropdown");
+  const profileBtn = document.getElementById("profileBtn");
+
+  if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+    profileDropdown.classList.remove("show");
+  }
+});
+
 document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
   const passwordSpan = document.getElementById("profilePassword");
   if (passwordSpan.textContent === "••••••••") {
@@ -2352,7 +2349,7 @@ async function updateProfileInfo() {
   if (!user) {
     profileBtn.disabled = true;
     document.getElementById("profilePseudoDisplay").textContent = "";
-    document.getElementById("profileAvatar").src = "images/avatarDefault.png";
+    document.getElementById("profileAvatar").src = "default.png";
     return;
   } else {
     profileBtn.disabled = false;
@@ -2370,7 +2367,7 @@ async function updateProfileInfo() {
   }
 
   document.getElementById("profilePseudoDisplay").textContent = player.pseudo || "";
-  document.getElementById("profileAvatar").src = player.avatar_url || "images/avatarDefault.png";
+  document.getElementById("profileAvatar").src = player.avatar_url || "default.png";
   document.getElementById("profileEmail").textContent = user.email || "";
   document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
 }
