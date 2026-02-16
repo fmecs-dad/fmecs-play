@@ -256,7 +256,124 @@ async function updateProfileInfo() {
   }
 }
 
-// Fonction pour ouvrir la modale de modification du profil
+// ===============================
+//   FONCTIONS DE BASE DU JEU
+// ===============================
+function resetGameState() {
+  validatedSegments = [];
+  score = 0;
+  timerStart = null;
+  timerRunning = false;
+  gameOver = false;
+  jokersUsed = 0;
+  undosUsed = 0;
+  selectedStart = null;
+
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  if (ctx && canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (typeof drawGrid === 'function') drawGrid();
+  }
+}
+
+function initGame() {
+
+  const undoBtn = document.getElementById("undoBtn");
+  if (undoBtn) {
+    undoBtn.disabled = false;
+    undoBtn.classList.remove("disabled");
+  }
+
+  //const restored = false;
+  const restored = restoreGameState();
+
+  if (!restored || gameOver) {
+    resetGameState();
+    initMaltaCross();
+  }
+
+  redrawEverything();
+
+  updateCounters();
+  document.getElementById("undoCount").textContent = undoCount;
+  updateSoundButton();
+  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
+
+  gameOver = false;
+  paused = false;
+
+  updateBestScoreTop();
+
+  //if (!paused && !gameOver) {
+  //  startTimer();
+ // }
+
+}
+
+function restoreGameState() {
+
+  const data = loadGameState();
+  if (!data) return false;
+
+  // Vérification stricte
+  if (!Array.isArray(data.activePoints) ||
+      !Array.isArray(data.permanentPoints) ||
+      !Array.isArray(data.validatedSegments) ||
+      data.activePoints.length === 0 ||
+      data.permanentPoints.length === 0) {
+    return false;
+  }
+
+  // Restaurer les Sets
+  activePoints = new Set(data.activePoints);
+  permanentPoints = new Set(data.permanentPoints);
+  usedEdges = new Set(data.usedEdges || []);
+
+  // Restaurer les tableaux simples
+  validatedSegments = [...data.validatedSegments];
+
+  // Restaurer les variables simples
+  score = data.score ?? 0;
+  jokersAvailable = data.jokersAvailable ?? 0;
+  jokersTotal = data.jokersTotal ?? 0;
+  undoCount = data.undoCount ?? 0;
+  timerSeconds = data.timerSeconds ?? 0;
+
+  gameOver = data.gameOver ?? false;
+  paused = data.paused ?? false;
+
+  // Restaurer l'historique interne
+  historyStack = data.historyStack ? [...data.historyStack] : [];
+
+  // Restaurer l'historique visuel
+  const historyList = document.getElementById("historyList");
+  historyList.innerHTML = "";
+  historyStack.forEach(entry => {
+    appendHistoryEntry(entry.points, entry.activeCount);
+  });
+
+  // Restaurer l'état du son
+  soundEnabled = data.soundEnabled ?? true;
+  updateSoundButton();
+
+  return true;
+}
+
+// Sauvegarde automatique à chaque coup
+function autoSave() {
+  saveGameState();
+}
+
+// Sauvegarde à la fermeture
+window.addEventListener("beforeunload", saveGameState);
+
+// ===============================
+//   FONCTIONS DE PROFIL
+// ===============================
 async function ouvrirProfil() {
   const user = await getSession();
   if (!user) return;
@@ -267,34 +384,65 @@ async function ouvrirProfil() {
     .eq("id", user.id)
     .single();
 
-  document.getElementById("profilePseudoInput").value = player.pseudo || "";
-  document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
+  if (player) {
+    document.getElementById("profilePseudoInput").value = player.pseudo || "";
+    document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
+  } else {
+    document.getElementById("profilePseudoInput").value = "";
+    document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
+  }
 
   const modal = document.getElementById("profileModal");
-  modal.classList.remove("hidden");
+  if (modal) modal.classList.remove("hidden");
 }
 
-// Fonction pour configurer le menu profil
-function setupProfileMenu() {
+async function updateProfileInfo() {
+  const user = await getSession();
   const profileBtn = document.getElementById("profileBtn");
-  const profileDropdown = document.getElementById("profileDropdown");
 
-  if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      console.log("Clic sur profileBtn");
-      profileDropdown.classList.toggle("show");
-      console.log("Menu déroulant affiché:", profileDropdown.classList.contains("show")); // Log de débogage
-      console.log("Style display:", window.getComputedStyle(profileDropdown).display); // Log de débogage
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-        profileDropdown.classList.remove("show");
+  if (!user) {
+    if (profileBtn) {
+      profileBtn.disabled = true;
+      const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+      if (pseudoDisplay) {
+        pseudoDisplay.textContent = "";
+        pseudoDisplay.title = "";
       }
-    });
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+    }
+    return;
   } else {
-    console.error("Élément(s) du menu profil manquant(s)");
+    if (profileBtn) {
+      profileBtn.disabled = false;
+    }
+  }
+
+  try {
+    const { data: player, error } = await supa
+      .from("players")
+      .select("pseudo, avatar_url, created_at")
+      .eq("id", user.id)
+      .single();
+
+    if (error) throw error;
+
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) {
+      pseudoDisplay.textContent = player.pseudo || "";
+      pseudoDisplay.title = player.pseudo || "";
+    }
+
+    const profileAvatar = document.getElementById("profileAvatar");
+    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
+
+    const profileEmail = document.getElementById("profileEmail");
+    if (profileEmail) profileEmail.textContent = user.email || "";
+
+    const profileCreationDate = document.getElementById("profileCreationDate");
+    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+  } catch (error) {
+    console.error("Erreur lors de la récupération des informations du profil :", error);
   }
 }
 
@@ -836,62 +984,6 @@ function loadGameState() {
   }
 }
 
-function restoreGameState() {
-
-  const data = loadGameState();
-  if (!data) return false;
-
-  // Vérification stricte
-  if (!Array.isArray(data.activePoints) ||
-      !Array.isArray(data.permanentPoints) ||
-      !Array.isArray(data.validatedSegments) ||
-      data.activePoints.length === 0 ||
-      data.permanentPoints.length === 0) {
-    return false;
-  }
-
-  // Restaurer les Sets
-  activePoints = new Set(data.activePoints);
-  permanentPoints = new Set(data.permanentPoints);
-  usedEdges = new Set(data.usedEdges || []);
-
-  // Restaurer les tableaux simples
-  validatedSegments = [...data.validatedSegments];
-
-  // Restaurer les variables simples
-  score = data.score ?? 0;
-  jokersAvailable = data.jokersAvailable ?? 0;
-  jokersTotal = data.jokersTotal ?? 0;
-  undoCount = data.undoCount ?? 0;
-  timerSeconds = data.timerSeconds ?? 0;
-
-  gameOver = data.gameOver ?? false;
-  paused = data.paused ?? false;
-
-  // Restaurer l'historique interne
-  historyStack = data.historyStack ? [...data.historyStack] : [];
-
-  // Restaurer l'historique visuel
-  const historyList = document.getElementById("historyList");
-  historyList.innerHTML = "";
-  historyStack.forEach(entry => {
-    appendHistoryEntry(entry.points, entry.activeCount);
-  });
-
-  // Restaurer l'état du son
-  soundEnabled = data.soundEnabled ?? true;
-  updateSoundButton();
-
-  return true;
-}
-
-// Sauvegarde automatique à chaque coup
-function autoSave() {
-  saveGameState();
-}
-
-// Sauvegarde à la fermeture
-window.addEventListener("beforeunload", saveGameState);
 
 
 // ===============================
@@ -1639,37 +1731,6 @@ function startNewGame() {
   startTimer();
 }
 
-function resetGameState() {
-
-  selectedStart = null;
-  score = 0;
-  paused = false;
-  gameOver = false;
-
-  activePoints = new Set();
-  permanentPoints = new Set();
-  usedEdges = new Set();
-  validatedSegments = [];
-
-  jokersAvailable = 0;
-  jokersTotal = 0;
-
-  undoCount = 0;
-  document.getElementById("undoCount").textContent = "0";
-
-  const stepBtn = document.getElementById("burgerStepBtn");
-  stepBtn.disabled = false;
-  stepBtn.classList.remove("disabled");
-
-
-  resetTimer();
-
-  const historyList = document.getElementById("historyList");
-  historyList.innerHTML = "";
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
 // ===============================
 //   TUTORIEL : CLIGNOTEMENT
 // ===============================
@@ -1854,43 +1915,6 @@ function playTutorialStep() {
     });
 }
 
-// ===============================
-//   INITIALISATION DU JEU (GLOBAL !)
-// ===============================
-
-function initGame() {
-
-  const undoBtn = document.getElementById("undoBtn");
-  if (undoBtn) {
-    undoBtn.disabled = false;
-    undoBtn.classList.remove("disabled");
-  }
-
-  //const restored = false;
-  const restored = restoreGameState();
-
-  if (!restored || gameOver) {
-    resetGameState();
-    initMaltaCross();
-  }
-
-  redrawEverything();
-
-  updateCounters();
-  document.getElementById("undoCount").textContent = undoCount;
-  updateSoundButton();
-  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
-
-  gameOver = false;
-  paused = false;
-
-  updateBestScoreTop();
-
-  //if (!paused && !gameOver) {
-  //  startTimer();
- // }
-
-}
 
 // ===============================
 //   FIRST LAUNCH FLOW
