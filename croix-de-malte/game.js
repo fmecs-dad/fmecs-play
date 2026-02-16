@@ -2089,50 +2089,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
   enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
+// ===============================
+//   FIN DE PARTIE
+// ===============================
 
-
-  // Références DOM essentielles
-  canvas = document.getElementById("gameCanvas");
-  ctx = canvas.getContext("2d");
-
-  // ===============================
-  //   CALCUL RÉEL DU CANVAS + GRILLE
-  // ===============================
-
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
-  spacing = canvas.width / (size + 1);
-  offset = spacing;
-
-  // ===============================
-  //   POSITIONNEMENT DES REPÈRES
-  // ===============================
-
-  const topLabels = document.querySelectorAll('#topLabels span');
-  const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  if (topLabels.length && leftLabels.length) {
-    topLabels.forEach(span => {
-      const pos = Number(span.textContent);
-      if (!Number.isFinite(pos)) return;
-      span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-    });
-
-    leftLabels.forEach(span => {
-      const pos = Number(span.textContent);
-      if (!Number.isFinite(pos)) return;
-      span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-    });
+  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
+  if (closeEndGameButton) {
+    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
   }
 
-  // ===============================
-  //   FIN DE PARTIE
-  // ===============================
+  // Références DOM essentielles
+  const canvas = document.getElementById("gameCanvas");
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
 
-  document.getElementById("closeEndGame").addEventListener("click", () => {
-    document.getElementById("endGameOverlay").classList.add("hidden");
-  });
+// ===============================
+//   CALCUL RÉEL DU CANVAS + GRILLE
+// ===============================
+  canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    if (typeof size !== 'undefined') {
+      const spacing = canvas.width / (size + 1);
+      const offset = spacing;
+
+// ===============================
+//   POSITIONNEMENT DES REPÈRES
+// ===============================
+      const topLabels = document.querySelectorAll('#topLabels span');
+      const leftLabels = document.querySelectorAll('#leftLabels span');
+
+      if (topLabels.length && leftLabels.length) {
+        topLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+
+        leftLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+      }
+    }
+  }
 
   // ===============================
   //   CLIC SUR LA GRILLE
