@@ -2312,22 +2312,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   //   READY BUTTON
   // ===============================
 
-  document.getElementById("readyBtn").addEventListener("click", () => {
+  const readyBtn = document.getElementById("readyBtn");
+  if (readyBtn) {
+    readyBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) readyModal.classList.add("hidden");
+      if (typeof initGame === 'function') initGame();
+      const board = document.getElementById("canvasContainer");
+      if (board) {
+        board.classList.remove("show");
+        board.classList.add("slide-in-premium");
+        void board.offsetWidth;
+        board.classList.add("show");
+        setTimeout(() => {
+          if (typeof playStartGameSound === 'function') playStartGameSound();
+        }, 1500);
+      }
+    });
+  } 
 
-    playClickSound()
-
-    document.getElementById("readyModal").classList.add("hidden");
-
-    initGame();
-
-    const board = document.getElementById("canvasContainer");
-    board.classList.remove("show");
-    board.classList.add("slide-in-premium");
-    void board.offsetWidth;
-    board.classList.add("show");
-
-    setTimeout(() => playStartGameSound(), 1500);
-  });
 
   // ===============================
   //   PROFIL
