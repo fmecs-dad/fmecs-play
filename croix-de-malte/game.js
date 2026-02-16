@@ -2512,77 +2512,139 @@ if (burgerHelpBtn) {
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
 
-  // --- LOGIN ---
+  // --- LOGIN --- (version corrigée)
+document.getElementById("loginBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  if (typeof playClickSound === 'function') playClickSound();
 
-  document.getElementById("loginBtn").addEventListener("click", async (e) => {
-    e.preventDefault();
-    playClickSound();
+  const email = document.getElementById("authEmail")?.value.trim();
+  const password = document.getElementById("authPassword")?.value.trim();
 
-    const email = document.getElementById("authEmail").value.trim();
-    const password = document.getElementById("authPassword").value.trim();
+  if (!email || !password) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
 
-    if (!email || !password) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
+  if (!email.includes("@") || !email.includes(".")) {
+    alert("Adresse email invalide.");
+    return;
+  }
 
-    if (!email.includes("@") || !email.includes(".")) {
-      alert("Adresse email invalide.");
-      return;
-    }
-
-    try {
-      const { data, error } = await supa.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) {
-        console.error("Erreur de connexion :", error);
-        alert("Erreur : " + error.message);
-        return;
-      }
-
-      const { data: { session }, error: sessionError } = await supa.auth.getSession();
-      if (sessionError) {
-        console.error("Erreur lors de la récupération de la session :", sessionError);
-        alert("Erreur lors de la récupération de la session.");
-        return;
-      }
-
-      const userId = session.user.id;
-
-      // Récupérer le meilleur score depuis Supabase
-      const bestScoreData = await fetchBestScore(userId);
-      if (bestScoreData) {
-        saveBestScore(bestScoreData);
-        console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
-      }
-
-      document.getElementById("authOverlay").classList.add("hidden");
-
-      await updateAuthUI(data.user).catch(err => {
-        console.error("Erreur dans updateAuthUI :", err);
-      });
-
-      if (data.user) {
-        const pseudo = await fetchPlayerPseudo(data.user.id).catch(err => {
-          console.error("Erreur lors de la récupération du pseudo :", err);
-          return null;
-        });
-        if (pseudo) localStorage.setItem("playerPseudo", pseudo);
-      }
-
-      // Mettre à jour l'affichage du meilleur score
-      updateBestScoreTop();
-    } catch (err) {
-      console.error("Erreur inattendue lors de la connexion :", err);
-      alert("Une erreur inattendue est survenue.");
-    }
-  });
-  // Fonction pour récupérer le meilleur score depuis Supabase
-  async function fetchBestScore(userId) {
   try {
+    // Affichage d'un indicateur de chargement
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) {
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Connexion en cours...";
+    }
+
+    // 1. Connexion avec Supabase
+    const { data: authData, error: authError } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (authError) {
+      throw new Error(authError.message || "Erreur d'authentification");
+    }
+
+    if (!authData?.user) {
+      throw new Error("Aucun utilisateur retourné après connexion");
+    }
+
+    // 2. Récupération de la session
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+    if (sessionError) {
+      throw new Error(sessionError.message || "Erreur de récupération de session");
+    }
+
+    if (!session) {
+      throw new Error("Aucune session retournée");
+    }
+
+    // 3. Stockage des tokens
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+
+    // 4. Récupération du meilleur score
+    const userId = session.user.id;
+    const bestScoreData = await fetchBestScore(userId).catch(err => {
+      console.error("Erreur lors de la récupération du meilleur score:", err);
+      return null;
+    });
+
+    if (bestScoreData) {
+      if (typeof saveBestScore === 'function') {
+        saveBestScore(bestScoreData);
+        console.log("Meilleur score récupéré et sauvegardé:", bestScoreData);
+      }
+    }
+
+    // 5. Fermeture de la modale
+    const authOverlay = document.getElementById("authOverlay");
+    if (authOverlay) {
+      authOverlay.classList.add("hidden");
+    }
+
+    // 6. Mise à jour de l'UI
+    if (typeof updateAuthUI === 'function') {
+      await updateAuthUI(authData.user).catch(err => {
+        console.error("Erreur dans updateAuthUI:", err);
+      });
+    }
+
+    // 7. Récupération du pseudo
+    if (authData.user) {
+      const pseudo = await fetchPlayerPseudo(authData.user.id).catch(err => {
+        console.error("Erreur lors de la récupération du pseudo:", err);
+        return null;
+      });
+      if (pseudo) {
+        localStorage.setItem("playerPseudo", pseudo);
+      }
+    }
+
+    // 8. Mise à jour du meilleur score
+    if (typeof updateBestScoreTop === 'function') {
+      updateBestScoreTop();
+    }
+
+    alert("Connexion réussie !");
+
+  } catch (err) {
+    console.error("Erreur lors de la connexion:", err);
+
+    // Restauration de l'état du bouton
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Se connecter";
+    }
+
+    alert("Une erreur est survenue: " + (err.message || "Erreur inconnue"));
+  } finally {
+    // Réactivation du bouton dans tous les cas
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) {
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Se connecter";
+    }
+  }
+});
+
+// Fonction pour récupérer le meilleur score depuis Supabase (version corrigée)
+async function fetchBestScore(userId) {
+  try {
+    // Vérification du token
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.error("Aucun token trouvé pour fetchBestScore");
+      return null;
+    }
+
+    // Configuration de la session
+    supa.auth.setSession(token);
+
     const { data, error } = await supa
       .from("scores")
       .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
@@ -2592,22 +2654,59 @@ if (burgerHelpBtn) {
       .single();
 
     if (error) {
-      console.error("Erreur lors de la récupération du meilleur score :", error);
+      console.error("Erreur Supabase lors de la récupération du score:", error);
       return null;
     }
 
-    if (data) {
-      data.duration = Math.floor(data.duration_ms / 1000);
-      delete data.duration_ms;
+    if (!data) {
+      console.log("Aucun score trouvé pour cet utilisateur");
+      return null;
     }
 
-    return data;
+    // Transformation des données
+    const result = {
+      ...data,
+      duration: Math.floor(data.duration_ms / 1000)
+    };
+    delete result.duration_ms;
+
+    return result;
+
   } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    console.error("Erreur inattendue dans fetchBestScore:", err);
     return null;
   }
 }
 
+// Fonction pour récupérer le pseudo (version corrigée)
+async function fetchPlayerPseudo(userId) {
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.error("Aucun token trouvé pour fetchPlayerPseudo");
+      return null;
+    }
+
+    supa.auth.setSession(token);
+
+    const { data, error } = await supa
+      .from("players")
+      .select("pseudo")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du pseudo:", error);
+      return null;
+    }
+
+    return data?.pseudo || null;
+
+  } catch (err) {
+    console.error("Erreur inattendue dans fetchPlayerPseudo:", err);
+    return null;
+  }
+}
 
   // ===============================
   //   WHY SIGNUP
