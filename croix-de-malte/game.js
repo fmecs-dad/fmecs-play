@@ -2422,7 +2422,7 @@ async function updateProfileInfo() {
   if (!user) {
     profileBtn.disabled = true;
     document.getElementById("profilePseudoDisplay").textContent = "";
-    document.getElementById("profileAvatar").src = "default.png";
+    document.getElementById("profileAvatar").src = "images/avatarDefault.png";
     return;
   } else {
     profileBtn.disabled = false;
@@ -2440,7 +2440,7 @@ async function updateProfileInfo() {
   }
 
   document.getElementById("profilePseudoDisplay").textContent = player.pseudo || "";
-  document.getElementById("profileAvatar").src = player.avatar_url || "default.png";
+  document.getElementById("profileAvatar").src = player.avatar_url || "images/avatarDefault.png";
   document.getElementById("profileEmail").textContent = user.email || "";
   document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
 }
