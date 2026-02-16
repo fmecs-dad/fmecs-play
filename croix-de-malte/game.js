@@ -2170,12 +2170,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   //   AIDE
   // ===============================
 
-  const burgerBtn = document.getElementById("burgerBtn");
-  if (burgerBtn) {
-    burgerBtn.addEventListener("click", () => {
+  const closeHelpBtn = document.getElementById("closeHelpBtn");
+  if (closeHelpBtn) {
+    closeHelpBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      const ov = document.getElementById("burgerOverlay");
-      if (ov) ov.classList.toggle("show");
+      if (typeof closeHelp === 'function') closeHelp();
     });
   }
 
