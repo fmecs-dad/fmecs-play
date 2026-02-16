@@ -310,25 +310,38 @@ async function fetchPlayerPseudo(userId) {
 }
 
 // Fonction pour gérer la déconnexion
+// Fonction de déconnexion
 async function logout() {
-  console.log("Début de la déconnexion");
-
-  // Supprimer les tokens du localStorage
-  localStorage.removeItem('supabase.access.token');
-  localStorage.removeItem('supabase.refresh.token');
-
-  // Déconnecter l'utilisateur de Supabase
   const { error } = await supa.auth.signOut();
 
   if (error) {
     console.error("Erreur lors de la déconnexion :", error);
+  } else {
+    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
+    updateAuthUI(null);
+    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
   }
+}
 
-  // Mettre à jour l'UI immédiatement
-  updateAuthUI(null);
+if (burgerAuthBtn) {
+  burgerAuthBtn.addEventListener("click", async () => {
+    playClickSound();
 
-  // Recharger la page pour réinitialiser l'état
-  window.location.reload();
+    const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
+
+    // OUVERTURE DE LA FENÊTRE DE CONNEXION
+    if (!isConnected) {
+      const auth = document.getElementById("authOverlay");
+      auth.classList.remove("hidden");
+      pauseGame();
+      return;
+    }
+
+    // DÉCONNEXION
+    await logout();
+  });
 }
 
 // Fonction pour vérifier la session au démarrage
