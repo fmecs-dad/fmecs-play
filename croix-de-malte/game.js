@@ -185,7 +185,7 @@ async function checkSessionOnStartup() {
   if (error) {
     console.error("Erreur lors de la récupération de la session :", error);
     updateAuthUI(null);
-    initialFlow(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
     return;
   }
 
@@ -194,10 +194,10 @@ async function checkSessionOnStartup() {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
     updateAuthUI(session.user);
-    initialFlow(session.user);
+    initialFlow(session.user); // Appeler initialFlow avec l'utilisateur connecté
   } else {
     updateAuthUI(null);
-    initialFlow(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
   }
 }
 
@@ -368,8 +368,23 @@ let loadedScores = [];
 const HELP_SEEN_KEY = "helpSeen";
 
 async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersUsed) {
+  const token = localStorage.getItem('supabase.access.token');
+  if (!token) {
+    console.error("Aucun JWT trouvé. L'utilisateur n'est pas connecté.");
+    return;
+  }
+
+  supa.auth.setSession(token);
+
   try {
-    // Récupérer les scores existants du joueur connecté
+    // Vérifiez que l'utilisateur est bien celui attendu
+    const { data: { user }, error } = await supa.auth.getUser(token);
+    if (error || !user || user.id !== userId) {
+      console.error("Session invalide ou utilisateur non autorisé.");
+      return;
+    }
+
+    // Logique pour enregistrer le score
     const { data: existingScores, error: fetchError } = await supa
       .from("scores")
       .select("id, score")
@@ -382,14 +397,8 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
       return;
     }
 
-    // Vérifier si le joueur a déjà 10 scores
     if (existingScores.length >= 10) {
-	console.log(">= à 10 score :", existingScores.length);
-
-      // Trouver le score le plus faible parmi les 10 meilleurs du joueur
       const worstScore = existingScores[existingScores.length - 1];
-
-      // Supprimer le score le plus faible du joueur
       const { error: deleteError } = await supa
         .from("scores")
         .delete()
@@ -401,32 +410,14 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
       }
     }
 
-    // Récupérer le pseudo du joueur depuis la table players
-    const { data: playerData, error: playerError } = await supa
-      .from("players")
-      .select("pseudo")
-      .eq("id", userId)
-      .single();
-
-    if (playerError) {
-      console.error("Erreur lors de la récupération du pseudo du joueur :", playerError);
-      return;
-    }
-
-    const pseudo = playerData.pseudo;
-
-    // Créer un message unique basé sur les données du score
     const message = `${userId}-${score}-${durationMs}-${undoCount}-${jokersUsed}-${Date.now()}`;
-
-    // Générer le hash
     const hash = await sha256(message);
 
-    // Ajouter le nouveau score avec le pseudo
     const { error: insertError } = await supa
       .from("scores")
       .insert({
         player_id: userId,
-        pseudo: pseudo,  // Ajouter le pseudo
+        pseudo: await fetchPlayerPseudo(userId),
         score: score,
         duration_ms: durationMs,
         undo_count: undoCount,
@@ -437,6 +428,8 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
 
     if (insertError) {
       console.error("Erreur lors de l'insertion du score :", insertError);
+    } else {
+      console.log("Score enregistré avec succès !");
     }
   } catch (err) {
     console.error("Erreur inattendue lors de l'enregistrement du score :", err);
@@ -1646,8 +1639,6 @@ function startNewGame() {
   startTimer();
 }
 
-
-
 function resetGameState() {
 
   selectedStart = null;
@@ -2276,6 +2267,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Écouteurs existants
 document.getElementById("profileCloseBtn").addEventListener("click", () => {
+  playClickSound();
   document.getElementById("profileModal").classList.add("hidden");
 });
 
