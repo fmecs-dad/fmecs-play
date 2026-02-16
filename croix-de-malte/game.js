@@ -2132,6 +2132,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (typeof initialFlow === 'function') initialFlow(null);
   }
 
+// ===============================
+//   FIN DE PARTIE
+// ===============================
+  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
+  if (closeEndGameButton) {
+    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
+  }
+
   // Activation des comportements des modales
   enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
   enableModalBehavior("authOverlay", ".panel", closeLogin);
@@ -2177,13 +2185,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-// ===============================
-//   FIN DE PARTIE
-// ===============================
-  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
-  if (closeEndGameButton) {
-    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
-  }
 
   // ===============================
   //   CLIC SUR LA GRILLE
