@@ -2326,7 +2326,7 @@ if (burgerHelpBtn) {
     if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
     if (typeof pauseGame === 'function') pauseGame();
   });
-}}
+}
 
   const burgerSoundBtn = document.getElementById("burgerSoundBtn");
   if (burgerSoundBtn) {
