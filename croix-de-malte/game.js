@@ -1964,10 +1964,6 @@ function handleFirstLaunchFlow(userFromEvent) {
 //   INITIAL FLOW (VERSION FINALE)
 // ===============================
 
-// ===============================
-//   INITIAL FLOW (VERSION FINALE)
-// ===============================
-
 let gameStarted = false; // global
 
 function initialFlow(user) {
