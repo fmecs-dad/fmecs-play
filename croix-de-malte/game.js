@@ -2309,13 +2309,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  const burgerHelpBtn = document.getElementById("burgerHelpBtn");
-  if (burgerHelpBtn) {
-    burgerHelpBtn.addEventListener("click", () => {
-      if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
-      if (typeof pauseGame === 'function') pauseGame();
-    });
-  }
+  // Écouteur pour le bouton de fermeture de l'aide
+const closeHelpBtn = document.getElementById("closeHelpBtn");
+if (closeHelpBtn) {
+  closeHelpBtn.addEventListener("click", () => {
+    if (typeof playClickSound === 'function') playClickSound();
+    closeHelp();  // Utilisation de la fonction de fermeture
+  });
+}
+
+// Écouteur pour le bouton d'aide dans le menu burger
+const burgerHelpBtn = document.getElementById("burgerHelpBtn");
+if (burgerHelpBtn) {
+  burgerHelpBtn.addEventListener("click", () => {
+    if (typeof playClickSound === 'function') playClickSound();
+    if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
+    if (typeof pauseGame === 'function') pauseGame();
+  });
+}}
 
   const burgerSoundBtn = document.getElementById("burgerSoundBtn");
   if (burgerSoundBtn) {
@@ -2352,28 +2363,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
-  // ===============================
-//   AIDE - Section complète corrigée
-// ===============================
-
-// Écouteur pour le bouton de fermeture de l'aide
-const closeHelpBtn = document.getElementById("closeHelpBtn");
-if (closeHelpBtn) {
-  closeHelpBtn.addEventListener("click", () => {
-    if (typeof playClickSound === 'function') playClickSound();
-    closeHelp();  // Utilisation de la fonction de fermeture
-  });
-}
-
-// Écouteur pour le bouton d'aide dans le menu burger
-const burgerHelpBtn = document.getElementById("burgerHelpBtn");
-if (burgerHelpBtn) {
-  burgerHelpBtn.addEventListener("click", () => {
-    if (typeof playClickSound === 'function') playClickSound();
-    if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
-    if (typeof pauseGame === 'function') pauseGame();
-  });
-}
+  
 
   // ===============================
   //   WHY SIGNUP
