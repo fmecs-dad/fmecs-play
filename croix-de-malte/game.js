@@ -2025,164 +2025,181 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (session) {
       localStorage.setItem('supabase.access.token', session.access_token);
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
+      if (typeof initialiserProfilEtLancerJeu === 'function') {
+        await initialiserProfilEtLancerJeu(session);
+      }
       if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
-      if (typeof initialFlow === 'function') initialFlow(session.user);
     } else {
       if (typeof updateAuthUI === 'function') updateAuthUI(null);
-      if (typeof initialFlow === 'function') initialFlow(null);
     }
   } catch (err) {
     console.error("Erreur lors de la vérification de la session:", err);
     if (typeof updateAuthUI === 'function') updateAuthUI(null);
-    if (typeof initialFlow === 'function') initialFlow(null);
   }
 
-
-  //enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
-  enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
-  enableModalBehavior("authOverlay", ".panel", closeLogin);
-  enableModalBehavior("profileModal", ".panel", closeProfile);
-  enableModalBehavior("helpOverlay", ".panel", closeHelp);
-  enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-  enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
-  enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+  // Activation des comportements des modales
+  if (typeof enableModalBehavior === 'function') {
+    enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+    enableModalBehavior("authOverlay", ".panel", closeLogin);
+    enableModalBehavior("profileModal", ".panel", closeProfile);
+    enableModalBehavior("helpOverlay", ".panel", closeHelp);
+    enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+    enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+    enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+  }
 
 // ===============================
 //   FIN DE PARTIE
 // ===============================
 
-  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
-  if (closeEndGameButton) {
-    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
+  const closeEndGameBtn = document.getElementById("closeEndGame");
+  if (closeEndGameBtn) {
+    closeEndGameBtn.addEventListener("click", () => {
+      const endGameOverlay = document.getElementById("endGameOverlay");
+      if (endGameOverlay) endGameOverlay.classList.add("hidden");
+    });
   }
-
-  // Références DOM essentielles
-  const canvas = document.getElementById("gameCanvas");
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
 
 // ===============================
 //   CALCUL RÉEL DU CANVAS + GRILLE
 // ===============================
-  canvas.width = canvas.clientWidth;
+  canvas = document.getElementById("gameCanvas");
+  if (canvas) {
+    ctx = canvas.getContext("2d");
+
+    // Calcul du canvas et de la grille
+    canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-    if (typeof size !== 'undefined') {
-      const spacing = canvas.width / (size + 1);
-      const offset = spacing;
+    spacing = canvas.width / (size + 1);
+    offset = spacing;
 
-// ===============================
-//   POSITIONNEMENT DES REPÈRES
-// ===============================
-      const topLabels = document.querySelectorAll('#topLabels span');
-      const leftLabels = document.querySelectorAll('#leftLabels span');
+    // Positionnement des repères
+    const topLabels = document.querySelectorAll('#topLabels span');
+    const leftLabels = document.querySelectorAll('#leftLabels span');
 
-      if (topLabels.length && leftLabels.length) {
-        topLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-        });
+    if (topLabels.length && leftLabels.length) {
+      topLabels.forEach(span => {
+        const pos = Number(span.textContent);
+        if (!Number.isFinite(pos)) return;
+        span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+      });
 
-        leftLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-      }
+      leftLabels.forEach(span => {
+        const pos = Number(span.textContent);
+        if (!Number.isFinite(pos)) return;
+        span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+      });
     }
+  } else {
+    console.error("Canvas non trouvé");
   }
 
   // ===============================
   //   CLIC SUR LA GRILLE
   // ===============================
 
-  canvas.addEventListener("click", (e) => {
+  if (canvas) {
+    canvas.addEventListener("click", (e) => {
+      if (gameOver) return;
+      if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
+      if (tutorialRunning) return;
+      if (paused && typeof resumeGame === 'function') resumeGame();
 
-    if (gameOver) return;
-    if (!tutorialRunning && !timerRunning) startTimer();
-    if (tutorialRunning) return;
-    if (paused) resumeGame();
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
 
-    const rect = canvas.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
+      const nearest = getNearestPoint(mx, my);
+      if (!nearest) {
+        if (typeof flash === 'function') flash("Hors grille", "error");
+        if (typeof playErrorSound === 'function') playErrorSound();
+        selectedStart = null;
+        return;
+      }
 
-    const nearest = getNearestPoint(mx, my);
-    if (!nearest) {
-      flash("Hors grille", "error");
-      playErrorSound();
+      const { x, y } = nearest;
+
+      if (!selectedStart) {
+        selectedStart = { x, y };
+        return;
+      }
+
+      const result = getSegmentBetween(selectedStart, { x, y });
       selectedStart = null;
-      return;
-    }
 
-    const { x, y } = nearest;
+      if (result) {
+        if (typeof playSuccessSound === 'function') playSuccessSound();
+        validatedSegments.push(result);
+        if (typeof drawSegment === 'function') drawSegment(result.points);
+        score++;
 
-    if (!selectedStart) {
-      selectedStart = { x, y };
-      return;
-    }
+        const stepBtn = document.getElementById("burgerStepBtn");
+        if (stepBtn) {
+          stepBtn.disabled = true;
+          stepBtn.classList.add("disabled");
+        }
 
-    const result = getSegmentBetween(selectedStart, { x, y });
-    selectedStart = null;
+        if (typeof updateCounters === 'function') updateCounters();
+        if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
+        if (typeof checkGameOver === 'function') checkGameOver();
+      }
+    });
+  }
 
-    if (result) {
-      playSuccessSound();
-      validatedSegments.push(result);
-      drawSegment(result.points);
-      score++;
-
-      const stepBtn = document.getElementById("burgerStepBtn");
-      stepBtn.disabled = true;
-      stepBtn.classList.add("disabled");
-
-      updateCounters();
-      appendHistoryEntry(result.points, result.activeCount);
-      checkGameOver();
-    }
-
-  });
   // ===============================
   //   BOUTONS TOP BAR
   // ===============================
 
-  document.getElementById("undoBtn").addEventListener("click", () => {
-    playClickSound();
-    if (!tutorialRunning) undoLastMove();
-  });
+  const undoBtn = document.getElementById("undoBtn");
+  if (undoBtn) {
+    undoBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      if (!tutorialRunning && typeof undoLastMove === 'function') undoLastMove();
+    });
+  }
 
-  document.getElementById("pauseBtn").addEventListener("click", () => {
-    playClickSound();
-    if (!tutorialRunning) togglePause();
-  });
+  const pauseBtn = document.getElementById("pauseBtn");
+  if (pauseBtn) {
+    pauseBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      if (!tutorialRunning && typeof togglePause === 'function') togglePause();
+    });
+  }
 
   // ===============================
   //   AIDE
   // ===============================
 
-  document.getElementById("closeHelpBtn").addEventListener("click", () => {
-    playClickSound();
-    closeHelp();
-  });
-
+  const burgerBtn = document.getElementById("burgerBtn");
+  if (burgerBtn) {
+    burgerBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      const ov = document.getElementById("burgerOverlay");
+      if (ov) ov.classList.toggle("show");
+    });
+  }
 
   // ===============================
   //   MENU BURGER
   // ===============================
 
-  document.getElementById("burgerBtn").addEventListener("click", () => {
-    playClickSound();
-    const ov = document.getElementById("burgerOverlay");
-    ov.classList.toggle("show");
-  });
+  const burgerBtn = document.getElementById("burgerBtn");
+  if (burgerBtn) {
+    burgerBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      const ov = document.getElementById("burgerOverlay");
+      if (ov) ov.classList.toggle("show");
+    });
+  }
 
   document.addEventListener("click", (e) => {
     const menu = document.getElementById("burgerOverlay");
     const burger = document.getElementById("burgerBtn");
-
-    if (!menu.contains(e.target) && e.target !== burger) {
+    if (menu && burger && !menu.contains(e.target) && e.target !== burger) {
       menu.classList.remove("show");
     }
   });
+
   // ===============================
   //   AUTH BURGER (v1)
   // ===============================
