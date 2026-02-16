@@ -2063,22 +2063,7 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Vérification de la session et initialisation
-  try {
-    const { data: { session }, error } = await supa.auth.getSession();
-    if (session) {
-      localStorage.setItem('supabase.access.token', session.access_token);
-      localStorage.setItem('supabase.refresh.token', session.refresh_token);
-      if (typeof initialiserProfilEtLancerJeu === 'function') {
-        await initialiserProfilEtLancerJeu(session);
-      }
-      if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
-    } else {
-      if (typeof updateAuthUI === 'function') updateAuthUI(null);
-    }
-  } catch (err) {
-    console.error("Erreur lors de la vérification de la session:", err);
-    if (typeof updateAuthUI === 'function') updateAuthUI(null);
-  }
+  await checkSessionAndShowModals();
 
   // 2. Activation des comportements des modales
   if (typeof enableModalBehavior === 'function') {
