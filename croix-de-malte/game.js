@@ -1964,15 +1964,15 @@ function handleFirstLaunchFlow(userFromEvent) {
 let gameStarted = false; // global
 
 function initialFlow(user) {
-  console.log("initialFlow appelé avec user:", user);
+  console.log("=== initialFlow appelé ===", { user });
 
-  // Récupération des valeurs depuis localStorage
-  const lastEmail = localStorage.getItem("lastEmail");
+  // 1. Récupération des valeurs avec fallback
+  const lastEmail = localStorage.getItem("lastEmail") || null;
   const skipWhySignup = localStorage.getItem("skipWhySignup") === "1";
   const helpSeen = localStorage.getItem("helpSeen") === "true";
 
-  console.log({
-    user,
+  console.log("État actuel :", {
+    user: !!user,
     lastEmail,
     skipWhySignup,
     helpSeen,
@@ -1980,43 +1980,40 @@ function initialFlow(user) {
     whySignupModalExists: !!document.getElementById("whySignupModal")
   });
 
-  // Cas 1 : Utilisateur connecté → Toujours afficher readyModal
+  // 2. Logique d'affichage des modales
   if (user) {
-    console.log("Utilisateur connecté → affichage de readyModal");
+    // Utilisateur connecté → Toujours readyModal
+    console.log("→ Affichage de readyModal (utilisateur connecté)");
     showReadyModal("connected");
-    return;
   }
-
-  // Cas 2 : Utilisateur déconnecté
-  if (!user) {
-    // Sous-cas 2.1 : L'utilisateur a coché "Ne plus me rappeler" → readyModal
+  else {
+    // Utilisateur déconnecté
     if (skipWhySignup) {
-      console.log("Utilisateur déconnecté avec skipWhySignup → readyModal");
-      showReadyModal("skipWhySignup");
-      return;
+      // A choisi "Ne plus me rappeler" → readyModal
+      console.log("→ Affichage de readyModal (skipWhySignup)");
+      showReadyModal("disconnected_skip");
     }
-
-    // Sous-cas 2.2 : L'utilisateur a déjà saisi un email → whySignupModal
-    if (lastEmail) {
-      console.log("Utilisateur déconnecté avec lastEmail → whySignupModal");
+    else if (lastEmail) {
+      // A déjà saisi un email → whySignupModal
+      console.log("→ Affichage de whySignupModal (lastEmail existe)");
       const whySignupModal = document.getElementById("whySignupModal");
       if (whySignupModal) {
         whySignupModal.classList.remove("hidden");
       } else {
-        console.error("whySignupModal introuvable dans le DOM");
+        console.error("whySignupModal non trouvé dans le DOM");
+        showReadyModal("fallback_no_whySignup");
       }
-      return;
     }
-
-    // Sous-cas 2.3 : Nouveau visiteur → whySignupModal
-    console.log("Nouveau visiteur → whySignupModal");
-    const modal = document.getElementById("whySignupModal");
-    if (modal) {
-      modal.classList.remove("hidden");
-    } else {
-      console.error("whySignupModal introuvable dans le DOM");
-      // Fallback : afficher readyModal si whySignupModal n'existe pas
-      showReadyModal("fallback");
+    else {
+      // Nouveau visiteur → whySignupModal
+      console.log("→ Affichage de whySignupModal (nouveau visiteur)");
+      const whySignupModal = document.getElementById("whySignupModal");
+      if (whySignupModal) {
+        whySignupModal.classList.remove("hidden");
+      } else {
+        console.error("whySignupModal non trouvé dans le DOM");
+        showReadyModal("fallback_no_whySignup");
+      }
     }
   }
 }
@@ -2088,7 +2085,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error("Erreur lors de la vérification de la session:", err);
     updateAuthUI(null);
-    initialFlow(null); 
   }
 
   // 2. Activation des comportements des modales
