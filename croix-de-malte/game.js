@@ -2645,5 +2645,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+// ===============================
+//   WHY SIGNUP
+// ===============================
+
+document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
+  playClickSound();
+  closeWhySignup();
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
+
+document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
+  playClickSound();
+
+  const dontRemind = document.getElementById("whySignupDontRemind").checked;
+  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+
+  closeWhySignup();
+  document.getElementById("readyModal").classList.remove("hidden");
+});
   
 });
