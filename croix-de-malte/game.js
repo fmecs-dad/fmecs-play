@@ -2058,11 +2058,11 @@ function closeWhySignup() {
 }
 
 // ===============================
-//   DOMContentLoaded
+//   DOMContentLoaded (version finale avec bouton Ready préservé)
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Vérification de la session et initialisation
+  // 1. Vérification de session et initialisation
   await checkSessionAndShowModals();
 
   // 2. Activation des comportements des modales
@@ -2076,25 +2076,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
   }
 
-  // 3. Écouteurs pour les boutons de modales
-  const readyBtn = document.getElementById("readyBtn");
-  if (readyBtn) {
-    readyBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      closeReady();
-      if (typeof lancerJeuComplet === 'function') lancerJeuComplet();
-    });
-  }
-
-  const closeHelpBtn = document.getElementById("closeHelpBtn");
-  if (closeHelpBtn) {
-    closeHelpBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof closeHelp === 'function') closeHelp();
-    });
-  }
-
-  // 4. Initialisation du canvas et de la grille
+  // Initialisation du canvas
   canvas = document.getElementById("gameCanvas");
   if (canvas) {
     ctx = canvas.getContext("2d");
@@ -2126,22 +2108,72 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Canvas non trouvé");
   }
 
-// ===============================
-//   FIN DE PARTIE
-// ===============================
+  // ===============================
+  //   GESTION DU MENU PROFIL
+  // ===============================
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
 
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      profileDropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileDropdown.classList.remove("show");
+      }
+    });
+  }
+
+  // Écouteur pour afficher/masquer le mot de passe
+  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
+  if (togglePasswordVisibilityBtn) {
+    togglePasswordVisibilityBtn.addEventListener("click", () => {
+      const passwordSpan = document.getElementById("profilePassword");
+      if (passwordSpan) {
+        if (passwordSpan.textContent === "••••••••") {
+          passwordSpan.textContent = "motdepasse";
+        } else {
+          passwordSpan.textContent = "••••••••";
+        }
+      }
+    });
+  }
+
+  // Écouteur pour la déconnexion
+  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
+  if (logoutProfileBtn) {
+    logoutProfileBtn.addEventListener("click", async () => {
+      if (typeof logout === 'function') await logout();
+      const dropdown = document.getElementById("profileDropdown");
+      if (dropdown) dropdown.classList.remove("show");
+    });
+  }
+
+  // Écouteur pour ouvrir la modale de modification du profil
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", async () => {
+      if (typeof ouvrirProfil === 'function') await ouvrirProfil();
+    });
+  }
+
+  // Mettre à jour les informations du profil
+  if (typeof updateProfileInfo === 'function') updateProfileInfo();
+
+  // ===============================
+  //   FIN DE PARTIE
+  // ===============================
   const closeEndGameBtn = document.getElementById("closeEndGame");
   if (closeEndGameBtn) {
-    closeEndGameBtn.addEventListener("click", () => {
-      const endGameOverlay = document.getElementById("endGameOverlay");
-      if (endGameOverlay) endGameOverlay.classList.add("hidden");
-    });
+    closeEndGameBtn.addEventListener("click", closeEndGame);
   }
 
   // ===============================
   //   CLIC SUR LA GRILLE
   // ===============================
-
   if (canvas) {
     canvas.addEventListener("click", (e) => {
       if (gameOver) return;
@@ -2193,7 +2225,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   BOUTONS TOP BAR
   // ===============================
-
   const undoBtn = document.getElementById("undoBtn");
   if (undoBtn) {
     undoBtn.addEventListener("click", () => {
@@ -2213,7 +2244,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   MENU BURGER
   // ===============================
-
   const burgerBtn = document.getElementById("burgerBtn");
   if (burgerBtn) {
     burgerBtn.addEventListener("click", () => {
@@ -2234,15 +2264,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   AUTH BURGER (v1)
   // ===============================
-
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   if (burgerAuthBtn) {
     burgerAuthBtn.addEventListener("click", async () => {
       if (typeof playClickSound === 'function') playClickSound();
       const user = await getSession();
       if (!user) {
-        const auth = document.getElementById("authOverlay");
-        if (auth) auth.classList.remove("hidden");
+        const authOverlay = document.getElementById("authOverlay");
+        if (authOverlay) authOverlay.classList.remove("hidden");
         if (typeof pauseGame === 'function') pauseGame();
         return;
       }
@@ -2253,7 +2282,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ===============================
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
-
   const burgerReplayBtn = document.getElementById("burgerReplayBtn");
   if (burgerReplayBtn) {
     burgerReplayBtn.addEventListener("click", () => {
@@ -2298,166 +2326,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  
-
-// ===============================
-  //   PROFIL
   // ===============================
-  const profileBtn = document.getElementById("profileBtn");
-  if (profileBtn) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const dropdown = document.getElementById("profileDropdown");
-      if (dropdown) dropdown.classList.toggle("show");
-    });
-  }
+  //   READY BUTTON (version originale préservée exactement)
+  // ===============================
+  const readyBtn = document.getElementById("readyBtn");
+  if (readyBtn) {
+    readyBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
 
-  document.addEventListener("click", (e) => {
-    const profileDropdown = document.getElementById("profileDropdown");
-    const profileBtn = document.getElementById("profileBtn");
-    if (profileDropdown && profileBtn && !profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-      profileDropdown.classList.remove("show");
-    }
-  });
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) readyModal.classList.add("hidden");
 
-  // Fonction pour afficher/masquer le mot de passe
-  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
-  if (togglePasswordVisibilityBtn) {
-    togglePasswordVisibilityBtn.addEventListener("click", () => {
-      const passwordSpan = document.getElementById("profilePassword");
-      if (passwordSpan) {
-        if (passwordSpan.textContent === "••••••••") {
-          passwordSpan.textContent = "motdepasse";
-        } else {
-          passwordSpan.textContent = "••••••••";
-        }
+      if (typeof initGame === 'function') initGame();
+
+      const board = document.getElementById("canvasContainer");
+      if (board) {
+        board.classList.remove("show");
+        board.classList.add("slide-in-premium");
+        void board.offsetWidth;
+        board.classList.add("show");
+
+        setTimeout(() => {
+          if (typeof playStartGameSound === 'function') playStartGameSound();
+        }, 1500);
       }
     });
   }
 
-  // Écouteur pour la déconnexion
-  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
-  if (logoutProfileBtn) {
-    logoutProfileBtn.addEventListener("click", async () => {
-      if (typeof logout === 'function') await logout();
-      const dropdown = document.getElementById("profileDropdown");
-      if (dropdown) dropdown.classList.remove("show");
-    });
-  }
-
-  // Écouteur pour ouvrir la modale de modification du profil
-  const editProfileBtn = document.getElementById("editProfileBtn");
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener("click", async () => {
-      if (typeof ouvrirProfil === 'function') await ouvrirProfil();
-    });
-  }
-
-  // Mettre à jour les informations du profil
-  if (typeof updateProfileInfo === 'function') updateProfileInfo();
-
   // ===============================
-  //   AUTHENTIFICATION (v1)
+  //   WHY SIGNUP
   // ===============================
-  const closeAuthBtn = document.getElementById("closeAuthBtn");
-  if (closeAuthBtn) {
-    closeAuthBtn.addEventListener("click", () => {
+  const whySignupRegisterBtn = document.getElementById("whySignupRegisterBtn");
+  if (whySignupRegisterBtn) {
+    whySignupRegisterBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
+      if (typeof closeWhySignup === 'function') closeWhySignup();
       const authOverlay = document.getElementById("authOverlay");
-      if (authOverlay) authOverlay.classList.add("hidden");
-    });
-  }
-
-  const closeSignupBtn = document.getElementById("closeSignupBtn");
-  if (closeSignupBtn) {
-    closeSignupBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const signupModal = document.getElementById("signupModal");
-      const authOverlay = document.getElementById("authOverlay");
-      if (signupModal) signupModal.classList.add("hidden");
       if (authOverlay) authOverlay.classList.remove("hidden");
     });
   }
 
-  const signupBtn = document.getElementById("signupBtn");
-  if (signupBtn) {
-    signupBtn.addEventListener("click", () => {
+  const whySignupContinueBtn = document.getElementById("whySignupContinueBtn");
+  if (whySignupContinueBtn) {
+    whySignupContinueBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      const authOverlay = document.getElementById("authOverlay");
-      const signupModal = document.getElementById("signupModal");
-      if (authOverlay) authOverlay.classList.add("hidden");
-      if (signupModal) signupModal.classList.remove("hidden");
+      const dontRemind = document.getElementById("whySignupDontRemind")?.checked;
+      if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+      if (typeof closeWhySignup === 'function') closeWhySignup();
+      const readyModal = document.getElementById("readyModal");
+      if (readyModal) readyModal.classList.remove("hidden");
     });
   }
-
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      if (typeof playClickSound === 'function') playClickSound();
-      const email = document.getElementById("authEmail")?.value.trim();
-      const password = document.getElementById("authPassword")?.value.trim();
-
-      if (!email || !password) {
-        alert("Veuillez remplir tous les champs.");
-        return;
-      }
-
-      if (!email.includes("@") || !email.includes(".")) {
-        alert("Adresse email invalide.");
-        return;
-      }
-
-      try {
-        const { data, error } = await supa.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (error) {
-          console.error("Erreur de connexion :", error);
-          alert("Erreur : " + error.message);
-          return;
-        }
-
-        const { data: { session }, error: sessionError } = await supa.auth.getSession();
-        if (sessionError || !session) {
-          console.error("Erreur récupération session :", sessionError);
-          alert("Impossible de récupérer la session.");
-          return;
-        }
-
-        localStorage.setItem('supabase.access.token', session.access_token);
-        localStorage.setItem('supabase.refresh.token', session.refresh_token);
-
-        const authOverlay = document.getElementById("authOverlay");
-        if (authOverlay) authOverlay.classList.add("hidden");
-
-        if (typeof updateAuthUI === 'function') await updateAuthUI(session.user);
-        if (typeof updateProfileInfo === 'function') await updateProfileInfo();
-      } catch (err) {
-        console.error("Erreur inattendue lors de la connexion :", err);
-        alert("Une erreur inattendue est survenue.");
-      }
-    });
-  }
-// ===============================
-//   WHY SIGNUP
-// ===============================
-
-document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
-  playClickSound();
-  closeWhySignup();
-  document.getElementById("authOverlay").classList.remove("hidden");
-});
-
-document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-  playClickSound();
-
-  const dontRemind = document.getElementById("whySignupDontRemind").checked;
-  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
-
-  closeWhySignup();
-  document.getElementById("readyModal").classList.remove("hidden");
-});
 });
