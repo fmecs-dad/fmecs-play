@@ -87,36 +87,42 @@ function playSound(id) {
 //   AUTH : UTILITAIRES
 // ===============================
 
-// Fonction pour mettre à jour l'UI d'authentification
-function updateAuthUI(user) {
-  console.log("Updating UI with user:", user);
+// Fonction pour vérifier la session au démarrage
+async function checkSessionOnStartup() {
+  const { data: { session }, error } = await supa.auth.getSession();
 
-  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  const burgerPseudo = document.getElementById("burgerPseudo");
-
-  if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
-    if (burgerPseudo) burgerPseudo.textContent = "";
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
+  if (error) {
+    console.error("Erreur lors de la récupération de la session :", error);
+    updateAuthUI(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
     return;
   }
 
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
-
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
-  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
+  // Si une session existe, stocker le JWT et mettre à jour l'UI
+  if (session) {
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+    updateAuthUI(session.user);
+    initialFlow(session.user); // Appeler initialFlow avec l'utilisateur connecté
+  } else {
+    updateAuthUI(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
+  }
 }
+// Appeler cette fonction au démarrage
+checkSessionOnStartup();
 
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   const token = localStorage.getItem('supabase.access.token');
+
   if (!token) {
     console.log("Aucun JWT trouvé.");
     return null;
   }
 
   const { data: { user }, error } = await supa.auth.getUser(token);
+
   if (error) {
     console.error("Erreur lors de la récupération de l'utilisateur :", error);
     return null;
@@ -156,145 +162,76 @@ async function fetchPlayerPseudo(userId) {
   }
 }
 
-// Fonction pour gérer la déconnexion
-async function logout() {
-  console.log("Début de la déconnexion");
-
-  // Supprimer les tokens du localStorage
-  localStorage.removeItem('supabase.access.token');
-  localStorage.removeItem('supabase.refresh.token');
-
-  // Déconnecter l'utilisateur de Supabase
-  const { error } = await supa.auth.signOut();
-
-  if (error) {
-    console.error("Erreur lors de la déconnexion :", error);
-  }
-
-  // Mettre à jour l'UI immédiatement
-  updateAuthUI(null);
-
-  // Recharger la page pour réinitialiser l'état
-  window.location.reload();
-}
-
-// Fonction pour vérifier la session au démarrage
-async function checkSessionOnStartup() {
-  const { data: { session }, error } = await supa.auth.getSession();
-
-  if (error) {
-    console.error("Erreur lors de la récupération de la session :", error);
-    updateAuthUI(null);
-    initialFlow(null);
-    return;
-  }
-
-  // Si une session existe, stocker le JWT et mettre à jour l'UI
-  if (session) {
-    localStorage.setItem('supabase.access.token', session.access_token);
-    localStorage.setItem('supabase.refresh.token', session.refresh_token);
-    updateAuthUI(session.user);
-    initialFlow(session.user);
-  } else {
-    updateAuthUI(null);
-    initialFlow(null);
-  }
-}
-
-// Fonction pour mettre à jour les informations du profil
-async function updateProfileInfo() {
-  const user = await getSession();
-  const profileBtn = document.getElementById("profileBtn");
-
-  console.log("User in updateProfileInfo:", user);
+// Fonction pour mettre à jour l'UI
+async function updateAuthUI(user = null) {
+  console.log("Updating UI with user:", user);
+  const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+  const burgerPseudo = document.getElementById("burgerPseudo");
 
   if (!user) {
-    if (profileBtn) {
-      profileBtn.disabled = true;
-      console.log("Bouton désactivé");
-      document.getElementById("profilePseudoDisplay").textContent = "";
-      document.getElementById("profilePseudoDisplay").title = "";
-      const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
-    }
+    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
+    if (burgerPseudo) burgerPseudo.textContent = "";
+    localStorage.removeItem("playerPseudo");
+    localStorage.removeItem("bestScoreData");
     return;
-  } else {
-    if (profileBtn) {
-      profileBtn.disabled = false;
-      profileBtn.removeAttribute('disabled');
-      console.log("Bouton activé, disabled:", profileBtn.disabled);
-    }
   }
+
+  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+
+  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
+  if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
-    const { data: player, error } = await supa
-      .from("players")
-      .select("pseudo, avatar_url, created_at")
-      .eq("id", user.id)
-      .single();
-
-    if (error) {
-      throw error;
+    const pseudo = await fetchPlayerPseudo(user.id);
+    if (pseudo && burgerPseudo) {
+      burgerPseudo.textContent = pseudo;
+      localStorage.setItem("playerPseudo", pseudo);
     }
-
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    if (pseudoDisplay) {
-      pseudoDisplay.textContent = player.pseudo || "";
-      pseudoDisplay.title = player.pseudo || "";
-    }
-
-    const profileAvatar = document.getElementById("profileAvatar");
-    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
-
-    const profileEmail = document.getElementById("profileEmail");
-    if (profileEmail) profileEmail.textContent = user.email || "";
-
-    const profileCreationDate = document.getElementById("profileCreationDate");
-    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
-  } catch (error) {
-    console.error("Erreur lors de la récupération des informations du profil :", error);
+  } catch (err) {
+    console.error("Impossible de récupérer le pseudo :", err);
   }
 }
 
-// Fonction pour ouvrir la modale de modification du profil
-async function ouvrirProfil() {
-  const user = await getSession();
-  if (!user) return;
+// ===============================
+//   PROFIL & JEU
+// ===============================
 
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+function lancerJeuComplet() {
+  document.getElementById("readyModal").classList.add("hidden");
+  initGame();
 
-  document.getElementById("profilePseudoInput").value = player.pseudo || "";
-  document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
-
-  const modal = document.getElementById("profileModal");
-  modal.classList.remove("hidden");
+  const board = document.getElementById("canvasContainer");
+  board.classList.remove("show");
+  board.classList.add("slide-in-premium");
+  void board.offsetWidth;
+  board.classList.add("show");
 }
 
-// Fonction pour configurer le menu profil
-function setupProfileMenu() {
-  const profileBtn = document.getElementById("profileBtn");
-  const profileDropdown = document.getElementById("profileDropdown");
+async function initialiserProfilEtLancerJeu(session) {
+  if (!session) return;
 
-  if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      console.log("Clic sur profileBtn");
-      profileDropdown.classList.toggle("show");
-      console.log("Menu déroulant affiché:", profileDropdown.classList.contains("show")); // Log de débogage
-      console.log("Style display:", window.getComputedStyle(profileDropdown).display); // Log de débogage
-    });
+  try {
+    const userId = session.user.id;
+    const { data: player, error } = await supa
+      .from("players")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-    document.addEventListener("click", (e) => {
-      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-        profileDropdown.classList.remove("show");
-      }
-    });
-  } else {
-    console.error("Élément(s) du menu profil manquant(s)");
+    if (error && error.code) {
+      console.error("Erreur lors de la récupération du joueur :", error);
+      return;
+    }
+
+    if (!player) {
+      console.log("Nouveau joueur détecté, affichage de l'aide...");
+      openHelpOverlay(true);
+    } else {
+      localStorage.setItem("playerPseudo", player.pseudo);
+      console.log("Profil initialisé avec succès pour :", player.pseudo);
+    }
+  } catch (err) {
+    console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
   }
 }
 // --------------------------------------------------
@@ -487,61 +424,6 @@ document.getElementById("leaderboardContainer").addEventListener("scroll", async
     await loadMoreScores();
   }
 });
-
-// Fonction pour récupérer le meilleur score depuis Supabase
-async function fetchBestScore(userId) {
-  try {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) {
-      console.error("Aucun JWT trouvé.");
-      return null;
-    }
-
-    supa.auth.setSession(token);
-
-    const { data, error } = await supa
-      .from("scores")
-      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
-      .eq("player_id", userId)
-      .order("score", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error("Erreur lors de la récupération du meilleur score :", error);
-      return null;
-    }
-
-    if (data) {
-      data.duration = Math.floor(data.duration_ms / 1000);
-      delete data.duration_ms;
-    }
-
-    return data;
-  } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
-    return null;
-  }
-}
-
-// Fonction pour sauvegarder le meilleur score
-function saveBestScore(bestScoreData) {
-  if (bestScoreData) {
-    localStorage.setItem("bestScoreData", JSON.stringify(bestScoreData));
-  }
-}
-
-// Fonction pour mettre à jour l'affichage du meilleur score
-function updateBestScoreTop() {
-  const bestScoreData = localStorage.getItem("bestScoreData");
-  if (bestScoreData) {
-    const scoreData = JSON.parse(bestScoreData);
-    const bestScoreElement = document.getElementById("bestScoreTop");
-    if (bestScoreElement) {
-      bestScoreElement.textContent = `Meilleur score: ${scoreData.score} en ${scoreData.duration} secondes`;
-    }
-  }
-}
 
 async function fetchLeaderboard(page = 1, limit = 20) {
   const offset = (page - 1) * limit;
@@ -811,7 +693,7 @@ function updateBestScoreTop() {
 function showBestScorePanel() {
   const panel = document.getElementById("bestScoreContent");
   if (!panel) return;
-  
+
   const pauseBtn = document.getElementById("pauseBtn");
   const undoBtn = document.getElementById("undoBtn");
 
@@ -1478,10 +1360,9 @@ function undoLastMove() {
   const historyList = document.getElementById("historyList");
   if (historyList.lastChild) historyList.removeChild(historyList.lastChild);
 
-  updateCounters();
-  redrawEverything();
-  
-}
+    updateCounters();
+    redrawEverything();
+  }
 
 
 // ===============================
@@ -1887,7 +1768,7 @@ function playTutorialStep() {
   redrawEverything();
   flash("A vous de jouer", "info");
   return;
-  }
+}
 
 
   // 3) Mise à jour visuelle
@@ -2041,72 +1922,41 @@ function showReadyModal(reason) {
 }
 
 function closeReady() {
- document.getElementById("readyModal").classList.add("hidden");
-}
-
-// Déclarez toutes les fonctions de fermeture avant DOMContentLoaded
-
-function closeEndGame() {
-  const overlay = document.getElementById("endGameOverlay");
-  if (overlay) overlay.classList.add("hidden");
-}
-
-function closeWhySignup() {
-  const overlay = document.getElementById("whySignupModal");
-  if (overlay) overlay.classList.add("hidden");
-}
-
-function closeLogin() {
-  const auth = document.getElementById("authOverlay");
-  if (auth) auth.classList.add("hidden");
-}
-
-function closeProfile() {
-  const overlay = document.getElementById("profileModal");
-  if (overlay) overlay.classList.add("hidden");
+  document.getElementById("readyModal").classList.add("hidden");
 }
 
 function closeHelp() {
   const overlay = document.getElementById("helpOverlay");
-  if (overlay) {
-    overlay.classList.add("hidden");
-    if (window.helpAutoOpened) {
-      localStorage.setItem("helpSeen", "true");
-      const readyModal = document.getElementById("readyModal");
-      if (readyModal) readyModal.classList.remove("hidden");
-      if (typeof startNewGame === 'function') startNewGame();
-    }
+  overlay.classList.add("hidden");
+
+  if (window.helpAutoOpened) {
+    localStorage.setItem("helpSeen", "true");
+    document.getElementById("readyModal").classList.remove("hidden");
+    startNewGame();
   }
 }
 
-function closeLeaderboard() {
-  const overlay = document.getElementById("leaderboardOverlay");
-  if (overlay) overlay.classList.add("hidden");
+function closeLogin() {
+  const auth = document.getElementById("authOverlay");
+  auth.classList.add("hidden");
+}
+
+function closeEndGame() {
+  const overlay = document.getElementById("endGameOverlay");
+  overlay.classList.add("hidden");
 }
 
 function closeBestScore() {
   const overlay = document.getElementById("bestScoreOverlay");
-  if (overlay) overlay.classList.add("hidden");
+  overlay.classList.add("hidden");
 }
 
-// Assurez-vous que enableModalBehavior est définie
-function enableModalBehavior(modalId, panelSelector, closeFunction) {
-  const modal = document.getElementById(modalId);
-  if (!modal) {
-    console.error(`Modal ${modalId} not found`);
-    return;
-  }
+function closeProfile() {
+  document.getElementById("profileModal").classList.add("hidden");
+}
 
-  const closeBtn = modal.querySelector('.close-btn');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeFunction);
-  }
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeFunction();
-    }
-  });
+function closeWhySignup() {
+  document.getElementById("whySignupModal").classList.add("hidden");
 }
 
 // ===============================
@@ -2115,24 +1965,15 @@ function enableModalBehavior(modalId, panelSelector, closeFunction) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Vérifie la session au démarrage
-  try {
-    const { data: { session }, error } = await supa.auth.getSession();
-    if (session) {
-      localStorage.setItem('supabase.access.token', session.access_token);
-      localStorage.setItem('supabase.refresh.token', session.refresh_token);
-      if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
-      if (typeof initialFlow === 'function') initialFlow(session.user);
-    } else {
-      if (typeof updateAuthUI === 'function') updateAuthUI(null);
-      if (typeof initialFlow === 'function') initialFlow(null);
-    }
-  } catch (err) {
-    console.error("Erreur lors de la vérification de la session:", err);
-    if (typeof updateAuthUI === 'function') updateAuthUI(null);
-    if (typeof initialFlow === 'function') initialFlow(null);
+  const { data: { session }, error } = await supa.auth.getSession();
+  if (session) {
+    await initialiserProfilEtLancerJeu(session);
+    updateAuthUI(session.user);
+  } else {
+    updateAuthUI(null);
   }
 
-// Activation des comportements des modales
+  //enableModalBehavior("readyModal", ".panel", closeReady); // fonctionnement différent des autres modals
   enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
   enableModalBehavior("authOverlay", ".panel", closeLogin);
   enableModalBehavior("profileModal", ".panel", closeProfile);
@@ -2141,108 +1982,103 @@ document.addEventListener("DOMContentLoaded", async () => {
   enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
   enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
 
-// ===============================
-//   FIN DE PARTIE
-// ===============================
 
-  const closeEndGameButton = document.getElementById("closeEndGame"); // Nom différent
-  if (closeEndGameButton) {
-    closeEndGameButton.addEventListener("click", closeEndGame); // Utilise la fonction
-  }
 
   // Références DOM essentielles
-  const canvas = document.getElementById("gameCanvas");
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
+  canvas = document.getElementById("gameCanvas");
+  ctx = canvas.getContext("2d");
 
-// ===============================
-//   CALCUL RÉEL DU CANVAS + GRILLE
-// ===============================
+  // ===============================
+  //   CALCUL RÉEL DU CANVAS + GRILLE
+  // ===============================
+
   canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-    if (typeof size !== 'undefined') {
-      const spacing = canvas.width / (size + 1);
-      const offset = spacing;
+  canvas.height = canvas.clientHeight;
 
-// ===============================
-//   POSITIONNEMENT DES REPÈRES
-// ===============================
-      const topLabels = document.querySelectorAll('#topLabels span');
-      const leftLabels = document.querySelectorAll('#leftLabels span');
+  spacing = canvas.width / (size + 1);
+  offset = spacing;
 
-      if (topLabels.length && leftLabels.length) {
-        topLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-        });
+  // ===============================
+  //   POSITIONNEMENT DES REPÈRES
+  // ===============================
 
-        leftLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-      }
-    }
+  const topLabels = document.querySelectorAll('#topLabels span');
+  const leftLabels = document.querySelectorAll('#leftLabels span');
+
+  if (topLabels.length && leftLabels.length) {
+    topLabels.forEach(span => {
+      const pos = Number(span.textContent);
+      if (!Number.isFinite(pos)) return;
+      span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+    });
+
+    leftLabels.forEach(span => {
+      const pos = Number(span.textContent);
+      if (!Number.isFinite(pos)) return;
+      span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+    });
   }
+
+  // ===============================
+  //   FIN DE PARTIE
+  // ===============================
+
+  document.getElementById("closeEndGame").addEventListener("click", () => {
+    document.getElementById("endGameOverlay").classList.add("hidden");
+  });
 
   // ===============================
   //   CLIC SUR LA GRILLE
   // ===============================
-  if (canvas) {
-    canvas.addEventListener("click", (e) => {
-      if (gameOver) return;
-      if (!tutorialRunning && !timerRunning) {
-        if (typeof startTimer === 'function') startTimer();
-      }
-      if (tutorialRunning) return;
-      if (paused && typeof resumeGame === 'function') resumeGame();
 
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
+  canvas.addEventListener("click", (e) => {
 
-      const nearest = getNearestPoint(mx, my);
-      if (!nearest) {
-        if (typeof flash === 'function') flash("Hors grille", "error");
-        if (typeof playErrorSound === 'function') playErrorSound();
-        selectedStart = null;
-        return;
-      }
+    if (gameOver) return;
+    if (!tutorialRunning && !timerRunning) startTimer();
+    if (tutorialRunning) return;
+    if (paused) resumeGame();
 
-      const { x, y } = nearest;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
 
-      if (!selectedStart) {
-        selectedStart = { x, y };
-        return;
-      }
-
-      const result = getSegmentBetween(selectedStart, { x, y });
+    const nearest = getNearestPoint(mx, my);
+    if (!nearest) {
+      flash("Hors grille", "error");
+      playErrorSound();
       selectedStart = null;
+      return;
+    }
 
-      if (result) {
-        if (typeof playSuccessSound === 'function') playSuccessSound();
-        validatedSegments.push(result);
-        if (typeof drawSegment === 'function') drawSegment(result.points);
-        score++;
+    const { x, y } = nearest;
 
-        const stepBtn = document.getElementById("burgerStepBtn");
-        if (stepBtn) {
-          stepBtn.disabled = true;
-          stepBtn.classList.add("disabled");
-        }
+    if (!selectedStart) {
+      selectedStart = { x, y };
+      return;
+    }
 
-        if (typeof updateCounters === 'function') updateCounters();
-        if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
-        if (typeof checkGameOver === 'function') checkGameOver();
-      }
-    });
-  }
+    const result = getSegmentBetween(selectedStart, { x, y });
+    selectedStart = null;
 
+    if (result) {
+      playSuccessSound();
+      validatedSegments.push(result);
+      drawSegment(result.points);
+      score++;
 
-// ===============================
-//   BOUTONS TOP BAR
-// ===============================
+      const stepBtn = document.getElementById("burgerStepBtn");
+      stepBtn.disabled = true;
+      stepBtn.classList.add("disabled");
+
+      updateCounters();
+      appendHistoryEntry(result.points, result.activeCount);
+      checkGameOver();
+    }
+
+  });
+  // ===============================
+  //   BOUTONS TOP BAR
+  // ===============================
 
   document.getElementById("undoBtn").addEventListener("click", () => {
     playClickSound();
@@ -2254,416 +2090,529 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!tutorialRunning) togglePause();
   });
 
+  // ===============================
+  //   AIDE
+  // ===============================
 
-// ===============================
-//   AIDE
-// ===============================
-  const closeHelpBtn = document.getElementById("closeHelpBtn");
-  if (closeHelpBtn) {
-    closeHelpBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof closeHelp === 'function') closeHelp();
-    });
-  }
+  document.getElementById("closeHelpBtn").addEventListener("click", () => {
+    playClickSound();
+    closeHelp();
+  });
 
-// ===============================
+
+  // ===============================
   //   MENU BURGER
   // ===============================
-  const burgerBtn = document.getElementById("burgerBtn");
-  if (burgerBtn) {
-    burgerBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const ov = document.getElementById("burgerOverlay");
-      if (ov) ov.classList.toggle("show");
-    });
-  }
+
+  document.getElementById("burgerBtn").addEventListener("click", () => {
+    playClickSound();
+    const ov = document.getElementById("burgerOverlay");
+    ov.classList.toggle("show");
+  });
 
   document.addEventListener("click", (e) => {
     const menu = document.getElementById("burgerOverlay");
     const burger = document.getElementById("burgerBtn");
-    if (menu && burger && !menu.contains(e.target) && e.target !== burger) {
+
+    if (!menu.contains(e.target) && e.target !== burger) {
       menu.classList.remove("show");
     }
   });
-
-  // ===============================
+// ===============================
   //   AUTH BURGER (v1)
   // ===============================
+
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
+
+  async function logout() {
+    console.log("Début de la déconnexion");
+
+    // Supprimer les tokens du localStorage
+    localStorage.removeItem('supabase.access.token');
+    localStorage.removeItem('supabase.refresh.token');
+
+    // Déconnecter l'utilisateur de Supabase
+    const { error } = await supa.auth.signOut();
+
+    if (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+    }
+
+    // Mettre à jour l'UI immédiatement
+    updateAuthUI(null);
+
+    // Recharger la page pour réinitialiser l'état
+    window.location.reload();
+  }
+
   if (burgerAuthBtn) {
     burgerAuthBtn.addEventListener("click", async () => {
       console.log("Clic sur le bouton d'authentification");
-      if (typeof playClickSound === 'function') playClickSound();
+      playClickSound();
+
       const user = await getSession();
+
       if (!user) {
         console.log("Ouverture de la fenêtre de connexion");
-        const authOverlay = document.getElementById("authOverlay");
-        if (authOverlay) authOverlay.classList.remove("hidden");
-        if (typeof pauseGame === 'function') pauseGame();
+        const auth = document.getElementById("authOverlay");
+        auth.classList.remove("hidden");
+        pauseGame();
         return;
       }
+
       console.log("Début de la déconnexion");
-      if (typeof logout === 'function') await logout();
+      await logout();
     });
   }
 
-// ===============================
+  // ===============================
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
-  const burgerReplayBtn = document.getElementById("burgerReplayBtn");
-  if (burgerReplayBtn) {
-    burgerReplayBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
+
+  document.getElementById("burgerReplayBtn").addEventListener("click", () => {
+    playClickSound();
+    localStorage.removeItem("currentGameState");
+    startNewGame();
+    initGame();
+  });
+
+  document.getElementById("burgerStepBtn").addEventListener("click", () => {
+    playClickSound();
+
+    if (!tutorialRunning) {
       localStorage.removeItem("currentGameState");
-      if (typeof startNewGame === 'function') startNewGame();
-      if (typeof initGame === 'function') initGame();
-    });
-  }
+      document.getElementById("readyModal").classList.add("hidden");
+      resetGameState();
+      initMaltaCross();
+      redrawEverything();
+      initGame();
+      runTutorial();
+    }
+  });
 
-  const burgerStepBtn = document.getElementById("burgerStepBtn");
-  if (burgerStepBtn) {
-    burgerStepBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (!tutorialRunning) {
-        localStorage.removeItem("currentGameState");
-        const readyModal = document.getElementById("readyModal");
-        if (readyModal) readyModal.classList.add("hidden");
-        if (typeof resetGameState === 'function') resetGameState();
-        if (typeof initMaltaCross === 'function') initMaltaCross();
-        if (typeof redrawEverything === 'function') redrawEverything();
-        if (typeof initGame === 'function') initGame();
-        if (typeof runTutorial === 'function') runTutorial();
-      }
-    });
-  }
+  document.getElementById("burgerHelpBtn").addEventListener("click", () => {
+    openHelpOverlay(false);
+    pauseGame();
+  });
 
-  const burgerHelpBtn = document.getElementById("burgerHelpBtn");
-  if (burgerHelpBtn) {
-    burgerHelpBtn.addEventListener("click", () => {
-      if (typeof openHelpOverlay === 'function') openHelpOverlay(false);
-      if (typeof pauseGame === 'function') pauseGame();
-    });
-  }
+  document.getElementById("burgerSoundBtn").addEventListener("click", () => {
+    playClickSound();
+    soundEnabled = !soundEnabled;
+    updateSoundButton();
+  });
 
-  const burgerSoundBtn = document.getElementById("burgerSoundBtn");
-  if (burgerSoundBtn) {
-    burgerSoundBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      soundEnabled = !soundEnabled;
-      if (typeof updateSoundButton === 'function') updateSoundButton();
-    });
-  }
-
-// ===============================
-//   READY BUTTON
-// ===============================
-  const readyBtn = document.getElementById("readyBtn");
-  if (readyBtn) {
-    readyBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const readyModal = document.getElementById("readyModal");
-      if (readyModal) readyModal.classList.add("hidden");
-      if (typeof initGame === 'function') initGame();
-      const board = document.getElementById("canvasContainer");
-      if (board) {
-        board.classList.remove("show");
-        board.classList.add("slide-in-premium");
-        void board.offsetWidth;
-        board.classList.add("show");
-        setTimeout(() => {
-          if (typeof playStartGameSound === 'function') playStartGameSound();
-        }, 1500);
-      }
-    });
-  } 
 
   // ===============================
-  //   ÉCOUTEURS DE CONNEXION/INSCRIPTION
+  //   READY BUTTON
   // ===============================
 
-  // Écouteur pour le bouton "Se connecter"
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      if (typeof playClickSound === 'function') playClickSound();
+  document.getElementById("readyBtn").addEventListener("click", () => {
 
-      const email = document.getElementById("authEmail")?.value.trim();
-      const password = document.getElementById("authPassword")?.value.trim();
+    playClickSound()
 
-      if (!email || !password) {
-        alert("Veuillez remplir tous les champs.");
-        return;
-      }
+    document.getElementById("readyModal").classList.add("hidden");
 
-      if (!email.includes("@") || !email.includes(".")) {
-        alert("Adresse email invalide.");
-        return;
-      }
+    initGame();
 
-      try {
-        console.log("Tentative de connexion avec email:", email);
-        const { data, error } = await supa.auth.signInWithPassword({
-          email,
-          password
-        });
+    const board = document.getElementById("canvasContainer");
+    board.classList.remove("show");
+    board.classList.add("slide-in-premium");
+    void board.offsetWidth;
+    board.classList.add("show");
 
-        if (error) {
-          console.error("Erreur de connexion :", error);
-          alert("Erreur : " + error.message);
-          return;
-        }
-
-        // Récupérer la session après la connexion
-        const { data: { session }, error: sessionError } = await supa.auth.getSession();
-
-        if (sessionError || !session) {
-          console.error("Erreur récupération session :", sessionError);
-          alert("Impossible de récupérer la session.");
-          return;
-        }
-
-        // Stocker le JWT après connexion
-        localStorage.setItem('supabase.access.token', session.access_token);
-        localStorage.setItem('supabase.refresh.token', session.refresh_token);
-
-        // Fermer la fenêtre de connexion
-        const authOverlay = document.getElementById("authOverlay");
-        if (authOverlay) authOverlay.classList.add("hidden");
-
-        // Mettre à jour l'UI
-        if (typeof updateAuthUI === 'function') await updateAuthUI(session.user);
-        if (typeof updateProfileInfo === 'function') await updateProfileInfo();
-
-        // Récupérer le meilleur score depuis Supabase
-        if (typeof fetchBestScore === 'function') {
-          const bestScoreData = await fetchBestScore(session.user.id);
-          if (bestScoreData && typeof saveBestScore === 'function') {
-            saveBestScore(bestScoreData);
-            console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
-          }
-        }
-
-        // Mettre à jour l'affichage du meilleur score
-        if (typeof updateBestScoreTop === 'function') updateBestScoreTop();
-      } catch (err) {
-        console.error("Erreur inattendue lors de la connexion :", err);
-        alert("Une erreur inattendue est survenue.");
-      }
-    });
-  }
-
-  // Écouteur pour le bouton "S'inscrire"
-  const signupBtn = document.getElementById("signupBtn");
-  if (signupBtn) {
-    signupBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const authOverlay = document.getElementById("authOverlay");
-      const signupModal = document.getElementById("signupModal");
-      if (authOverlay) authOverlay.classList.add("hidden");
-      if (signupModal) signupModal.classList.remove("hidden");
-    });
-  }
-
-  // Écouteur pour le bouton "Confirmer l'inscription"
-  const signupConfirmBtn = document.getElementById("signupConfirmBtn");
-  if (signupConfirmBtn) {
-    signupConfirmBtn.addEventListener("click", async () => {
-      if (typeof playClickSound === 'function') playClickSound();
-
-      const email = document.getElementById("authEmail")?.value.trim();
-      const password = document.getElementById("authPassword")?.value.trim();
-      const pseudo = document.getElementById("signupPseudoInput")?.value.trim();
-
-      if (!email || !password || !pseudo) {
-        alert("Merci de remplir tous les champs.");
-        return;
-      }
-
-      try {
-        // Vérification pseudo unique
-        const { data: existingPseudo, error: checkPseudoError } = await supa
-          .from("players")
-          .select("id")
-          .eq("pseudo", pseudo)
-          .maybeSingle();
-
-        if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
-          console.error("Erreur SELECT pseudo :", checkPseudoError);
-          alert("Erreur interne.");
-          return;
-        }
-
-        if (existingPseudo) {
-          alert("Ce pseudo est déjà pris.");
-          return;
-        }
-
-        // Inscription de l'utilisateur
-        const { data: signupData, error: signupError } = await supa.auth.signUp({
-          email,
-          password
-        });
-
-        if (signupError) {
-          console.error("Erreur lors de l'inscription :", signupError);
-          alert("Erreur lors de l'inscription : " + signupError.message);
-          return;
-        }
-
-        // Connexion automatique après l'inscription
-        const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
-          email,
-          password
-        });
-
-        if (signinError) {
-          console.error("Erreur lors de la connexion après inscription :", signinError);
-          alert("Erreur lors de la connexion : " + signinError.message);
-          return;
-        }
-
-        // Récupérer la session après la connexion
-        const { data: { session }, error: sessionError } = await supa.auth.getSession();
-
-        if (sessionError || !session) {
-          console.error("Erreur récupération session :", sessionError);
-          alert("Impossible de récupérer la session.");
-          return;
-        }
-
-        // Stocker le JWT après connexion
-        localStorage.setItem('supabase.access.token', session.access_token);
-        localStorage.setItem('supabase.refresh.token', session.refresh_token);
-
-        const userId = session.user.id;
-        console.log("ID de l'utilisateur :", userId);
-
-        // Vérifier si le joueur existe déjà dans la table players
-        const { data: existingPlayer, error: checkPlayerError } = await supa
-          .from("players")
-          .select("id")
-          .eq("id", userId)
-          .maybeSingle();
-
-        if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
-          console.error("Erreur SELECT player :", checkPlayerError);
-          alert("Erreur interne.");
-          return;
-        }
-
-        // Insertion dans players
-        if (existingPlayer) {
-          console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
-
-          const { error: updateError } = await supa
-            .from("players")
-            .update({
-              pseudo: pseudo
-            })
-            .eq("id", userId);
-
-          if (updateError) {
-            console.error("Erreur UPDATE player :", updateError);
-            alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
-          } else {
-            console.log("Pseudo mis à jour avec succès dans la table players.");
-          }
-        } else {
-          console.log("Insertion d'un nouveau joueur dans la table players...");
-          const { error: insertError } = await supa
-            .from("players")
-            .insert({
-              id: userId,
-              pseudo: pseudo,
-              created_at: new Date().toISOString(),
-              premium: false
-            });
-
-          if (insertError) {
-            console.error("Erreur INSERT player :", insertError);
-            alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
-          } else {
-            console.log("Joueur inséré avec succès dans la table players.");
-          }
-        }
-
-        // Mise à jour UI
-        if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
-
-        // Fermeture modals
-        const signupModal = document.getElementById("signupModal");
-        if (signupModal) signupModal.classList.add("hidden");
-        if (typeof playSound === 'function') playSound("successSound");
-        alert("Compte créé ! Bienvenue dans le jeu.");
-      } catch (err) {
-        console.error("Erreur inattendue lors de l'inscription :", err);
-        alert("Une erreur inattendue est survenue.");
-      }
-    });
-  }
+    setTimeout(() => playStartGameSound(), 1500);
+  });
 
   // ===============================
-  //   GESTION DU MENU PROFIL
+  //   PROFIL
   // ===============================
-  const profileBtn = document.getElementById("profileBtn");
+
+async function ouvrirProfil() {
+  const user = await getSession();
+  if (!user) return;
+
+  const { data: player } = await supa
+    .from("players")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+ document.getElementById("profilePseudoInput").value = player.pseudo || "";
+ document.getElementById("profileAvatarPreview").src = player.avatar_url || "avatarDefault.png";
+  const modal = document.getElementById("profileModal");
+  modal.classList.remove("hidden");
+}
+
+// Écouteurs existants
+document.getElementById("profileCloseBtn").addEventListener("click", () => {
+  document.getElementById("profileModal").classList.add("hidden");
+});
+document.getElementById("profileSaveBtn").addEventListener("click", async () => {
+  const user = await getSession();
+  if (!user) return;
+
+  const pseudo = document.getElementById("profilePseudoInput").value.trim();
+  const avatarFile = document.getElementById("profileAvatarInput").files[0];
+
+ let avatarUrl = null;
+
+  if (avatarFile) {
+    const path = `avatars/${user.id}.png`;
+ // Upload de l'avatar
+    await supa.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+    // Récupère l'URL publique de manière asynchrone
+    const { data } = await supa.storage.from("avatars").getPublicUrl(path);
+    avatarUrl = data.publicUrl;
+  }
+
+  // Met à jour le profil du joueur
+  await supa
+    .from("players")
+    .update({
+      pseudo: pseudo,
+      ...(avatarUrl && { avatar_url: avatarUrl })
+    })
+    .eq("id", user.id);
+
+  localStorage.setItem("playerPseudo", pseudo);
+
+  // Met à jour l'UI
+  await updateAuthUI(user);
+  await updateProfileInfo(); // Mettre à jour les informations du profil
+
+  document.getElementById("profileModal").classList.add("hidden");
+});
+
+// Nouveaux écouteurs pour le menu profil
+document.getElementById("profileBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+});
+
+document.addEventListener("click", (e) => {
   const profileDropdown = document.getElementById("profileDropdown");
+  const profileBtn = document.getElementById("profileBtn");
 
-  if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      console.log("Clic sur profileBtn");
-      profileDropdown.classList.toggle("show");
-      console.log("Menu déroulant affiché:", profileDropdown.classList.contains("show"));
-    });
+  if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+    profileDropdown.classList.remove("show");
+  }
+});
 
-    document.addEventListener("click", (e) => {
-      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-        profileDropdown.classList.remove("show");
-      }
-    });
+document.getElementById("togglePasswordVisibility").addEventListener("click", () => {
+  const passwordSpan = document.getElementById("profilePassword");
+  if (passwordSpan.textContent === "••••••••") {
+    passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
   } else {
-    console.error("Élément(s) du menu profil manquant(s)");
+    passwordSpan.textContent = "••••••••";
+  }
+});
+
+async function updateProfileInfo() {
+  const user = await getSession();
+  const profileBtn = document.getElementById("profileBtn");
+
+  if (!user) {
+    profileBtn.disabled = true;
+    document.getElementById("profilePseudoDisplay").textContent = "";
+    document.getElementById("profileAvatar").src = "default.png";
+    return;
+  } else {
+    profileBtn.disabled = false;
   }
 
-  // Écouteur pour afficher/masquer le mot de passe
-  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
-  if (togglePasswordVisibilityBtn) {
-    togglePasswordVisibilityBtn.addEventListener("click", () => {
-      const passwordSpan = document.getElementById("profilePassword");
-      if (passwordSpan) {
-        if (passwordSpan.textContent === "••••••••") {
-          passwordSpan.textContent = "motdepasse"; // Remplacez par la logique réelle
-        } else {
-          passwordSpan.textContent = "••••••••";
-        }
-      }
+  const { data: player, error } = await supa
+    .from("players")
+    .select("pseudo, avatar_url, created_at")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Erreur lors de la récupération des informations du profil :", error);
+    return;
+  }
+
+  document.getElementById("profilePseudoDisplay").textContent = player.pseudo || "";
+  document.getElementById("profileAvatar").src = player.avatar_url || "default.png";
+  document.getElementById("profileEmail").textContent = user.email || "";
+  document.getElementById("profileCreationDate").textContent = new Date(player.created_at).toLocaleDateString() || "";
+}
+
+document.getElementById("logoutProfileBtn").addEventListener("click", async () => {
+  await logout();
+  document.getElementById("profileDropdown").classList.remove("show");
+});
+
+document.getElementById("editProfileBtn").addEventListener("click", async () => {
+  await ouvrirProfil();
+});
+
+// Appeler updateProfileInfo au démarrage et après connexion/déconnexion
+updateProfileInfo();
+
+// ===============================
+//   AUTHENTIFICATION (v1)
+// ===============================
+
+document.getElementById("closeAuthBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("authOverlay").classList.add("hidden");
+});
+
+document.getElementById("closeSignupBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
+
+// --- SIGNUP ---
+document.getElementById("signupBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("authOverlay").classList.add("hidden");
+  document.getElementById("signupModal").classList.remove("hidden");
+});
+
+document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+  playClickSound();
+
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
+  const pseudo = document.getElementById("signupPseudoInput").value.trim();
+
+  if (!email || !password || !pseudo) {
+    alert("Merci de remplir tous les champs.");
+    return;
+  }
+
+  // Vérification pseudo unique
+  const { data: existingPseudo, error: checkPseudoError } = await supa
+    .from("players")
+    .select("id")
+    .eq("pseudo", pseudo)
+    .maybeSingle();
+
+  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
+    console.error("Erreur SELECT pseudo :", checkPseudoError);
+    alert("Erreur interne.");
+    return;
+  }
+
+  if (existingPseudo) {
+    alert("Ce pseudo est déjà pris.");
+    return;
+  }
+
+  // Inscription de l'utilisateur
+  const { data: signupData, error: signupError } = await supa.auth.signUp({
+    email,
+    password
+  });
+
+  if (signupError) {
+    console.error("Erreur lors de l'inscription :", signupError);
+    alert("Erreur lors de l'inscription : " + signupError.message);
+    return;
+  }
+
+  // Connexion automatique après l'inscription
+  const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (signinError) {
+    console.error("Erreur lors de la connexion après inscription :", signinError);
+    alert("Erreur lors de la connexion : " + signinError.message);
+    return;
+  }
+
+  // Récupérer la session après la connexion
+  const { data: { session }, error: sessionError } = await supa.auth.getSession();
+
+  if (sessionError || !session) {
+    console.error("Erreur récupération session :", sessionError);
+    alert("Impossible de récupérer la session.");
+    return;
+  }
+
+  // Stocker le JWT après connexion
+  localStorage.setItem('supabase.access.token', session.access_token);
+  localStorage.setItem('supabase.refresh.token', session.refresh_token);
+
+  const userId = session.user.id;
+  console.log("ID de l'utilisateur :", userId);
+
+  // Vérifier si le joueur existe déjà dans la table players
+  const { data: existingPlayer, error: checkPlayerError } = await supa
+    .from("players")
+    .select("id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
+    console.error("Erreur SELECT player :", checkPlayerError);
+    alert("Erreur interne.");
+    return;
+  }
+
+  // Insertion dans players
+  if (existingPlayer) {
+    console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+
+    const { error: updateError } = await supa
+      .from("players")
+      .update({
+        pseudo: pseudo
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Erreur UPDATE player :", updateError);
+      alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
+    } else {
+      console.log("Pseudo mis à jour avec succès dans la table players.");
+    }
+  } else {
+    console.log("Insertion d'un nouveau joueur dans la table players...");
+    const { error: insertError } = await supa
+      .from("players")
+      .insert({
+        id: userId,
+        pseudo: pseudo,
+        created_at: new Date().toISOString(),
+        premium: false
+      });
+
+    if (insertError) {
+      console.error("Erreur INSERT player :", insertError);
+      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
+    } else {
+      console.log("Joueur inséré avec succès dans la table players.");
+    }
+  }
+
+  // Mise à jour UI
+  updateAuthUI(session.user);
+
+  // Fermeture modals
+  document.getElementById("signupModal").classList.add("hidden");
+  playSound("successSound");
+  alert("Compte créé ! Bienvenue dans le jeu.");
+});
+
+document.getElementById("signupCloseBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
+
+// --- LOGIN ---
+document.getElementById("loginBtn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  playClickSound();
+
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value.trim();
+
+  if (!email || !password) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
+
+  if (!email.includes("@") || !email.includes(".")) {
+    alert("Adresse email invalide.");
+    return;
+  }
+
+  try {
+    const { data, error } = await supa.auth.signInWithPassword({
+      email,
+      password
     });
-  }
 
-  // Écouteur pour la déconnexion
-  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
-  if (logoutProfileBtn) {
-    logoutProfileBtn.addEventListener("click", async () => {
-      if (typeof logout === 'function') await logout();
-      if (profileDropdown) profileDropdown.classList.remove("show");
+    if (error) {
+      console.error("Erreur de connexion :", error);
+      alert("Erreur : " + error.message);
+      return;
+    }
+
+    // Récupérer la session après la connexion
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+
+    if (sessionError || !session) {
+      console.error("Erreur récupération session :", sessionError);
+      alert("Impossible de récupérer la session.");
+      return;
+    }
+
+    // Stocker le JWT après connexion
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+
+    // Récupérer le meilleur score depuis Supabase
+    const bestScoreData = await fetchBestScore(session.user.id);
+    if (bestScoreData) {
+      saveBestScore(bestScoreData);
+      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+    }
+
+    document.getElementById("authOverlay").classList.add("hidden");
+
+    await updateAuthUI(session.user).catch(err => {
+      console.error("Erreur dans updateAuthUI :", err);
     });
+
+    if (session.user) {
+      const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
+        console.error("Erreur lors de la récupération du pseudo :", err);
+        return null;
+      });
+      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+    }
+
+    // Mettre à jour l'affichage du meilleur score
+    updateBestScoreTop();
+  } catch (err) {
+    console.error("Erreur inattendue lors de la connexion :", err);
+    alert("Une erreur inattendue est survenue.");
   }
+});
 
-  // Écouteur pour ouvrir la modale de modification du profil
-  const editProfileBtn = document.getElementById("editProfileBtn");
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener("click", async () => {
-      if (typeof ouvrirProfil === 'function') await ouvrirProfil();
-    });
+// Fonction pour récupérer le meilleur score depuis Supabase
+async function fetchBestScore(userId) {
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.error("Aucun JWT trouvé.");
+      return null;
+    }
+
+    supa.auth.setSession(token);
+
+    const { data, error } = await supa
+      .from("scores")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du meilleur score :", error);
+      return null;
+    }
+
+    if (data) {
+      data.duration = Math.floor(data.duration_ms / 1000);
+      delete data.duration_ms;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Erreur inattendue lors de la récupération du meilleur score :", err);
+    return null;
   }
-
-  // Mettre à jour les informations du profil
-  if (typeof updateProfileInfo === 'function') updateProfileInfo();
-
-  
-
-  
+}
 
 // ===============================
 //   WHY SIGNUP
@@ -2684,5 +2633,4 @@ document.getElementById("whySignupContinueBtn").addEventListener("click", () => 
   closeWhySignup();
   document.getElementById("readyModal").classList.remove("hidden");
 });
-  
 });
