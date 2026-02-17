@@ -2234,17 +2234,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   const profileDropdown = document.getElementById("profileDropdown");
 
   if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      profileDropdown.classList.toggle("show");
-    });
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isShowing = profileDropdown.classList.toggle("show");
 
-    document.addEventListener("click", (e) => {
-      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-        profileDropdown.classList.remove("show");
-      }
-    });
-  }
+    // Animation supplémentaire
+    if (isShowing) {
+      profileDropdown.style.transform = "scaleY(1)";
+      profileDropdown.style.opacity = "1";
+    } else {
+      profileDropdown.style.transform = "scaleY(0.9)";
+      profileDropdown.style.opacity = "0";
+    }
+  });
+
+  // Fermeture quand on clique ailleurs
+  document.addEventListener("click", (e) => {
+    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+      profileDropdown.style.transform = "scaleY(0.9)";
+      profileDropdown.style.opacity = "0";
+    }
+  });
+}
 
   // Écouteur pour afficher/masquer le mot de passe
   const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
