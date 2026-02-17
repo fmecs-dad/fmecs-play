@@ -276,6 +276,7 @@ async function ouvrirProfil() {
 }
 
 async function updateProfileInfo() {
+  console.log("[updateProfileInfo] Appel détecté - Stack trace:", new Error().stack);
   // 1. Vérification précoce : si pas de token, on sort immédiatement
   const token = localStorage.getItem('supabase.access.token');
   if (!token) {
