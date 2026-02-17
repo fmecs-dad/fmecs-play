@@ -2011,58 +2011,55 @@ function handleFirstLaunchFlow(userFromEvent) {
 let gameStarted = false; // global
 
 function initialFlow(user) {
-  console.log("=== initialFlow appelé ===", { user });
+  console.log("initialFlow appelé avec user :", user);
 
-  // 1. Récupération des valeurs avec fallback
-  const lastEmail = localStorage.getItem("lastEmail") || null;
-  const skipWhySignup = localStorage.getItem("skipWhySignup") === "1";
-  const helpSeen = localStorage.getItem("helpSeen") === "true";
+  let lastEmail;
+  let skip;
 
-  console.log("État actuel :", {
-    user: !!user,
-    lastEmail,
-    skipWhySignup,
-    helpSeen,
-    readyModalExists: !!document.getElementById("readyModal"),
-    whySignupModalExists: !!document.getElementById("whySignupModal")
-  });
+  try {
+    lastEmail = localStorage.getItem("lastEmail");
+    skip = localStorage.getItem("skipWhySignup") === "1";
+  } catch (err) {
+    console.error("Erreur d'accès à localStorage :", err);
+    lastEmail = null;
+    skip = false;
+  }
 
-  // 2. Logique d'affichage des modales
+  console.log("lastEmail :", lastEmail);
+  console.log("skip :", skip);
+
+  // 1. Utilisateur connecté → readyModal
   if (user) {
-    // Utilisateur connecté → Toujours readyModal
-    console.log("→ Affichage de readyModal (utilisateur connecté)");
+    console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
+    return;
   }
-  else {
-    // Utilisateur déconnecté
-    if (skipWhySignup) {
-      // A choisi "Ne plus me rappeler" → readyModal
-      console.log("→ Affichage de readyModal (skipWhySignup)");
-      showReadyModal("disconnected_skip");
-    }
-    else if (lastEmail) {
-      // A déjà saisi un email → whySignupModal
-      console.log("→ Affichage de whySignupModal (lastEmail existe)");
-      const whySignupModal = document.getElementById("whySignupModal");
-      if (whySignupModal) {
-        whySignupModal.classList.remove("hidden");
-      } else {
-        console.error("whySignupModal non trouvé dans le DOM");
-        showReadyModal("fallback_no_whySignup");
-      }
-    }
-    else {
-      // Nouveau visiteur → whySignupModal
-      console.log("→ Affichage de whySignupModal (nouveau visiteur)");
-      const whySignupModal = document.getElementById("whySignupModal");
-      if (whySignupModal) {
-        whySignupModal.classList.remove("hidden");
-      } else {
-        console.error("whySignupModal non trouvé dans le DOM");
-        showReadyModal("fallback_no_whySignup");
-      }
-    }
+
+  // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
+  if (skip) {
+    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
+    showReadyModal("skipWhySignup");
+    return;
   }
+
+  // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
+  if (lastEmail) {
+    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
+    document.getElementById("whySignupModal").classList.remove("hidden");
+    return;
+  }
+
+  // 4. Nouveau joueur → whySignupModal
+  if (!lastEmail) {
+    console.log("Nouveau joueur, affichage de whySignupModal...");
+    document.getElementById("whySignupModal").classList.remove("hidden");
+    return;
+  }
+
+  // 5. Fallback (ne devrait jamais arriver)
+  console.log("Fallback, affichage de authOverlay...");
+  const auth = document.getElementById("authOverlay");
+  auth.classList.remove("hidden");
 }
 
 function showReadyModal(reason) {
