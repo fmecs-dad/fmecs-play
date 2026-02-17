@@ -431,6 +431,7 @@ async function checkSessionOnStartup() {
 // ===============================
 //   FONCTIONS DE BASE DU JEU
 // ===============================
+
 function resetGameState() {
   selectedStart = null;
   score = 0;
@@ -456,40 +457,6 @@ function resetGameState() {
   historyList.innerHTML = "";
 
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-}
-
-function initGame() {
-
-  const undoBtn = document.getElementById("undoBtn");
-  if (undoBtn) {
-    undoBtn.disabled = false;
-    undoBtn.classList.remove("disabled");
-  }
-
-  //const restored = false;
-  const restored = restoreGameState();
-
-  if (!restored || gameOver) {
-    resetGameState();
-    initMaltaCross();
-  }
-
-  redrawEverything();
-
-  updateCounters();
-  document.getElementById("undoCount").textContent = undoCount;
-  updateSoundButton();
-  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
-
-  gameOver = false;
-  paused = false;
-
-  updateBestScoreTop();
-
-  //if (!paused && !gameOver) {
-  //  startTimer();
- // }
-
 }
 
 function restoreGameState() {
@@ -2019,6 +1986,39 @@ function playTutorialStep() {
     });
 }
 
+// ===============================
+//   INITIALISATION DU JEU (GLOBAL !)
+// ===============================
+
+function initGame() {
+
+  const undoBtn = document.getElementById("undoBtn");
+  if (undoBtn) {
+    undoBtn.disabled = false;
+    undoBtn.classList.remove("disabled");
+  }
+
+  //const restored = false;
+  const restored = restoreGameState();
+
+  if (!restored || gameOver) {
+    resetGameState();
+    initMaltaCross();
+  }
+
+  redrawEverything();
+
+  updateCounters();
+  document.getElementById("undoCount").textContent = undoCount;
+  updateSoundButton();
+  document.getElementById("timerValue").textContent = formatTime(timerSeconds);
+
+  gameOver = false;
+  paused = false;
+
+  updateBestScoreTop();
+
+}
 
 // ===============================
 //   FIRST LAUNCH FLOW
