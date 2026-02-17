@@ -275,40 +275,42 @@ async function ouvrirProfil() {
   if (modal) modal.classList.remove("hidden");
 }
 
-async function updateProfileInfo() {
-  console.log("[updateProfileInfo] Appel détecté - Stack trace:", new Error().stack);
-  // 1. Vérification précoce : si pas de token, on sort immédiatement
-  const token = localStorage.getItem('supabase.access.token');
-  if (!token) {
-    const profileBtn = document.getElementById("profileBtn");
-    if (profileBtn) profileBtn.disabled = true;
-    return; // ← Sortie immédiate si pas de token
+async function updateProfileInfo(force = false) {
+  // 1. Vérification stricte de la connexion
+  if (!force) {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.log("[updateProfileInfo] Pas de token - sortie immédiate");
+      const profileBtn = document.getElementById("profileBtn");
+      if (profileBtn) profileBtn.disabled = true;
+      return;
+    }
   }
 
-  // 2. Récupération de l'utilisateur (avec gestion d'erreur)
+  // 2. Vérification de l'utilisateur
   let user;
   try {
     const { data: { user: currentUser }, error } = await supa.auth.getUser();
     if (error) {
-      console.warn("Utilisateur non connecté (token expiré ou invalide)");
-      localStorage.removeItem('supabase.access.token'); // Nettoyage
+      console.warn("[updateProfileInfo] Utilisateur non connecté (token invalide)");
+      localStorage.removeItem('supabase.access.token');
       localStorage.removeItem('supabase.refresh.token');
       return;
     }
     user = currentUser;
   } catch (err) {
-    console.warn("Erreur lors de la récupération de l'utilisateur:", err.message);
+    console.warn("[updateProfileInfo] Erreur utilisateur:", err.message);
     return;
   }
 
-  // 3. Si pas d'utilisateur, on sort
   if (!user) {
+    console.log("[updateProfileInfo] Pas d'utilisateur - sortie");
     const profileBtn = document.getElementById("profileBtn");
     if (profileBtn) profileBtn.disabled = true;
     return;
   }
 
-  // 4. Le reste de votre code existant pour les utilisateurs connectés...
+  // 3. Mise à jour du profil (votre code existant)
   const profileBtn = document.getElementById("profileBtn");
   if (profileBtn) profileBtn.disabled = false;
 
@@ -321,27 +323,34 @@ async function updateProfileInfo() {
 
     if (error) throw error;
 
-    // ... (votre code existant pour afficher les infos du profil)
+    // ... (le reste de votre code existant)
   } catch (error) {
-    console.error("Erreur profil:", error);
+    console.error("[updateProfileInfo] Erreur profil:", error);
   }
 }
 
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
-  const token = localStorage.getItem('supabase.access.token');
-  if (!token) {
-    console.log("Aucun JWT trouvé.");
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.log("[getSession] Aucun token trouvé");
+      return null;
+    }
+
+    const { data: { user }, error } = await supa.auth.getUser();
+    if (error) {
+      console.warn("[getSession] Token invalide:", error.message);
+      localStorage.removeItem('supabase.access.token');
+      localStorage.removeItem('supabase.refresh.token');
+      return null;
+    }
+
+    return user;
+  } catch (err) {
+    console.error("[getSession] Erreur:", err);
     return null;
   }
-
-  const { data: { user }, error } = await supa.auth.getUser(token);
-  if (error) {
-    console.error("Erreur lors de la récupération de l'utilisateur :", error);
-    return null;
-  }
-
-  return user;
 }
 
 // Fonction de déconnexion
@@ -2123,45 +2132,44 @@ function closeWhySignup() {
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // Nettoyage des tokens invalides au démarrage
-  const token = localStorage.getItem('supabase.access.token');
-if (token) {
-  try {
-    // Test rapide du token
-    await supa.auth.getUser();
-  } catch (err) {
-    console.warn("Token invalide détecté, nettoyage...");
-    localStorage.removeItem('supabase.access.token');
-    localStorage.removeItem('supabase.refresh.token');
-  }
-}
   console.log("=== [DOMContentLoaded] Début ===");
+
+  // 1. Nettoyage initial des tokens invalides
+  const token = localStorage.getItem('supabase.access.token');
+  if (token) {
+    try {
+      await supa.auth.getUser();
+    } catch (err) {
+      console.warn("[DOMContentLoaded] Token invalide - nettoyage");
+      localStorage.removeItem('supabase.access.token');
+      localStorage.removeItem('supabase.refresh.token');
+    }
+  }
+
+  // 2. Vérification de la session
   try {
-    // 1. Vérification de la session
     const { data: { session }, error } = await supa.auth.getSession();
 
     if (session) {
-      console.log("[DOMContentLoaded] Utilisateur connecté");
+      console.log("[DOMContentLoaded] Session valide détectée");
       localStorage.setItem('supabase.access.token', session.access_token);
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
-      updateProfileInfo(); // ← Seulement ici (si connecté)
+      updateProfileInfo(); // Seulement ici pour les connectés
     } else {
-      console.log("[DOMContentLoaded] Aucun utilisateur connecté");
+      console.log("[DOMContentLoaded] Aucune session active");
       updateAuthUI(null);
-      // PAS d'appel à updateProfileInfo
     }
 
-    // 2. Appel systématique à initialFlow
-    const user = session ? session.user : null;
+    // 3. Initialisation du flux (toujours appelé)
+    const user = await getSession();
     initialFlow(user);
 
   } catch (err) {
     console.error("[DOMContentLoaded] Erreur:", err);
     updateAuthUI(null);
     initialFlow(null);
-    // PAS d'appel à updateProfileInfo
   }
 
   // 2. Activation des comportements des modales
