@@ -255,24 +255,36 @@ async function initialiserProfilEtLancerJeu(session) {
 // ===============================
 async function ouvrirProfil() {
   const user = await getSession();
-  if (!user) return;
-
-  const { data: player } = await supa
-    .from("players")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (player) {
-    document.getElementById("profilePseudoInput").value = player.pseudo || "";
-    document.getElementById("profileAvatarPreview").src = player.avatar_url || "images/avatarDefault.png";
-  } else {
-    document.getElementById("profilePseudoInput").value = "";
-    document.getElementById("profileAvatarPreview").src = "images/avatarDefault.png";
+  if (!user) {
+    console.warn("Tentative d'ouverture du profil sans utilisateur connecté");
+    return;
   }
 
-  const modal = document.getElementById("profileModal");
-  if (modal) modal.classList.remove("hidden");
+  try {
+    const { data: player, error } = await supa
+      .from("players")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error) throw error;
+
+    // Remplit les champs de la modale
+    document.getElementById("profilePseudoInput").value = player?.pseudo || "";
+    document.getElementById("profileAvatarPreview").src = player?.avatar_url || "images/avatarDefault.png";
+    document.getElementById("profileEmailInput").value = user.email || "";
+
+    // Affiche la modale
+    const modal = document.getElementById("profileModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      // Réinitialise les messages d'erreur
+      document.getElementById("profileErrorMessage")?.classList.add("hidden");
+    }
+  } catch (err) {
+    console.error("Erreur lors de l'ouverture du profil:", err);
+    alert("Impossible de charger vos informations de profil.");
+  }
 }
 
 async function updateProfileInfo(force = false) {
