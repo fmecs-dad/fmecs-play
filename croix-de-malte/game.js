@@ -2119,18 +2119,11 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Vérification de session et initialisation
-  try {
   const { data: { session }, error } = await supa.auth.getSession();
   if (session) {
-    localStorage.setItem('supabase.access.token', session.access_token);
-    localStorage.setItem('supabase.refresh.token', session.refresh_token);
-    await initialiserProfilEtLancerJeu(session);  // Appel original
+    await initialiserProfilEtLancerJeu(session);
     updateAuthUI(session.user);
   } else {
-    updateAuthUI(null);
-  }
-  } catch (err) {
-    console.error("Erreur lors de la vérification de la session:", err);
     updateAuthUI(null);
   }
 
