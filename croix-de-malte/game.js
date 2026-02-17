@@ -432,24 +432,30 @@ async function checkSessionOnStartup() {
 //   FONCTIONS DE BASE DU JEU
 // ===============================
 function resetGameState() {
-  validatedSegments = [];
-  score = 0;
-  timerStart = null;
-  timerRunning = false;
-  gameOver = false;
-  jokersUsed = 0;
-  undosUsed = 0;
   selectedStart = null;
+  score = 0;
+  paused = false;
+  gameOver = false;
+  activePoints = new Set();
+  permanentPoints = new Set();
+  usedEdges = new Set();
+  validatedSegments = [];
+  jokersAvailable = 0;
+  jokersTotal = 0;
+  undoCount = 0;
+  document.getElementById("undoCount").textContent = "0";
 
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
+  const stepBtn = document.getElementById("burgerStepBtn");
+  stepBtn.disabled = false;
+  stepBtn.classList.remove("disabled");
 
-  if (ctx && canvas) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (typeof drawGrid === 'function') drawGrid();
-  }
+
+  resetTimer();
+
+  const historyList = document.getElementById("historyList");
+  historyList.innerHTML = "";
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
 
 function initGame() {
