@@ -135,19 +135,17 @@ async function getSession() {
   return user;
 }
 
-// Fonction pour récupérer le pseudo
+// Fonction pour récupérer le pseudo (version corrigée)
 async function fetchPlayerPseudo(userId) {
-  const token = localStorage.getItem('supabase.access.token');
-
-  if (!token) {
-    console.error("Aucun JWT trouvé.");
-    return null;
-  }
-
-  // Configurer le client Supabase avec le JWT
-  supa.auth.setSession(token);
-
   try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.error("Aucun token trouvé pour fetchPlayerPseudo");
+      return null;
+    }
+
+    supa.auth.setSession(token);
+
     const { data, error } = await supa
       .from("players")
       .select("pseudo")
@@ -155,13 +153,14 @@ async function fetchPlayerPseudo(userId) {
       .single();
 
     if (error) {
-      console.error("Erreur lors de la récupération du pseudo :", error);
+      console.error("Erreur lors de la récupération du pseudo:", error);
       return null;
     }
 
-    return data.pseudo;
+    return data?.pseudo || null;
+
   } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du pseudo :", err);
+    console.error("Erreur inattendue dans fetchPlayerPseudo:", err);
     return null;
   }
 }
@@ -2698,35 +2697,6 @@ async function fetchBestScore(userId) {
   }
 }
 
-// Fonction pour récupérer le pseudo (version corrigée)
-async function fetchPlayerPseudo(userId) {
-  try {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) {
-      console.error("Aucun token trouvé pour fetchPlayerPseudo");
-      return null;
-    }
-
-    supa.auth.setSession(token);
-
-    const { data, error } = await supa
-      .from("players")
-      .select("pseudo")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      console.error("Erreur lors de la récupération du pseudo:", error);
-      return null;
-    }
-
-    return data?.pseudo || null;
-
-  } catch (err) {
-    console.error("Erreur inattendue dans fetchPlayerPseudo:", err);
-    return null;
-  }
-}
 
   // ===============================
   //   WHY SIGNUP
