@@ -2569,9 +2569,7 @@ if (burgerHelpBtn) {
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
 
-  // --- LOGIN --- Version finale corrigée
-
-// Écouteur pour le bouton "Se connecter" dans la modale d'authentification
+// --- LOGIN ---
 document.getElementById("loginBtn").addEventListener("click", async (e) => {
   e.preventDefault();
   playClickSound();
@@ -2601,24 +2599,42 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
       return;
     }
 
+    // Récupérer la session après la connexion
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
-    if (sessionError) {
-      console.error("Erreur lors de la récupération de la session :", sessionError);
-      alert("Erreur lors de la récupération de la session.");
+
+    if (sessionError || !session) {
+      console.error("Erreur récupération session :", sessionError);
+      alert("Impossible de récupérer la session.");
       return;
     }
 
-    // Stockage des tokens
+    // Stocker le JWT après connexion
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
-    // Fermeture de la modale
+    // Récupérer le meilleur score depuis Supabase
+    const bestScoreData = await fetchBestScore(session.user.id);
+    if (bestScoreData) {
+      saveBestScore(bestScoreData);
+      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+    }
+
     document.getElementById("authOverlay").classList.add("hidden");
 
-    // Mise à jour de l'UI et relancement du flux d'initialisation
-    await updateAuthUI(data.user);
-    await initialiserProfilEtLancerJeu(session);  // Appel crucial pour afficher readyModal
+    await updateAuthUI(session.user).catch(err => {
+      console.error("Erreur dans updateAuthUI :", err);
+    });
 
+    if (session.user) {
+      const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
+        console.error("Erreur lors de la récupération du pseudo :", err);
+        return null;
+      });
+      if (pseudo) localStorage.setItem("playerPseudo", pseudo);
+    }
+
+    // Mettre à jour l'affichage du meilleur score
+    updateBestScoreTop();
   } catch (err) {
     console.error("Erreur inattendue lors de la connexion :", err);
     alert("Une erreur inattendue est survenue.");
