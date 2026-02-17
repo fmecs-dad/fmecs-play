@@ -2676,28 +2676,23 @@ async function fetchBestScore(userId) {
 }
 
 
-  // ===============================
-  //   WHY SIGNUP
-  // ===============================
-  const whySignupRegisterBtn = document.getElementById("whySignupRegisterBtn");
-  if (whySignupRegisterBtn) {
-    whySignupRegisterBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof closeWhySignup === 'function') closeWhySignup();
-      const authOverlay = document.getElementById("authOverlay");
-      if (authOverlay) authOverlay.classList.remove("hidden");
-    });
-  }
+// ===============================
+//   WHY SIGNUP
+// ===============================
 
-  const whySignupContinueBtn = document.getElementById("whySignupContinueBtn");
-  if (whySignupContinueBtn) {
-    whySignupContinueBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const dontRemind = document.getElementById("whySignupDontRemind")?.checked;
-      if (dontRemind) localStorage.setItem("skipWhySignup", "1");
-      if (typeof closeWhySignup === 'function') closeWhySignup();
-      const readyModal = document.getElementById("readyModal");
-      if (readyModal) readyModal.classList.remove("hidden");
-    });
-  }
+document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
+  playClickSound();
+  closeWhySignup();
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
+
+document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
+  playClickSound();
+
+  const dontRemind = document.getElementById("whySignupDontRemind").checked;
+  if (dontRemind) localStorage.setItem("skipWhySignup", "1");
+
+  closeWhySignup();
+  document.getElementById("readyModal").classList.remove("hidden");
+});
 });
