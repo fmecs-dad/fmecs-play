@@ -2135,30 +2135,33 @@ if (token) {
   }
 }
   console.log("=== [DOMContentLoaded] Début ===");
-  // 1. Vérification de session et initialisation
   try {
-  const { data: { session }, error } = await supa.auth.getSession();
-  if (session) {
-    console.log("[DOMContentLoaded] Utilisateur connecté détecté");
-    localStorage.setItem('supabase.access.token', session.access_token);
-    localStorage.setItem('supabase.refresh.token', session.refresh_token);
-    await initialiserProfilEtLancerJeu(session);
-    updateAuthUI(session.user);
-  } else {
-    console.log("[DOMContentLoaded] Aucun utilisateur connecté");
-    updateAuthUI(null);
-    // PAS d'appel à updateProfileInfo ici
-  }
+    // 1. Vérification de la session
+    const { data: { session }, error } = await supa.auth.getSession();
 
-  // Appel à initialFlow (comme avant)
-  const user = session ? session.user : null;
-  console.log("[DOMContentLoaded] Appel à initialFlow avec user:", user);
-  initialFlow(user);
-} catch (err) {
-  console.error("Erreur dans DOMContentLoaded:", err);
-  updateAuthUI(null);
-  initialFlow(null); // Appel à initialFlow même en cas d'erreur
-}
+    if (session) {
+      console.log("[DOMContentLoaded] Utilisateur connecté");
+      localStorage.setItem('supabase.access.token', session.access_token);
+      localStorage.setItem('supabase.refresh.token', session.refresh_token);
+      await initialiserProfilEtLancerJeu(session);
+      updateAuthUI(session.user);
+      updateProfileInfo(); // ← Seulement ici (si connecté)
+    } else {
+      console.log("[DOMContentLoaded] Aucun utilisateur connecté");
+      updateAuthUI(null);
+      // PAS d'appel à updateProfileInfo
+    }
+
+    // 2. Appel systématique à initialFlow
+    const user = session ? session.user : null;
+    initialFlow(user);
+
+  } catch (err) {
+    console.error("[DOMContentLoaded] Erreur:", err);
+    updateAuthUI(null);
+    initialFlow(null);
+    // PAS d'appel à updateProfileInfo
+  }
 
   // 2. Activation des comportements des modales
   if (typeof enableModalBehavior === 'function') {
