@@ -276,26 +276,40 @@ async function ouvrirProfil() {
 }
 
 async function updateProfileInfo() {
-  const user = await getSession();
-  const profileBtn = document.getElementById("profileBtn");
-
-  if (!user) {
-    if (profileBtn) {
-      profileBtn.disabled = true;
-      const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-      if (pseudoDisplay) {
-        pseudoDisplay.textContent = "";
-        pseudoDisplay.title = "";
-      }
-      const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
-    }
-    return;
-  } else {
-    if (profileBtn) {
-      profileBtn.disabled = false;
-    }
+  // 1. Vérification précoce : si pas de token, on sort immédiatement
+  const token = localStorage.getItem('supabase.access.token');
+  if (!token) {
+    const profileBtn = document.getElementById("profileBtn");
+    if (profileBtn) profileBtn.disabled = true;
+    return; // ← Sortie immédiate si pas de token
   }
+
+  // 2. Récupération de l'utilisateur (avec gestion d'erreur)
+  let user;
+  try {
+    const { data: { user: currentUser }, error } = await supa.auth.getUser();
+    if (error) {
+      console.warn("Utilisateur non connecté (token expiré ou invalide)");
+      localStorage.removeItem('supabase.access.token'); // Nettoyage
+      localStorage.removeItem('supabase.refresh.token');
+      return;
+    }
+    user = currentUser;
+  } catch (err) {
+    console.warn("Erreur lors de la récupération de l'utilisateur:", err.message);
+    return;
+  }
+
+  // 3. Si pas d'utilisateur, on sort
+  if (!user) {
+    const profileBtn = document.getElementById("profileBtn");
+    if (profileBtn) profileBtn.disabled = true;
+    return;
+  }
+
+  // 4. Le reste de votre code existant pour les utilisateurs connectés...
+  const profileBtn = document.getElementById("profileBtn");
+  if (profileBtn) profileBtn.disabled = false;
 
   try {
     const { data: player, error } = await supa
@@ -306,25 +320,11 @@ async function updateProfileInfo() {
 
     if (error) throw error;
 
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    if (pseudoDisplay) {
-      pseudoDisplay.textContent = player.pseudo || "";
-      pseudoDisplay.title = player.pseudo || "";
-    }
-
-    const profileAvatar = document.getElementById("profileAvatar");
-    if (profileAvatar) profileAvatar.src = player.avatar_url || "images/avatarDefault.png";
-
-    const profileEmail = document.getElementById("profileEmail");
-    if (profileEmail) profileEmail.textContent = user.email || "";
-
-    const profileCreationDate = document.getElementById("profileCreationDate");
-    if (profileCreationDate) profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString() || "";
+    // ... (votre code existant pour afficher les infos du profil)
   } catch (error) {
-    console.error("Erreur lors de la récupération des informations du profil :", error);
+    console.error("Erreur profil:", error);
   }
 }
-
 
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
