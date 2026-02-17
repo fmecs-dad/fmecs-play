@@ -2132,7 +2132,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(session.user);
-    updateProfileInfo(); // Appel uniquement si connecté
   } else {
     console.log("[DOMContentLoaded] Aucun utilisateur connecté");
     updateAuthUI(null);
