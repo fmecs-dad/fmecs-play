@@ -399,6 +399,39 @@ async function getSession() {
   }
 }
 
+function setupProfileMenu() {
+  console.log("=== Initialisation Menu Profil ===");
+
+  // 1. Récupération des éléments
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  // 2. Vérification des éléments
+  if (!profileBtn || !profileDropdown) {
+    console.error("Menu profil: éléments manquants - profileBtn:", !!profileBtn, "profileDropdown:", !!profileDropdown);
+    return;
+  }
+
+  // 3. Configuration des écouteurs
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (profileBtn.disabled) {
+      console.log("Bouton profil désactivé - clic ignoré");
+      return;
+    }
+    console.log("Toggle menu profil");
+    profileDropdown.classList.toggle("show");
+  });
+
+  // Écouteur pour fermer le dropdown quand on clique ailleurs
+  document.addEventListener("click", (e) => {
+    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+      console.log("Fermeture menu profil (clic externe)");
+    }
+  });
+}
+
 // Fonction de déconnexion
 async function logout() {
   const { error } = await supa.auth.signOut();
@@ -2179,6 +2212,13 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("=== Initialisation DOM ===");
+  console.log("=== Vérification éléments profil ===");
+  console.log({
+    profileBtn: !!document.getElementById("profileBtn"),
+    profileDropdown: !!document.getElementById("profileDropdown"),
+    profileAvatar: !!document.getElementById("profileAvatar"),
+    profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
+  });
 
   // 1. Initialisation de base (votre code existant)
   try {
