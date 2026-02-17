@@ -220,6 +220,10 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.profile-btn:not(:disabled) {
+  cursor: pointer;  /* Curseur normal quand activé */
+}
+
 .avatar-icon {
   width: 40px;
   height: 40px;
@@ -1167,21 +1171,25 @@ footer {
   <span id="bestScoreTop" class="best-score-info"></span>
 
   <!-- Bloc 6 : Menu Profil -->
-  <div id="profileContainer">
-    <button id="profileBtn" class="profile-btn" disabled>
-      <img id="profileAvatar" src="images/avatarDefault.png" class="avatar-icon">
-      <span id="profilePseudoDisplay"></span>
-    </button>
-    <div id="profileDropdown" class="profile-dropdown hidden">
-      <div class="profile-info">
-        <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-        <p><strong>Date de création:</strong> <span id="profileCreationDate"></span></p>
-        <p><strong>Mot de passe:</strong> <span id="profilePassword">••••••••</span> <button id="togglePasswordVisibility" class="toggle-password">👁️</button></p>
-      </div>
-      <button id="editProfileBtn">Modifier le Profil</button>
-      <button id="logoutProfileBtn">Se Déconnecter</button>
+<div id="profileContainer">
+  <button id="profileBtn" class="profile-btn" disabled>
+    <img id="profileAvatar" src="images/avatarDefault.png" class="avatar-icon" alt="Avatar utilisateur">
+    <span id="profilePseudoDisplay" class="profile-pseudo"></span>
+  </button>
+  <div id="profileDropdown" class="profile-dropdown">
+    <div class="profile-info">
+      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+      <p><strong>Membre depuis:</strong> <span id="profileCreationDate"></span></p>
+      <p>
+        <strong>Mot de passe:</strong>
+        <span id="profilePassword">••••••••</span>
+        <button id="togglePasswordVisibility" class="toggle-password" title="Afficher/Masquer">👁️</button>
+      </p>
     </div>
+    <button id="editProfileBtn" class="profile-btn">Modifier le Profil</button>
+    <button id="logoutProfileBtn" class="profile-btn">Se Déconnecter</button>
   </div>
+</div>
 </div>
 <!-- === /TOP BAR === -->
 
