@@ -118,21 +118,26 @@ checkSessionOnStartup();
 
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
-  const token = localStorage.getItem('supabase.access.token');
+  try {
+    // 1. Vérifie d'abord si on a un token valide en localStorage
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) return null;
 
-  if (!token) {
-    console.log("Aucun JWT trouvé.");
+    // 2. Vérifie si le token est toujours valide
+    const { data: { user }, error } = await supa.auth.getUser();
+
+    if (error) {
+      // Token invalide/expiré → on le supprime
+      localStorage.removeItem('supabase.access.token');
+      localStorage.removeItem('supabase.refresh.token');
+      return null;
+    }
+
+    return user;
+  } catch (err) {
+    console.error("Erreur dans getSession:", err);
     return null;
   }
-
-  const { data: { user }, error } = await supa.auth.getUser(token);
-
-  if (error) {
-    console.error("Erreur lors de la récupération de l'utilisateur :", error);
-    return null;
-  }
-
-  return user;
 }
 
 // Fonction pour récupérer le pseudo (version corrigée)
