@@ -2071,7 +2071,7 @@ function showReadyModal(reason) {
   console.log(`Affichage de readyModal pour la raison : ${reason}`);
   const modal = document.getElementById("readyModal");
   if (modal) {
-    console.log("[showReadyModal] Modale trouvée. Classes avant:"
+    console.log("[showReadyModal] Modale trouvée. Classes avant:");
     modal.classList.remove("hidden");
     console.log("[showReadyModal] Classes après:", modal.className);
   } else {
