@@ -2071,7 +2071,9 @@ function showReadyModal(reason) {
   console.log(`Affichage de readyModal pour la raison : ${reason}`);
   const modal = document.getElementById("readyModal");
   if (modal) {
+    console.log("[showReadyModal] Modale trouvée. Classes avant:"
     modal.classList.remove("hidden");
+    console.log("[showReadyModal] Classes après:", modal.className);
   } else {
     console.error("Élément readyModal non trouvé dans le DOM.");
   }
@@ -2120,22 +2122,26 @@ function closeWhySignup() {
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("=== [DOMContentLoaded] Début ===");
   // 1. Vérification de session et initialisation
   try {
   const { data: { session }, error } = await supa.auth.getSession();
   if (session) {
+    console.log("[DOMContentLoaded] Utilisateur connecté détecté");
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(session.user);
     updateProfileInfo(); // Appel uniquement si connecté
   } else {
+    console.log("[DOMContentLoaded] Aucun utilisateur connecté");
     updateAuthUI(null);
     // PAS d'appel à updateProfileInfo ici
   }
 
   // Appel à initialFlow (comme avant)
   const user = session ? session.user : null;
+  console.log("[DOMContentLoaded] Appel à initialFlow avec user:", user);
   initialFlow(user);
 } catch (err) {
   console.error("Erreur dans DOMContentLoaded:", err);
@@ -2714,4 +2720,5 @@ document.getElementById("whySignupContinueBtn").addEventListener("click", () => 
   closeWhySignup();
   document.getElementById("readyModal").classList.remove("hidden");
 });
+console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
