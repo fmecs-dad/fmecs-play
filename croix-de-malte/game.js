@@ -2118,6 +2118,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 1. Vérification de session et initialisation
   const { data: { session }, error } = await supa.auth.getSession();
   if (session) {
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(session.user);
   } else {
