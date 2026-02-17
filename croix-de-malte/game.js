@@ -2122,6 +2122,18 @@ function closeWhySignup() {
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Nettoyage des tokens invalides au démarrage
+  const token = localStorage.getItem('supabase.access.token');
+if (token) {
+  try {
+    // Test rapide du token
+    await supa.auth.getUser();
+  } catch (err) {
+    console.warn("Token invalide détecté, nettoyage...");
+    localStorage.removeItem('supabase.access.token');
+    localStorage.removeItem('supabase.refresh.token');
+  }
+}
   console.log("=== [DOMContentLoaded] Début ===");
   // 1. Vérification de session et initialisation
   try {
