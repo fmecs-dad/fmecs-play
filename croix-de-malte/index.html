@@ -192,7 +192,7 @@ body {
   pointer-events: none;
 }
 
-/* Menu Profil */
+/* ========== MENU PROFIL ========== */
 #profileContainer {
   position: relative;
   margin-left: auto;
@@ -200,7 +200,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
-  z-index: 10002; /* Assurez-vous que ce z-index est supérieur à celui de la topbar */
+  z-index: 10002;
 }
 
 .profile-btn {
@@ -213,15 +213,23 @@ body {
   gap: 5px;
   color: white;
   font-size: 14px;
-  pointer-events: auto !important; /* Assurez-vous que les événements de la souris sont activés */
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.profile-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .profile-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
 .profile-btn:not(:disabled) {
-  cursor: pointer;  /* Curseur normal quand activé */
+  cursor: pointer;
 }
 
 .avatar-icon {
@@ -230,6 +238,11 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
+  transition: transform 0.2s ease;
+}
+
+.profile-btn:not(:disabled) .avatar-icon:hover {
+  transform: scale(1.05);
 }
 
 #profilePseudoDisplay {
@@ -237,61 +250,104 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
 .profile-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: #222;
-  padding: 12px;
-  border-radius: 6px;
-  min-width: 250px;
-  min-height: 100px;
-  z-index: 99999;
   display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 250px;
+  z-index: 99999;
   flex-direction: column;
   gap: 10px;
   visibility: visible;
-  opacity: 1;
-  pointer-events: auto !important; /* Assurez-vous que les événements de la souris sont activés */
-  border: 2px solid red; /* Bordure rouge pour le débogage */
-  transform: translateY(0); /* Assurez-vous qu'il n'y a pas de transformation */
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .profile-dropdown.show {
   display: flex;
-  border: 2px solid green; /* Bordure verte pour le débogage */
+  opacity: 1;
+  transform: translateY(0);
+  border-color: #3a3a3a;
 }
 
 .profile-info {
   margin-bottom: 10px;
+  padding: 0 5px;
 }
 
 .profile-info p {
-  margin: 5px 0;
+  margin: 6px 0;
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.profile-info strong {
   color: white;
 }
 
 #editProfileBtn, #logoutProfileBtn {
   padding: 8px 12px;
-  background: #444;
+  background: #2d2d2d;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   pointer-events: auto;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  width: calc(100% - 10px);
+  margin: 0 5px;
 }
 
 #editProfileBtn:hover, #logoutProfileBtn:hover {
-  background: #555;
+  background: #3a3a3a;
+  transform: translateY(-1px);
 }
 
 .toggle-password {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
-  pointer-events: auto;
+  font-size: 16px;
+  color: #aaa;
+  margin-left: 5px;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: white;
+}
+
+/* Animation pour l'ouverture du dropdown */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Style pour les boutons du dropdown */
+.profile-dropdown button {
+  padding: 8px 12px;
+  text-align: center;
+  background: #2d2d2d;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.profile-dropdown button:hover {
+  background: #3a3a3a;
 }
 
 /* === HELP CLOSE BUTTON === */
