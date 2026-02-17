@@ -79,7 +79,7 @@ body {
   padding: 12px 20px;
   width: 100%;
   height: 110px;
-  overflow: hidden;
+  overflow: visible !important; /* Assurez-vous que l'overflow est visible */
 }
 
 /* Bloc titre + sous-titre */
@@ -157,6 +157,7 @@ body {
   vertical-align: middle;
 }
 
+
 /* Burger */
 .burger-btn {
   font-size: 20px;
@@ -189,6 +190,164 @@ body {
   opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* ========== MENU PROFIL ========== */
+#profileContainer {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  z-index: 10002;
+}
+
+.profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: white;
+  font-size: 14px;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.profile-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-btn:not(:disabled) {
+  cursor: pointer;
+}
+
+.avatar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  transition: transform 0.2s ease;
+}
+
+.profile-btn:not(:disabled) .avatar-icon:hover {
+  transform: scale(1.05);
+}
+
+#profilePseudoDisplay {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.profile-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 5px);
+  right: 0;
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 250px;
+  z-index: 99999;
+  flex-direction: column;
+  gap: 10px;
+  visibility: visible;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-dropdown.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+  border-color: #3a3a3a;
+}
+
+.profile-info {
+  margin-bottom: 10px;
+  padding: 0 5px;
+}
+
+.profile-info p {
+  margin: 6px 0;
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.profile-info strong {
+  color: white;
+}
+
+#editProfileBtn, #logoutProfileBtn {
+  padding: 8px 12px;
+  background: #2d2d2d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  width: calc(100% - 10px);
+  margin: 0 5px;
+}
+
+#editProfileBtn:hover, #logoutProfileBtn:hover {
+  background: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #aaa;
+  margin-left: 5px;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: white;
+}
+
+/* Animation pour l'ouverture du dropdown */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Style pour les boutons du dropdown */
+.profile-dropdown button {
+  padding: 8px 12px;
+  text-align: center;
+  background: #2d2d2d;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.profile-dropdown button:hover {
+  background: #3a3a3a;
 }
 
 /* === HELP CLOSE BUTTON === */
@@ -412,17 +571,16 @@ body {
   display: none !important;
 }
 
-/* === GENERIC OVERLAY (CORRIGÉ) === */
+/* === GENERIC OVERLAY === */
 
-/* === OVERLAY MODAL UNIFIÉ === */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
-  display: none; /* caché par défaut */
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99999;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
 }
 
 .overlay-center {
@@ -434,7 +592,47 @@ body {
   pointer-events: none !important;
 }
 
+/* === MODAL GÉNÉRIQUE === */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  padding: 20px; /* important pour petits écrans */
+  overflow: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  margin: auto;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-size: 18px;
+
+  /* Adaptation automatique */
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+#readyModal {
+  z-index: 200000 !important;
+}
+
+
 /* === PANELS INTERNES === */
+
 .panel {
   background: #fff;
   padding: 24px 30px;
@@ -536,43 +734,6 @@ body {
   display: none;
 }
 
-/* === MODAL GÉNÉRIQUE === */
-
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 20000;
-  padding: 20px; /* important pour petits écrans */
-  overflow: hidden;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.modal-content {
-  margin: auto;
-  background: white;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  font-size: 18px;
-
-  /* Adaptation automatique */
-  max-width: 90vw;
-  max-height: 90vh;
-  overflow: auto;
-  box-sizing: border-box;
-}
-
-#readyModal {
-  z-index: 200000 !important;
-}
 
 /* === ANIMATIONS === */
 
@@ -655,6 +816,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  top: 116px; /* 110px de topBar + marge */
+  left: 20px;
 }
 
 .close-btn:hover {
@@ -985,24 +1148,6 @@ footer {
   </div>
 </div>
 
-<!-- Profil -->
-<div id="profileModal" class="overlay overlay-center hidden">
-  <div class="panel">
-    <h2>Mon Profil</h2>
-
-    <label>Pseudo :</label>
-    <input id="profilePseudoInput" type="text">
-
-    <label>Avatar :</label>
-    <img id="profileAvatarPreview" src="" class="avatar-preview">
-    <input id="profileAvatarInput" type="file" accept="image/*">
-
-    <div class="modal-buttons">
-      <button id="profileSaveBtn">Enregistrer</button>
-      <button id="profileCloseBtn">Fermer</button>
-    </div>
-  </div>
-</div>
 
 <!-- === HELP OVERLAY === -->
 <div id="helpOverlay" class="overlay overlay-center hidden">
@@ -1049,52 +1194,68 @@ footer {
 
   <div id="gameContainer">
 
-  <!-- === TOP BAR === -->
-  <div id="topBar">
-
-    <!-- Bloc 1 : Burger -->
-    <div id="burgerWrapper">
-      <button id="burgerBtn" class="burger-btn" aria-label="Menu">☰</button>
-    </div>
-
-    <!-- Bloc 2 : Titre -->
-    <div id="titleArea">
-      <h1>Morpion Solitaire – Croix de Malte</h1>
-      <div id="subtitle">
-        Objectif : créer des lignes de 5 points selon les règles du Morpion Solitaire
-      </div>
-    </div>
-
-    <!-- Bloc 3 : Valeurs -->
-    <div id="statusArea">
-      <div><span class="label">Score :</span> <span id="scoreValue">0</span></div>
-      <div><span class="label">Temps :</span> <span id="timerValue">00:00</span></div>
-      <div><span class="label">Jokers :</span> <span id="jokersCombinedValue">0 / 0</span></div>
-      <div><span class="label">Retours :</span> <span id="undoCount">0</span></div>
-    </div>
-
-    <!-- Bloc 4 : Boutons -->
-    <div id="topActions">
-      <button id="undoBtn" class="main-btn">Retour</button>
-      <button id="pauseBtn" class="main-btn">Pause</button>
-    </div>
-
-    <!-- Bloc 5 : Meilleur score -->
-    <span id="bestScoreTop" class="best-score-info"></span>
-
+<!-- === TOP BAR === -->
+<div id="topBar">
+  <!-- Bloc 1 : Burger -->
+  <div id="burgerWrapper">
+    <button id="burgerBtn" class="burger-btn" aria-label="Menu">☰</button>
   </div>
-  <!-- === /TOP BAR === -->
 
+  <!-- Bloc 2 : Titre -->
+  <div id="titleArea">
+    <h1>Morpion Solitaire – Croix de Malte</h1>
+    <div id="subtitle">
+      Objectif : créer des lignes de 5 points selon les règles du Morpion Solitaire
+    </div>
+  </div>
 
-  <!-- === MENU BURGER (EN DEHORS DU TOPBAR) === -->
+  <!-- Bloc 3 : Valeurs -->
+  <div id="statusArea">
+    <div><span class="label">Score :</span> <span id="scoreValue">0</span></div>
+    <div><span class="label">Temps :</span> <span id="timerValue">00:00</span></div>
+    <div><span class="label">Jokers :</span> <span id="jokersCombinedValue">0 / 0</span></div>
+    <div><span class="label">Retours :</span> <span id="undoCount">0</span></div>
+  </div>
+
+  <!-- Bloc 4 : Boutons -->
+  <div id="topActions">
+    <button id="undoBtn" class="main-btn">Retour</button>
+    <button id="pauseBtn" class="main-btn">Pause</button>
+  </div>
+
+  <!-- Bloc 5 : Meilleur score -->
+  <span id="bestScoreTop" class="best-score-info"></span>
+
+  <!-- Bloc 6 : Menu Profil -->
+<div id="profileContainer">
+  <button id="profileBtn" class="profile-btn" disabled>
+    <img id="profileAvatar" src="images/avatarDefault.png" class="avatar-icon" alt="Avatar utilisateur">
+    <span id="profilePseudoDisplay" class="profile-pseudo"></span>
+  </button>
+  <div id="profileDropdown" class="profile-dropdown">
+    <div class="profile-info">
+      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+      <p><strong>Membre depuis:</strong> <span id="profileCreationDate"></span></p>
+      <p>
+        <strong>Mot de passe:</strong>
+        <span id="profilePassword">••••••••</span>
+        <button id="togglePasswordVisibility" class="toggle-password" title="Afficher/Masquer">👁️</button>
+      </p>
+    </div>
+    <button id="editProfileBtn" class="profile-btn">Modifier le Profil</button>
+    <button id="logoutProfileBtn" class="profile-btn">Se Déconnecter</button>
+  </div>
+</div>
+</div>
+<!-- === /TOP BAR === -->
+
+  <!-- === MENU BURGER === -->
   <div id="burgerOverlay">
-    <button id="burgerProfileBtn" class="main-btn">Profil</button>
     <button id="burgerReplayBtn" class="main-btn">Rejouer</button>
     <button id="burgerStepBtn" class="main-btn">Pas à pas</button>
     <button id="burgerHelpBtn" class="main-btn">Aide</button>
     <button id="burgerSoundBtn" class="main-btn">Son : on</button>
     <button id="burgerLeaderboardBtn" class="main-btn">Leaderboard</button>
-    <span id="burgerPseudo" class="burger-pseudo">Invité</span>
     <button id="burgerAuthBtn" class="main-btn">Se connecter</button>
   </div>
 
