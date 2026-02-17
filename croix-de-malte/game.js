@@ -2163,25 +2163,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { data: { session }, error } = await supa.auth.getSession();
 
     if (session) {
-      console.log("[DOMContentLoaded] Session valide détectée");
+      // Utilisateur connecté
       localStorage.setItem('supabase.access.token', session.access_token);
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
-      updateProfileInfo(); // Seulement ici pour les connectés
+      updateProfileInfo(); // ← Appel crucial pour activer le bouton
     } else {
-      console.log("[DOMContentLoaded] Aucune session active");
+      // Utilisateur déconnecté
       updateAuthUI(null);
+      // Le bouton reste désactivé (comportement correct)
     }
 
-    // 3. Initialisation du flux (toujours appelé)
-    const user = await getSession();
-    initialFlow(user);
-
+    // Initialisation du menu profil (pour tout le monde)
+    const profileBtn = document.getElementById("profileBtn");
+    if (profileBtn) {
+      profileBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const dropdown = document.getElementById("profileDropdown");
+        if (dropdown) dropdown.classList.toggle("show");
+      });
+    }
   } catch (err) {
-    console.error("[DOMContentLoaded] Erreur:", err);
+    console.error("Erreur DOMContentLoaded:", err);
     updateAuthUI(null);
-    initialFlow(null);
   }
 
   // 2. Activation des comportements des modales
