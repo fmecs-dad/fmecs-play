@@ -2116,15 +2116,27 @@ function closeWhySignup() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // 1. Vérification de session et initialisation
+  try {
   const { data: { session }, error } = await supa.auth.getSession();
   if (session) {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
     await initialiserProfilEtLancerJeu(session);
     updateAuthUI(session.user);
+    updateProfileInfo(); // Appel uniquement si connecté
   } else {
     updateAuthUI(null);
+    // PAS d'appel à updateProfileInfo ici
   }
+
+  // Appel à initialFlow (comme avant)
+  const user = session ? session.user : null;
+  initialFlow(user);
+} catch (err) {
+  console.error("Erreur dans DOMContentLoaded:", err);
+  updateAuthUI(null);
+  initialFlow(null); // Appel à initialFlow même en cas d'erreur
+}
 
   // 2. Activation des comportements des modales
   if (typeof enableModalBehavior === 'function') {
