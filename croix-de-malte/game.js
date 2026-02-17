@@ -2471,7 +2471,7 @@ if (burgerHelpBtn) {
     return;
   }
 
-  // Inscription de l'utilisateur avec le mot de passe saisi
+  // Inscription de l'utilisateur
   const { data: signupData, error: signupError } = await supa.auth.signUp({
     email,
     password
@@ -2484,7 +2484,7 @@ if (burgerHelpBtn) {
   }
 
   // Connexion automatique après l'inscription
-  const { error: signinError } = await supa.auth.signInWithPassword({
+  const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
     email,
     password
   });
@@ -2503,6 +2503,10 @@ if (burgerHelpBtn) {
     alert("Impossible de récupérer la session.");
     return;
   }
+
+  // Stocker le JWT après connexion
+  localStorage.setItem('supabase.access.token', session.access_token);
+  localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
   const userId = session.user.id;
   console.log("ID de l'utilisateur :", userId);
@@ -2561,7 +2565,6 @@ if (burgerHelpBtn) {
 
   // Fermeture modals
   document.getElementById("signupModal").classList.add("hidden");
-
   playSound("successSound");
   alert("Compte créé ! Bienvenue dans le jeu.");
 });
