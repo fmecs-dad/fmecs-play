@@ -338,37 +338,6 @@ async function getSession() {
   return user;
 }
 
-// Fonction pour récupérer le pseudo
-async function fetchPlayerPseudo(userId) {
-  const token = localStorage.getItem('supabase.access.token');
-
-  if (!token) {
-    console.error("Aucun JWT trouvé.");
-    return null;
-  }
-
-  // Configurer le client Supabase avec le JWT
-  supa.auth.setSession(token);
-
-  try {
-    const { data, error } = await supa
-      .from("players")
-      .select("pseudo")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      console.error("Erreur lors de la récupération du pseudo :", error);
-      return null;
-    }
-
-    return data.pseudo;
-  } catch (err) {
-    console.error("Erreur inattendue lors de la récupération du pseudo :", err);
-    return null;
-  }
-}
-
 // Fonction de déconnexion
 async function logout() {
   const { error } = await supa.auth.signOut();
