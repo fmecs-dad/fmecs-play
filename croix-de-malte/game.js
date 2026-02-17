@@ -2013,7 +2013,7 @@ function handleFirstLaunchFlow(userFromEvent) {
 //   INITIAL FLOW (VERSION FINALE)
 // ===============================
 
-let gameStarted = false; // global
+//let gameStarted = false; // global
 
 function initialFlow(user) {
   console.log("initialFlow appelé avec user :", user);
