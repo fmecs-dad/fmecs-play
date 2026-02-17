@@ -87,10 +87,88 @@ function playSound(id) {
 //   AUTH : UTILITAIRES
 // ===============================
 
-// Fonction pour mettre à jour l'UI d'authentification
-function updateAuthUI(user) {
-  console.log("Updating UI with user:", user);
+// ===============================
+//   AUTH : UTILITAIRES
+// ===============================
 
+// Fonction pour vérifier la session au démarrage
+async function checkSessionOnStartup() {
+  const { data: { session }, error } = await supa.auth.getSession();
+
+  if (error) {
+    console.error("Erreur lors de la récupération de la session :", error);
+    updateAuthUI(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
+    return;
+  }
+
+  // Si une session existe, stocker le JWT et mettre à jour l'UI
+  if (session) {
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+    updateAuthUI(session.user);
+    initialFlow(session.user); // Appeler initialFlow avec l'utilisateur connecté
+  } else {
+    updateAuthUI(null);
+    initialFlow(null); // Appeler initialFlow avec user = null
+  }
+}
+// Appeler cette fonction au démarrage
+checkSessionOnStartup();
+
+// Fonction pour récupérer la session (utilise le JWT stocké)
+async function getSession() {
+  const token = localStorage.getItem('supabase.access.token');
+
+  if (!token) {
+    console.log("Aucun JWT trouvé.");
+    return null;
+  }
+
+  const { data: { user }, error } = await supa.auth.getUser(token);
+
+  if (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur :", error);
+    return null;
+  }
+
+  return user;
+}
+
+// Fonction pour récupérer le pseudo
+async function fetchPlayerPseudo(userId) {
+  const token = localStorage.getItem('supabase.access.token');
+
+  if (!token) {
+    console.error("Aucun JWT trouvé.");
+    return null;
+  }
+
+  // Configurer le client Supabase avec le JWT
+  supa.auth.setSession(token);
+
+  try {
+    const { data, error } = await supa
+      .from("players")
+      .select("pseudo")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Erreur lors de la récupération du pseudo :", error);
+      return null;
+    }
+
+    return data.pseudo;
+  } catch (err) {
+    console.error("Erreur inattendue lors de la récupération du pseudo :", err);
+    return null;
+  }
+}
+
+// Fonction pour mettre à jour l'UI
+async function updateAuthUI(user = null) {
+  console.log("Updating UI with user:", user);
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
 
@@ -106,6 +184,16 @@ function updateAuthUI(user) {
 
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
+
+  try {
+    const pseudo = await fetchPlayerPseudo(user.id);
+    if (pseudo && burgerPseudo) {
+      burgerPseudo.textContent = pseudo;
+      localStorage.setItem("playerPseudo", pseudo);
+    }
+  } catch (err) {
+    console.error("Impossible de récupérer le pseudo :", err);
+  }
 }
 
 // ===============================
@@ -155,33 +243,6 @@ async function initialiserProfilEtLancerJeu(session) {
     }
   } catch (err) {
     console.error("Erreur inattendue dans initialiserProfilEtLancerJeu :", err);
-  }
-}
-
-// Fonction pour vérifier la session au démarrage et afficher les modales appropriées
-async function checkSessionAndShowModals() {
-  try {
-    const { data: { session }, error } = await supa.auth.getSession();
-
-    if (error) {
-      console.error("Erreur lors de la récupération de la session :", error);
-      if (typeof initialFlow === 'function') initialFlow(null);
-      return;
-    }
-
-    if (session) {
-      localStorage.setItem('supabase.access.token', session.access_token);
-      localStorage.setItem('supabase.refresh.token', session.refresh_token);
-      if (typeof updateAuthUI === 'function') updateAuthUI(session.user);
-      if (typeof initialiserProfilEtLancerJeu === 'function') await initialiserProfilEtLancerJeu(session);
-    } else {
-      if (typeof updateAuthUI === 'function') updateAuthUI(null);
-      if (typeof initialFlow === 'function') initialFlow(null);
-    }
-  } catch (err) {
-    console.error("Erreur dans checkSessionAndShowModals:", err);
-    if (typeof updateAuthUI === 'function') updateAuthUI(null);
-    if (typeof initialFlow === 'function') initialFlow(null);
   }
 }
 
