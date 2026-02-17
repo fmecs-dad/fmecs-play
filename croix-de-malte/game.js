@@ -288,59 +288,93 @@ async function ouvrirProfil() {
 }
 
 async function updateProfileInfo(force = false) {
-  // 1. Vérification stricte de la connexion
-  if (!force) {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) {
-      console.log("[updateProfileInfo] Pas de token - sortie immédiate");
-      const profileBtn = document.getElementById("profileBtn");
-      if (profileBtn) profileBtn.disabled = true;
-      return;
-    }
-  }
+  console.log("[updateProfileInfo] Début de la mise à jour du profil");
 
-  // 2. Vérification de l'utilisateur
-  let user;
+  // 1. Récupération du bouton profil et initialisation
+  const profileBtn = document.getElementById("profileBtn");
+  const profileAvatar = document.getElementById("profileAvatar");
+  const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  // Désactive le bouton par défaut (sera réactivé si utilisateur connecté)
+  if (profileBtn) profileBtn.disabled = true;
+
+  // 2. Vérification de la connexion
   try {
-    const { data: { user: currentUser }, error } = await supa.auth.getUser();
-    if (error) {
-      console.warn("[updateProfileInfo] Utilisateur non connecté (token invalide)");
+    // Vérification du token seulement si pas forcé
+    if (!force) {
+      const token = localStorage.getItem('supabase.access.token');
+      if (!token) {
+        console.log("[updateProfileInfo] Pas de token - utilisateur déconnecté");
+        return;
+      }
+    }
+
+    // Récupération de l'utilisateur
+    const { data: { user }, error: userError } = await supa.auth.getUser();
+
+    if (userError) {
+      console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
       localStorage.removeItem('supabase.access.token');
       localStorage.removeItem('supabase.refresh.token');
       return;
     }
-    user = currentUser;
-  } catch (err) {
-    console.warn("[updateProfileInfo] Erreur utilisateur:", err.message);
-    return;
-  }
 
-  if (!user) {
-    console.log("[updateProfileInfo] Pas d'utilisateur - sortie");
-    const profileBtn = document.getElementById("profileBtn");
-    if (profileBtn) profileBtn.disabled = true;
-    return;
-  }
+    if (!user) {
+      console.log("[updateProfileInfo] Aucun utilisateur trouvé");
+      return;
+    }
 
-  // 3. Mise à jour du profil (votre code existant)
-  const profileBtn = document.getElementById("profileBtn");
-  if (profileBtn) profileBtn.disabled = false;
-
-  try {
-    const { data: player, error } = await supa
+    // 3. Récupération des informations du joueur
+    const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
       .eq("id", user.id)
       .single();
 
-    if (error) throw error;
+    if (playerError) {
+      console.error("[updateProfileInfo] Erreur récupération joueur:", playerError);
+      return;
+    }
 
-    // ... (le reste de votre code existant)
-  } catch (error) {
-    console.error("[updateProfileInfo] Erreur profil:", error);
+    // 4. Mise à jour de l'interface utilisateur
+    console.log("[updateProfileInfo] Utilisateur connecté - mise à jour UI");
+
+    // Active le bouton profil
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.title = "Voir votre profil";
+    }
+
+    // Met à jour l'avatar
+    if (profileAvatar) {
+      profileAvatar.src = player?.avatar_url || "images/avatarDefault.png";
+      profileAvatar.alt = player?.pseudo ? `Avatar de ${player.pseudo}` : "Avatar utilisateur";
+    }
+
+    // Met à jour le pseudo
+    if (pseudoDisplay) {
+      pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
+      pseudoDisplay.title = player?.pseudo || "Utilisateur";
+    }
+
+    // Met à jour les informations dans le dropdown
+    const profileEmail = document.getElementById("profileEmail");
+    const profileCreationDate = document.getElementById("profileCreationDate");
+
+    if (profileEmail) profileEmail.textContent = user.email || "Email non défini";
+    if (profileCreationDate && player?.created_at) {
+      profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString();
+    }
+
+    console.log("[updateProfileInfo] Mise à jour terminée avec succès");
+
+  } catch (err) {
+    console.error("[updateProfileInfo] Erreur inattendue:", err);
+    // En cas d'erreur, on s'assure que le bouton est désactivé
+    if (profileBtn) profileBtn.disabled = true;
   }
 }
-
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   try {
