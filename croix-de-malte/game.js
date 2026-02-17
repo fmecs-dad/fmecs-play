@@ -2260,18 +2260,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Écouteur pour afficher/masquer le mot de passe
   const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
-  if (togglePasswordVisibilityBtn) {
-    togglePasswordVisibilityBtn.addEventListener("click", () => {
-      const passwordSpan = document.getElementById("profilePassword");
-      if (passwordSpan) {
-        if (passwordSpan.textContent === "••••••••") {
-          passwordSpan.textContent = "motdepasse";
-        } else {
-          passwordSpan.textContent = "••••••••";
-        }
+if (togglePasswordVisibilityBtn) {
+  togglePasswordVisibilityBtn.addEventListener("click", (e) => {
+    e.stopPropagation(); // Empêche la fermeture du dropdown
+    const passwordSpan = document.getElementById("profilePassword");
+    if (passwordSpan) {
+      if (passwordSpan.textContent === "••••••••") {
+        passwordSpan.textContent = "motdepasse"; // À remplacer par le vrai mot de passe (si vous le stockez)
+        togglePasswordVisibilityBtn.textContent = "👁️‍🗨️"; // Emoji "yeux fermés"
+      } else {
+        passwordSpan.textContent = "••••••••";
+        togglePasswordVisibilityBtn.textContent = "👁️"; // Emoji "yeux ouverts"
       }
-    });
-  }
+    }
+  });
+}
+
 
   // Écouteur pour la déconnexion
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
