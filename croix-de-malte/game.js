@@ -2260,12 +2260,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Écouteur pour ouvrir la modale de modification du profil
-  //const editProfileBtn = document.getElementById("editProfileBtn");
-  //if (editProfileBtn) {
-  //  editProfileBtn.addEventListener("click", async () => {
-  //    if (typeof ouvrirProfil === 'function') await ouvrirProfil();
-  //  });
-  //}
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", async () => {
+      if (typeof ouvrirProfil === 'function') await ouvrirProfil();
+    });
+  }
 
   // Mettre à jour les informations du profil
   if (typeof updateProfileInfo === 'function') updateProfileInfo();
