@@ -2178,49 +2178,68 @@ function closeWhySignup() {
 // ===============================
 
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("=== [DOMContentLoaded] Début ===");
+  console.log("=== Initialisation DOM ===");
 
-  // 1. Nettoyage initial des tokens invalides
-  const token = localStorage.getItem('supabase.access.token');
-  if (token) {
-    try {
-      await supa.auth.getUser();
-    } catch (err) {
-      console.warn("[DOMContentLoaded] Token invalide - nettoyage");
-      localStorage.removeItem('supabase.access.token');
-      localStorage.removeItem('supabase.refresh.token');
-    }
-  }
-
-  // 2. Vérification de la session
+  // 1. Initialisation de base (votre code existant)
   try {
+    // Vérification de la session au démarrage
     const { data: { session }, error } = await supa.auth.getSession();
 
     if (session) {
-      // Utilisateur connecté
+      console.log("Utilisateur connecté détecté au démarrage");
       localStorage.setItem('supabase.access.token', session.access_token);
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
-      updateProfileInfo(); // ← Appel crucial pour activer le bouton
+      updateProfileInfo(); // Mise à jour du profil pour les utilisateurs déjà connectés
     } else {
-      // Utilisateur déconnecté
+      console.log("Aucun utilisateur connecté au démarrage");
       updateAuthUI(null);
-      // Le bouton reste désactivé (comportement correct)
     }
 
-    // Initialisation du menu profil (pour tout le monde)
-    const profileBtn = document.getElementById("profileBtn");
-    if (profileBtn) {
+    // 2. Initialisation du menu profil (NOUVEAU)
+    const setupProfileMenu = () => {
+      const profileBtn = document.getElementById("profileBtn");
+      const profileDropdown = document.getElementById("profileDropdown");
+
+      if (!profileBtn || !profileDropdown) {
+        console.error("Menu profil : éléments manquants");
+        return;
+      }
+
+      // Écouteur pour ouvrir/fermer le dropdown
       profileBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const dropdown = document.getElementById("profileDropdown");
-        if (dropdown) dropdown.classList.toggle("show");
+        if (profileBtn.disabled) {
+          console.log("Bouton profil désactivé - clic ignoré");
+          return;
+        }
+        console.log("Toggle menu profil");
+        profileDropdown.classList.toggle("show");
       });
-    }
+
+      // Écouteur pour fermer le dropdown quand on clique ailleurs
+      document.addEventListener("click", (e) => {
+        if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+          profileDropdown.classList.remove("show");
+          console.log("Fermeture menu profil (clic externe)");
+        }
+      });
+    };
+
+    // Appel de l'initialisation du menu profil
+    setupProfileMenu();
+
+    // 3. Appel à initialFlow (votre code existant)
+    const user = session ? session.user : null;
+    initialFlow(user);
+
+    // ... reste de votre code DOMContentLoaded existant ...
+
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
     updateAuthUI(null);
+    initialFlow(null);
   }
 
   // 2. Activation des comportements des modales
@@ -2703,53 +2722,69 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   }
 
   try {
-    const { data, error } = await supa.auth.signInWithPassword({
-      email,
-      password
-    });
-
+    // 1. Connexion
+    const { data, error } = await supa.auth.signInWithPassword({ email, password });
     if (error) {
       console.error("Erreur de connexion :", error);
       alert("Erreur : " + error.message);
       return;
     }
 
-    // Récupérer la session après la connexion
+    // 2. Récupération de la session
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
-
     if (sessionError || !session) {
       console.error("Erreur récupération session :", sessionError);
       alert("Impossible de récupérer la session.");
       return;
     }
 
-    // Stocker le JWT après connexion
+    // 3. Stockage des tokens
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
-    // Récupérer le meilleur score depuis Supabase
-    const bestScoreData = await fetchBestScore(session.user.id);
+    // 4. Mise à jour du profil IMMEDIATEMENT (NOUVEAU)
+    await updateProfileInfo().catch(err => {
+      console.error("Erreur mise à jour profil :", err);
+    });
+
+    // 5. Récupération du meilleur score
+    const bestScoreData = await fetchBestScore(session.user.id).catch(err => {
+      console.error("Erreur récupération score :", err);
+      return null;
+    });
     if (bestScoreData) {
       saveBestScore(bestScoreData);
-      console.log("Meilleur score récupéré depuis Supabase et sauvegardé dans localStorage :", bestScoreData);
+      console.log("Meilleur score récupéré et sauvegardé :", bestScoreData);
     }
 
-    document.getElementById("authOverlay").classList.add("hidden");
-
+    // 6. Mise à jour de l'UI
     await updateAuthUI(session.user).catch(err => {
       console.error("Erreur dans updateAuthUI :", err);
     });
 
+    // 7. Récupération du pseudo (déjà présent dans votre code)
     if (session.user) {
       const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
-        console.error("Erreur lors de la récupération du pseudo :", err);
+        console.error("Erreur récupération pseudo :", err);
         return null;
       });
       if (pseudo) localStorage.setItem("playerPseudo", pseudo);
     }
 
-    // Mettre à jour l'affichage du meilleur score
+    // 8. Fermeture de la modale et mise à jour du score
+    document.getElementById("authOverlay").classList.add("hidden");
     updateBestScoreTop();
+
+    // 9. Réinitialisation du menu profil (NOUVEAU)
+    const profileBtn = document.getElementById("profileBtn");
+    if (profileBtn) {
+      profileBtn.disabled = false; // Force l'activation
+      console.log("Bouton profil activé après connexion");
+    }
+
+    // 10. Affichage message de succès
+    alert("Connexion réussie !");
+
   } catch (err) {
     console.error("Erreur inattendue lors de la connexion :", err);
     alert("Une erreur inattendue est survenue.");
