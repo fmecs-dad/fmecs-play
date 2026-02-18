@@ -2447,6 +2447,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Appel de l'initialisation du menu profil
     setupProfileMenu();
+    initProfileModalListeners(); // Écouteurs de la modale (inclut maintenant l'avatar)
 
     // 3. Appel à initialFlow (votre code existant)
     const user = session ? session.user : null;
