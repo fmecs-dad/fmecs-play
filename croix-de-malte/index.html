@@ -192,7 +192,7 @@ body {
   pointer-events: none;
 }
 
-/* ========== MENU PROFIL (Version finale complète et corrigée) ========== */
+/* === MENU PROFIL === */
 
 #profileContainer {
   position: relative;
@@ -1260,7 +1260,7 @@ footer {
   </div>
 </div>
     <button id="editProfileBtn" class="profile-btn">Modifier le Profil</button>
-    <button id="logoutProfileBtn" class="profile-btn">Se Déconnecter</button>
+    <button id="logoutProfileBtn" class="profile-btn">Se déconnecter</button>
   </div>
 </div>
 </div>
@@ -1388,22 +1388,45 @@ footer {
 </div>
  
 <!-- Profil -->
-<div id="profileModal" class="overlay overlay-center hidden">
+<div id="profileModal" class="modal hidden">
   <div class="panel">
-    <button id="profileCloseBtn" class="close-btn">✕</button>
+    <h2>Modifier mon profil</h2>
 
-    <h2>Mon Profil</h2>
+    <!-- Message d'erreur -->
+    <div id="profileErrorMessage" class="error-message hidden">
+      Une erreur est survenue.
+    </div>
 
-    <label>Pseudo :</label>
-    <input id="profilePseudoInput" type="text">
+    <!-- Champ pour le pseudo -->
+    <div class="form-group">
+      <label for="profilePseudoInput">Pseudo</label>
+      <input type="text" id="profilePseudoInput" class="form-input">
+    </div>
 
-    <label>Avatar :</label>
-    <img id="profileAvatarPreview" src="" class="avatar-preview">
-    <input id="profileAvatarInput" type="file" accept="image/*">
+    <!-- Aperçu de l'avatar -->
+    <div class="form-group">
+      <label>Avatar</label>
+      <img id="profileAvatarPreview" src="images/avatarDefault.png" class="avatar-preview">
+      <!-- Vous pouvez ajouter ici un bouton pour changer l'avatar -->
+    </div>
 
-    <button id="profileSaveBtn" class="main-btn">Enregistrer</button>
+    <!-- Champ pour l'email (en lecture seule) -->
+    <div class="form-group">
+      <label for="profileEmailInput">Email</label>
+      <input type="email" id="profileEmailInput" class="form-input" readonly>
+    </div>
+
+    <!-- Boutons d'action -->
+    <div class="modal-actions">
+      <button id="saveProfileBtn" class="btn">Enregistrer</button>
+      <button id="cancelProfileBtn" class="btn btn-secondary">Annuler</button>
+    </div>
   </div>
 </div>
+
+
+<!-- Bas de page -->
+
 <footer class="transparent-footer">
   <div class="footer-content">
     <div class="logo">
