@@ -263,6 +263,7 @@ async function ouvrirProfil() {
   }
 
   try {
+    // Récupération des données
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("*")
@@ -271,34 +272,38 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // CORRECTION : Utilisation des BONS IDs selon votre HTML
-    const profileEmailSpan = document.getElementById("profileEmail");      // <span> et non <input>
-    const profileCreationDateSpan = document.getElementById("profileCreationDate");
-    const avatarPreview = document.getElementById("profileAvatarPreview"); // Si présent dans la modale
+    // 1. Mise à jour des éléments EXISTANTS dans votre HTML
+    const emailElement = document.getElementById("profileEmail");
+    const dateElement = document.getElementById("profileCreationDate");
 
-    // Mise à jour des éléments avec vérification
-    if (profileEmailSpan) {
-      profileEmailSpan.textContent = session.user.email || "Email non défini";
+    // 2. Application des valeurs (avec vérifications)
+    if (emailElement) {
+      emailElement.textContent = session.user.email || "Email non défini";
       console.log("Email défini:", session.user.email);
+    } else {
+      console.error("Élément profileEmail introuvable");
     }
 
-    if (profileCreationDateSpan && player.created_at) {
+    if (dateElement && player.created_at) {
       const date = new Date(player.created_at);
-      profileCreationDateSpan.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
+      dateElement.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
       console.log("Date définie:", date.toLocaleDateString());
+    } else if (!dateElement) {
+      console.error("Élément profileCreationDate introuvable");
     }
 
-    // Avatar dans la modale (si présent)
-    if (avatarPreview && player.avatar_url) {
-      const { data: signedData } = await supa.storage
-        .from('avatars')
-        .createSignedUrl(player.avatar_url, 3600);
-      avatarPreview.src = signedData.signedUrl;
+    // 3. Ouverture de la modale de modification (correction du bug)
+    const modal = document.getElementById("profileModal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      console.log("Modale affichée");
+    } else {
+      console.error("Modale introuvable");
     }
 
   } catch (err) {
-    console.error("Erreur lors de l'ouverture du profil:", err);
-    alert("Impossible de charger vos informations de profil.");
+    console.error("Erreur:", err);
+    alert("Erreur lors du chargement du profil");
   }
 }
 
