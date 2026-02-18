@@ -215,16 +215,15 @@ body {
   font-size: 14px;
   padding: 5px;
   border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.profile-btn:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .profile-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.profile-btn:not(:disabled) {
+  cursor: pointer;
 }
 
 .avatar-icon {
@@ -233,84 +232,69 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
-  transition: transform 0.2s ease;
 }
 
-.profile-btn:not(:disabled) {
-  cursor: pointer;
-}
-
-.profile-pseudo {
+#profilePseudoDisplay {
   max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
-  font-weight: 500;
 }
 
-/* ==== DROPDOWN (Correction critique) ==== */
 .profile-dropdown {
   display: none;
   position: absolute;
   top: 100%;
   right: 0;
   background: #222;
-  padding: 10px;
+  padding: 12px;
   border-radius: 6px;
-  min-width: 200px;
+  min-width: 250px;
+  min-height: 100px;
   z-index: 99999;
+  transform: translateY(0);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
 }
 
 .profile-dropdown.show {
-  display: block !important;
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: scaleY(1);
 }
 
 .profile-info {
   margin-bottom: 10px;
-  padding: 0 5px;
 }
 
 .profile-info p {
-  margin: 6px 0;
-  color: #e0e0e0;
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.profile-info strong {
+  margin: 5px 0;
   color: white;
 }
 
 #editProfileBtn, #logoutProfileBtn {
-  width: calc(100% - 10px);
-  margin: 0 5px 5px;
-  padding: 8px;
-  background: #2d2d2d;
+  padding: 8px 12px;
+  background: #444;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  pointer-events: auto;
 }
 
 #editProfileBtn:hover, #logoutProfileBtn:hover {
-  background: #3a3a3a;
-  transform: translateY(-1px);
+  background: #555;
 }
 
 .toggle-password {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  color: #aaa;
-  margin-left: 5px;
-  transition: color 0.2s ease;
-}
-
-.toggle-password:hover {
-  color: white;
+  font-size: 14px;
+  pointer-events: auto;
 }
 
 /* === HELP CLOSE BUTTON === */
