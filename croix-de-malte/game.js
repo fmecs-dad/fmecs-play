@@ -254,22 +254,22 @@ async function initialiserProfilEtLancerJeu(session) {
 //   FONCTIONS DE PROFIL
 // ===============================
 async function ouvrirProfil() {
-  console.log("Début de l'ouverture du profil");
+  console.log("Ouverture du profil...");
 
-  const user = await getSession();
-  if (!user) {
-    console.warn("Tentative d'ouverture du profil sans utilisateur connecté");
+  const { data: { session }, error } = await supa.auth.getSession();
+  if (error || !session) {
+    console.warn("Aucun utilisateur connecté");
     return;
   }
 
   try {
-    const { data: player, error } = await supa
+    const { data: player, error: playerError } = await supa
       .from("players")
       .select("*")
-      .eq("id", user.id)
+      .eq("id", session.user.id)
       .single();
 
-    if (error) throw error;
+    if (playerError) throw playerError;
 
     // Vérification des éléments
     const pseudoInput = document.getElementById("profilePseudoInput");
@@ -278,16 +278,23 @@ async function ouvrirProfil() {
     const modal = document.getElementById("profileModal");
 
     if (!pseudoInput || !avatarPreview || !emailInput || !modal) {
-      console.error("Un ou plusieurs éléments de la modale de profil sont manquants");
+      console.error("Éléments manquants dans la modale");
       return;
     }
 
-    // Remplit les champs
-    pseudoInput.value = player?.pseudo || "";
-    avatarPreview.src = player?.avatar_url || "images/avatarDefault.png";
-    emailInput.value = user.email || "";
+    // Remplissage des champs
+    pseudoInput.value = player.pseudo || "";
+    emailInput.value = session.user.email || "";
 
-    // Affiche la modale
+    // Affichage de l'avatar
+    let avatarUrl = player.avatar_url;
+    if (avatarUrl) {
+      avatarPreview.src = avatarUrl;
+    } else {
+      avatarPreview.src = "images/avatarDefault.png";
+    }
+
+    // Affichage de la modale
     modal.classList.remove("hidden");
 
   } catch (err) {
@@ -302,6 +309,7 @@ async function updateProfileInfo(force = false) {
   // 1. Récupération du bouton profil et initialisation
   const profileBtn = document.getElementById("profileBtn");
   const profileAvatar = document.getElementById("profileAvatar");
+  const avatarPreview = document.getElementById("profileAvatarPreview");
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
   const profileDropdown = document.getElementById("profileDropdown");
 
@@ -551,12 +559,10 @@ function initProfileModalListeners() {
 const changeAvatarBtn = document.getElementById("changeAvatarBtn");
 if (changeAvatarBtn) {
   changeAvatarBtn.addEventListener("click", () => {
-    const avatarUpload = document.getElementById("avatarUpload");
-    if (avatarUpload) avatarUpload.click();
+    document.getElementById("avatarUpload").click();
   });
 }
 
-// Gestion du fichier sélectionné
 const avatarUpload = document.getElementById("avatarUpload");
 if (avatarUpload) {
   avatarUpload.addEventListener("change", async (e) => {
@@ -581,46 +587,21 @@ if (avatarUpload) {
       preview.src = URL.createObjectURL(file);
     }
 
-    // Upload vers Supabase Storage
+    // Upload de l'avatar
     try {
-      const { data: { session }, error } = await supa.auth.getSession();
-      if (error || !session) throw new Error("Utilisateur non connecté");
+      const avatarUrl = await uploadAvatar(file);
+      console.log("Avatar mis à jour avec succès:", avatarUrl);
 
-      const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
-
-      const { data: uploadData, error: uploadError } = await supa.storage
-        .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Construction de l'URL publique COMPLÈTE
-      const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
-
-      // Mise à jour dans la base de données
-      const { error: dbError } = await supa
-        .from("players")
-        .update({ avatar_url: avatarUrl })  // Enregistre l'URL complète
-        .eq("id", session.user.id);
-
-      if (dbError) throw dbError;
-
-      // Mise à jour de l'interface
+      // Mise à jour de l'avatar dans l'interface
       const profileAvatar = document.getElementById("profileAvatar");
       if (profileAvatar) profileAvatar.src = avatarUrl;
 
-      console.log("Avatar mis à jour avec succès:", avatarUrl);
-
     } catch (err) {
-      console.error("Erreur complète lors du changement d'avatar:", err);
-      alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
+      console.error("Erreur lors du changement d'avatar:", err);
+      alert("Erreur lors du changement d'avatar: " + err.message);
     }
   });
-}
-}
+}}
 
 
 /**
