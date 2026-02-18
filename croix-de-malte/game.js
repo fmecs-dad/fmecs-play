@@ -271,42 +271,43 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // Vérification des éléments
+    // Vérification des éléments (version minimale)
     const pseudoInput = document.getElementById("profilePseudoInput");
     const avatarPreview = document.getElementById("profileAvatarPreview");
     const emailInput = document.getElementById("profileEmailInput");
     const creationDateElement = document.getElementById("profileCreationDate");
     const modal = document.getElementById("profileModal");
 
-    if (!pseudoInput || !avatarPreview || !emailInput || !creationDateElement || !modal) {
-      console.error("Éléments manquants dans la modale");
-      return;
+    // CORRECTIONS CIBLEES POUR EMAIL ET DATE
+    if (emailInput) {
+      emailInput.value = session.user.email || "";
+      console.log("Email défini:", session.user.email);  // Log de vérification
+    } else {
+      console.error("Élément profileEmailInput introuvable");
     }
 
-    // Remplissage des champs
-    pseudoInput.value = player.pseudo || "";
-    emailInput.value = session.user.email || "";  // Email de la session Supabase
-
-    // Affichage de la date avec le nouveau libellé
-    if (player.created_at) {
+    if (creationDateElement && player.created_at) {
       const date = new Date(player.created_at);
       creationDateElement.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
-    } else {
-      creationDateElement.textContent = "Joueur depuis : date inconnue";
+      console.log("Date définie:", player.created_at);  // Log de vérification
+    } else if (!creationDateElement) {
+      console.error("Élément profileCreationDate introuvable");
     }
 
-    // Affichage de l'avatar (votre code existant)
-    if (player.avatar_url) {
-      const { data: signedData } = await supa.storage
-        .from('avatars')
-        .createSignedUrl(player.avatar_url, 3600);
-      avatarPreview.src = signedData.signedUrl;
-    } else {
-      avatarPreview.src = "images/avatarDefault.png";
+    // Code existant pour le pseudo et l'avatar (inchangé)
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (avatarPreview) {
+      if (player.avatar_url) {
+        const { data: signedData } = await supa.storage
+          .from('avatars')
+          .createSignedUrl(player.avatar_url, 3600);
+        avatarPreview.src = signedData.signedUrl;
+      } else {
+        avatarPreview.src = "images/avatarDefault.png";
+      }
     }
 
-    // Affichage de la modale
-    modal.classList.remove("hidden");
+    if (modal) modal.classList.remove("hidden");
 
   } catch (err) {
     console.error("Erreur lors de l'ouverture du profil:", err);
