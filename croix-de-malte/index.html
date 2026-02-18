@@ -360,6 +360,120 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Style pour la modale de profil */
+#profileModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#profileModal .panel {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#profileModal h2 {
+  color: white;
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  display: none;
+}
+
+.error-message.hidden {
+  display: none;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  color: white;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  display: block;
+  margin: 0 auto 15px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #646cff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a63e8;
+}
+
+.btn-secondary {
+  background: #444;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #555;
+}
 
 /* === HELP CLOSE BUTTON === */
 
@@ -1392,33 +1506,29 @@ footer {
   <div class="panel">
     <h2>Modifier mon profil</h2>
 
-    <!-- Message d'erreur -->
     <div id="profileErrorMessage" class="error-message hidden">
       Une erreur est survenue.
     </div>
 
-    <!-- Champ pour le pseudo -->
     <div class="form-group">
       <label for="profilePseudoInput">Pseudo</label>
       <input type="text" id="profilePseudoInput" class="form-input">
     </div>
 
-    <!-- Aperçu de l'avatar -->
     <div class="form-group">
       <label>Avatar</label>
       <img id="profileAvatarPreview" src="images/avatarDefault.png" class="avatar-preview">
-      <!-- Vous pouvez ajouter ici un bouton pour changer l'avatar -->
+      <!-- Bouton pour changer l'avatar (optionnel) -->
+      <button id="changeAvatarBtn" class="btn btn-secondary" style="margin-top: 10px;">Changer l'avatar</button>
     </div>
 
-    <!-- Champ pour l'email (en lecture seule) -->
     <div class="form-group">
       <label for="profileEmailInput">Email</label>
       <input type="email" id="profileEmailInput" class="form-input" readonly>
     </div>
 
-    <!-- Boutons d'action -->
     <div class="modal-actions">
-      <button id="saveProfileBtn" class="btn">Enregistrer</button>
+      <button id="saveProfileBtn" class="btn btn-primary">Enregistrer</button>
       <button id="cancelProfileBtn" class="btn btn-secondary">Annuler</button>
     </div>
   </div>
