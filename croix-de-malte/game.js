@@ -521,6 +521,7 @@ async function checkSessionOnStartup() {
  */
 
 async function uploadAvatar(file) {
+console.log("Début de uploadAvatar");
   try {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
