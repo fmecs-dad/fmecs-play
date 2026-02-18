@@ -545,7 +545,75 @@ function initProfileModalListeners() {
       await ouvrirProfil();
     });
   }
+
+  // ===== NOUVEAU : Écouteurs pour l'avatar =====
+  // Écouteur pour le bouton "Changer l'avatar"
+  const changeAvatarBtn = document.getElementById("changeAvatarBtn");
+  if (changeAvatarBtn) {
+    changeAvatarBtn.addEventListener("click", () => {
+      const avatarUpload = document.getElementById("avatarUpload");
+      if (avatarUpload) avatarUpload.click();
+    });
+  }
+
+  // Gestion du fichier sélectionné
+  const avatarUpload = document.getElementById("avatarUpload");
+  if (avatarUpload) {
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Vérification du format et de la taille
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Seuls les fichiers JPEG/PNG sont acceptés");
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) { // 2Mo max
+        alert("L'image ne doit pas dépasser 2Mo");
+        return;
+      }
+
+      // Aperçu de l'image
+      const preview = document.getElementById("profileAvatarPreview");
+      if (preview) {
+        preview.src = URL.createObjectURL(file);
+      }
+
+      // Upload vers Supabase Storage
+      try {
+        const user = await getSession();
+        if (!user) throw new Error("Utilisateur non connecté");
+
+        // Upload vers Supabase Storage
+        const filePath = `avatars/${user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+        const { data, error } = await supa.storage
+          .from('avatars') // Remplacez par votre bucket
+          .upload(filePath, file);
+
+        if (error) throw error;
+
+        // Mise à jour de l'URL de l'avatar dans la base de données
+        const { error: dbError } = await supa
+          .from("players")
+          .update({ avatar_url: data.path })
+          .eq("id", user.id);
+
+        if (dbError) throw dbError;
+
+        // Mise à jour de l'avatar dans l'interface
+        const profileAvatar = document.getElementById("profileAvatar");
+        if (profileAvatar) profileAvatar.src = preview.src;
+
+      } catch (err) {
+        console.error("Erreur lors du changement d'avatar:", err);
+        alert("Erreur lors du changement d'avatar: " + err.message);
+      }
+    });
+  }
 }
+
 
 /**
  * Fonction pour sauvegarder les modifications du profil
@@ -568,13 +636,21 @@ async function saveProfileChanges() {
     const user = await getSession();
     if (!user) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour du pseudo dans la base de données
-    const { error } = await supa
+    // Mise à jour dans la table players
+    const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
       .eq("id", user.id);
 
-    if (error) throw error;
+    if (playerError) throw playerError;
+
+    // Mise à jour dans la table scores (pour tous les scores de ce joueur)
+    const { error: scoresError } = await supa
+      .from("scores")
+      .update({ player_name: newPseudo })
+      .eq("player_id", user.id);
+
+    if (scoresError) throw scoresError;
 
     // Mise à jour de l'interface
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
