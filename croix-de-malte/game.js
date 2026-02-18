@@ -644,7 +644,7 @@ async function saveProfileChanges() {
     const user = await getSession();
     if (!user) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour dans la table players
+    // 1. Mise à jour du pseudo dans la table players
     const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
@@ -652,7 +652,7 @@ async function saveProfileChanges() {
 
     if (playerError) throw playerError;
 
-    // Mise à jour dans la table scores (pour tous les scores de ce joueur)
+    // 2. Mise à jour du pseudo dans la table scores
     const { error: scoresError } = await supa
       .from("scores")
       .update({ player_name: newPseudo })
@@ -660,15 +660,39 @@ async function saveProfileChanges() {
 
     if (scoresError) throw scoresError;
 
-    // Mise à jour de l'interface
+    // 3. Récupération de l'URL de l'avatar actuel
+    const { data: updatedPlayer, error: fetchError } = await supa
+      .from("players")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // 4. Mise à jour de l'avatar dans l'interface
+    const profileAvatar = document.getElementById("profileAvatar");
+    const avatarPreview = document.getElementById("profileAvatarPreview");
+
+    // Construction de l'URL complète de l'avatar
+    let avatarUrl = updatedPlayer.avatar_url;
+    if (avatarUrl && !avatarUrl.startsWith('http')) {
+      avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
+    } else if (!avatarUrl) {
+      avatarUrl = "images/avatarDefault.png";
+    }
+
+    if (profileAvatar) profileAvatar.src = avatarUrl;
+    if (avatarPreview) avatarPreview.src = avatarUrl;
+
+    // 5. Mise à jour du pseudo dans l'interface
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
     if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
 
-    // Fermeture de la modale
+    // 6. Fermeture de la modale
     const modal = document.getElementById("profileModal");
     if (modal) modal.classList.add("hidden");
 
-    // Réinitialisation du message d'erreur
+    // 7. Réinitialisation du message d'erreur
     errorMessage.classList.add("hidden");
 
   } catch (err) {
