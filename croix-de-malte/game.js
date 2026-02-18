@@ -558,60 +558,68 @@ function initProfileModalListeners() {
 
   // Gestion du fichier sélectionné
   const avatarUpload = document.getElementById("avatarUpload");
-  if (avatarUpload) {
-    avatarUpload.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+if (avatarUpload) {
+  avatarUpload.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-      // Vérification du format et de la taille
-      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-      if (!validTypes.includes(file.type)) {
-        alert("Seuls les fichiers JPEG/PNG sont acceptés");
-        return;
-      }
+    // Vérification du format et de la taille
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      alert("Seuls les fichiers JPEG/PNG sont acceptés");
+      return;
+    }
 
-      if (file.size > 2 * 1024 * 1024) { // 2Mo max
-        alert("L'image ne doit pas dépasser 2Mo");
-        return;
-      }
+    if (file.size > 2 * 1024 * 1024) { // 2Mo max
+      alert("L'image ne doit pas dépasser 2Mo");
+      return;
+    }
 
-      // Aperçu de l'image
-      const preview = document.getElementById("profileAvatarPreview");
-      if (preview) {
-        preview.src = URL.createObjectURL(file);
-      }
+    // Aperçu de l'image
+    const preview = document.getElementById("profileAvatarPreview");
+    if (preview) {
+      preview.src = URL.createObjectURL(file);
+    }
 
-      // Upload vers Supabase Storage
-      try {
-        const user = await getSession();
-        if (!user) throw new Error("Utilisateur non connecté");
+    // Upload vers Supabase Storage
+    try {
+      const user = await getSession();
+      if (!user) throw new Error("Utilisateur non connecté");
 
-        // Upload vers Supabase Storage
-        const filePath = `avatars/${user.id}/${Date.now()}.${file.type.split('/')[1]}`;
-        const { data, error } = await supa.storage
-          .from('avatars') // Remplacez par votre bucket
-          .upload(filePath, file);
+      // Chemin corrigé (sans "avatars/" au début)
+      const filePath = `${user.id}/${Date.now()}.${file.type.split('/')[1]}`;
 
-        if (error) throw error;
+      console.log("Upload vers:", filePath); // Log pour débogage
 
-        // Mise à jour de l'URL de l'avatar dans la base de données
-        const { error: dbError } = await supa
-          .from("players")
-          .update({ avatar_url: data.path })
-          .eq("id", user.id);
+      const { data, error } = await supa.storage
+        .from('avatars')  // Nom du bucket
+        .upload(filePath, file);
 
-        if (dbError) throw dbError;
+      if (error) throw error;
 
-        // Mise à jour de l'avatar dans l'interface
-        const profileAvatar = document.getElementById("profileAvatar");
-        if (profileAvatar) profileAvatar.src = preview.src;
+      // Construction de l'URL publique
+      const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
 
-      } catch (err) {
-        console.error("Erreur lors du changement d'avatar:", err);
-        alert("Erreur lors du changement d'avatar: " + err.message);
-      }
-    });
-  }
+      // Mise à jour de l'URL de l'avatar dans la base de données
+      const { error: dbError } = await supa
+        .from("players")
+        .update({ avatar_url: avatarUrl })  // URL complète
+        .eq("id", user.id);
+
+      if (dbError) throw dbError;
+
+      // Mise à jour de l'avatar dans l'interface
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = avatarUrl;
+
+      console.log("Avatar mis à jour avec succès");
+
+    } catch (err) {
+      console.error("Erreur complète lors du changement d'avatar:", err);
+      alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
+    }
+  });
+}
 }
 
 
