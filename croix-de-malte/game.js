@@ -548,16 +548,16 @@ function initProfileModalListeners() {
 
   // ===== NOUVEAU : Écouteurs pour l'avatar =====
   // Écouteur pour le bouton "Changer l'avatar"
-  const changeAvatarBtn = document.getElementById("changeAvatarBtn");
-  if (changeAvatarBtn) {
-    changeAvatarBtn.addEventListener("click", () => {
-      const avatarUpload = document.getElementById("avatarUpload");
-      if (avatarUpload) avatarUpload.click();
-    });
-  }
+const changeAvatarBtn = document.getElementById("changeAvatarBtn");
+if (changeAvatarBtn) {
+  changeAvatarBtn.addEventListener("click", () => {
+    const avatarUpload = document.getElementById("avatarUpload");
+    if (avatarUpload) avatarUpload.click();
+  });
+}
 
-  // Gestion du fichier sélectionné
-  const avatarUpload = document.getElementById("avatarUpload");
+// Gestion du fichier sélectionné
+const avatarUpload = document.getElementById("avatarUpload");
 if (avatarUpload) {
   avatarUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -583,43 +583,41 @@ if (avatarUpload) {
 
     // Upload vers Supabase Storage
     try {
-  const { data: { session }, error } = await supa.auth.getSession();
-  if (error || !session) throw new Error("Utilisateur non connecté");
+      const { data: { session }, error } = await supa.auth.getSession();
+      if (error || !session) throw new Error("Utilisateur non connecté");
 
-  const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
-  const { data: uploadData, error: uploadError } = await supa.storage
-    .from('avatars')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false
-    });
+      const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
 
-  if (uploadError) throw uploadError;
+      const { data: uploadData, error: uploadError } = await supa.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-  // Construction de l'URL avec le bon format
-  const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
+      if (uploadError) throw uploadError;
 
-  // Mise à jour dans la base de données
-  const { error: dbError } = await supa
-    .from("players")
-    .update({ avatar_url: avatarUrl })
-    .eq("id", session.user.id);
+      // Construction de l'URL publique COMPLÈTE
+      const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
 
-  if (dbError) throw dbError;
+      // Mise à jour dans la base de données
+      const { error: dbError } = await supa
+        .from("players")
+        .update({ avatar_url: avatarUrl })  // Enregistre l'URL complète
+        .eq("id", session.user.id);
 
-  // Mise à jour de l'interface
-  const profileAvatar = document.getElementById("profileAvatar");
-  const avatarPreview = document.getElementById("profileAvatarPreview");
+      if (dbError) throw dbError;
 
-  if (profileAvatar) profileAvatar.src = avatarUrl;
-  if (avatarPreview) avatarPreview.src = avatarUrl;
+      // Mise à jour de l'interface
+      const profileAvatar = document.getElementById("profileAvatar");
+      if (profileAvatar) profileAvatar.src = avatarUrl;
 
-  console.log("Avatar mis à jour avec succès:", avatarUrl);
+      console.log("Avatar mis à jour avec succès:", avatarUrl);
 
-} catch (err) {
-  console.error("Erreur complète:", err);
-  alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
-}
+    } catch (err) {
+      console.error("Erreur complète lors du changement d'avatar:", err);
+      alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
+    }
   });
 }
 }
