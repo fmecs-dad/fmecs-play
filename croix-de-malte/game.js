@@ -583,39 +583,41 @@ if (avatarUpload) {
 
     // Upload vers Supabase Storage
     try {
-  const user = await getSession();
-  if (!user) throw new Error("Utilisateur non connecté");
+  const { data: { session }, error } = await supa.auth.getSession();
+  if (error || !session) throw new Error("Utilisateur non connecté");
 
-  // Upload vers Supabase Storage
-  const filePath = `${user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+  const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
   const { data: uploadData, error: uploadError } = await supa.storage
     .from('avatars')
-    .upload(filePath, file);
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
 
   if (uploadError) throw uploadError;
 
-  // Construction de l'URL publique complète
+  // Construction de l'URL avec le bon format
   const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
 
-  // Mise à jour de l'URL de l'avatar dans la base de données
+  // Mise à jour dans la base de données
   const { error: dbError } = await supa
     .from("players")
-    .update({ avatar_url: avatarUrl })  // Enregistre l'URL complète
-    .eq("id", user.id);
+    .update({ avatar_url: avatarUrl })
+    .eq("id", session.user.id);
 
   if (dbError) throw dbError;
 
-  // Mise à jour immédiate de l'avatar dans l'interface
+  // Mise à jour de l'interface
   const profileAvatar = document.getElementById("profileAvatar");
   const avatarPreview = document.getElementById("profileAvatarPreview");
 
   if (profileAvatar) profileAvatar.src = avatarUrl;
   if (avatarPreview) avatarPreview.src = avatarUrl;
 
-  console.log("Avatar mis à jour avec succès");
+  console.log("Avatar mis à jour avec succès:", avatarUrl);
 
 } catch (err) {
-  console.error("Erreur complète lors du changement d'avatar:", err);
+  console.error("Erreur complète:", err);
   alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
 }
   });
