@@ -354,9 +354,8 @@ async function updateProfileInfo(force = false) {
   // Désactive le bouton par défaut
   if (profileBtn) profileBtn.disabled = true;
 
-  // 2. Vérification de la connexion
   try {
-    // Vérification du token seulement si pas forcé
+    // 2. Vérification de la connexion
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
@@ -395,16 +394,30 @@ async function updateProfileInfo(force = false) {
       profileBtn.title = "Voir votre profil";
     }
 
-    // Mise à jour de l'avatar avec construction de l'URL complète
+    // Mise à jour de l'avatar avec solution ultra-robuste
     if (profileAvatar) {
       if (player?.avatar_url) {
-        // Construction de l'URL publique complète
-        const avatarUrl = `${supa.storage.url}/object/public/avatars/${player.avatar_url}`;
+        // Construction de l'URL publique complète avec timestamp anti-cache
+        const avatarUrl = `${supa.storage.url}/object/public/avatars/${player.avatar_url}?v=${Date.now()}`;
+
+        // Chargement de l'image avec vérification
         profileAvatar.src = avatarUrl;
-        console.log("[updateProfileInfo] Avatar chargé depuis:", avatarUrl);
+        console.log("[updateProfileInfo] URL de l'avatar:", avatarUrl);
+
+        // Vérification du chargement
+        const testImg = new Image();
+        testImg.onload = () => {
+          console.log("[updateProfileInfo] ✅ Avatar chargé avec succès dans la topbar");
+        };
+        testImg.onerror = () => {
+          console.error("[updateProfileInfo] ❌ Échec du chargement de l'avatar dans la topbar");
+          console.error("URL testée:", avatarUrl);
+          profileAvatar.src = "images/avatarDefault.png";
+        };
+        testImg.src = avatarUrl;
       } else {
         profileAvatar.src = "images/avatarDefault.png";
-        console.log("[updateProfileInfo] Aucun avatar, utilisation par défaut");
+        console.log("[updateProfileInfo] Aucun avatar défini, utilisation par défaut");
       }
       profileAvatar.alt = player?.pseudo ? `Avatar de ${player.pseudo}` : "Avatar utilisateur";
     }
