@@ -619,11 +619,13 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Modifier le profil" dans le dropdown
   const editProfileBtn = document.getElementById("editProfileBtn");
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener("click", async () => {
-      await ouvrirProfil();
-    });
-  }
+if (editProfileBtn) {
+  editProfileBtn.addEventListener("click", async (e) => {
+    e.stopPropagation(); // Empêche la propagation de l'événement
+    console.log("Bouton Modifier cliqué");
+    await ouvrirProfil(); // Appel de la fonction corrigée
+  });
+}
 
   // Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
