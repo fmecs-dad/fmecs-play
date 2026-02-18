@@ -254,15 +254,17 @@ async function initialiserProfilEtLancerJeu(session) {
 //   FONCTIONS DE PROFIL
 // ===============================
 async function ouvrirProfil() {
-  console.log("Ouverture du profil...");
-
-  const { data: { session }, error } = await supa.auth.getSession();
-  if (error || !session) {
-    console.warn("Aucun utilisateur connecté");
-    return;
-  }
+  console.log("[ouvrirProfil] Début de l'ouverture du profil...");
 
   try {
+    // 1. Vérification de la session
+    const { data: { session }, error } = await supa.auth.getSession();
+    if (error || !session) {
+      console.warn("[ouvrirProfil] Aucun utilisateur connecté");
+      return;
+    }
+
+    // 2. Récupération des données du joueur
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("*")
@@ -271,49 +273,68 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // Vérification des éléments
+    // 3. Vérification et récupération des éléments du DOM
+    const modal = document.getElementById("profileModal");
     const pseudoInput = document.getElementById("profilePseudoInput");
     const avatarPreview = document.getElementById("profileAvatarPreview");
     const emailInput = document.getElementById("profileEmailInput");
     const creationDateElement = document.getElementById("profileCreationDate");
-    const modal = document.getElementById("profileModal");
 
-    if (!pseudoInput || !avatarPreview || !emailInput || !creationDateElement || !modal) {
-      console.error("Éléments manquants dans la modale");
+    // Vérification complète des éléments
+    const missingElements = [];
+    if (!modal) missingElements.push("profileModal");
+    if (!pseudoInput) missingElements.push("profilePseudoInput");
+    if (!avatarPreview) missingElements.push("profileAvatarPreview");
+    if (!emailInput) missingElements.push("profileEmailInput");
+    if (!creationDateElement) missingElements.push("profileCreationDate");
+
+    if (missingElements.length > 0) {
+      console.error("[ouvrirProfil] Éléments manquants:", missingElements.join(", "));
+      alert(`Éléments manquants dans le DOM: ${missingElements.join(", ")}`);
       return;
     }
 
-    // Remplissage des champs
+    // 4. Remplissage des champs
     pseudoInput.value = player.pseudo || "";
-    emailInput.value = session.user.email || "";  // Email de la session Supabase
 
-    // Affichage de la date avec le nouveau libellé
+    // Email (directement depuis la session Supabase)
+    emailInput.value = session.user.email || "";
+    console.log("[ouvrirProfil] Email défini:", session.user.email);
+
+    // Date de création (avec le nouveau libellé)
     if (player.created_at) {
       const date = new Date(player.created_at);
       creationDateElement.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
+      console.log("[ouvrirProfil] Date de création définie:", player.created_at);
     } else {
       creationDateElement.textContent = "Joueur depuis : date inconnue";
     }
 
-    // Affichage de l'avatar (votre code existant)
+    // 5. Affichage de l'avatar (votre code existant)
     if (player.avatar_url) {
-      const { data: signedData } = await supa.storage
-        .from('avatars')
-        .createSignedUrl(player.avatar_url, 3600);
-      avatarPreview.src = signedData.signedUrl;
+      try {
+        const { data: signedData } = await supa.storage
+          .from('avatars')
+          .createSignedUrl(player.avatar_url, 3600);
+        avatarPreview.src = signedData.signedUrl;
+        console.log("[ouvrirProfil] Avatar chargé avec URL:", signedData.signedUrl);
+      } catch (err) {
+        console.error("[ouvrirProfil] Erreur chargement avatar:", err);
+        avatarPreview.src = "images/avatarDefault.png";
+      }
     } else {
       avatarPreview.src = "images/avatarDefault.png";
     }
 
-    // Affichage de la modale
+    // 6. Affichage de la modale
     modal.classList.remove("hidden");
+    console.log("[ouvrirProfil] Modale affichée avec succès");
 
   } catch (err) {
-    console.error("Erreur lors de l'ouverture du profil:", err);
-    alert("Impossible de charger vos informations de profil.");
+    console.error("[ouvrirProfil] Erreur:", err);
+    alert("Impossible de charger vos informations de profil. Voir la console pour plus de détails.");
   }
 }
-
 async function refreshAvatar() {
   try {
     const { data: { session }, error } = await supa.auth.getSession();
