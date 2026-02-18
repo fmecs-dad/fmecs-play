@@ -271,31 +271,30 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // Vérification des éléments (version minimale)
+    // 1. Récupération des éléments (comme dans la modale qui fonctionne)
     const pseudoInput = document.getElementById("profilePseudoInput");
     const avatarPreview = document.getElementById("profileAvatarPreview");
     const emailInput = document.getElementById("profileEmailInput");
     const creationDateElement = document.getElementById("profileCreationDate");
     const modal = document.getElementById("profileModal");
 
-    // CORRECTIONS CIBLEES POUR EMAIL ET DATE
+    // 2. Application des valeurs (même logique que pour l'email qui fonctionne)
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+
+    // Email (copie exacte de ce qui fonctionne dans la modale)
     if (emailInput) {
       emailInput.value = session.user.email || "";
-      console.log("Email défini:", session.user.email);  // Log de vérification
-    } else {
-      console.error("Élément profileEmailInput introuvable");
+      console.log("Email défini:", emailInput.value);  // Vérification
     }
 
+    // Date (même approche que l'email)
     if (creationDateElement && player.created_at) {
       const date = new Date(player.created_at);
       creationDateElement.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
-      console.log("Date définie:", player.created_at);  // Log de vérification
-    } else if (!creationDateElement) {
-      console.error("Élément profileCreationDate introuvable");
+      console.log("Date définie:", creationDateElement.textContent);  // Vérification
     }
 
-    // Code existant pour le pseudo et l'avatar (inchangé)
-    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    // 3. Avatar (votre code existant qui fonctionne)
     if (avatarPreview) {
       if (player.avatar_url) {
         const { data: signedData } = await supa.storage
@@ -307,6 +306,7 @@ async function ouvrirProfil() {
       }
     }
 
+    // 4. Affichage de la modale
     if (modal) modal.classList.remove("hidden");
 
   } catch (err) {
