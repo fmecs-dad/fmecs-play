@@ -620,11 +620,11 @@ function initProfileModalListeners() {
       // Upload de l'avatar
       try {
         const avatarUrl = await uploadAvatar(file);
-
+        console.log("entrée dans MAJ avatar dans la base");
         // Mise à jour de l'URL de l'avatar dans la base de données
         const { data: { session }, error } = await supa.auth.getSession();
         if (error || !session) throw new Error("Utilisateur non connecté");
-
+        console.log(session.user.id);
         const { error: dbError } = await supa
           .from("players")
           .update({ avatar_url: avatarUrl })
