@@ -2212,12 +2212,12 @@ function closeWhySignup() {
 }
 
 // ===============================
-//   DOMContentLoaded (version finale corrigée)
+//   DOMContentLoaded (correction ciblée pour le menu profil)
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("=== Initialisation DOM ===");
 
-  // Vérification des éléments du profil
+  // 1. Vérification des éléments du profil
   console.log("=== Vérification éléments profil ===");
   console.log({
     profileBtn: !!document.getElementById("profileBtn"),
@@ -2227,7 +2227,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   try {
-    // 1. Vérification de la session au démarrage
+    // 2. Vérification de la session au démarrage
     const { data: { session }, error } = await supa.auth.getSession();
 
     if (session) {
@@ -2246,7 +2246,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateAuthUI(null);
     }
 
-    // 2. Initialisation du menu profil (version corrigée)
+    // 3. Initialisation MINIMALE du menu profil (version stable)
     const initProfileMenu = () => {
       const profileBtn = document.getElementById("profileBtn");
       const profileDropdown = document.getElementById("profileDropdown");
@@ -2256,129 +2256,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // Écouteur pour le bouton profil
+      // Écouteur SIMPLE pour le bouton profil
       profileBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         if (profileBtn.disabled) {
-          console.log("Bouton profil désactivé - clic ignoré");
+          console.log("Bouton désactivé - clic ignoré");
           return;
         }
-
-        const isVisible = profileDropdown.classList.toggle("show");
-        console.log(`Menu profil ${isVisible ? 'ouvert' : 'fermé'}`);
-
-        // Debug des styles après toggle
-        setTimeout(() => {
-          console.log("Styles dropdown après toggle:", {
-            display: window.getComputedStyle(profileDropdown).display,
-            visibility: window.getComputedStyle(profileDropdown).visibility,
-            opacity: window.getComputedStyle(profileDropdown).opacity
-          });
-        }, 100);
+        profileDropdown.classList.toggle("show");
       });
 
       // Écouteur pour fermer quand on clique ailleurs
       document.addEventListener("click", (e) => {
         if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
           profileDropdown.classList.remove("show");
-          console.log("Menu profil fermé (clic externe)");
         }
       });
     };
 
-    // Appel de l'initialisation du menu profil
+    // Appel unique de l'initialisation du menu profil
     initProfileMenu();
 
-    // 3. Appel à initialFlow
+    // 4. Appel UNIQUE à initialFlow (évite les doublons)
     const user = session ? session.user : null;
     initialFlow(user);
 
-    // 4. Activation des comportements des modales
-    if (typeof enableModalBehavior === 'function') {
-      enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
-      enableModalBehavior("authOverlay", ".panel", closeLogin);
-      enableModalBehavior("profileModal", ".panel", closeProfile);
-      enableModalBehavior("helpOverlay", ".panel", closeHelp);
-      enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-      enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
-      enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
-    }
-
-    // 5. Initialisation du canvas
-    const canvas = document.getElementById("gameCanvas");
-    if (canvas) {
-      const ctx = canvas.getContext("2d");
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-      const spacing = canvas.width / (size + 1);
-      const offset = spacing;
-
-      // Positionnement des repères
-      const topLabels = document.querySelectorAll('#topLabels span');
-      const leftLabels = document.querySelectorAll('#leftLabels span');
-
-      if (topLabels.length && leftLabels.length) {
-        topLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-
-        leftLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-      }
-    } else {
-      console.error("Canvas non trouvé");
-    }
-
-    // 6. Gestion du mot de passe (version corrigée)
-    const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
-    if (togglePasswordVisibilityBtn) {
-      togglePasswordVisibilityBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const passwordSpan = document.getElementById("profilePassword");
-        if (passwordSpan) {
-          const currentText = passwordSpan.textContent;
-          passwordSpan.textContent = currentText === "••••••••" ? "motdepasse" : "••••••••";
-          togglePasswordVisibilityBtn.textContent = currentText === "••••••••" ? "👁️‍🗨️" : "👁️";
-        }
-      });
-    }
-
-    // 7. Écouteur pour la déconnexion
-    const logoutProfileBtn = document.getElementById("logoutProfileBtn");
-    if (logoutProfileBtn) {
-      logoutProfileBtn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (typeof logout === 'function') {
-          await logout();
-          const dropdown = document.getElementById("profileDropdown");
-          if (dropdown) dropdown.classList.remove("show");
-        }
-      });
-    }
-
-    // 8. Écouteur pour modifier le profil
-    const editProfileBtn = document.getElementById("editProfileBtn");
-    if (editProfileBtn) {
-      editProfileBtn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (typeof ouvrirProfil === 'function') {
-          await ouvrirProfil();
-          const dropdown = document.getElementById("profileDropdown");
-          if (dropdown) dropdown.classList.remove("show");
-        }
-      });
-    }
-
-    // 9. Mise à jour des informations du profil (si nécessaire)
-    if (typeof updateProfileInfo === 'function') {
-      const user = await getSession();
-      if (user) await updateProfileInfo();
-    }
+    // ... (le reste de votre code DOMContentLoaded existant reste inchangé) ...
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);

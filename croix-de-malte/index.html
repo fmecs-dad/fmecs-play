@@ -236,8 +236,8 @@ body {
   transition: transform 0.2s ease;
 }
 
-.profile-btn:not(:disabled) .avatar-icon:hover {
-  transform: scale(1.05);
+.profile-btn:not(:disabled) {
+  cursor: pointer;
 }
 
 .profile-pseudo {
@@ -251,29 +251,19 @@ body {
 
 /* ==== DROPDOWN (Correction critique) ==== */
 .profile-dropdown {
-  position: absolute;
-  top: calc(100% + 5px);
-  right: 0;
-  background: #1a1a1a;
-  padding: 12px;
-  border-radius: 8px;
-  min-width: 220px;
-  z-index: 999999; /* Z-index très élevé */
   display: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 5px;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #222;
+  padding: 10px;
+  border-radius: 6px;
+  min-width: 200px;
+  z-index: 99999;
 }
 
 .profile-dropdown.show {
   display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0) !important;
 }
 
 .profile-info {
