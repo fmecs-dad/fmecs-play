@@ -519,6 +519,33 @@ async function checkSessionOnStartup() {
 /**
  * Initialise tous les écouteurs pour la modale de profil
  */
+
+async function uploadAvatar(file) {
+  try {
+    const { data: { session }, error } = await supa.auth.getSession();
+    if (error || !session) throw new Error("Utilisateur non connecté");
+
+    const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+
+    // Upload du fichier
+    const { data: uploadData, error: uploadError } = await supa.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    // Construction de l'URL publique complète
+    return `${supa.storage.url}/object/public/avatars/${filePath}`;
+
+  } catch (err) {
+    console.error("Erreur lors de l'upload de l'avatar:", err);
+    throw err;
+  }
+}
+
 function initProfileModalListeners() {
   // Écouteur pour le bouton "Annuler"
   const cancelBtn = document.getElementById("cancelProfileBtn");
@@ -3121,32 +3148,6 @@ async function fetchBestScore(userId) {
   } catch (err) {
     console.error("Erreur inattendue fetchBestScore:", err);
     return null;
-  }
-}
-
-async function uploadAvatar(file) {
-  try {
-    const { data: { session }, error } = await supa.auth.getSession();
-    if (error || !session) throw new Error("Utilisateur non connecté");
-
-    const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
-
-    // Upload du fichier
-    const { data: uploadData, error: uploadError } = await supa.storage
-      .from('avatars')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    if (uploadError) throw uploadError;
-
-    // Construction de l'URL publique complète
-    return `${supa.storage.url}/object/public/avatars/${filePath}`;
-
-  } catch (err) {
-    console.error("Erreur lors de l'upload de l'avatar:", err);
-    throw err;
   }
 }
 
