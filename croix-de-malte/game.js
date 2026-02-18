@@ -624,7 +624,7 @@ function initProfileModalListeners() {
         // Mise à jour de l'URL de l'avatar dans la base de données
         const { data: { session }, error } = await supa.auth.getSession();
         if (error || !session) throw new Error("Utilisateur non connecté");
-        console.log(session.user.id);
+        console.log("user id du joueur :",  session.user.id);
         const { error: dbError } = await supa
           .from("players")
           .update({ avatar_url: avatarUrl })
