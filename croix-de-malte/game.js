@@ -392,6 +392,7 @@ async function updateProfileInfo(force = false) {
     if (profileBtn) profileBtn.disabled = true;
   }
 }
+
 // Fonction pour récupérer la session (utilise le JWT stocké)
 async function getSession() {
   try {
@@ -554,15 +555,16 @@ function initProfileModalListeners() {
     });
   }
 
-  // ===== NOUVEAU : Écouteurs pour l'avatar =====
   // Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
-      document.getElementById("avatarUpload").click();
+      const avatarUpload = document.getElementById("avatarUpload");
+      if (avatarUpload) avatarUpload.click();
     });
   }
 
+  // Gestion du fichier sélectionné pour l'avatar
   const avatarUpload = document.getElementById("avatarUpload");
   if (avatarUpload) {
     avatarUpload.addEventListener("change", async (e) => {
@@ -590,7 +592,17 @@ function initProfileModalListeners() {
       // Upload de l'avatar
       try {
         const avatarUrl = await uploadAvatar(file);
-        console.log("Avatar mis à jour avec succès:", avatarUrl);
+
+        // Mise à jour de l'URL de l'avatar dans la base de données
+        const { data: { session }, error } = await supa.auth.getSession();
+        if (error || !session) throw new Error("Utilisateur non connecté");
+
+        const { error: dbError } = await supa
+          .from("players")
+          .update({ avatar_url: avatarUrl })
+          .eq("id", session.user.id);
+
+        if (dbError) throw dbError;
 
         // Mise à jour de l'avatar dans l'interface
         const profileAvatar = document.getElementById("profileAvatar");
@@ -603,7 +615,6 @@ function initProfileModalListeners() {
     });
   }
 }
-
 
 /**
  * Fonction pour sauvegarder les modifications du profil
@@ -623,58 +634,51 @@ async function saveProfileChanges() {
   }
 
   try {
-    const user = await getSession();
-    if (!user) throw new Error("Utilisateur non connecté");
+    const { data: { session }, error } = await supa.auth.getSession();
+    if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // 1. Mise à jour du pseudo dans la table players
+    // Mise à jour du pseudo dans la table players
     const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
-      .eq("id", user.id);
+      .eq("id", session.user.id);
 
     if (playerError) throw playerError;
 
-    // 2. Mise à jour du pseudo dans la table scores
-    const { error: scoresError } = await supa
-      .from("scores")
-      .update({ player_name: newPseudo })
-      .eq("player_id", user.id);
+    // NE PAS essayer de mettre à jour la table scores car la colonne player_name n'existe pas
 
-    if (scoresError) throw scoresError;
-
-    // 3. Récupération de l'URL de l'avatar actuel
+    // Récupération des données mises à jour
     const { data: updatedPlayer, error: fetchError } = await supa
       .from("players")
-      .select("avatar_url")
-      .eq("id", user.id)
+      .select("pseudo, avatar_url")
+      .eq("id", session.user.id)
       .single();
 
     if (fetchError) throw fetchError;
 
-    // 4. Mise à jour de l'avatar dans l'interface
+    // Mise à jour de l'interface
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
     const profileAvatar = document.getElementById("profileAvatar");
     const avatarPreview = document.getElementById("profileAvatarPreview");
 
-    // Construction de l'URL complète de l'avatar
+    if (pseudoDisplay) pseudoDisplay.textContent = updatedPlayer.pseudo;
+
+    // Mise à jour de l'avatar
     let avatarUrl = updatedPlayer.avatar_url;
     if (avatarUrl && !avatarUrl.startsWith('http')) {
       avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
     } else if (!avatarUrl) {
       avatarUrl = "images/avatarDefault.png";
     }
-console.log("URL de l'avatar récupérée:", updatedPlayer.avatar_url);
+
     if (profileAvatar) profileAvatar.src = avatarUrl;
     if (avatarPreview) avatarPreview.src = avatarUrl;
 
-    // 5. Mise à jour du pseudo dans l'interface
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
-
-    // 6. Fermeture de la modale
+    // Fermeture de la modale
     const modal = document.getElementById("profileModal");
     if (modal) modal.classList.add("hidden");
 
-    // 7. Réinitialisation du message d'erreur
+    // Réinitialisation du message d'erreur
     errorMessage.classList.add("hidden");
 
   } catch (err) {
@@ -3120,6 +3124,31 @@ async function fetchBestScore(userId) {
   }
 }
 
+async function uploadAvatar(file) {
+  try {
+    const { data: { session }, error } = await supa.auth.getSession();
+    if (error || !session) throw new Error("Utilisateur non connecté");
+
+    const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+
+    // Upload du fichier
+    const { data: uploadData, error: uploadError } = await supa.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    // Construction de l'URL publique complète
+    return `${supa.storage.url}/object/public/avatars/${filePath}`;
+
+  } catch (err) {
+    console.error("Erreur lors de l'upload de l'avatar:", err);
+    throw err;
+  }
+}
 
 // ===============================
 //   WHY SIGNUP
