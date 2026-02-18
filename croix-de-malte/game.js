@@ -503,6 +503,96 @@ async function checkSessionOnStartup() {
   }
 }
 
+// ===============================
+// FONCTIONS D'INITIALISATION DES ÉCOUTEURS
+// ===============================
+
+/**
+ * Initialise tous les écouteurs pour la modale de profil
+ */
+function initProfileModalListeners() {
+  // Écouteur pour le bouton "Annuler"
+  const cancelBtn = document.getElementById("cancelProfileBtn");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      const modal = document.getElementById("profileModal");
+      if (modal) modal.classList.add("hidden");
+    });
+  }
+
+  // Écouteur pour le bouton "Enregistrer"
+  const saveBtn = document.getElementById("saveProfileBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", async () => {
+      await saveProfileChanges();
+    });
+  }
+
+  // Écouteur pour fermer la modale en cliquant en dehors
+  const modal = document.getElementById("profileModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.add("hidden");
+      }
+    });
+  }
+
+  // Écouteur pour le bouton "Modifier le profil" dans le dropdown
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", async () => {
+      await ouvrirProfil();
+    });
+  }
+}
+
+/**
+ * Fonction pour sauvegarder les modifications du profil
+ */
+async function saveProfileChanges() {
+  const pseudoInput = document.getElementById("profilePseudoInput");
+  const errorMessage = document.getElementById("profileErrorMessage");
+
+  if (!pseudoInput || !errorMessage) return;
+
+  const newPseudo = pseudoInput.value.trim();
+
+  if (!newPseudo) {
+    errorMessage.textContent = "Le pseudo ne peut pas être vide";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const user = await getSession();
+    if (!user) throw new Error("Utilisateur non connecté");
+
+    // Mise à jour du pseudo dans la base de données
+    const { error } = await supa
+      .from("players")
+      .update({ pseudo: newPseudo })
+      .eq("id", user.id);
+
+    if (error) throw error;
+
+    // Mise à jour de l'interface
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
+
+    // Fermeture de la modale
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.classList.add("hidden");
+
+    // Réinitialisation du message d'erreur
+    errorMessage.classList.add("hidden");
+
+  } catch (err) {
+    console.error("Erreur lors de la sauvegarde du profil:", err);
+    errorMessage.textContent = err.message || "Une erreur est survenue";
+    errorMessage.classList.remove("hidden");
+  }
+}
 
 // ===============================
 //   FONCTIONS DE BASE DU JEU
