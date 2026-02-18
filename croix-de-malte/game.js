@@ -2326,36 +2326,54 @@ document.addEventListener("DOMContentLoaded", async () => {
     initialFlow(null);
   }
 
-  // ===============================
-  //   GESTION DU MENU PROFIL (votre code existant conservé)
-  // ===============================
+// ===============================
+//   GESTION DU MENU PROFIL (version finale corrigée)
+// ===============================
+
+const initProfileMenu = () => {
   const profileBtn = document.getElementById("profileBtn");
   const profileDropdown = document.getElementById("profileDropdown");
 
-  if (profileBtn && profileDropdown) {
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const isShowing = profileDropdown.classList.toggle("show");
-
-      // Animation supplémentaire (votre code existant)
-      if (isShowing) {
-        profileDropdown.style.transform = "scaleY(1)";
-        profileDropdown.style.opacity = "1";
-      } else {
-        profileDropdown.style.transform = "scaleY(0.9)";
-        profileDropdown.style.opacity = "0";
-      }
-    });
-
-    // Fermeture quand on clique ailleurs (votre code existant)
-    document.addEventListener("click", (e) => {
-      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-        profileDropdown.classList.remove("show");
-        profileDropdown.style.transform = "scaleY(0.9)";
-        profileDropdown.style.opacity = "0";
-      }
-    });
+  if (!profileBtn || !profileDropdown) {
+    console.error("Menu profil: éléments manquants");
+    return;
   }
+
+  // Activation du bouton si utilisateur connecté
+  const user = await getSession();
+  if (user) profileBtn.disabled = false;
+
+  // Écouteur pour ouvrir/fermer le dropdown
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (profileBtn.disabled) {
+      console.log("Bouton désactivé - clic ignoré");
+      return;
+    }
+
+    const isVisible = profileDropdown.classList.toggle("show");
+    console.log(`Menu profil ${isVisible ? 'ouvert' : 'fermé'}`);
+
+    // Vérification des styles après toggle
+    if (isVisible) {
+      setTimeout(() => {
+        console.log("Styles après ouverture:", {
+          display: window.getComputedStyle(profileDropdown).display,
+          visibility: window.getComputedStyle(profileDropdown).visibility,
+          opacity: window.getComputedStyle(profileDropdown).opacity
+        });
+      }, 100);
+    }
+  });
+
+  // Écouteur pour fermer quand on clique ailleurs
+  document.addEventListener("click", (e) => {
+    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+      console.log("Menu profil fermé (clic externe)");
+    }
+  });
+};
 
   // Écouteur pour afficher/masquer le mot de passe (votre code existant)
   const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
