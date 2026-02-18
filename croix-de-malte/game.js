@@ -680,7 +680,7 @@ async function saveProfileChanges() {
     } else if (!avatarUrl) {
       avatarUrl = "images/avatarDefault.png";
     }
-
+console.log("URL de l'avatar récupérée:", updatedPlayer.avatar_url);
     if (profileAvatar) profileAvatar.src = avatarUrl;
     if (avatarPreview) avatarPreview.src = avatarUrl;
 
