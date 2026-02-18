@@ -290,8 +290,10 @@ async function ouvrirProfil() {
     if (player.avatar_url) {
       const signedUrl = await getSignedAvatarUrl(player.avatar_url);
       avatarPreview.src = signedUrl || "images/avatarDefault.png";
+      console.log("Avatar chargé avec URL:", signedUrl || "default");
     } else {
       avatarPreview.src = "images/avatarDefault.png";
+      console.log("Aucun avatar défini, utilisation de l'avatar par défaut");
     }
 
     modal.classList.remove("hidden");
@@ -559,9 +561,12 @@ async function checkSessionOnStartup() {
 
 async function getSignedAvatarUrl(path) {
   try {
+    // On s'assure que le path est relatif (sans le préfixe public/)
+    const cleanPath = path.replace(/^https:\/\/[^/]+\/storage\/v1\/object\/public\/avatars\//, '');
+
     const { data, error } = await supa.storage
       .from('avatars')
-      .createSignedUrl(path, 3600); // URL valide pour 1 heure
+      .createSignedUrl(cleanPath, 3600);
 
     if (error) {
       console.error("Erreur lors de la génération de l'URL signée:", error);
@@ -588,22 +593,12 @@ async function uploadAvatar(file) {
 
     if (uploadError) throw uploadError;
 
-    // Génération d'une URL signée
-    const signedUrl = await getSignedAvatarUrl(filePath);
-    if (!signedUrl) throw new Error("Impossible de générer l'URL signée");
+    // On retourne juste le chemin relatif (pas l'URL complète)
+    return filePath;
 
-    // Mise à jour dans la base de données
-    const { error: dbError } = await supa
-      .from("players")
-      .update({ avatar_url: filePath }) // On stocke seulement le chemin
-      .eq("id", session.user.id);
-
-    if (dbError) throw dbError;
-
-    return signedUrl;
   } catch (err) {
     console.error("Erreur dans uploadAvatar:", err);
-    return null;
+    throw err;
   }
 }
 
@@ -677,13 +672,27 @@ if (avatarUpload) {
 
     // Upload
     try {
-      const signedUrl = await uploadAvatar(file);
-      if (!signedUrl) throw new Error("Upload échoué");
+      const { data: { session }, error } = await supa.auth.getSession();
+      if (error || !session) throw new Error("Utilisateur non connecté");
+
+      const filePath = await uploadAvatar(file);
+      const signedUrl = await getSignedAvatarUrl(filePath);
+
+      if (!signedUrl) throw new Error("Impossible de générer l'URL signée");
+
+      // Mise à jour dans la base de données
+      const { error: dbError } = await supa
+        .from("players")
+        .update({ avatar_url: filePath }) // On stocke seulement le chemin relatif
+        .eq("id", session.user.id);
+
+      if (dbError) throw dbError;
 
       // Mise à jour de l'interface
       const profileAvatar = document.getElementById("profileAvatar");
       if (profileAvatar) profileAvatar.src = signedUrl;
       if (preview) preview.src = signedUrl;
+
     } catch (err) {
       console.error("Erreur:", err);
       alert("Erreur lors du changement d'avatar: " + err.message);
