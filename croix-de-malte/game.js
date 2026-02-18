@@ -271,7 +271,7 @@ async function ouvrirProfil() {
 
     if (error) throw error;
 
-    // Vérification de l'existence des éléments avant de les modifier
+    // Vérification des éléments
     const pseudoInput = document.getElementById("profilePseudoInput");
     const avatarPreview = document.getElementById("profileAvatarPreview");
     const emailInput = document.getElementById("profileEmailInput");
@@ -282,21 +282,13 @@ async function ouvrirProfil() {
       return;
     }
 
-    // Remplit les champs de la modale
+    // Remplit les champs
     pseudoInput.value = player?.pseudo || "";
     avatarPreview.src = player?.avatar_url || "images/avatarDefault.png";
     emailInput.value = user.email || "";
 
     // Affiche la modale
     modal.classList.remove("hidden");
-
-    // Réinitialise les messages d'erreur
-    const errorMessage = document.getElementById("profileErrorMessage");
-    if (errorMessage) {
-      errorMessage.classList.add("hidden");
-    }
-
-    console.log("Profil ouvert avec succès");
 
   } catch (err) {
     console.error("Erreur lors de l'ouverture du profil:", err);
@@ -2420,6 +2412,63 @@ document.addEventListener("keydown", (e) => {
 
   // Mise à jour des informations du profil (votre code existant)
   if (typeof updateProfileInfo === 'function') updateProfileInfo();
+
+  // Écouteurs pour les boutons de la modale
+document.getElementById("cancelProfileBtn")?.addEventListener("click", () => {
+  const modal = document.getElementById("profileModal");
+  if (modal) modal.classList.add("hidden");
+});
+
+document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
+  const pseudoInput = document.getElementById("profilePseudoInput");
+  const errorMessage = document.getElementById("profileErrorMessage");
+
+  if (!pseudoInput || !errorMessage) return;
+
+  const newPseudo = pseudoInput.value.trim();
+
+  if (!newPseudo) {
+    errorMessage.textContent = "Le pseudo ne peut pas être vide";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const user = await getSession();
+    if (!user) throw new Error("Utilisateur non connecté");
+
+    // Mise à jour du pseudo dans la base de données
+    const { error } = await supa
+      .from("players")
+      .update({ pseudo: newPseudo })
+      .eq("id", user.id);
+
+    if (error) throw error;
+
+    // Mise à jour de l'interface
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
+
+    // Fermeture de la modale
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.classList.add("hidden");
+
+    // Réinitialisation du message d'erreur
+    errorMessage.classList.add("hidden");
+
+  } catch (err) {
+    console.error("Erreur lors de la sauvegarde du profil:", err);
+    errorMessage.textContent = err.message || "Une erreur est survenue";
+    errorMessage.classList.remove("hidden");
+  }
+});
+
+// Écouteur pour fermer la modale en cliquant en dehors
+document.getElementById("profileModal")?.addEventListener("click", (e) => {
+  if (e.target === e.currentTarget) {
+    e.currentTarget.classList.add("hidden");
+  }
+});
 
   // ===============================
   //   FIN DE PARTIE
