@@ -254,6 +254,8 @@ async function initialiserProfilEtLancerJeu(session) {
 //   FONCTIONS DE PROFIL
 // ===============================
 async function ouvrirProfil() {
+  console.log("Début de l'ouverture du profil");
+
   const user = await getSession();
   if (!user) {
     console.warn("Tentative d'ouverture du profil sans utilisateur connecté");
@@ -269,18 +271,33 @@ async function ouvrirProfil() {
 
     if (error) throw error;
 
+    // Vérification de l'existence des éléments avant de les modifier
+    const pseudoInput = document.getElementById("profilePseudoInput");
+    const avatarPreview = document.getElementById("profileAvatarPreview");
+    const emailInput = document.getElementById("profileEmailInput");
+    const modal = document.getElementById("profileModal");
+
+    if (!pseudoInput || !avatarPreview || !emailInput || !modal) {
+      console.error("Un ou plusieurs éléments de la modale de profil sont manquants");
+      return;
+    }
+
     // Remplit les champs de la modale
-    document.getElementById("profilePseudoInput").value = player?.pseudo || "";
-    document.getElementById("profileAvatarPreview").src = player?.avatar_url || "images/avatarDefault.png";
-    document.getElementById("profileEmailInput").value = user.email || "";
+    pseudoInput.value = player?.pseudo || "";
+    avatarPreview.src = player?.avatar_url || "images/avatarDefault.png";
+    emailInput.value = user.email || "";
 
     // Affiche la modale
-    const modal = document.getElementById("profileModal");
-    if (modal) {
-      modal.classList.remove("hidden");
-      // Réinitialise les messages d'erreur
-      document.getElementById("profileErrorMessage")?.classList.add("hidden");
+    modal.classList.remove("hidden");
+
+    // Réinitialise les messages d'erreur
+    const errorMessage = document.getElementById("profileErrorMessage");
+    if (errorMessage) {
+      errorMessage.classList.add("hidden");
     }
+
+    console.log("Profil ouvert avec succès");
+
   } catch (err) {
     console.error("Erreur lors de l'ouverture du profil:", err);
     alert("Impossible de charger vos informations de profil.");
