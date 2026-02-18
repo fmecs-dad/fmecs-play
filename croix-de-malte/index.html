@@ -192,7 +192,7 @@ body {
   pointer-events: none;
 }
 
-/* ========== MENU PROFIL (version corrigée) ========== */
+/* ========== MENU PROFIL (Solution finale) ========== */
 #profileContainer {
   position: relative;
   margin-left: auto;
@@ -215,7 +215,7 @@ body {
   font-size: 14px;
   padding: 5px;
   border-radius: 4px;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .profile-btn:not(:disabled):hover {
@@ -233,27 +233,33 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
+  transition: transform 0.2s ease;
 }
 
-#profilePseudoDisplay {
+.profile-btn:not(:disabled) .avatar-icon:hover {
+  transform: scale(1.05);
+}
+
+.profile-pseudo {
   max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  font-weight: 500;
 }
 
-/* ==== DROPDOWN (partie critique corrigée) ==== */
+/* ==== DROPDOWN (Correction critique) ==== */
 .profile-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 5px);
   right: 0;
   background: #1a1a1a;
   padding: 12px;
   border-radius: 8px;
   min-width: 220px;
   z-index: 999999; /* Z-index très élevé */
-  display: none; /* Caché par défaut */
+  display: none;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
@@ -264,13 +270,12 @@ body {
 }
 
 .profile-dropdown.show {
-  display: block !important; /* Forcer l'affichage */
+  display: block !important;
   opacity: 1 !important;
   visibility: visible !important;
   transform: translateY(0) !important;
 }
 
-/* Contenu du dropdown */
 .profile-info {
   margin-bottom: 10px;
   padding: 0 5px;
@@ -280,6 +285,11 @@ body {
   margin: 6px 0;
   color: #e0e0e0;
   font-size: 14px;
+  line-height: 1.4;
+}
+
+.profile-info strong {
+  color: white;
 }
 
 #editProfileBtn, #logoutProfileBtn {
@@ -291,11 +301,12 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 #editProfileBtn:hover, #logoutProfileBtn:hover {
   background: #3a3a3a;
+  transform: translateY(-1px);
 }
 
 .toggle-password {
@@ -310,25 +321,6 @@ body {
 
 .toggle-password:hover {
   color: white;
-}
-
-/* Animation pour l'ouverture du dropdown */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Style pour les boutons du dropdown */
-.profile-dropdown button {
-  padding: 8px 12px;
-  text-align: center;
-  background: #2d2d2d;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.profile-dropdown button:hover {
-  background: #3a3a3a;
 }
 
 /* === HELP CLOSE BUTTON === */
