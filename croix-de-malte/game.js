@@ -2360,22 +2360,28 @@ const initProfileMenu = () => {
 };
 
   // Écouteur pour afficher/masquer le mot de passe (votre code existant)
-  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
-  if (togglePasswordVisibilityBtn) {
-    togglePasswordVisibilityBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const passwordSpan = document.getElementById("profilePassword");
-      if (passwordSpan) {
-        if (passwordSpan.textContent === "••••••••") {
-          passwordSpan.textContent = "motdepasse";
-          togglePasswordVisibilityBtn.textContent = "👁️‍🗨️";
-        } else {
-          passwordSpan.textContent = "••••••••";
-          togglePasswordVisibilityBtn.textContent = "👁️";
-        }
-      }
-    });
+  const togglePasswordBtn = document.getElementById("togglePasswordVisibility");
+if (togglePasswordBtn) {
+  togglePasswordBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const passwordSpan = document.getElementById("profilePassword");
+    if (passwordSpan) {
+      const currentText = passwordSpan.textContent;
+      passwordSpan.textContent = currentText === "••••••••" ? "motdepasse" : "••••••••";
+      togglePasswordBtn.textContent = currentText === "••••••••" ? "👁️‍🗨️" : "👁️";
+    }
+  });
+}
+
+  // Fermeture du menu avec la touche Echap
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    const dropdown = document.getElementById("profileDropdown");
+    if (dropdown && dropdown.classList.contains("show")) {
+      dropdown.classList.remove("show");
+    }
   }
+})
 
   // Écouteur pour la déconnexion (votre code existant)
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");

@@ -192,7 +192,6 @@ body {
   pointer-events: none;
 }
 
-/* ========== MENU PROFIL (Solution finale) ========== */
 #profileContainer {
   position: relative;
   margin-left: auto;
@@ -201,6 +200,7 @@ body {
   justify-content: center;
   height: 100%;
   z-index: 10002;
+  padding: 0 10px; /* Ajout pour éviter le collage aux bords */
 }
 
 .profile-btn {
@@ -213,8 +213,13 @@ body {
   gap: 5px;
   color: white;
   font-size: 14px;
-  padding: 5px;
-  border-radius: 4px;
+  padding: 8px 12px; /* Zone cliquable agrandie */
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.profile-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1); /* Effet hover visible */
 }
 
 .profile-btn:disabled {
@@ -232,6 +237,11 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
+  transition: transform 0.2s ease;
+}
+
+.profile-btn:not(:disabled) .avatar-icon:hover {
+  transform: scale(1.05); /* Légère animation au survol */
 }
 
 #profilePseudoDisplay {
@@ -240,65 +250,112 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  font-weight: 500;
 }
 
-/* ==== DROPDOWN ==== */
+/* ==== DROPDOWN (Correction complète) ==== */
 .profile-dropdown {
-  display: none;
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px); /* Positionnement précis sous le bouton */
   right: 0;
-  background: #222;
-  padding: 12px;
+  background: #1a1a1a;
+  padding: 15px;
   border-radius: 8px;
-  min-width: 220px;
-  z-index: 999999;
+  width: 280px; /* Largeur fixe pour une meilleure présentation */
+  z-index: 999999; /* Z-index très élevé */
+  display: none;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.2s ease;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 5px;
 }
 
 .profile-dropdown.show {
-  display: block;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
 }
 
 .profile-info {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   padding: 0 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
 }
 
 .profile-info p {
-  margin: 6px 0;
+  margin: 8px 0;
   color: #e0e0e0;
   font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  justify-content: space-between;
 }
 
+.profile-info strong {
+  color: white;
+  margin-right: 10px;
+}
+
+.profile-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.password-item {
+  align-items: center;
+}
+
+/* Boutons d'action */
 #editProfileBtn, #logoutProfileBtn {
-  width: calc(100% - 10px);
-  margin: 0 5px 5px;
-  padding: 8px;
+  width: calc(100% - 20px);
+  margin: 0 10px 10px;
+  padding: 10px;
   background: #2d2d2d;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  text-align: center;
 }
 
 #editProfileBtn:hover, #logoutProfileBtn:hover {
   background: #3a3a3a;
+  transform: translateY(-1px);
 }
 
+/* Bouton de visibilité du mot de passe */
 .toggle-password {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
-  pointer-events: auto;
+  font-size: 16px;
+  color: #aaa;
+  margin-left: 10px;
+  transition: color 0.2s ease;
 }
+
+.toggle-password:hover {
+  color: white;
+}
+
+/* Section des actions */
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 
 /* === HELP CLOSE BUTTON === */
 
@@ -1184,14 +1241,20 @@ footer {
   </button>
   <div id="profileDropdown" class="profile-dropdown">
     <div class="profile-info">
-      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
-      <p><strong>Membre depuis:</strong> <span id="profileCreationDate"></span></p>
-      <p>
-        <strong>Mot de passe:</strong>
-        <span id="profilePassword">••••••••</span>
-        <button id="togglePasswordVisibility" class="toggle-password" title="Afficher/Masquer">👁️</button>
-      </p>
-    </div>
+  <div class="profile-info-item">
+    <strong>Email:</strong>
+    <span id="profileEmail"></span>
+  </div>
+  <div class="profile-info-item">
+    <strong>Membre depuis:</strong>
+    <span id="profileCreationDate"></span>
+  </div>
+  <div class="profile-info-item password-item">
+    <strong>Mot de passe:</strong>
+    <span id="profilePassword">••••••••</span>
+    <button id="togglePasswordVisibility" class="toggle-password" title="Afficher/Masquer">👁️</button>
+  </div>
+</div>
     <button id="editProfileBtn" class="profile-btn">Modifier le Profil</button>
     <button id="logoutProfileBtn" class="profile-btn">Se Déconnecter</button>
   </div>
