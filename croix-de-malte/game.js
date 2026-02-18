@@ -271,43 +271,30 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // 1. Récupération des éléments (comme dans la modale qui fonctionne)
-    const pseudoInput = document.getElementById("profilePseudoInput");
-    const avatarPreview = document.getElementById("profileAvatarPreview");
-    const emailInput = document.getElementById("profileEmailInput");
-    const creationDateElement = document.getElementById("profileCreationDate");
-    const modal = document.getElementById("profileModal");
+    // CORRECTION : Utilisation des BONS IDs selon votre HTML
+    const profileEmailSpan = document.getElementById("profileEmail");      // <span> et non <input>
+    const profileCreationDateSpan = document.getElementById("profileCreationDate");
+    const avatarPreview = document.getElementById("profileAvatarPreview"); // Si présent dans la modale
 
-    // 2. Application des valeurs (même logique que pour l'email qui fonctionne)
-    if (pseudoInput) pseudoInput.value = player.pseudo || "";
-
-    // Email (copie exacte de ce qui fonctionne dans la modale)
-    if (emailInput) {
-      emailInput.value = session.user.email || "";
-      console.log("Email défini:", emailInput.value);  // Vérification
+    // Mise à jour des éléments avec vérification
+    if (profileEmailSpan) {
+      profileEmailSpan.textContent = session.user.email || "Email non défini";
+      console.log("Email défini:", session.user.email);
     }
 
-    // Date (même approche que l'email)
-    if (creationDateElement && player.created_at) {
+    if (profileCreationDateSpan && player.created_at) {
       const date = new Date(player.created_at);
-      creationDateElement.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
-      console.log("Date définie:", creationDateElement.textContent);  // Vérification
+      profileCreationDateSpan.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
+      console.log("Date définie:", date.toLocaleDateString());
     }
 
-    // 3. Avatar (votre code existant qui fonctionne)
-    if (avatarPreview) {
-      if (player.avatar_url) {
-        const { data: signedData } = await supa.storage
-          .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600);
-        avatarPreview.src = signedData.signedUrl;
-      } else {
-        avatarPreview.src = "images/avatarDefault.png";
-      }
+    // Avatar dans la modale (si présent)
+    if (avatarPreview && player.avatar_url) {
+      const { data: signedData } = await supa.storage
+        .from('avatars')
+        .createSignedUrl(player.avatar_url, 3600);
+      avatarPreview.src = signedData.signedUrl;
     }
-
-    // 4. Affichage de la modale
-    if (modal) modal.classList.remove("hidden");
 
   } catch (err) {
     console.error("Erreur lors de l'ouverture du profil:", err);
