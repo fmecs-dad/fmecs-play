@@ -2216,8 +2216,6 @@ function closeWhySignup() {
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("=== Initialisation DOM ===");
-
-  // 1. Vérification des éléments du profil
   console.log("=== Vérification éléments profil ===");
   console.log({
     profileBtn: !!document.getElementById("profileBtn"),
@@ -2227,7 +2225,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   try {
-    // 2. Vérification de la session au démarrage
+    // 1. Initialisation de base (votre code existant)
     const { data: { session }, error } = await supa.auth.getSession();
 
     if (session) {
@@ -2236,58 +2234,167 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
-
-      // Mise à jour du profil avec activation forcée du bouton
-      await updateProfileInfo();
-      const profileBtn = document.getElementById("profileBtn");
-      if (profileBtn) profileBtn.disabled = false;
+      updateProfileInfo(); // Mise à jour du profil pour les utilisateurs déjà connectés
     } else {
       console.log("Aucun utilisateur connecté au démarrage");
       updateAuthUI(null);
     }
 
-    // 3. Initialisation MINIMALE du menu profil (version stable)
-    const initProfileMenu = () => {
+    // 2. Initialisation du menu profil (version corrigée)
+    const setupProfileMenu = () => {
       const profileBtn = document.getElementById("profileBtn");
       const profileDropdown = document.getElementById("profileDropdown");
 
       if (!profileBtn || !profileDropdown) {
-        console.error("Menu profil: éléments manquants");
+        console.error("Menu profil : éléments manquants");
         return;
       }
 
-      // Écouteur SIMPLE pour le bouton profil
+      // Écouteur pour ouvrir/fermer le dropdown
       profileBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         if (profileBtn.disabled) {
-          console.log("Bouton désactivé - clic ignoré");
+          console.log("Bouton profil désactivé - clic ignoré");
           return;
         }
+        console.log("Toggle menu profil");
         profileDropdown.classList.toggle("show");
       });
 
-      // Écouteur pour fermer quand on clique ailleurs
+      // Écouteur pour fermer le dropdown quand on clique ailleurs
       document.addEventListener("click", (e) => {
         if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
           profileDropdown.classList.remove("show");
+          console.log("Fermeture menu profil (clic externe)");
         }
       });
     };
 
-    // Appel unique de l'initialisation du menu profil
-    initProfileMenu();
+    // Appel de l'initialisation du menu profil
+    setupProfileMenu();
 
-    // 4. Appel UNIQUE à initialFlow (évite les doublons)
+    // 3. Appel à initialFlow (votre code existant)
     const user = session ? session.user : null;
     initialFlow(user);
 
-    // ... (le reste de votre code DOMContentLoaded existant reste inchangé) ...
+    // 4. Activation des comportements des modales (votre code existant)
+    if (typeof enableModalBehavior === 'function') {
+      enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+      enableModalBehavior("authOverlay", ".panel", closeLogin);
+      enableModalBehavior("profileModal", ".panel", closeProfile);
+      enableModalBehavior("helpOverlay", ".panel", closeHelp);
+      enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+      enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+      enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+    }
+
+    // 5. Initialisation du canvas (votre code existant)
+    canvas = document.getElementById("gameCanvas");
+    if (canvas) {
+      ctx = canvas.getContext("2d");
+
+      // Calcul du canvas et de la grille
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      spacing = canvas.width / (size + 1);
+      offset = spacing;
+
+      // Positionnement des repères
+      const topLabels = document.querySelectorAll('#topLabels span');
+      const leftLabels = document.querySelectorAll('#leftLabels span');
+
+      if (topLabels.length && leftLabels.length) {
+        topLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+
+        leftLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+      }
+    } else {
+      console.error("Canvas non trouvé");
+    }
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
     updateAuthUI(null);
     initialFlow(null);
   }
+
+  // ===============================
+  //   GESTION DU MENU PROFIL (votre code existant conservé)
+  // ===============================
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  if (profileBtn && profileDropdown) {
+    profileBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isShowing = profileDropdown.classList.toggle("show");
+
+      // Animation supplémentaire (votre code existant)
+      if (isShowing) {
+        profileDropdown.style.transform = "scaleY(1)";
+        profileDropdown.style.opacity = "1";
+      } else {
+        profileDropdown.style.transform = "scaleY(0.9)";
+        profileDropdown.style.opacity = "0";
+      }
+    });
+
+    // Fermeture quand on clique ailleurs (votre code existant)
+    document.addEventListener("click", (e) => {
+      if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+        profileDropdown.classList.remove("show");
+        profileDropdown.style.transform = "scaleY(0.9)";
+        profileDropdown.style.opacity = "0";
+      }
+    });
+  }
+
+  // Écouteur pour afficher/masquer le mot de passe (votre code existant)
+  const togglePasswordVisibilityBtn = document.getElementById("togglePasswordVisibility");
+  if (togglePasswordVisibilityBtn) {
+    togglePasswordVisibilityBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const passwordSpan = document.getElementById("profilePassword");
+      if (passwordSpan) {
+        if (passwordSpan.textContent === "••••••••") {
+          passwordSpan.textContent = "motdepasse";
+          togglePasswordVisibilityBtn.textContent = "👁️‍🗨️";
+        } else {
+          passwordSpan.textContent = "••••••••";
+          togglePasswordVisibilityBtn.textContent = "👁️";
+        }
+      }
+    });
+  }
+
+  // Écouteur pour la déconnexion (votre code existant)
+  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
+  if (logoutProfileBtn) {
+    logoutProfileBtn.addEventListener("click", async () => {
+      if (typeof logout === 'function') await logout();
+      const dropdown = document.getElementById("profileDropdown");
+      if (dropdown) dropdown.classList.remove("show");
+    });
+  }
+
+  // Écouteur pour ouvrir la modale de modification du profil (votre code existant)
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", async () => {
+      if (typeof ouvrirProfil === 'function') await ouvrirProfil();
+    });
+  }
+
+  // Mise à jour des informations du profil (votre code existant)
+  if (typeof updateProfileInfo === 'function') updateProfileInfo();
 
   // ===============================
   //   FIN DE PARTIE
