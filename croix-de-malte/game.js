@@ -583,41 +583,41 @@ if (avatarUpload) {
 
     // Upload vers Supabase Storage
     try {
-      const user = await getSession();
-      if (!user) throw new Error("Utilisateur non connecté");
+  const user = await getSession();
+  if (!user) throw new Error("Utilisateur non connecté");
 
-      // Chemin corrigé (sans "avatars/" au début)
-      const filePath = `${user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+  // Upload vers Supabase Storage
+  const filePath = `${user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+  const { data: uploadData, error: uploadError } = await supa.storage
+    .from('avatars')
+    .upload(filePath, file);
 
-      console.log("Upload vers:", filePath); // Log pour débogage
+  if (uploadError) throw uploadError;
 
-      const { data, error } = await supa.storage
-        .from('avatars')  // Nom du bucket
-        .upload(filePath, file);
+  // Construction de l'URL publique complète
+  const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
 
-      if (error) throw error;
+  // Mise à jour de l'URL de l'avatar dans la base de données
+  const { error: dbError } = await supa
+    .from("players")
+    .update({ avatar_url: avatarUrl })  // Enregistre l'URL complète
+    .eq("id", user.id);
 
-      // Construction de l'URL publique
-      const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
+  if (dbError) throw dbError;
 
-      // Mise à jour de l'URL de l'avatar dans la base de données
-      const { error: dbError } = await supa
-        .from("players")
-        .update({ avatar_url: avatarUrl })  // URL complète
-        .eq("id", user.id);
+  // Mise à jour immédiate de l'avatar dans l'interface
+  const profileAvatar = document.getElementById("profileAvatar");
+  const avatarPreview = document.getElementById("profileAvatarPreview");
 
-      if (dbError) throw dbError;
+  if (profileAvatar) profileAvatar.src = avatarUrl;
+  if (avatarPreview) avatarPreview.src = avatarUrl;
 
-      // Mise à jour de l'avatar dans l'interface
-      const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) profileAvatar.src = avatarUrl;
+  console.log("Avatar mis à jour avec succès");
 
-      console.log("Avatar mis à jour avec succès");
-
-    } catch (err) {
-      console.error("Erreur complète lors du changement d'avatar:", err);
-      alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
-    }
+} catch (err) {
+  console.error("Erreur complète lors du changement d'avatar:", err);
+  alert("Erreur lors du changement d'avatar: " + (err.message || "Erreur inconnue"));
+}
   });
 }
 }
