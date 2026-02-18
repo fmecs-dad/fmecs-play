@@ -556,52 +556,53 @@ function initProfileModalListeners() {
 
   // ===== NOUVEAU : Écouteurs pour l'avatar =====
   // Écouteur pour le bouton "Changer l'avatar"
-const changeAvatarBtn = document.getElementById("changeAvatarBtn");
-if (changeAvatarBtn) {
-  changeAvatarBtn.addEventListener("click", () => {
-    document.getElementById("avatarUpload").click();
-  });
+  const changeAvatarBtn = document.getElementById("changeAvatarBtn");
+  if (changeAvatarBtn) {
+    changeAvatarBtn.addEventListener("click", () => {
+      document.getElementById("avatarUpload").click();
+    });
+  }
+
+  const avatarUpload = document.getElementById("avatarUpload");
+  if (avatarUpload) {
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Vérification du format et de la taille
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Seuls les fichiers JPEG/PNG sont acceptés");
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) { // 2Mo max
+        alert("L'image ne doit pas dépasser 2Mo");
+        return;
+      }
+
+      // Aperçu de l'image
+      const preview = document.getElementById("profileAvatarPreview");
+      if (preview) {
+        preview.src = URL.createObjectURL(file);
+      }
+
+      // Upload de l'avatar
+      try {
+        const avatarUrl = await uploadAvatar(file);
+        console.log("Avatar mis à jour avec succès:", avatarUrl);
+
+        // Mise à jour de l'avatar dans l'interface
+        const profileAvatar = document.getElementById("profileAvatar");
+        if (profileAvatar) profileAvatar.src = avatarUrl;
+
+      } catch (err) {
+        console.error("Erreur lors du changement d'avatar:", err);
+        alert("Erreur lors du changement d'avatar: " + err.message);
+      }
+    });
+  }
 }
-
-const avatarUpload = document.getElementById("avatarUpload");
-if (avatarUpload) {
-  avatarUpload.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Vérification du format et de la taille
-    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-    if (!validTypes.includes(file.type)) {
-      alert("Seuls les fichiers JPEG/PNG sont acceptés");
-      return;
-    }
-
-    if (file.size > 2 * 1024 * 1024) { // 2Mo max
-      alert("L'image ne doit pas dépasser 2Mo");
-      return;
-    }
-
-    // Aperçu de l'image
-    const preview = document.getElementById("profileAvatarPreview");
-    if (preview) {
-      preview.src = URL.createObjectURL(file);
-    }
-
-    // Upload de l'avatar
-    try {
-      const avatarUrl = await uploadAvatar(file);
-      console.log("Avatar mis à jour avec succès:", avatarUrl);
-
-      // Mise à jour de l'avatar dans l'interface
-      const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) profileAvatar.src = avatarUrl;
-
-    } catch (err) {
-      console.error("Erreur lors du changement d'avatar:", err);
-      alert("Erreur lors du changement d'avatar: " + err.message);
-    }
-  });
-}}
 
 
 /**
