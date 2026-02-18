@@ -286,26 +286,15 @@ async function ouvrirProfil() {
     pseudoInput.value = player.pseudo || "";
     emailInput.value = session.user.email || "";
 
-    // Affichage de l'avatar
-    let avatarUrl = player.avatar_url;
-    console.log("URL de l'avatar récupérée:", avatarUrl);
-
-    if (avatarUrl) {
-      // Si l'URL est déjà complète, on l'utilise directement
-      // Sinon, on construit l'URL complète
-      if (!avatarUrl.startsWith('http')) {
-        avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
-      }
-      avatarPreview.src = avatarUrl;
-      console.log("Avatar chargé avec l'URL:", avatarUrl);
+    // Chargement de l'avatar
+    if (player.avatar_url) {
+      const signedUrl = await getSignedAvatarUrl(player.avatar_url);
+      avatarPreview.src = signedUrl || "images/avatarDefault.png";
     } else {
       avatarPreview.src = "images/avatarDefault.png";
-      console.log("Aucun avatar trouvé, utilisation de l'avatar par défaut");
     }
 
-    // Affichage de la modale
     modal.classList.remove("hidden");
-
   } catch (err) {
     console.error("Erreur lors de l'ouverture du profil:", err);
     alert("Impossible de charger vos informations de profil.");
@@ -568,39 +557,53 @@ async function checkSessionOnStartup() {
  * Initialise tous les écouteurs pour la modale de profil
  */
 
+async function getSignedAvatarUrl(path) {
+  try {
+    const { data, error } = await supa.storage
+      .from('avatars')
+      .createSignedUrl(path, 3600); // URL valide pour 1 heure
+
+    if (error) {
+      console.error("Erreur lors de la génération de l'URL signée:", error);
+      return null;
+    }
+    return data.signedUrl;
+  } catch (err) {
+    console.error("Erreur inattendue:", err);
+    return null;
+  }
+}
+
 async function uploadAvatar(file) {
   try {
-    console.log("Début de uploadAvatar");
-
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
     const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
 
-    console.log("Chemin du fichier:", filePath);
-
     // Upload du fichier
-    const { data: uploadData, error: uploadError } = await supa.storage
+    const { error: uploadError } = await supa.storage
       .from('avatars')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+      .upload(filePath, file, { cacheControl: '3600' });
 
     if (uploadError) throw uploadError;
 
-    console.log("Upload réussi, construction de l'URL");
+    // Génération d'une URL signée
+    const signedUrl = await getSignedAvatarUrl(filePath);
+    if (!signedUrl) throw new Error("Impossible de générer l'URL signée");
 
-    // Construction de l'URL publique complète
-    const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
+    // Mise à jour dans la base de données
+    const { error: dbError } = await supa
+      .from("players")
+      .update({ avatar_url: filePath }) // On stocke seulement le chemin
+      .eq("id", session.user.id);
 
-    console.log("URL de l'avatar générée:", avatarUrl);
+    if (dbError) throw dbError;
 
-    return avatarUrl;
-
+    return signedUrl;
   } catch (err) {
     console.error("Erreur dans uploadAvatar:", err);
-    throw err;
+    return null;
   }
 }
 
@@ -650,68 +653,39 @@ function initProfileModalListeners() {
   }
 
   // Gestion du fichier sélectionné pour l'avatar
-const avatarUpload = document.getElementById("avatarUpload");
+
+  const avatarUpload = document.getElementById("avatarUpload");
 if (avatarUpload) {
   avatarUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Vérification du format et de la taille
+    // Vérifications...
     const validTypes = ["image/jpeg", "image/png", "image/jpg"];
     if (!validTypes.includes(file.type)) {
       alert("Seuls les fichiers JPEG/PNG sont acceptés");
       return;
     }
-
-    if (file.size > 2 * 1024 * 1024) { // 2Mo max
+    if (file.size > 2 * 1024 * 1024) {
       alert("L'image ne doit pas dépasser 2Mo");
       return;
     }
 
-    // Aperçu de l'image
+    // Aperçu
     const preview = document.getElementById("profileAvatarPreview");
-    if (preview) {
-      preview.src = URL.createObjectURL(file);
-      console.log("Aperçu de l'image mis à jour");
-    }
+    if (preview) preview.src = URL.createObjectURL(file);
 
-    // Upload de l'avatar
+    // Upload
     try {
-      console.log("Début de l'upload de l'avatar");
-      const avatarUrl = await uploadAvatar(file);
-      console.log("Avatar uploadé, URL:", avatarUrl);
+      const signedUrl = await uploadAvatar(file);
+      if (!signedUrl) throw new Error("Upload échoué");
 
-      // Mise à jour dans la base de données
-      const { data: { session }, error } = await supa.auth.getSession();
-      if (error || !session) throw new Error("Utilisateur non connecté");
-
-      console.log("Mise à jour de l'avatar dans la base de données");
-      const { error: dbError } = await supa
-        .from("players")
-        .update({ avatar_url: avatarUrl })
-        .eq("id", session.user.id);
-
-      if (dbError) throw dbError;
-
-      console.log("Avatar mis à jour dans la base de données");
-
-      // Mise à jour de l'avatar dans l'interface
+      // Mise à jour de l'interface
       const profileAvatar = document.getElementById("profileAvatar");
-      const avatarPreview = document.getElementById("profileAvatarPreview");
-
-      if (profileAvatar) {
-        profileAvatar.src = avatarUrl;
-        console.log("Avatar principal mis à jour");
-      }
-      if (avatarPreview) {
-        avatarPreview.src = avatarUrl;
-        console.log("Aperçu de l'avatar mis à jour");
-      }
-      
-      await refreshAvatar();
-
+      if (profileAvatar) profileAvatar.src = signedUrl;
+      if (preview) preview.src = signedUrl;
     } catch (err) {
-      console.error("Erreur complète lors du changement d'avatar:", err);
+      console.error("Erreur:", err);
       alert("Erreur lors du changement d'avatar: " + err.message);
     }
   });
