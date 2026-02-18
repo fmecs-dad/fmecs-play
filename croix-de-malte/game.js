@@ -2339,10 +2339,6 @@ const initProfileMenu = () => {
     return;
   }
 
-  // Activation du bouton si utilisateur connecté
-  const user = await getSession();
-  if (user) profileBtn.disabled = false;
-
   // Écouteur pour ouvrir/fermer le dropdown
   profileBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -2350,20 +2346,8 @@ const initProfileMenu = () => {
       console.log("Bouton désactivé - clic ignoré");
       return;
     }
-
-    const isVisible = profileDropdown.classList.toggle("show");
-    console.log(`Menu profil ${isVisible ? 'ouvert' : 'fermé'}`);
-
-    // Vérification des styles après toggle
-    if (isVisible) {
-      setTimeout(() => {
-        console.log("Styles après ouverture:", {
-          display: window.getComputedStyle(profileDropdown).display,
-          visibility: window.getComputedStyle(profileDropdown).visibility,
-          opacity: window.getComputedStyle(profileDropdown).opacity
-        });
-      }, 100);
-    }
+    console.log("Toggle menu profil");
+    profileDropdown.classList.toggle("show");
   });
 
   // Écouteur pour fermer quand on clique ailleurs
