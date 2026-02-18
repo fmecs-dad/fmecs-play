@@ -400,34 +400,39 @@ async function getSession() {
 }
 
 function setupProfileMenu() {
-  console.log("=== Initialisation Menu Profil ===");
-
-  // 1. Récupération des éléments
   const profileBtn = document.getElementById("profileBtn");
   const profileDropdown = document.getElementById("profileDropdown");
 
-  // 2. Vérification des éléments
   if (!profileBtn || !profileDropdown) {
-    console.error("Menu profil: éléments manquants - profileBtn:", !!profileBtn, "profileDropdown:", !!profileDropdown);
+    console.error("Menu profil: éléments manquants");
     return;
   }
 
-  // 3. Configuration des écouteurs
+  // Écouteur d'ouverture/fermeture
   profileBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     if (profileBtn.disabled) {
-      console.log("Bouton profil désactivé - clic ignoré");
+      console.log("Bouton désactivé - clic ignoré");
       return;
     }
-    console.log("Toggle menu profil");
-    profileDropdown.classList.toggle("show");
+
+    const isShowing = profileDropdown.classList.toggle("show");
+
+    // Logs de débogage avancés
+    console.log("Dropdown togglé. Visible ?", isShowing);
+    console.log("Styles après toggle:", {
+      display: window.getComputedStyle(profileDropdown).display,
+      visibility: window.getComputedStyle(profileDropdown).visibility,
+      opacity: window.getComputedStyle(profileDropdown).opacity,
+      transform: window.getComputedStyle(profileDropdown).transform
+    });
   });
 
-  // Écouteur pour fermer le dropdown quand on clique ailleurs
+  // Écouteur de fermeture externe
   document.addEventListener("click", (e) => {
     if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
       profileDropdown.classList.remove("show");
-      console.log("Fermeture menu profil (clic externe)");
+      console.log("Dropdown fermé (clic externe)");
     }
   });
 }
