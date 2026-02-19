@@ -263,7 +263,6 @@ async function ouvrirProfil() {
   }
 
   try {
-    // Récupération des données
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("*")
@@ -272,40 +271,30 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // 1. Mise à jour des éléments EXISTANTS dans votre HTML
-    const emailElement = document.getElementById("profileEmail");
-    const dateElement = document.getElementById("profileCreationDate");
+    // Mise à jour des éléments dans le dropdown
+    const profileEmail = document.getElementById("profileEmail");
+    const profileCreationDate = document.getElementById("profileCreationDate");
 
-    // 2. Application des valeurs (avec vérifications)
-    if (emailElement) {
-      emailElement.textContent = session.user.email || "Email non défini";
+    if (profileEmail) {
+      profileEmail.textContent = session.user.email;
       console.log("Email défini:", session.user.email);
     } else {
       console.error("Élément profileEmail introuvable");
     }
 
-    if (dateElement && player.created_at) {
+    if (profileCreationDate && player.created_at) {
       const date = new Date(player.created_at);
-      dateElement.textContent = `Joueur depuis : ${date.toLocaleDateString()}`;
+      profileCreationDate.textContent = date.toLocaleDateString();
       console.log("Date définie:", date.toLocaleDateString());
-    } else if (!dateElement) {
+    } else if (!profileCreationDate) {
       console.error("Élément profileCreationDate introuvable");
     }
 
-    // 3. Ouverture de la modale de modification (correction du bug)
-    const modal = document.getElementById("profileModal");
-    if (modal) {
-      modal.classList.remove("hidden");
-      console.log("Modale affichée");
-    } else {
-      console.error("Modale introuvable");
-    }
-
   } catch (err) {
-    console.error("Erreur:", err);
-    alert("Erreur lors du chargement du profil");
+    console.error("Erreur lors de l'ouverture du profil:", err);
   }
 }
+
 async function refreshAvatar() {
   try {
     const { data: { session }, error } = await supa.auth.getSession();
