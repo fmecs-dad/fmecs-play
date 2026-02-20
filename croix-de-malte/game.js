@@ -490,19 +490,16 @@ function setupProfileMenu() {
 // Fonction de déconnexion
 async function logout() {
   const { error } = await supa.auth.signOut();
-
   if (error) {
     console.error("Erreur lors de la déconnexion :", error);
     return;
   }
 
-  // Suppression des tokens de session
   localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
   localStorage.removeItem("playerPseudo");
   localStorage.removeItem("bestScoreData");
 
-  // Mise à jour de l'UI
-  updateAuthUI(null);
+  updateAuthUI(null); // Mise à jour de l'UI avec un utilisateur null
 
   // Fermeture du menu profil si ouvert
   const profileDropdown = document.getElementById("profileDropdown");
@@ -511,8 +508,6 @@ async function logout() {
   // Fermeture de la modale de profil si ouverte
   const profileModal = document.getElementById("profileModal");
   if (profileModal) profileModal.classList.add("hidden");
-
-  // Pas de rechargement de la page pour éviter de perdre l'état des autres éléments
 }
 
 // Fonction pour vérifier la session au démarrage
