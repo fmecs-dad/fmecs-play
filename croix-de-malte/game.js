@@ -676,7 +676,7 @@ if (avatarUpload) {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Vérifications...
+    // Vérification du format et de la taille
     const validTypes = ["image/jpeg", "image/png", "image/jpg"];
     if (!validTypes.includes(file.type)) {
       alert("Seuls les fichiers JPEG/PNG sont acceptés");
