@@ -407,10 +407,31 @@ async function updateProfileInfo(force = false) {
       profileBtn.title = "Voir votre profil";
     }
 
-    // Met à jour l'avatar
-    if (profileAvatar) {
-      profileAvatar.src = player?.avatar_url || "images/avatarDefault.png";
-      profileAvatar.alt = player?.pseudo ? `Avatar de ${player.pseudo}` : "Avatar utilisateur";
+    // 5. Mise à jour de l'avatar avec URL SIGNÉE
+    if (profileAvatar && player.avatar_url) {
+      try {
+        // Génération de l'URL signée
+        const { data: signedData, error: signError } = await supa.storage
+          .from('avatars')
+          .createSignedUrl(player.avatar_url, 3600); // Valide 1 heure
+
+        if (signError) throw signError;
+
+        profileAvatar.src = signedData.signedUrl;
+        console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
+
+        // Vérification du chargement
+        const testImg = new Image();
+        testImg.onload = () => console.log("[updateProfileInfo] ✅ Avatar chargé avec succès");
+        testImg.onerror = () => console.error("[updateProfileInfo] ❌ Échec du chargement");
+        testImg.src = signedData.signedUrl;
+
+      } catch (err) {
+        console.error("[updateProfileInfo] Erreur génération URL signée:", err);
+        profileAvatar.src = "images/avatarDefault.png";
+      }
+    } else if (profileAvatar) {
+      profileAvatar.src = "images/avatarDefault.png";
     }
 
     // Met à jour le pseudo
