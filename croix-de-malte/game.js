@@ -603,9 +603,9 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Annuler"
   const cancelBtn = document.getElementById("cancelProfileBtn");
-  playClickSound()
   if (cancelBtn) {
     cancelBtn.addEventListener("click", () => {
+      playClickSound()
       const modal = document.getElementById("profileModal");
       if (modal) modal.classList.add("hidden");
 
@@ -621,9 +621,9 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Enregistrer"
   const saveBtn = document.getElementById("saveProfileBtn");
-  playClickSound()
   if (saveBtn) {
     saveBtn.addEventListener("click", saveProfileChanges);
+    playClickSound()
   }
 
   // Écouteur pour fermer la modale en cliquant en dehors
@@ -641,6 +641,7 @@ function initProfileModalListeners() {
   playClickSound()
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
+      playClickSound()
       const avatarUpload = document.getElementById("avatarUpload");
       if (avatarUpload) avatarUpload.click();
     });
@@ -3060,8 +3061,8 @@ if (burgerHelpBtn) {
 
 // --- LOGIN ---
 document.getElementById("loginBtn").addEventListener("click", async (e) => {
+  playClickSound()
   e.preventDefault();
-  playClickSound();
 
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value.trim();
@@ -3191,7 +3192,6 @@ document.getElementById("whySignupRegisterBtn").addEventListener("click", () => 
 });
 
 document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-  playClickSound();
 
   const dontRemind = document.getElementById("whySignupDontRemind").checked;
   if (dontRemind) localStorage.setItem("skipWhySignup", "1");
