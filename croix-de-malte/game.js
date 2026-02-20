@@ -311,45 +311,6 @@ async function ouvrirProfil() {
   }
 }
 
-async function refreshAvatar() {
-  try {
-    const { data: { session }, error } = await supa.auth.getSession();
-    if (error || !session) {
-      console.log("Aucun utilisateur connecté");
-      return;
-    }
-
-    const { data: player, error: playerError } = await supa
-      .from("players")
-      .select("avatar_url")
-      .eq("id", session.user.id)
-      .single();
-
-    if (playerError) throw playerError;
-
-    let avatarUrl = player.avatar_url;
-    if (avatarUrl) {
-      if (!avatarUrl.startsWith('http')) {
-        avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
-      }
-
-      const profileAvatar = document.getElementById("profileAvatar");
-      const avatarPreview = document.getElementById("profileAvatarPreview");
-
-      if (profileAvatar) {
-        profileAvatar.src = avatarUrl + "?t=" + Date.now(); // Ajout d'un timestamp pour forcer le rafraîchissement
-        console.log("Avatar principal rafraîchi");
-      }
-      if (avatarPreview) {
-        avatarPreview.src = avatarUrl + "?t=" + Date.now(); // Ajout d'un timestamp pour forcer le rafraîchissement
-        console.log("Aperçu de l'avatar rafraîchi");
-      }
-    }
-  } catch (err) {
-    console.error("Erreur lors du rafraîchissement de l'avatar:", err);
-  }
-}
-
 async function updateProfileInfo(force = false) {
   console.log("[updateProfileInfo] Début de la mise à jour du profil");
 
@@ -2648,20 +2609,6 @@ const initProfileMenu = () => {
     }
   });
 };
-
-  // Écouteur pour afficher/masquer le mot de passe (votre code existant)
-  const togglePasswordBtn = document.getElementById("togglePasswordVisibility");
-if (togglePasswordBtn) {
-  togglePasswordBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const passwordSpan = document.getElementById("profilePassword");
-    if (passwordSpan) {
-      const currentText = passwordSpan.textContent;
-      passwordSpan.textContent = currentText === "••••••••" ? "motdepasse" : "••••••••";
-      togglePasswordBtn.textContent = currentText === "••••••••" ? "👁️‍🗨️" : "👁️";
-    }
-  });
-}
 
   // Fermeture du menu avec la touche Echap
 document.addEventListener("keydown", (e) => {
