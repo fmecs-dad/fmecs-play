@@ -389,8 +389,8 @@ async function updateProfileInfo(force = false) {
 
         // Vérification du chargement
         const testImg = new Image();
-        testImg.onload = () => console.log("[updateProfileInfo] ✅ Avatar chargé avec succès");
-        testImg.onerror = () => console.error("[updateProfileInfo] ❌ Échec du chargement");
+        testImg.onload = () => console.log("[updateProfileInfo]");
+        testImg.onerror = () => console.error("[updateProfileInfo]");
         testImg.src = signedData.signedUrl;
 
       } catch (err) {
@@ -603,6 +603,7 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Annuler"
   const cancelBtn = document.getElementById("cancelProfileBtn");
+  playClickSound()
   if (cancelBtn) {
     cancelBtn.addEventListener("click", () => {
       const modal = document.getElementById("profileModal");
@@ -620,6 +621,7 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Enregistrer"
   const saveBtn = document.getElementById("saveProfileBtn");
+  playClickSound()
   if (saveBtn) {
     saveBtn.addEventListener("click", saveProfileChanges);
   }
@@ -636,6 +638,7 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
+  playClickSound()
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
       const avatarUpload = document.getElementById("avatarUpload");
