@@ -172,16 +172,19 @@ async function updateAuthUI(user = null) {
   console.log("Updating UI with user:", user);
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
+  const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
     if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
     if (burgerPseudo) burgerPseudo.textContent = "";
+    if (profileBtn) profileBtn.disabled = true;
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
     return;
   }
 
   if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+  if (profileBtn) profileBtn.disabled = false;
 
   let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
@@ -490,32 +493,26 @@ async function logout() {
 
   if (error) {
     console.error("Erreur lors de la déconnexion :", error);
-  } else {
-    localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
-    localStorage.removeItem("playerPseudo");
-    localStorage.removeItem("bestScoreData");
-    updateAuthUI(null);
-    window.location.reload(); // Optionnel : recharger la page pour réinitialiser l'état
+    return;
   }
-}
 
-if (burgerAuthBtn) {
-  burgerAuthBtn.addEventListener("click", async () => {
-    playClickSound();
+  // Suppression des tokens de session
+  localStorage.removeItem('sb-gjzqghhqpycbcwykxvgw-auth-token');
+  localStorage.removeItem("playerPseudo");
+  localStorage.removeItem("bestScoreData");
 
-    const isConnected = burgerAuthBtn.textContent === "Se déconnecter";
+  // Mise à jour de l'UI
+  updateAuthUI(null);
 
-    // OUVERTURE DE LA FENÊTRE DE CONNEXION
-    if (!isConnected) {
-      const auth = document.getElementById("authOverlay");
-      auth.classList.remove("hidden");
-      pauseGame();
-      return;
-    }
+  // Fermeture du menu profil si ouvert
+  const profileDropdown = document.getElementById("profileDropdown");
+  if (profileDropdown) profileDropdown.classList.remove("show");
 
-    // DÉCONNEXION
-    await logout();
-  });
+  // Fermeture de la modale de profil si ouverte
+  const profileModal = document.getElementById("profileModal");
+  if (profileModal) profileModal.classList.add("hidden");
+
+  // Pas de rechargement de la page pour éviter de perdre l'état des autres éléments
 }
 
 // Fonction pour vérifier la session au démarrage
@@ -2620,11 +2617,14 @@ document.addEventListener("keydown", (e) => {
   }
 })
 
-  // Écouteur pour la déconnexion (votre code existant)
+  // Écouteur pour le bouton de déconnexion dans le menu profil
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
   if (logoutProfileBtn) {
     logoutProfileBtn.addEventListener("click", async () => {
-      if (typeof logout === 'function') await logout();
+      if (typeof playClickSound === 'function') playClickSound(); // Ajout du son de clic
+      if (typeof logout === 'function') {
+        await logout();
+      }
       const dropdown = document.getElementById("profileDropdown");
       if (dropdown) dropdown.classList.remove("show");
     });
@@ -2799,20 +2799,26 @@ document.getElementById("profileModal")?.addEventListener("click", (e) => {
   // ===============================
   //   AUTH BURGER (v1)
   // ===============================
+
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
-  if (burgerAuthBtn) {
-    burgerAuthBtn.addEventListener("click", async () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const user = await getSession();
-      if (!user) {
-        const authOverlay = document.getElementById("authOverlay");
-        if (authOverlay) authOverlay.classList.remove("hidden");
-        if (typeof pauseGame === 'function') pauseGame();
-        return;
-      }
+if (burgerAuthBtn) {
+  burgerAuthBtn.addEventListener("click", async () => {
+    if (typeof playClickSound === 'function') playClickSound();
+
+    const { data: { session }, error } = await supa.auth.getSession();
+
+    if (error || !session) {
+      // Si l'utilisateur n'est pas connecté, ouvrir la modale de connexion
+      const authOverlay = document.getElementById("authOverlay");
+      if (authOverlay) authOverlay.classList.remove("hidden");
+      if (typeof pauseGame === 'function') pauseGame();
+      return;
+    } else {
+      // Si l'utilisateur est connecté, se déconnecter
       if (typeof logout === 'function') await logout();
-    });
-  }
+    }
+  });
+}
 
   // ===============================
   //   AUTRES ÉCOUTEURS DE BOUTONS
