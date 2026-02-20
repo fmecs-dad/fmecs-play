@@ -583,6 +583,7 @@ function initProfileModalListeners() {
     editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
 
     newEditProfileBtn.addEventListener("click", async (e) => {
+      if (typeof playClickSound === 'function') playClickSound();
       e.stopPropagation();
       console.log("Bouton Modifier cliqué");
       await ouvrirProfil();
@@ -592,7 +593,7 @@ function initProfileModalListeners() {
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
   if (logoutProfileBtn) {
     logoutProfileBtn.addEventListener("click", async () => {
-      if (typeof playClickSound === 'function') playClickSound(); // Ajout du son de clic
+      if (typeof playClickSound === 'function') playClickSound();
       if (typeof logout === 'function') {
         await logout();
       }
@@ -605,7 +606,7 @@ function initProfileModalListeners() {
   const cancelBtn = document.getElementById("cancelProfileBtn");
   if (cancelBtn) {
     cancelBtn.addEventListener("click", () => {
-      playClickSound()
+      if (typeof playClickSound === 'function') playClickSound();
       const modal = document.getElementById("profileModal");
       if (modal) modal.classList.add("hidden");
 
@@ -623,7 +624,7 @@ function initProfileModalListeners() {
   const saveBtn = document.getElementById("saveProfileBtn");
   if (saveBtn) {
     saveBtn.addEventListener("click", saveProfileChanges);
-    playClickSound()
+    if (typeof playClickSound === 'function') playClickSound();
   }
 
   // Écouteur pour fermer la modale en cliquant en dehors
@@ -641,7 +642,7 @@ function initProfileModalListeners() {
   playClickSound()
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
-      playClickSound()
+      if (typeof playClickSound === 'function') playClickSound();
       const avatarUpload = document.getElementById("avatarUpload");
       if (avatarUpload) avatarUpload.click();
     });
@@ -1190,7 +1191,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
 // --- OUVERTURE LEADERBOARD ---
 
 document.getElementById("burgerLeaderboardBtn").addEventListener("click", async () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   pauseGame();
 
   const overlay = document.getElementById("leaderboardOverlay");
@@ -1228,7 +1229,7 @@ function closeLeaderboard() {
 
 // --- Bouton de fermeture ---
 document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   closeLeaderboard();
 });
 
@@ -2511,6 +2512,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Écouteur pour ouvrir/fermer le dropdown
       profileBtn.addEventListener("click", (e) => {
+        if (typeof playClickSound === 'function') playClickSound();
         e.stopPropagation();
         if (profileBtn.disabled) {
           console.log("Bouton profil désactivé - clic ignoré");
@@ -2601,7 +2603,7 @@ const initProfileMenu = () => {
 
   // Écouteur pour ouvrir/fermer le dropdown
   profileBtn.addEventListener("click", (e) => {
-    playClickSound()
+    if (typeof playClickSound === 'function') playClickSound();
     e.stopPropagation();
     if (profileBtn.disabled) {
       console.log("Bouton désactivé - clic ignoré");
@@ -2634,8 +2636,7 @@ document.addEventListener("keydown", (e) => {
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
   if (logoutProfileBtn) {
     logoutProfileBtn.addEventListener("click", async () => {
-      playClickSound()
-      if (typeof playClickSound === 'function') playClickSound(); // Ajout du son de clic
+      if (typeof playClickSound === 'function') playClickSound();
       if (typeof logout === 'function') {
         await logout();
       }
@@ -2649,13 +2650,13 @@ document.addEventListener("keydown", (e) => {
 
   // Écouteurs pour les boutons de la modale
 document.getElementById("cancelProfileBtn")?.addEventListener("click", () => {
-  playClickSound()
+  if (typeof playClickSound === 'function') playClickSound();
   const modal = document.getElementById("profileModal");
   if (modal) modal.classList.add("hidden");
 });
 
 document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
-  playClickSound()
+  if (typeof playClickSound === 'function') playClickSound();
   const pseudoInput = document.getElementById("profilePseudoInput");
   const errorMessage = document.getElementById("profileErrorMessage");
 
