@@ -2600,6 +2600,7 @@ const initProfileMenu = () => {
 
   // Écouteur pour ouvrir/fermer le dropdown
   profileBtn.addEventListener("click", (e) => {
+    playClickSound()
     e.stopPropagation();
     if (profileBtn.disabled) {
       console.log("Bouton désactivé - clic ignoré");
@@ -2632,6 +2633,7 @@ document.addEventListener("keydown", (e) => {
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
   if (logoutProfileBtn) {
     logoutProfileBtn.addEventListener("click", async () => {
+      playClickSound()
       if (typeof playClickSound === 'function') playClickSound(); // Ajout du son de clic
       if (typeof logout === 'function') {
         await logout();
@@ -2641,24 +2643,18 @@ document.addEventListener("keydown", (e) => {
     });
   }
 
-  // Écouteur pour ouvrir la modale de modification du profil (votre code existant)
-  //const editProfileBtn = document.getElementById("editProfileBtn");
-  //if (editProfileBtn) {
-  //  editProfileBtn.addEventListener("click", async () => {
-  //    if (typeof ouvrirProfil === 'function') await ouvrirProfil();
-  //  });
-  //}
-
   // Mise à jour des informations du profil (votre code existant)
   if (typeof updateProfileInfo === 'function') updateProfileInfo();
 
   // Écouteurs pour les boutons de la modale
 document.getElementById("cancelProfileBtn")?.addEventListener("click", () => {
+  playClickSound()
   const modal = document.getElementById("profileModal");
   if (modal) modal.classList.add("hidden");
 });
 
 document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
+  playClickSound()
   const pseudoInput = document.getElementById("profilePseudoInput");
   const errorMessage = document.getElementById("profileErrorMessage");
 
