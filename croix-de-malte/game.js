@@ -593,6 +593,18 @@ function initProfileModalListeners() {
       await ouvrirProfil();
     });
   }
+// Écouteur pour le bouton de déconnexion dans le menu profil
+  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
+  if (logoutProfileBtn) {
+    logoutProfileBtn.addEventListener("click", async () => {
+      if (typeof playClickSound === 'function') playClickSound(); // Ajout du son de clic
+      if (typeof logout === 'function') {
+        await logout();
+      }
+      const dropdown = document.getElementById("profileDropdown");
+      if (dropdown) dropdown.classList.remove("show");
+    });
+  }
 
   // Écouteur pour le bouton "Annuler"
   const cancelBtn = document.getElementById("cancelProfileBtn");
