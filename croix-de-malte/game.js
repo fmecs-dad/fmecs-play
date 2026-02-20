@@ -741,7 +741,7 @@ async function saveProfileChanges() {
 
     // Si un nouvel avatar a été sélectionné, mettez à jour l'avatar_url
     if (tempAvatarUrl) {
-      updateData.avatar_url = tempAvatarUrl.split('/avatars/')[1]; // Stocke uniquement le chemin relatif
+      updateData.avatar_url = tempAvatarUrl; // Utilisez directement le chemin relatif
     }
 
     const { error: playerError } = await supa
@@ -760,8 +760,11 @@ async function saveProfileChanges() {
 
     // Mise à jour de l'avatar si un nouvel avatar a été sélectionné
     if (tempAvatarUrl) {
-      if (profileAvatar) profileAvatar.src = tempAvatarUrl;
-      if (avatarPreview) avatarPreview.src = tempAvatarUrl;
+      const { data: signedData } = await supa.storage
+        .from('avatars')
+        .createSignedUrl(tempAvatarUrl, 3600);
+      if (profileAvatar) profileAvatar.src = signedData.signedUrl;
+      if (avatarPreview) avatarPreview.src = signedData.signedUrl;
     }
 
     // Fermeture de la modale
