@@ -564,26 +564,6 @@ async function checkSessionOnStartup() {
  * Initialise tous les écouteurs pour la modale de profil
  */
 
-async function getSignedAvatarUrl(path) {
-  try {
-    // On s'assure que le path est relatif (sans le préfixe public/)
-    const cleanPath = path.replace(/^https:\/\/[^/]+\/storage\/v1\/object\/public\/avatars\//, '');
-
-    const { data, error } = await supa.storage
-      .from('avatars')
-      .createSignedUrl(cleanPath, 3600);
-
-    if (error) {
-      console.error("Erreur lors de la génération de l'URL signée:", error);
-      return null;
-    }
-    return data.signedUrl;
-  } catch (err) {
-    console.error("Erreur inattendue:", err);
-    return null;
-  }
-}
-
 async function uploadAvatar(file) {
 
   try {
