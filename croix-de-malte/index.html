@@ -1519,15 +1519,39 @@ footer {
     </div>
 
     <div class="form-group">
-  <label>Avatar</label>
-  <img id="profileAvatarPreview" src="images/avatarDefault.png" class="avatar-preview">
-  <input type="file" id="avatarUpload" accept="image/png, image/jpeg" style="display: none;">
-  <button id="changeAvatarBtn" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Changer l'avatar</button>
-</div>
+      <label>Avatar</label>
+      <img id="profileAvatarPreview" src="images/avatarDefault.png" class="avatar-preview">
+      <input type="file" id="avatarUpload" accept="image/png, image/jpeg" style="display: none;">
+      <button id="changeAvatarBtn" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Changer l'avatar</button>
+    </div>
 
     <div class="form-group">
       <label for="profileEmailInput">Email</label>
       <input type="email" id="profileEmailInput" class="form-input" readonly>
+    </div>
+
+    <div class="form-group">
+      <h3>Changer le mot de passe</h3>
+      <label for="profileCurrentPassword">Mot de passe actuel</label>
+      <input type="password" id="profileCurrentPassword" class="form-input" placeholder="Mot de passe actuel">
+    </div>
+
+    <div class="form-group">
+      <label for="profileNewPassword">Nouveau mot de passe</label>
+      <input type="password" id="profileNewPassword" class="form-input" placeholder="Nouveau mot de passe">
+    </div>
+
+    <div class="form-group">
+      <label for="profileConfirmPassword">Confirmer le nouveau mot de passe</label>
+      <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirmer le nouveau mot de passe">
+    </div>
+
+    <div class="form-group">
+      <button id="changePasswordBtn" class="btn btn-secondary" style="width: 100%;">Changer le mot de passe</button>
+    </div>
+
+    <div class="form-group">
+      <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
     </div>
 
     <div class="modal-actions">
@@ -1536,7 +1560,6 @@ footer {
     </div>
   </div>
 </div>
-
 
 <!-- Bas de page -->
 
