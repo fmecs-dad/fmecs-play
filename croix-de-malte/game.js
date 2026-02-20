@@ -646,6 +646,14 @@ function initProfileModalListeners() {
     cancelBtn.addEventListener("click", () => {
       const modal = document.getElementById("profileModal");
       if (modal) modal.classList.add("hidden");
+
+      // Réinitialisez l'aperçu de l'avatar si l'utilisateur annule
+      const avatarPreview = document.getElementById("profileAvatarPreview");
+      if (avatarPreview && !tempAvatarUrl) {
+        // Rechargez l'avatar actuel
+        updateProfileInfo(true);
+      }
+      tempAvatarUrl = null; // Réinitialisez l'URL temporaire
     });
   }
 
@@ -676,7 +684,7 @@ function initProfileModalListeners() {
 
   // Gestion du fichier sélectionné pour l'avatar
 
-  const avatarUpload = document.getElementById("avatarUpload");
+const avatarUpload = document.getElementById("avatarUpload");
 if (avatarUpload) {
   avatarUpload.addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -693,48 +701,17 @@ if (avatarUpload) {
       return;
     }
 
-    // Aperçu
+    // Aperçu de l'image
     const preview = document.getElementById("profileAvatarPreview");
     if (preview) {
       preview.src = URL.createObjectURL(file);
       console.log("Aperçu de l'image mis à jour");
     }
 
-    // Upload de l'avatar
+    // Stockez temporairement l'URL de l'avatar
     try {
-      console.log("Début de l'upload de l'avatar");
-      const avatarUrl = await uploadAvatar(file);
-      console.log("Avatar uploadé, URL:", avatarUrl);
-
-      // Mise à jour dans la base de données
-      const { data: { session }, error } = await supa.auth.getSession();
-      if (error || !session) throw new Error("Utilisateur non connecté");
-
-      console.log("Mise à jour de l'avatar dans la base de données");
-      const { error: dbError } = await supa
-        .from("players")
-        .update({ avatar_url: avatarUrl })
-        .eq("id", session.user.id);
-
-      if (dbError) throw dbError;
-
-      console.log("Avatar mis à jour dans la base de données");
-
-      // Mise à jour de l'avatar dans l'interface
-      const profileAvatar = document.getElementById("profileAvatar");
-      const avatarPreview = document.getElementById("profileAvatarPreview");
-
-      if (profileAvatar) {
-        profileAvatar.src = avatarUrl;
-        console.log("Avatar principal mis à jour");
-      }
-      if (avatarPreview) {
-        avatarPreview.src = avatarUrl;
-        console.log("Aperçu de l'avatar mis à jour");
-      }
-      
-      await refreshAvatar();
-
+      tempAvatarUrl = await uploadAvatar(file);
+      console.log("Avatar temporaire stocké:", tempAvatarUrl);
     } catch (err) {
       console.error("Erreur complète lors du changement d'avatar:", err);
       alert("Erreur lors du changement d'avatar: " + err.message);
@@ -742,7 +719,6 @@ if (avatarUpload) {
   });
 }
 }
-
 /**
  * Fonction pour sauvegarder les modifications du profil
  */
@@ -764,42 +740,33 @@ async function saveProfileChanges() {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour du pseudo dans la table players
+    // Mise à jour du pseudo dans la base de données
+    const updateData = { pseudo: newPseudo };
+
+    // Si un nouvel avatar a été sélectionné, mettez à jour l'avatar_url
+    if (tempAvatarUrl) {
+      updateData.avatar_url = tempAvatarUrl.split('/avatars/')[1]; // Stocke uniquement le chemin relatif
+    }
+
     const { error: playerError } = await supa
       .from("players")
-      .update({ pseudo: newPseudo })
+      .update(updateData)
       .eq("id", session.user.id);
 
     if (playerError) throw playerError;
-
-    // NE PAS essayer de mettre à jour la table scores car la colonne player_name n'existe pas
-
-    // Récupération des données mises à jour
-    const { data: updatedPlayer, error: fetchError } = await supa
-      .from("players")
-      .select("pseudo, avatar_url")
-      .eq("id", session.user.id)
-      .single();
-
-    if (fetchError) throw fetchError;
 
     // Mise à jour de l'interface
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
     const profileAvatar = document.getElementById("profileAvatar");
     const avatarPreview = document.getElementById("profileAvatarPreview");
 
-    if (pseudoDisplay) pseudoDisplay.textContent = updatedPlayer.pseudo;
+    if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
 
-    // Mise à jour de l'avatar
-    let avatarUrl = updatedPlayer.avatar_url;
-    if (avatarUrl && !avatarUrl.startsWith('http')) {
-      avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
-    } else if (!avatarUrl) {
-      avatarUrl = "images/avatarDefault.png";
+    // Mise à jour de l'avatar si un nouvel avatar a été sélectionné
+    if (tempAvatarUrl) {
+      if (profileAvatar) profileAvatar.src = tempAvatarUrl;
+      if (avatarPreview) avatarPreview.src = tempAvatarUrl;
     }
-
-    if (profileAvatar) profileAvatar.src = avatarUrl;
-    if (avatarPreview) avatarPreview.src = avatarUrl;
 
     // Fermeture de la modale
     const modal = document.getElementById("profileModal");
@@ -807,6 +774,7 @@ async function saveProfileChanges() {
 
     // Réinitialisation du message d'erreur
     errorMessage.classList.add("hidden");
+    tempAvatarUrl = null; // Réinitialisez l'URL temporaire
 
   } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
@@ -970,6 +938,8 @@ const limit = 20;
 let isLoading = false;
 let allScoresLoaded = false;
 let loadedScores = [];
+
+let tempAvatarUrl = null;
 
 const HELP_SEEN_KEY = "helpSeen";
 
