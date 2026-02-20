@@ -626,6 +626,20 @@ async function uploadAvatar(file) {
 }
 
 function initProfileModalListeners() {
+  const editProfileBtn = document.getElementById("editProfileBtn");
+
+  // Supprimez d'abord tout écouteur existant pour éviter les doublons
+  if (editProfileBtn) {
+    const newEditProfileBtn = editProfileBtn.cloneNode(true);
+    editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
+
+    newEditProfileBtn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      console.log("Bouton Modifier cliqué");
+      await ouvrirProfil();
+    });
+  }
+
   // Écouteur pour le bouton "Annuler"
   const cancelBtn = document.getElementById("cancelProfileBtn");
   if (cancelBtn) {
@@ -638,9 +652,7 @@ function initProfileModalListeners() {
   // Écouteur pour le bouton "Enregistrer"
   const saveBtn = document.getElementById("saveProfileBtn");
   if (saveBtn) {
-    saveBtn.addEventListener("click", async () => {
-      await saveProfileChanges();
-    });
+    saveBtn.addEventListener("click", saveProfileChanges);
   }
 
   // Écouteur pour fermer la modale en cliquant en dehors
@@ -652,16 +664,6 @@ function initProfileModalListeners() {
       }
     });
   }
-
-  // Écouteur pour le bouton "Modifier le profil" dans le dropdown
-  const editProfileBtn = document.getElementById("editProfileBtn");
-if (editProfileBtn) {
-  editProfileBtn.addEventListener("click", async (e) => {
-    e.stopPropagation(); // Empêche la propagation de l'événement
-    console.log("Bouton Modifier cliqué");
-    await ouvrirProfil(); // Appel de la fonction corrigée
-  });
-}
 
   // Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
