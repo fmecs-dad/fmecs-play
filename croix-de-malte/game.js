@@ -104,6 +104,7 @@ async function checkSessionOnStartup() {
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
     updateAuthUI(session.user);
     initialFlow(session.user); // Appeler initialFlow avec l'utilisateur connecté
+    updateProfileInfo(); // Un seul appel ici
   } else {
     updateAuthUI(null);
     initialFlow(null); // Appeler initialFlow avec user = null
@@ -2551,7 +2552,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
-      updateProfileInfo(); // Mise à jour du profil pour les utilisateurs déjà connectés
+      //updateProfileInfo(); // Mise à jour du profil pour les utilisateurs déjà connectés
     } else {
       console.log("Aucun utilisateur connecté au démarrage");
       updateAuthUI(null);
