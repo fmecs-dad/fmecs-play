@@ -267,58 +267,46 @@ async function ouvrirProfil() {
 
     if (playerError) throw playerError;
 
-    // Vérification des éléments
+    // Mise à jour des éléments dans le dropdown
+    const profileEmail = document.getElementById("profileEmail");
+    const profileCreationDate = document.getElementById("profileCreationDate");
+
+    if (profileEmail) {
+      profileEmail.textContent = session.user.email;
+    }
+
+    if (profileCreationDate && player.created_at) {
+      const date = new Date(player.created_at);
+      profileCreationDate.textContent = date.toLocaleDateString();
+    }
+
+    // Mise à jour de la modale de modification
     const pseudoInput = document.getElementById("profilePseudoInput");
-    const avatarPreview = document.getElementById("profileAvatarPreview");
     const emailInput = document.getElementById("profileEmailInput");
+    const avatarPreview = document.getElementById("profileAvatarPreview");
     const modal = document.getElementById("profileModal");
 
-    if (!pseudoInput || !avatarPreview || !emailInput || !modal) {
-      console.error("Éléments manquants dans la modale");
-      return;
-    }
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (emailInput) emailInput.value = session.user.email || "";
 
-    // Remplissage des champs
-    pseudoInput.value = player.pseudo || "";
-    emailInput.value = session.user.email || "";
-
-    // Affichage de l'avatar
-    let avatarUrl = player.avatar_url;
-    console.log("URL de l'avatar récupérée:", avatarUrl);
-
-    if (avatarUrl) {
-      try {
-        // Génération de l'URL signée
-        const { data: signedData, error: signError } = await supa.storage
+    // Correction pour l'avatar
+    if (avatarPreview) {
+      if (player.avatar_url) {
+        const { data: signedData } = await supa.storage
           .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600); // Valide 1 heure
-
-        if (signError) throw signError;
-
-        profileAvatar.src = signedData.signedUrl;
-        console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
-
-        // Vérification du chargement
-        const testImg = new Image();
-        testImg.onload = () => console.log("[updateProfileInfo] ✅ Avatar chargé avec succès");
-        testImg.onerror = () => console.error("[updateProfileInfo] ❌ Échec du chargement");
-        testImg.src = signedData.signedUrl;
-
-      } catch (err) {
-        console.error("[updateProfileInfo] Erreur génération URL signée:", err);
-        profileAvatar.src = "images/avatarDefault.png";
+          .createSignedUrl(player.avatar_url, 3600);
+        avatarPreview.src = signedData.signedUrl;
+        console.log("Avatar dans la modale mis à jour:", signedData.signedUrl);
+      } else {
+        avatarPreview.src = "images/avatarDefault.png";
       }
-    } else if (profileAvatar) {
-      profileAvatar.src = "images/avatarDefault.png";
     }
-
 
     // Affichage de la modale
-    modal.classList.remove("hidden");
+    if (modal) modal.classList.remove("hidden");
 
   } catch (err) {
     console.error("Erreur lors de l'ouverture du profil:", err);
-    alert("Impossible de charger vos informations de profil.");
   }
 }
 
