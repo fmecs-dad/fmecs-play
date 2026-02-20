@@ -585,21 +585,35 @@ async function getSignedAvatarUrl(path) {
 }
 
 async function uploadAvatar(file) {
+
   try {
+    console.log("Début de uploadAvatar");
+
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
     const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
 
+    console.log("Chemin du fichier:", filePath);
+
     // Upload du fichier
-    const { error: uploadError } = await supa.storage
+    const { data: uploadData, error: uploadError } = await supa.storage
       .from('avatars')
-      .upload(filePath, file, { cacheControl: '3600' });
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
     if (uploadError) throw uploadError;
 
-    // On retourne juste le chemin relatif (pas l'URL complète)
-    return filePath;
+    console.log("Upload réussi, construction de l'URL");
+
+    // Construction de l'URL publique complète
+    const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
+
+    console.log("URL de l'avatar générée:", avatarUrl);
+
+    return avatarUrl;
 
   } catch (err) {
     console.error("Erreur dans uploadAvatar:", err);
@@ -675,33 +689,48 @@ if (avatarUpload) {
 
     // Aperçu
     const preview = document.getElementById("profileAvatarPreview");
-    if (preview) preview.src = URL.createObjectURL(file);
+    if (preview) {
+      preview.src = URL.createObjectURL(file);
+      console.log("Aperçu de l'image mis à jour");
+    }
 
-    // Upload
+    // Upload de l'avatar
     try {
+      console.log("Début de l'upload de l'avatar");
+      const avatarUrl = await uploadAvatar(file);
+      console.log("Avatar uploadé, URL:", avatarUrl);
+
+      // Mise à jour dans la base de données
       const { data: { session }, error } = await supa.auth.getSession();
       if (error || !session) throw new Error("Utilisateur non connecté");
 
-      const filePath = await uploadAvatar(file);
-      const signedUrl = await getSignedAvatarUrl(filePath);
-
-      if (!signedUrl) throw new Error("Impossible de générer l'URL signée");
-
-      // Mise à jour dans la base de données
+      console.log("Mise à jour de l'avatar dans la base de données");
       const { error: dbError } = await supa
         .from("players")
-        .update({ avatar_url: filePath }) // On stocke seulement le chemin relatif
+        .update({ avatar_url: avatarUrl })
         .eq("id", session.user.id);
 
       if (dbError) throw dbError;
 
-      // Mise à jour de l'interface
+      console.log("Avatar mis à jour dans la base de données");
+
+      // Mise à jour de l'avatar dans l'interface
       const profileAvatar = document.getElementById("profileAvatar");
-      if (profileAvatar) profileAvatar.src = signedUrl;
-      if (preview) preview.src = signedUrl;
+      const avatarPreview = document.getElementById("profileAvatarPreview");
+
+      if (profileAvatar) {
+        profileAvatar.src = avatarUrl;
+        console.log("Avatar principal mis à jour");
+      }
+      if (avatarPreview) {
+        avatarPreview.src = avatarUrl;
+        console.log("Aperçu de l'avatar mis à jour");
+      }
+      
+      await refreshAvatar();
 
     } catch (err) {
-      console.error("Erreur:", err);
+      console.error("Erreur complète lors du changement d'avatar:", err);
       alert("Erreur lors du changement d'avatar: " + err.message);
     }
   });
