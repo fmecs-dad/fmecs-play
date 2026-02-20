@@ -175,7 +175,7 @@ async function updateAuthUI(user = null) {
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.textContent = "Se connecter";
+    if (burgerAuthBtn) burgerAuthBtn.style.display = "block"; // Afficher le bouton
     if (burgerPseudo) burgerPseudo.textContent = "";
     if (profileBtn) profileBtn.disabled = true;
     localStorage.removeItem("playerPseudo");
@@ -183,10 +183,10 @@ async function updateAuthUI(user = null) {
     return;
   }
 
-  if (burgerAuthBtn) burgerAuthBtn.textContent = "Se déconnecter";
+  if (burgerAuthBtn) burgerAuthBtn.style.display = "none"; // Masquer le bouton si connecté
   if (profileBtn) profileBtn.disabled = false;
 
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
+  let fallbackPseudo = localStorage.getElementById("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
