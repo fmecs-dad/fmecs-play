@@ -282,14 +282,21 @@ async function ouvrirProfil() {
     pseudoInput.value = player.pseudo || "";
     emailInput.value = session.user.email || "";
 
-    // Chargement de l'avatar
-    if (player.avatar_url) {
-      const signedUrl = await getSignedAvatarUrl(player.avatar_url);
-      avatarPreview.src = signedUrl || "images/avatarDefault.png";
-      console.log("Avatar chargé avec URL:", signedUrl || "default");
+    // Affichage de l'avatar
+    let avatarUrl = player.avatar_url;
+    console.log("URL de l'avatar récupérée:", avatarUrl);
+
+    if (avatarUrl) {
+      // Si l'URL est déjà complète, on l'utilise directement
+      // Sinon, on construit l'URL complète
+      if (!avatarUrl.startsWith('http')) {
+        avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
+      }
+      avatarPreview.src = avatarUrl;
+      console.log("Avatar chargé avec l'URL:", avatarUrl);
     } else {
       avatarPreview.src = "images/avatarDefault.png";
-      console.log("Aucun avatar défini, utilisation de l'avatar par défaut");
+      console.log("Aucun avatar trouvé, utilisation de l'avatar par défaut");
     }
 
     // Affichage de la modale
