@@ -287,17 +287,31 @@ async function ouvrirProfil() {
     console.log("URL de l'avatar récupérée:", avatarUrl);
 
     if (avatarUrl) {
-      // Si l'URL est déjà complète, on l'utilise directement
-      // Sinon, on construit l'URL complète
-      if (!avatarUrl.startsWith('http')) {
-        avatarUrl = `${supa.storage.url}/object/public/avatars/${avatarUrl}`;
+      try {
+        // Génération de l'URL signée
+        const { data: signedData, error: signError } = await supa.storage
+          .from('avatars')
+          .createSignedUrl(player.avatar_url, 3600); // Valide 1 heure
+
+        if (signError) throw signError;
+
+        profileAvatar.src = signedData.signedUrl;
+        console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
+
+        // Vérification du chargement
+        const testImg = new Image();
+        testImg.onload = () => console.log("[updateProfileInfo] ✅ Avatar chargé avec succès");
+        testImg.onerror = () => console.error("[updateProfileInfo] ❌ Échec du chargement");
+        testImg.src = signedData.signedUrl;
+
+      } catch (err) {
+        console.error("[updateProfileInfo] Erreur génération URL signée:", err);
+        profileAvatar.src = "images/avatarDefault.png";
       }
-      avatarPreview.src = avatarUrl;
-      console.log("Avatar chargé avec l'URL:", avatarUrl);
-    } else {
-      avatarPreview.src = "images/avatarDefault.png";
-      console.log("Aucun avatar trouvé, utilisation de l'avatar par défaut");
+    } else if (profileAvatar) {
+      profileAvatar.src = "images/avatarDefault.png";
     }
+
 
     // Affichage de la modale
     modal.classList.remove("hidden");
