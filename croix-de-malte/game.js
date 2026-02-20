@@ -701,20 +701,21 @@ async function saveProfileChanges() {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour du pseudo dans la base de données
-    const updateData = { pseudo: newPseudo };
-
-    // Si un nouvel avatar a été sélectionné, mettez à jour l'avatar_url
-    if (tempAvatarUrl) {
-      updateData.avatar_url = tempAvatarUrl; // Utilisez directement le chemin relatif
-    }
-
+    // Mise à jour du pseudo dans la table players
     const { error: playerError } = await supa
       .from("players")
-      .update(updateData)
+      .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
 
     if (playerError) throw playerError;
+
+    // Mise à jour du pseudo dans la table scores
+    const { error: scoresError } = await supa
+      .from("scores")
+      .update({ pseudo: newPseudo })
+      .eq("player_id", session.user.id);
+
+    if (scoresError) throw scoresError;
 
     // Mise à jour de l'interface
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
