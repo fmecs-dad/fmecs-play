@@ -2648,7 +2648,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 // ===============================
-//   GESTION DU MENU PROFIL (version finale corrigée)
+//   GESTION DU MENU PROFIL 
 // ===============================
 
 const initProfileMenu = () => {
@@ -2715,12 +2715,12 @@ document.addEventListener("keydown", (e) => {
   }
 
   // Écouteur pour ouvrir la modale de modification du profil (votre code existant)
-  const editProfileBtn = document.getElementById("editProfileBtn");
-  if (editProfileBtn) {
-    editProfileBtn.addEventListener("click", async () => {
-      if (typeof ouvrirProfil === 'function') await ouvrirProfil();
-    });
-  }
+  //const editProfileBtn = document.getElementById("editProfileBtn");
+  //if (editProfileBtn) {
+  //  editProfileBtn.addEventListener("click", async () => {
+  //    if (typeof ouvrirProfil === 'function') await ouvrirProfil();
+  //  });
+  //}
 
   // Mise à jour des informations du profil (votre code existant)
   if (typeof updateProfileInfo === 'function') updateProfileInfo();
