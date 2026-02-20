@@ -589,14 +589,14 @@ async function checkSessionOnStartup() {
  */
 
 async function uploadAvatar(file) {
-
   try {
     console.log("Début de uploadAvatar");
 
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    const filePath = `${session.user.id}/${Date.now()}.${file.type.split('/')[1]}`;
+    // Générer un chemin relatif sans l'URL complète
+    const filePath = `${session.user.id}/${Date.now()}${file.name.match(/\.[0-9a-z]+$/i)[0]}`;
 
     console.log("Chemin du fichier:", filePath);
 
@@ -610,14 +610,10 @@ async function uploadAvatar(file) {
 
     if (uploadError) throw uploadError;
 
-    console.log("Upload réussi, construction de l'URL");
+    console.log("Upload réussi");
 
-    // Construction de l'URL publique complète
-    const avatarUrl = `${supa.storage.url}/object/public/avatars/${filePath}`;
-
-    console.log("URL de l'avatar générée:", avatarUrl);
-
-    return avatarUrl;
+    // Retourner uniquement le chemin relatif
+    return filePath;
 
   } catch (err) {
     console.error("Erreur dans uploadAvatar:", err);
