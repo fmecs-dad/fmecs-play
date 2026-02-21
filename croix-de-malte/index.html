@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Morpion Solitaire – Croix de Malte</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preload" as="image" href="images/monfond.jpg">
+  <link rel="icon" type="image/png" href="favicon.png?v=1">
+
+<style>
+
+/* === Mise en page générale === */
+
+/* === GLOBAL === */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img, canvas {
+  max-width: 100%;
+}
+
+/* utile si tu veux réutiliser .flex */
+.flex {
+  flex-wrap: wrap;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-image: url("images/monfond.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.jeton-img {
+  display: block;
+  margin: 10px auto;
+  width: 60px;
+  height: auto;
+}
+
+.jeton-img {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+#gameContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* === TOP BAR === */
+
+#topBar {
+  position: relative;
+  z-index: 10000;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 24px;
+  background: #333;
+  color: white;
+  padding: 12px 20px;
+  width: 100%;
+  height: 110px;
+  overflow: visible !important; /* Assurez-vous que l'overflow est visible */
+}
+
+/* Bloc titre + sous-titre */
+#titleArea {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 300px;
+  max-width: 480px;
+  white-space: nowrap;
+}
+
+#titleArea h1 {
+  margin: 0;
+  font-size: clamp(18px, 3vw, 24px);
+  line-height: 1.2;
+}
+
+#subtitle {
+  font-size: clamp(12px, 2vw, 14px);
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+/* Bloc valeurs */
+#statusArea {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  font-size: clamp(12px, 2vw, 15px);
+  flex-shrink: 0;
+  min-width: 140px;
+  padding-left: 10px;
+}
+
+/* Bloc boutons */
+#topActions {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#topActions button {
+  width: auto;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* Meilleur score — style général */
+.best-score-info {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400; /* normal */
+  white-space: nowrap;
+}
+
+/* Meilleur score — isolation typographique */
+#bestScoreTop {
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Emojis du meilleur score */
+#bestScoreTop .emoji {
+  font-size: 1em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+
+/* Burger */
+.burger-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.main-btn {
+  padding: 8px 14px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: clamp(12px, 2vw, 14px);
+  white-space: nowrap;
+  background: #0078d4;
+  color: white;
+  transition: opacity 0.2s, background-color 0.2s;
+  min-width: 100px;
+  text-align: center;
+}
+
+.main-btn:hover {
+  opacity: 0.85;
+  background-color: #006cc0;
+}
+
+.main-btn.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* === MENU PROFIL === */
+
+#profileContainer {
+  position: relative;
+  margin-left: auto;
+  margin-top: 10px; /* Décale de 10px vers le haut */
+  margin-right: 10px; /* Décale de 20px vers la gauche (équivaut à un décalage vers la droite) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  z-index: 10002;
+  padding: 0 10px; /* Conservez votre padding existant */
+}
+
+.profile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: white;
+  font-size: 14px;
+  padding: 8px 12px; /* Zone cliquable agrandie */
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.profile-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1); /* Effet hover visible */
+}
+
+.profile-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-btn:not(:disabled) {
+  cursor: pointer;
+}
+
+.avatar-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  transition: transform 0.2s ease;
+}
+
+.profile-btn:not(:disabled) .avatar-icon:hover {
+  transform: scale(1.05); /* Légère animation au survol */
+}
+
+.forgot-password-link {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.9em;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.forgot-password-link:hover {
+  text-decoration: underline;
+}
+
+#profilePseudoDisplay {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* ==== DROPDOWN (Correction complète) ==== */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px); /* Positionnement précis sous le bouton */
+  right: 0;
+  background: #1a1a1a;
+  padding: 15px;
+  border-radius: 8px;
+  width: 280px; /* Largeur fixe pour une meilleure présentation */
+  z-index: 999999; /* Z-index très élevé */
+  display: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 5px;
+}
+
+.profile-dropdown.show {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0) !important;
+}
+
+.profile-info {
+  margin-bottom: 15px;
+  padding: 0 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.profile-info p {
+  margin: 8px 0;
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  justify-content: space-between;
+}
+
+.profile-info strong {
+  color: white;
+  margin-right: 10px;
+}
+
+.profile-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.password-item {
+  align-items: center;
+}
+
+/* Boutons d'action */
+#editProfileBtn, #logoutProfileBtn {
+  width: calc(100% - 20px);
+  margin: 0 10px 10px;
+  padding: 10px;
+  background: #2d2d2d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  text-align: center;
+}
+
+#editProfileBtn:hover, #logoutProfileBtn:hover {
+  background: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+/* Bouton de visibilité du mot de passe */
+.toggle-password {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  color: #aaa;
+  margin-left: 10px;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: white;
+}
+
+/* Section des actions */
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Style pour la modale de profil */
+#profileModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+#profileModal .panel {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#profileModal h2 {
+  color: white;
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  display: none;
+}
+
+.error-message.hidden {
+  display: none;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  color: white;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  display: block;
+  margin: 0 auto 15px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: #646cff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5a63e8;
+}
+
+.btn-secondary {
+  background: #444;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #555;
+}
+
+/* === HELP CLOSE BUTTON === */
+
+#closeHelpBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+/* === HELP CONTENT === */
+
+#helpContent {
+  background: #fff;
+  width: min(800px, 90vw);
+  max-height: 80vh; /* empêche de dépasser sous le bandeau */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  position: relative;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.aide-separator {
+  width: 100%;
+  height: 1px;
+  background: #ddd;
+  margin: 16px 0;
+}
+
+/* === MAIN AREA === */
+
+#mainArea {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+#mainArea {
+  min-height: 0;
+}
+
+/* === BOARD === */
+
+#boardWrapper {
+  padding-top: 20px;
+  padding-left: clamp(10px, 4vw, 60px);
+  flex: 1;
+  overflow: visible;
+}
+
+#boardWrapper {
+  min-height: 0;
+}
+
+.board-frame {
+  border: 30px solid transparent;
+  background-clip: padding-box;
+  border-image: url("images/plateau.jpg") 30 round;
+}
+
+/* plateau responsive */
+
+#canvasContainer {
+  position: relative;
+  width: min(600px, 90vw);
+  height: min(600px, 90vw);
+  overflow: visible;
+  z-index: 0;
+}
+
+#canvasContainer::before {
+  content: "";
+  position: absolute;
+
+  width: calc(min(600px, 90vw) + 20px);
+  height: calc(min(600px, 90vw) + 20px);
+
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  background: radial-gradient(circle,
+    rgba(255,255,255,0.25) 40%,
+    rgba(0,0,0,0.25) 100%
+  );
+
+  pointer-events: none;
+
+  z-index: -1;
+}
+
+#gameCanvas {
+  width: 100% !important;
+  height: 100% !important;
+  background: #fafafa;
+  display: block;
+
+  position: relative;
+  z-index: 1;
+}
+
+/* === LABELS === */
+
+#topLabels, #leftLabels {
+  position: absolute;
+  pointer-events: none;
+}
+
+#topLabels span, #leftLabels span {
+  position: absolute;
+  font-size: clamp(10px, 1.5vw, 12px);
+  color: #444;
+}
+
+#topLabels {
+  top: -22px;
+  width: 100%;
+}
+
+#leftLabels {
+  left: -20px;
+  height: 100%;
+}
+
+/* === FLASH MESSAGES === */
+
+#flashContainer {
+  position: fixed;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 1000000;
+}
+
+.flashMessage {
+  background: rgba(30, 30, 30, 0.92);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.flashMessage.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === SIDE PANEL === */
+
+#sidePanel {
+  margin-top: 10px;
+  margin-left: 20px;
+  width: clamp(220px, 28vw, 320px);
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  padding: 20px 12px 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.25);
+  border-radius: 8px;
+  overflow-y: auto;
+}
+
+#historyTitle {
+  color: #222;
+  font-weight: 600;
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#historyPanel {
+  max-height: 600px;
+  overflow-y: auto;
+  z-index:10001;
+}
+
+#historyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+
+#historyList li {
+  padding: 4px 0;
+  border-bottom: 1px dashed #e6e6e6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#historyList li.gain { color: #008a00; font-weight: 600; }
+#historyList li.loss { color: #cc0000; font-weight: 600; }
+#historyList li.neutral { color: #222; }
+
+/* === HELP OVERLAY === */
+
+#helpOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: flex-start; 
+  justify-content: center;
+  padding-top: 100px; 
+  z-index: 999999;
+}
+
+#helpOverlay.hidden {
+  display: none !important;
+}
+
+/* === GENERIC OVERLAY === */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+}
+
+.overlay-center {
+  display: flex;
+}
+
+.overlay.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* === MODAL GÉNÉRIQUE === */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  padding: 20px; /* important pour petits écrans */
+  overflow: hidden;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.modal-content {
+  margin: auto;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-size: 18px;
+
+  /* Adaptation automatique */
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+#readyModal {
+  z-index: 200000 !important;
+}
+
+
+/* === PANELS INTERNES === */
+
+.panel {
+  background: #fff;
+  padding: 24px 30px;
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+/* Bouton de fermeture */
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* === END GAME PANEL === */
+
+#endGamePanel {
+  background: #fafafa;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.15);
+  text-align: center;
+  border: 1px solid #e0e0e0;
+}
+
+/* === BEST SCORE PANEL === */
+
+#bestScoreOverlay .panel {
+  min-width: 460px;
+  max-width: 640px;
+  padding: 20px 30px;
+  border-radius: 12px;
+  text-align: center;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  animation: popIn 0.25s ease-out;
+  isolation: isolate;
+}
+
+#bestScoreContent {
+  width: auto;
+  max-width: 640px;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.record-line {
+  display: inline-block;
+  margin: 0 auto;
+  font-size: 1.1em;
+  white-space: nowrap;
+}
+
+.my-best-score {
+  background: rgba(0, 120, 255, 0.15);
+  border-left: 4px solid #0078ff;
+  font-weight: bold;
+}
+
+#bestScoreContent button {
+  align-self: center;
+  padding: 8px 16px;
+  font-size: 1em;
+  margin-top: 8px;
+}
+
+/* === TUTORIAL BUBBLE === */
+
+#tutorialBubble {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.92);
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  font-size: 16px;
+  font-weight: 500;
+  max-width: 85%;
+  text-align: center;
+  z-index: 3000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  display: none;
+}
+
+
+/* === ANIMATIONS === */
+
+.fade-hidden {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.98);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.blink {
+  animation: blinkAnim 0.4s ease-in-out 2;
+}
+
+@keyframes blinkAnim {
+  50% { transform: scale(1.4); }
+}
+
+/* Animation premium : arrivée du plateau */
+
+.slide-in-premium {
+  opacity: 0;
+  transform: translateX(120%) rotate(3deg) scale(0.95);
+  transition:
+    opacity 0.6s ease-out,
+    transform 1.8s cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+
+.slide-in-premium.show {
+  opacity: 1;
+  transform: translateX(0) rotate(0deg) scale(1);
+  animation: boardBounce 0.35s ease-out 1 1.8s;
+}
+
+@keyframes boardBounce {
+  0%   { transform: translateX(0) scale(1); }
+  40%  { transform: translateX(-12px) scale(1.01); }
+  70%  { transform: translateX(4px) scale(0.995); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+#pseudoSection {
+  display: none;
+}
+
+#signupModal {
+  z-index: 100000;
+}
+
+.burger-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+/* Burger overlay */
+
+.burger-panel {
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 10px;
+  min-width: 260px;
+  max-width: 320px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  position: relative;
+}
+
+.burger-section {
+  margin-top: 16px;
+}
+
+.burger-section h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+#burgerProfile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  top: 116px; /* 110px de topBar + marge */
+  left: 20px;
+}
+
+#burgerAuthBtn {
+  display: block; /* Par défaut, le bouton est visible */
+}
+
+.burger-dropdown.show {
+  display: block;
+}
+
+.close-btn:hover {
+  color: #000;
+}
+
+/* === LEADERBOARD PANEL === */
+/* Le panel NE DOIT PAS scroller */
+
+.leaderboard-panel {
+  background: #fff !important;
+  padding: 20px 24px;
+  border-radius: 10px;
+  min-width: 440px;
+  max-width: 600px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  position: relative;
+
+  /* IMPORTANT : on enlève tout scroll ici */
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+
+/* === CONTENEUR SCROLLABLE === */
+/* C’est LUI qui contient toutes les lignes */
+
+#leaderboardContainer {
+  max-height: 360px !important;
+  overflow-y: auto !important;
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 6px;
+  scroll-behavior: smooth; /* Ajoute un défilement fluide */
+}
+
+
+/* === LIGNES DU LEADERBOARD === */
+
+.leaderboard-panel .leaderboard-row,
+.leaderboard-panel .leaderboard-header {
+  display: grid !important;
+
+  grid-template-columns:
+    35px
+    120px
+    55px
+    70px
+    50px
+    50px
+    110px;
+
+  gap: 10px;
+  font-size: 14px;
+  padding: 8px 0;
+  white-space: nowrap;
+  overflow: hidden;
+
+  scroll-snap-align: start;
+}
+
+.leaderboard-panel .pseudo {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === MISE EN ÉVIDENCE DU MEILLEUR SCORE === */
+
+.leaderboard-panel .leaderboard-row.my-best-score {
+  background-color: #e6f7ff !important;
+  font-weight: bold;
+  box-shadow: inset 2px 0 0 #1890ff !important;
+}
+
+
+/* === HEADER === */
+
+.leaderboard-panel .leaderboard-header {
+  font-weight: 700;
+  background: #f7f7f7;
+  border-bottom: 2px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+
+/* === ALIGNEMENTS === */
+
+.leaderboard-panel .rank,
+.leaderboard-panel .pseudo {
+  text-align: left;
+}
+
+.leaderboard-panel .score,
+.leaderboard-panel .duration,
+.leaderboard-panel .undo,
+.leaderboard-panel .jokers {
+  text-align: right;
+}
+
+.leaderboard-panel .date {
+  text-align: center;
+}
+
+
+/* Icônes du header alignées */
+
+.leaderboard-panel .leaderboard-header span {
+  display: flex;
+  align-items: center;
+}
+
+.leaderboard-panel .leaderboard-header .rank,
+.leaderboard-panel .leaderboard-header .pseudo {
+  justify-content: flex-start;
+}
+
+.leaderboard-panel .leaderboard-header .score,
+.leaderboard-panel .leaderboard-header .duration,
+.leaderboard-panel .leaderboard-header .undo,
+.leaderboard-panel .leaderboard-header .jokers {
+  justify-content: flex-end;
+}
+
+.leaderboard-panel .leaderboard-header .date {
+  justify-content: center;
+}
+
+
+/* === SÉPARATEURS === */
+
+.leaderboard-panel .leaderboard-row:not(.leaderboard-header) {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.leaderboard-panel .leaderboard-row:not(.leaderboard-header):last-child {
+  border-bottom: none;
+}
+
+
+/* === MESSAGE INVITÉ === */
+
+.leaderboard-hint {
+  font-size: 1.1rem;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: 6px;
+  white-space: nowrap;
+  text-align: center;
+  margin: 10px 0 16px;
+  white-space: normal;
+}
+
+
+/* === PAGINATION (désactivée totalement) === */
+
+.leaderboard-pagination {
+  display: none !important;
+}
+
+/* === AUTH PANEL === */
+
+/* === PANEL SPÉCIFIQUE POUR LA FENÊTRE DE CONNEXION === */
+#authOverlay .panel {
+  position: relative;
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 10px;
+  min-width: 260px;
+  max-width: 320px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Champs */
+#authOverlay .modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+/* Boutons */
+#authOverlay .auth-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* === MENU BURGER DÉROULANT === */
+
+#burgerBtn {
+  position: relative;
+  z-index: 10001;
+}
+
+/* Menu déroulant */
+#burgerWrapper {
+  position: relative;
+}
+
+#burgerOverlay {
+  position: absolute;
+  top: 116px; /* 110px de topBar + marge */
+  left: 20px;
+  background: #222;
+  padding: 8px 0;
+  border-radius: 6px;
+  display: none;
+  flex-direction: column;
+  min-width: 180px;
+  z-index: 99999;
+}
+
+#burgerOverlay.show {
+  display: flex;
+}
+
+#burgerOverlay button {
+  background: none;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+#burgerOverlay button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #333;
+  padding: 15px; /* Augmenter cette valeur pour ajouter de l'espace en haut et en bas */
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.footer-logo {
+  height: 70px; /* Taille du logo */
+  margin-right: 30px;
+}
+
+.footer-text {
+  margin-right: 15px;
+  color: #ffffff; /* Couleur du texte */
+}
+
+.footer-link {
+  margin-right: 15px;
+  color: #ffffff; /* Couleur du lien */
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  margin-left: auto;
+  color: #ffffff; /* Couleur du copyright */
+}
+
+  </style>
+</head>
+
+<body>
+
+<!-- Modale "Vous n'êtes pas connecté / inscrit" -->
+<div id="whySignupModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <h2>Vous n'êtes pas connecté / inscrit</h2>
+    <p>En créant un compte, vous pourrez :</p>
+    <ul style="text-align:left; max-width:360px; margin:0 auto 16px;">
+      <li>Enregistrer vos meilleurs scores</li>
+      <li>Apparaître dans le leaderboard</li>
+      <li>Associer un pseudo et un avatar</li>
+    </ul>
+
+    <div style="margin:12px 0;">
+      <label style="font-size:14px;">
+        <input type="checkbox" id="whySignupDontRemind" />
+        Ne plus me le rappeler
+      </label>
+    </div>
+
+    <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+      <button id="whySignupRegisterBtn" class="main-btn">S’inscrire</button>
+      <button id="whySignupContinueBtn" class="main-btn">Continuer sans compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale "Prêt à jouer ?" -->
+<div id="readyModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <p>Prêt à jouer ?</p>
+    <img src="images/jeton.png" alt="Jeton FmecS" class="jeton-img">
+    <button id="readyBtn" class="main-btn">Commencer</button>
+  </div>
+</div>
+
+<!-- Modale pseudo -->
+<div id="signupModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <h2>Créer votre pseudo</h2>
+    <input id="signupPseudoInput" type="text" placeholder="Votre pseudo" class="modal-input">
+    <button id="signupConfirmBtn" class="main-btn">Enregistrer</button>
+    <button id="signupCloseBtn" class="close-btn">✕</button>
+  </div>
+</div>
+
+
+<!-- === HELP OVERLAY === -->
+<div id="helpOverlay" class="overlay overlay-center hidden">
+    <div class="panel">
+    <button class="close-btn" id="closeHelpBtn">✕</button>
+
+    <h2>📖 Aide - pour bien démarrer</h2>
+    <div class="aide-separator"></div>
+
+    <h3>L’objectif</h3>
+    <p>Tracer un maximum de lignes de 5 points en partant de la Croix de Malte avec les points noirs actifs.</p>
+    <div class="aide-separator"></div>
+
+    <h3>Comment jouer</h3>
+    <ul>
+      <li>Repère une ligne possible de 5 points alignés avec un minimum de 4 points déjà actifs.</li>
+      <li>Clique sur l’un des points d’extrémité, puis sur le point d’arrivée.</li>
+      <li>La ligne sera créée automatiquement si elle est valide.</li>
+      <li>Le bouton Retour permet d'annuler la dernière ligne créée.</li>
+      <li>Le bouton Pause arrête le chrono.</li>
+      <li>Le menu Burger ☰ permet d'accéder au Pas à Pas montrant comment créer des lignes.</li>
+      <li>Retrouve-moi aussi dans ce menu ☰ ainsi que d'autres options</li>
+    </ul>
+    <div class="aide-separator"></div>
+
+    <h3>Règles</h3>
+    <ul>
+      <li>Une ligne doit faire exactement 5 points.</li>
+      <li>Une ligne doit contenir au préalable au moins 2 points déjà actifs.</li>
+      <li>Les lignes peuvent se croiser, mais pas se superposer.</li>
+    </ul>
+    <div class="aide-separator"></div>
+
+    <h3>Jokers</h3>
+    <p>Gagnés lorsqu’une ligne utilise 5 points déjà actifs.</p>
+    <p><strong>Utilisation :</strong></p>
+    <ul>
+      <li>1 joker utilisé si la ligne comporte seulement 3 points actifs.</li>
+      <li>2 jokers utilisés si elle ne comporte que 2 points actifs.</li>
+      <li><em>Les lignes avec moins de 2 points actifs ne sont pas autorisées.</em></li>
+    </ul>
+  </div>
+</div>
+
+  <div id="gameContainer">
+
+<!-- === TOP BAR === -->
+<div id="topBar">
+  <!-- Bloc 1 : Burger -->
+  <div id="burgerWrapper">
+    <button id="burgerBtn" class="burger-btn" aria-label="Menu">☰</button>
+  </div>
+
+  <!-- Bloc 2 : Titre -->
+  <div id="titleArea">
+    <h1>Morpion Solitaire – Croix de Malte</h1>
+    <div id="subtitle">
+      Objectif : créer des lignes de 5 points selon les règles du Morpion Solitaire
+    </div>
+  </div>
+
+  <!-- Bloc 3 : Valeurs -->
+  <div id="statusArea">
+    <div><span class="label">Score :</span> <span id="scoreValue">0</span></div>
+    <div><span class="label">Temps :</span> <span id="timerValue">00:00</span></div>
+    <div><span class="label">Jokers :</span> <span id="jokersCombinedValue">0 / 0</span></div>
+    <div><span class="label">Retours :</span> <span id="undoCount">0</span></div>
+  </div>
+
+  <!-- Bloc 4 : Boutons -->
+  <div id="topActions">
+    <button id="undoBtn" class="main-btn">Retour</button>
+    <button id="pauseBtn" class="main-btn">Pause</button>
+  </div>
+
+  <!-- Bloc 5 : Meilleur score -->
+  <span id="bestScoreTop" class="best-score-info"></span>
+
+  <!-- Bloc 6 : Menu Profil -->
+<div id="profileContainer">
+  <button id="profileBtn" class="profile-btn" disabled>
+    <img id="profileAvatar" src="images/avatarDefault.png" class="avatar-icon" alt="Avatar utilisateur">
+    <span id="profilePseudoDisplay" class="profile-pseudo"></span>
+  </button>
+  <div id="profileDropdown" class="profile-dropdown">
+    <div class="profile-info">
+  <div class="profile-info-item">
+    <strong>Email:</strong>
+    <span id="profileEmail"></span>
+  </div>
+  <div class="profile-info-item">
+    <strong>Joueur depuis:</strong>
+    <span id="profileCreationDate"></span>
+  </div>
+  </div>
+    <button id="editProfileBtn" class="profile-btn">Modifier le Profil</button>
+    <button id="logoutProfileBtn" class="profile-btn">Se déconnecter</button>
+  </div>
+</div>
+</div>
+<!-- === /TOP BAR === -->
+
+  <!-- === MENU BURGER === -->
+  <div id="burgerOverlay">
+    <button id="burgerReplayBtn" class="main-btn">Rejouer</button>
+    <button id="burgerStepBtn" class="main-btn">Pas à pas</button>
+    <button id="burgerHelpBtn" class="main-btn">Aide</button>
+    <button id="burgerSoundBtn" class="main-btn">Son : on</button>
+    <button id="burgerLeaderboardBtn" class="main-btn">Leaderboard</button>
+    <button id="burgerAuthBtn" class="main-btn">Se connecter</button>
+  </div>
+
+
+  <!-- === MAIN AREA (historique + grille) === -->
+  <div id="mainArea">
+
+    <!-- HISTORIQUE -->
+    <div id="sidePanel">
+      <h2 id="historyTitle">Historique</h2>
+      <div id="historyPanel">
+        <ul id="historyList"></ul>
+      </div>
+    </div>
+
+    <!-- GRILLE -->
+    <div id="boardWrapper">
+      <div id="canvasContainer" class="board-frame slide-in-premium">
+
+        <!-- Repères horizontaux -->
+        <div id="topLabels">
+          <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span>
+        </div>
+
+        <!-- Repères verticaux -->
+        <div id="leftLabels">
+          <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span>
+        </div>
+
+        <!-- CANVAS 600×600 -->
+        <canvas id="gameCanvas" width="600" height="600"></canvas>
+        <div id="tutorialBubble"></div>
+        <div id="jokerEffectContainer"></div>
+
+      </div>
+    </div>
+
+  </div>
+  <!-- === /MAIN AREA === -->
+
+</div> <!-- /gameContainer -->
+
+
+  <div id="leaderboardOverlay" class="overlay overlay-center hidden">
+  <div class="leaderboard-panel">
+    <button id="closeLeaderboardBtn" class="close-btn">✕</button>
+
+    <h2 id="leaderboardTitle">Leaderboard</h2>
+
+    <div class="leaderboard-hint">
+      Si tu veux voir tes scores, inscris-toi 🙂
+    </div>
+
+    <div id="leaderboardContainer"></div>
+  </div>
+</div>
+
+
+
+
+  <div id="flashContainer"></div>
+
+<div id="endGameOverlay" class="overlay overlay-center hidden">
+  <div id="endGamePanel" class="panel">
+    <h2>Partie terminée</h2>
+    <p id="finalScore"></p>
+    <button id="closeEndGame" class="main-btn">OK</button>
+  </div>
+</div>
+
+<div id="bestScoreOverlay" class="overlay overlay-center hidden">
+  <div class="panel">
+    <h2>🎉 Nouveau record</h2>
+    <div id="bestScoreContent"></div>
+    <button id="closeBestScore" class="main-btn">Fermer</button>
+  </div>
+</div>
+
+<!-- Fenêtre d'authentification -->
+<div id="authOverlay" class="overlay overlay-center hidden">
+  <div class="panel">
+    <button id="closeAuthBtn" class="close-btn">✕</button>
+
+    <h2>Connexion / Inscription</h2>
+
+    <label for="authEmail">Email</label>
+    <input type="email" id="authEmail" class="modal-input" />
+
+    <label for="authPassword">Mot de passe</label>
+    <input type="password" id="authPassword" class="modal-input" />
+
+    <div class="auth-buttons">
+      <button id="signupBtn" class="main-btn">Créer un compte</button>
+      <button id="loginBtn" class="main-btn">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fenêtre pour la création de compte -->
+<div id="signupModal" class="overlay overlay-center hidden">
+  <div class="panel">
+    <button id="closeSignupBtn" class="close-btn">✕</button>
+
+    <h2>Créer un compte</h2>
+
+    <label for="signupPseudoInput">Pseudo</label>
+    <input type="text" id="signupPseudoInput" class="modal-input" />
+
+    <div class="auth-buttons">
+      <button id="signupConfirmBtn" class="main-btn">Confirmer</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- Profil -->
+<div id="profileModal" class="modal hidden">
+  <div class="panel">
+    <h2>Modifier mon profil</h2>
+
+    <div id="profileErrorMessage" class="error-message hidden">
+      Une erreur est survenue.
+    </div>
+
+    <div class="form-group">
+      <label for="profilePseudoInput">Pseudo</label>
+      <input type="text" id="profilePseudoInput" class="form-input">
+    </div>
+
+    <div class="form-group">
+      <label>Avatar</label>
+      <img id="profileAvatarPreview" src="images/avatarDefault.png" class="avatar-preview">
+      <input type="file" id="avatarUpload" accept="image/png, image/jpeg" style="display: none;">
+      <button id="changeAvatarBtn" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Changer l'avatar</button>
+    </div>
+
+    <div class="form-group">
+      <label for="profileEmailInput">Email</label>
+      <input type="email" id="profileEmailInput" class="form-input" readonly>
+    </div>
+
+    <div class="form-group">
+      <h3>Changer le mot de passe</h3>
+      <label for="profileCurrentPassword">Mot de passe actuel</label>
+      <input type="password" id="profileCurrentPassword" class="form-input" placeholder="Mot de passe actuel">
+    </div>
+
+    <div class="form-group">
+      <label for="profileNewPassword">Nouveau mot de passe</label>
+      <input type="password" id="profileNewPassword" class="form-input" placeholder="Nouveau mot de passe">
+    </div>
+
+    <div class="form-group">
+      <label for="profileConfirmPassword">Confirmer le nouveau mot de passe</label>
+      <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirmer le nouveau mot de passe">
+    </div>
+
+    <div class="form-group">
+      <button id="changePasswordBtn" class="btn btn-secondary" style="width: 100%;">Changer le mot de passe</button>
+    </div>
+
+    <div class="form-group">
+      <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
+    </div>
+
+    <div class="modal-actions">
+      <button id="saveProfileBtn" class="btn btn-primary">Enregistrer</button>
+      <button id="cancelProfileBtn" class="btn btn-secondary">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bas de page -->
+
+<footer class="transparent-footer">
+  <div class="footer-content">
+    <div class="logo">
+      <img src="images/logo-fmecs.png" alt="Logo" class="footer-logo" />
+    </div>
+    <!img src="images/logo-fmecs.png" alt="Logo" class="footer-logo" />
+    <span class="footer-text">Photo prise par </span>
+    <!a href="https://www.artmajeur.alainaudet.com" class="footer-link"></a>
+    <a href="https://www.artmajeur.com/alainaudet" class="footer-link" target="_blank" rel="noopener noreferrer">Alain Audet</a>
+    <span class="footer-copyright">© 2026 Morpion Solitaire - Croix de Malte. Tous droits réservés.</span>
+  </div>
+</footer>
+ 
+<!script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/croix-de-malte/lib/supabase.js"></script>
+<script src="game.js"></script>
+
+
+</body>
+</html>
