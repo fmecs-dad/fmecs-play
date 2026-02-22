@@ -759,15 +759,7 @@ async function changePassword() {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Re-authentifier l'utilisateur avec son mot de passe actuel
-    const { error: reauthError } = await supa.auth.signInWithPassword({
-      email: session.user.email,
-      password: currentPassword,
-    });
-
-    if (reauthError) throw new Error("Mot de passe actuel incorrect.");
-
-    // Mettre à jour le mot de passe
+    // Mettre à jour le mot de passe directement
     const { error: updateError } = await supa.auth.updateUser({
       password: newPassword
     });
