@@ -646,7 +646,6 @@ function initProfileModalListeners() {
 
   // Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
-  playClickSound()
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
