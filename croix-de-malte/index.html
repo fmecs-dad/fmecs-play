@@ -1523,26 +1523,34 @@ footer {
       <input type="email" id="profileEmailInput" class="form-input" readonly>
     </div>
 
+    <!-- Bouton pour afficher les champs de changement de mot de passe -->
     <div class="form-group">
-      <h3>Changer le mot de passe</h3>
-      <label for="profileCurrentPassword">Mot de passe actuel</label>
-      <input type="password" id="profileCurrentPassword" class="form-input" placeholder="Mot de passe actuel">
+      <button id="toggleChangePasswordBtn" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Changer le mot de passe</button>
     </div>
 
-    <div class="form-group">
-      <label for="profileNewPassword">Nouveau mot de passe</label>
-      <input type="password" id="profileNewPassword" class="form-input" placeholder="Nouveau mot de passe">
+    <!-- Champs de changement de mot de passe, masqués par défaut -->
+    <div id="changePasswordSection" class="hidden">
+      <div class="form-group">
+        <label for="profileCurrentPassword">Mot de passe actuel</label>
+        <input type="password" id="profileCurrentPassword" class="form-input" placeholder="Mot de passe actuel">
+      </div>
+
+      <div class="form-group">
+        <label for="profileNewPassword">Nouveau mot de passe</label>
+        <input type="password" id="profileNewPassword" class="form-input" placeholder="Nouveau mot de passe">
+      </div>
+
+      <div class="form-group">
+        <label for="profileConfirmPassword">Confirmer le nouveau mot de passe</label>
+        <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirmer le nouveau mot de passe">
+      </div>
+
+      <div class="form-group">
+        <button id="changePasswordBtn" class="btn btn-primary" style="width: 100%;">Valider le changement</button>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="profileConfirmPassword">Confirmer le nouveau mot de passe</label>
-      <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirmer le nouveau mot de passe">
-    </div>
-
-    <div class="form-group">
-      <button id="changePasswordBtn" class="btn btn-secondary" style="width: 100%;">Changer le mot de passe</button>
-    </div>
-
+    <!-- Lien pour la réinitialisation du mot de passe -->
     <div class="form-group">
       <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
     </div>

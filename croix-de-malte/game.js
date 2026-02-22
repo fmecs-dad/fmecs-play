@@ -585,7 +585,7 @@ async function uploadAvatar(file) {
 function initProfileModalListeners() {
   const editProfileBtn = document.getElementById("editProfileBtn");
 
-  // Supprimez d'abord tout écouteur existant pour éviter les doublons
+// Supprimez d'abord tout écouteur existant pour éviter les doublons
   if (editProfileBtn) {
     const newEditProfileBtn = editProfileBtn.cloneNode(true);
     editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
@@ -597,6 +597,38 @@ function initProfileModalListeners() {
       await ouvrirProfil();
     });
   }
+
+// Écouteur pour le bouton "Changer le mot de passe"
+  const toggleChangePasswordBtn = document.getElementById("toggleChangePasswordBtn");
+  if (toggleChangePasswordBtn) {
+    toggleChangePasswordBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      const changePasswordSection = document.getElementById("changePasswordSection");
+      if (changePasswordSection) {
+        changePasswordSection.classList.toggle("hidden");
+      }
+    });
+  }
+
+  // Écouteur pour le bouton de validation du changement de mot de passe
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
+  if (changePasswordBtn) {
+    changePasswordBtn.addEventListener("click", async () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      await changePassword();
+    });
+  }
+
+  // Écouteur pour le lien "Mot de passe oublié"
+  const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+  if (forgotPasswordLink) {
+    forgotPasswordLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (typeof playClickSound === 'function') playClickSound();
+      await resetPassword();
+    });
+  }
+  
 // Écouteur pour le bouton de déconnexion dans le menu profil
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
   if (logoutProfileBtn) {
@@ -691,6 +723,108 @@ if (avatarUpload) {
   });
 }
 }
+
+// Fonction pour changer le mot de passe
+async function changePassword() {
+  const currentPasswordInput = document.getElementById("profileCurrentPassword");
+  const newPasswordInput = document.getElementById("profileNewPassword");
+  const confirmPasswordInput = document.getElementById("profileConfirmPassword");
+  const errorMessage = document.getElementById("profileErrorMessage");
+
+  if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput || !errorMessage) return;
+
+  const currentPassword = currentPasswordInput.value.trim();
+  const newPassword = newPasswordInput.value.trim();
+  const confirmPassword = confirmPasswordInput.value.trim();
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    errorMessage.textContent = "Tous les champs de mot de passe sont obligatoires.";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    errorMessage.textContent = "Les nouveaux mots de passe ne correspondent pas.";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    errorMessage.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const { data: { session }, error } = await supa.auth.getSession();
+    if (error || !session) throw new Error("Utilisateur non connecté");
+
+    // Re-authentifier l'utilisateur avec son mot de passe actuel
+    const { error: reauthError } = await supa.auth.signInWithPassword({
+      email: session.user.email,
+      password: currentPassword,
+    });
+
+    if (reauthError) throw new Error("Mot de passe actuel incorrect.");
+
+    // Mettre à jour le mot de passe
+    const { error: updateError } = await supa.auth.updateUser({
+      password: newPassword
+    });
+
+    if (updateError) throw updateError;
+
+    // Réinitialiser les champs de mot de passe
+    currentPasswordInput.value = "";
+    newPasswordInput.value = "";
+    confirmPasswordInput.value = "";
+
+    errorMessage.textContent = "Mot de passe changé avec succès !";
+    errorMessage.classList.remove("hidden");
+    errorMessage.style.color = "green";
+
+  } catch (err) {
+    console.error("Erreur lors du changement de mot de passe:", err);
+    errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
+    errorMessage.classList.remove("hidden");
+    errorMessage.style.color = "red";
+  }
+}
+
+// Fonction pour réinitialiser le mot de passe
+async function resetPassword() {
+  const emailInput = document.getElementById("profileEmailInput");
+  const errorMessage = document.getElementById("profileErrorMessage");
+
+  if (!emailInput || !errorMessage) return;
+
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    errorMessage.textContent = "Veuillez vérifier votre email pour réinitialiser le mot de passe.";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const { error } = await supa.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/reset-password' // Assurez-vous que cette URL est correcte
+    });
+
+    if (error) throw error;
+
+    errorMessage.textContent = "Un email de réinitialisation a été envoyé.";
+    errorMessage.classList.remove("hidden");
+    errorMessage.style.color = "green";
+
+  } catch (err) {
+    console.error("Erreur lors de la réinitialisation du mot de passe:", err);
+    errorMessage.textContent = err.message || "Erreur lors de l'envoi de l'email de réinitialisation.";
+    errorMessage.classList.remove("hidden");
+    errorMessage.style.color = "red";
+  }
+}
+
 /**
  * Fonction pour sauvegarder les modifications du profil
  */
