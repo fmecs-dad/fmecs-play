@@ -186,14 +186,22 @@ async function updateAuthUI(user = null) {
   if (burgerAuthBtn) burgerAuthBtn.style.display = "none"; // Masquer le bouton si connecté
   if (profileBtn) profileBtn.disabled = false;
 
-  let fallbackPseudo = localStorage.getElementById("playerPseudo") || "Joueur";
+  // Correction ici : utiliser localStorage.getItem au lieu de localStorage.getElementById
+  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
-    const pseudo = await fetchPlayerPseudo(user.id);
-    if (pseudo && burgerPseudo) {
-      burgerPseudo.textContent = pseudo;
-      localStorage.setItem("playerPseudo", pseudo);
+    const { data: player, error: playerError } = await supa
+      .from("players")
+      .select("pseudo")
+      .eq("id", user.id)
+      .single();
+
+    if (playerError) throw playerError;
+
+    if (player.pseudo && burgerPseudo) {
+      burgerPseudo.textContent = player.pseudo;
+      localStorage.setItem("playerPseudo", player.pseudo);
     }
   } catch (err) {
     console.error("Impossible de récupérer le pseudo :", err);
