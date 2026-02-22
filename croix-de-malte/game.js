@@ -632,7 +632,6 @@ function initProfileModalListeners() {
   const saveBtn = document.getElementById("saveProfileBtn");
   if (saveBtn) {
     saveBtn.addEventListener("click", saveProfileChanges);
-    if (typeof playClickSound === 'function') playClickSound();
   }
 
   // Écouteur pour fermer la modale en cliquant en dehors
