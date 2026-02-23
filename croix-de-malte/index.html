@@ -22,15 +22,23 @@
       <li>Associer un pseudo et un avatar</li>
     </ul>
 
-    <div style="margin:12px 0;">
-      <label style="font-size:14px;">
+    <!-- Case à cocher pour accepter la politique de confidentialité (RGPD) -->
+    <div style="margin: 12px 0; font-size: 14px;">
+      <label>
+        <input type="checkbox" id="acceptPrivacyPolicy" required />
+        J’accepte la <a href="https://fmecs.fr/politique-de-confidentialite.html" target="_blank" style="color: #fedd94;">politique de confidentialité</a>.
+      </label>
+    </div>
+
+    <div style="margin: 12px 0;">
+      <label style="font-size: 14px;">
         <input type="checkbox" id="whySignupDontRemind" />
         Ne plus me le rappeler
       </label>
     </div>
 
-    <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
-      <button id="whySignupRegisterBtn" class="main-btn">S’inscrire</button>
+    <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: center;">
+      <button id="whySignupRegisterBtn" class="main-btn" disabled>S’inscrire</button>
       <button id="whySignupContinueBtn" class="main-btn">Continuer sans compte</button>
     </div>
   </div>
@@ -359,6 +367,7 @@
 
 </body>
 </html>
+
 
 
 
