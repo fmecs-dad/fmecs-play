@@ -3058,6 +3058,16 @@ if (burgerHelpBtn) {
 
   // --- SIGNUP ---
 
+  const acceptPrivacyCheckbox = document.getElementById('acceptPrivacyPolicy');
+  const registerButton = document.getElementById('whySignupRegisterBtn');
+
+  if (acceptPrivacyCheckbox && registerButton) { // Vérifie que les éléments existent
+    registerButton.disabled = true;
+    acceptPrivacyCheckbox.addEventListener('change', function() {
+      registerButton.disabled = !this.checked;
+    });
+  }
+
   document.getElementById("signupBtn").addEventListener("click", () => {
     playClickSound();
     document.getElementById("authOverlay").classList.add("hidden");
