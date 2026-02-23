@@ -155,9 +155,9 @@
   </div>
 </div>
 </div>
-<!-- === /TOP BAR === -->
+<!--- Top bar --->
 
-  <!-- === MENU BURGER === -->
+  <!--- Menu burger --->
   <div id="burgerOverlay">
     <button id="burgerReplayBtn" class="main-btn">Rejouer</button>
     <button id="burgerStepBtn" class="main-btn">Pas à pas</button>
@@ -168,10 +168,10 @@
   </div>
 
 
-  <!-- === MAIN AREA (historique + grille) === -->
+  <!--- Main area --->
   <div id="mainArea">
 
-    <!-- HISTORIQUE -->
+    <!--- History --->
     <div id="sidePanel">
       <h2 id="historyTitle">Historique</h2>
       <div id="historyPanel">
@@ -179,7 +179,7 @@
       </div>
     </div>
 
-    <!-- GRILLE -->
+    <!--- Grid --->
     <div id="boardWrapper">
       <div id="canvasContainer" class="board-frame slide-in-premium">
 
@@ -193,7 +193,7 @@
           <span>1</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span>
         </div>
 
-        <!-- CANVAS 600×600 -->
+        <!--- Canvas --->
         <canvas id="gameCanvas" width="600" height="600"></canvas>
         <div id="tutorialBubble"></div>
         <div id="jokerEffectContainer"></div>
@@ -202,9 +202,8 @@
     </div>
 
   </div>
-  <!-- === /MAIN AREA === -->
 
-</div> <!-- /gameContainer -->
+</div> <!--- gameContainer --->
 
 
   <div id="leaderboardOverlay" class="overlay overlay-center hidden">
@@ -220,9 +219,6 @@
     <div id="leaderboardContainer"></div>
   </div>
 </div>
-
-
-
 
   <div id="flashContainer"></div>
 
@@ -242,7 +238,7 @@
   </div>
 </div>
 
-<!-- Fenêtre d'authentification -->
+<!--- Fenêtre d'authentification --->
 <div id="authOverlay" class="overlay overlay-center hidden">
   <div class="panel">
     <button id="closeAuthBtn" class="close-btn">✕</button>
@@ -262,7 +258,7 @@
   </div>
 </div>
 
-<!-- Fenêtre pour la création de compte -->
+<!--- Fenêtre pour la création de compte --->
 <div id="signupModal" class="overlay overlay-center hidden">
   <div class="panel">
     <button id="closeSignupBtn" class="close-btn">✕</button>
@@ -278,7 +274,7 @@
   </div>
 </div>
  
-<!-- Profil -->
+<!--- Profil --->
 <div id="profileModal" class="modal hidden">
   <div class="panel">
     <h2>Modifier mon profil</h2>
@@ -303,13 +299,11 @@
       <label for="profileEmailInput">Email</label>
       <input type="email" id="profileEmailInput" class="form-input" readonly>
     </div>
-
-    <!-- Bouton pour afficher les champs de changement de mot de passe -->
+    
     <div class="form-group">
       <button id="toggleChangePasswordBtn" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Changer le mot de passe</button>
     </div>
 
-    <!-- Champs de changement de mot de passe, masqués par défaut -->
     <div id="changePasswordSection" class="hidden">
       <div class="form-group">
         <label for="profileCurrentPassword">Mot de passe actuel</label>
@@ -331,7 +325,6 @@
       </div>
     </div>
 
-    <!-- Lien pour la réinitialisation du mot de passe -->
     <div class="form-group">
       <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
     </div>
@@ -350,20 +343,19 @@
     <div class="logo">
       <img src="images/logo-fmecs.png" alt="Logo" class="footer-logo" />
     </div>
-    <!img src="images/logo-fmecs.png" alt="Logo" class="footer-logo" />
     <span class="footer-text">Photo prise par</span>
     <a href="https://www.artmajeur.com/alainaudet" class="footer-link" target="_blank" rel="noopener noreferrer">Alain Audet</a>
     <span class="footer-copyright">© 2026 Morpion Solitaire - Croix de Malte. Tous droits réservés</span>
   </div>
 </footer>
  
-<!script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="/croix-de-malte/lib/supabase.js"></script>
 <script src="game.js"></script>
 
 
 </body>
 </html>
+
 
 
 
