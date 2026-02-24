@@ -382,7 +382,7 @@ async function updateProfileInfo(force = false) {
       profileBtn.title = "Voir votre profil";
     }
 
-    // Mise à jour de l'avatar
+    // 5. Mise à jour de l'avatar
     if (profileAvatar && player.avatar_url) {
       try {
         const { data: signedData, error: signError } = await supa.storage
@@ -406,12 +406,12 @@ async function updateProfileInfo(force = false) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    // Mise à jour du pseudo dans le bouton profil (si nécessaire)
+    // 6.Mise à jour du pseudo dans le bouton profil (si nécessaire)
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
     }
 
-    // 5. Mise à jour des infos dans le DROPDOWN (UNIQUEMENT email et date de création)
+    // 7. Mise à jour des infos dans le DROPDOWN 
     const dropdownEmailDisplay = document.getElementById("dropdownEmailDisplay");
     const dropdownJoinDateDisplay = document.getElementById("dropdownJoinDate");
 
@@ -568,6 +568,20 @@ async function uploadAvatar(file) {
 /*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
 
 function initProfileModalListeners() {
+
+  // Supprimez d'abord tout écouteur existant pour éviter les doublons
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    const newEditProfileBtn = editProfileBtn.cloneNode(true);
+    editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
+
+    newEditProfileBtn.addEventListener("click", async (e) => {
+      if (typeof playClickSound === 'function') playClickSound();
+      e.stopPropagation();
+      console.log("Bouton Modifier cliqué");
+      await ouvrirProfil();
+    });
+  }
   // Bouton "Changer le mot de passe" dans la modale de profil
   const changePasswordBtn = document.getElementById("changePasswordBtn");
   if (changePasswordBtn) {
