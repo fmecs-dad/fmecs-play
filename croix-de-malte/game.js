@@ -568,8 +568,7 @@ async function uploadAvatar(file) {
 /*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
 
 function initProfileModalListeners() {
-
-  // Supprimez d'abord tout écouteur existant pour éviter les doublons
+  // Écouteur pour le bouton "Modifier le profil"
   const editProfileBtn = document.getElementById("editProfileBtn");
   if (editProfileBtn) {
     const newEditProfileBtn = editProfileBtn.cloneNode(true);
@@ -579,15 +578,16 @@ function initProfileModalListeners() {
       if (typeof playClickSound === 'function') playClickSound();
       e.stopPropagation();
       console.log("Bouton Modifier cliqué");
-      await ouvrirProfil();
+      document.getElementById("profileModal").classList.remove("hidden");
     });
   }
-  // Bouton "Changer le mot de passe" dans la modale de profil
+
+  // Bouton "Changer le mot de passe"
   const changePasswordBtn = document.getElementById("changePasswordBtn");
   if (changePasswordBtn) {
     changePasswordBtn.addEventListener("click", () => {
-      document.getElementById("profileModal").classList.add("hidden"); // Cache la modale de profil
-      document.getElementById("passwordModal").classList.remove("hidden"); // Affiche la modale de mot de passe
+      document.getElementById("profileModal").classList.add("hidden");
+      document.getElementById("passwordModal").classList.remove("hidden");
     });
   }
 
@@ -595,9 +595,8 @@ function initProfileModalListeners() {
   const cancelPasswordBtn = document.getElementById("cancelPasswordBtn");
   if (cancelPasswordBtn) {
     cancelPasswordBtn.addEventListener("click", () => {
-      document.getElementById("passwordModal").classList.add("hidden"); // Cache la modale de mot de passe
-      document.getElementById("profileModal").classList.remove("hidden"); // Réaffiche la modale de profil
-      // Réinitialise les champs
+      document.getElementById("passwordModal").classList.add("hidden");
+      document.getElementById("profileModal").classList.remove("hidden");
       document.getElementById("currentPassword").value = "";
       document.getElementById("newPassword").value = "";
       document.getElementById("confirmNewPassword").value = "";
@@ -618,36 +617,76 @@ function initProfileModalListeners() {
   if (cancelProfileBtn) {
     cancelProfileBtn.addEventListener("click", () => {
       document.getElementById("profileModal").classList.add("hidden");
+      const avatarPreview = document.getElementById("profileAvatarPreview");
+      if (avatarPreview && !tempAvatarUrl) {
+        updateProfileInfo(true);
+      }
+      tempAvatarUrl = null;
     });
   }
 
   // Bouton "Enregistrer" de la modale de profil
-  const saveProfileBtn = document.getElementById("saveProfileBtn");
-  if (saveProfileBtn) {
-    saveProfileBtn.addEventListener("click", saveProfileChanges);
+  const saveBtn = document.getElementById("saveProfileBtn");
+  if (saveBtn) {
+    saveBtn.addEventListener("click", saveProfileChanges);
   }
-}
 
-  // Bouton "Changer l'avatar"
+  // Écouteur pour fermer la modale en cliquant en dehors
+  const modal = document.getElementById("profileModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.add("hidden");
+      }
+    });
+  }
+
+  // Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      document.getElementById("avatarUpload").click();
+      const avatarUpload = document.getElementById("avatarUpload");
+      if (avatarUpload) avatarUpload.click();
     });
   }
 
-  // Gestion du fichier avatar
+  // Gestion du fichier sélectionné pour l'avatar
   const avatarUpload = document.getElementById("avatarUpload");
   if (avatarUpload) {
     avatarUpload.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      // Logique pour prévisualiser et uploader l'avatar
+
+      // Vérification du format et de la taille
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Seuls les fichiers JPEG/PNG sont acceptés");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert("L'image ne doit pas dépasser 2Mo");
+        return;
+      }
+
+      // Aperçu de l'image
       const preview = document.getElementById("profileAvatarPreview");
-      if (preview) preview.src = URL.createObjectURL(file);
+      if (preview) {
+        preview.src = URL.createObjectURL(file);
+        console.log("Aperçu de l'image mis à jour");
+      }
+
+      // Stocke temporairement l'URL de l'avatar
+      try {
+        tempAvatarUrl = await uploadAvatar(file);
+        console.log("Avatar temporaire stocké:", tempAvatarUrl);
+      } catch (err) {
+        console.error("Erreur complète lors du changement d'avatar:", err);
+        alert("Erreur lors du changement d'avatar: " + err.message);
+      }
     });
   }
+}
 
 // Fonction pour changer le mot de passe
 async function changePassword() {
