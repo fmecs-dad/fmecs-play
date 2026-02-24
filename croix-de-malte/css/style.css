@@ -1,4 +1,3 @@
-
 /* === GLOBAL === */
 
 html, body {
@@ -374,6 +373,14 @@ body {
   margin-top: 0;
   margin-bottom: 20px;
   text-align: center;
+}
+
+/* Style pour le message d'erreur/succès dans la modale de mot de passe */
+#passwordErrorMessage {
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: none; /* Caché par défaut */
 }
 
 .error-message {
@@ -1174,6 +1181,81 @@ body {
 #burgerOverlay button:hover {
   background: rgba(255,255,255,0.1);
 }
+
+/* ===== SECTION CHANGEMENT MOT DE PASSE ===== */
+#changePasswordSection {
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.1); /* Fond légèrement transparent pour distinguer la section */
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: none; /* Cachée par défaut */
+}
+
+#changePasswordSection.show {
+  display: block !important;
+}
+
+/* Champs de mot de passe (réutilise ton style .form-input) */
+#changePasswordSection input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* Boutons spécifiques à la section mot de passe */
+#changePasswordSection .main-btn {
+  background: #0078d4; /* Même bleu que ton design */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+#changePasswordSection .secondary-btn {
+  background: #444; /* Gris comme ton btn-secondary */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Style pour les boutons désactivés (déjà présent dans ton CSS, mais vérification) */
+.main-btn:disabled,
+.secondary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Espacement des boutons dans la section mot de passe */
+#changePasswordSection .modal-actions {
+  display: flex;
+  justify-content: flex-end; /* Aligne les boutons à droite */
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Message d'erreur/succès pour le mot de passe */
+#changePasswordSection .error-message {
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+
+
+/* === BAS DE PAGE === */
 
 footer {
   position: fixed;
