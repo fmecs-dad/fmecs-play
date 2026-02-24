@@ -636,6 +636,19 @@ function initProfileModalListeners() {
       document.getElementById("avatarUpload").click();
     });
   }
+
+  // Gestion du fichier avatar
+  const avatarUpload = document.getElementById("avatarUpload");
+  if (avatarUpload) {
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      // Logique pour prévisualiser et uploader l'avatar
+      const preview = document.getElementById("profileAvatarPreview");
+      if (preview) preview.src = URL.createObjectURL(file);
+    });
+  }
+
 // Fonction pour changer le mot de passe
 async function changePassword() {
   const currentPassword = document.getElementById("currentPassword").value.trim();
