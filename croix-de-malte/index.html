@@ -284,27 +284,13 @@
 <div id="profileModal" class="modal hidden">
   <div class="modal-content">
     <h2>Modifier mon profil</h2>
-
-    <!-- Champs du profil -->
     <div class="form-group">
       <label for="profilePseudoInput">Pseudo :</label>
-      <input type="text" id="profilePseudoInput" class="form-input" placeholder="Ton pseudo">
+      <input type="text" id="profilePseudoInput" class="form-input">
     </div>
-
     <div class="form-group">
-      <label for="avatarUpload">Avatar :</label>
-      <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
-      <button id="changeAvatarBtn" class="secondary-btn">Changer l'avatar</button>
-      <img id="profileAvatarPreview" class="avatar-preview" src="" alt="Aperçu avatar">
+      <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
     </div>
-
-    <!-- Bouton pour ouvrir la modale de mot de passe -->
-    <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
-
-    <!-- Message d'erreur -->
-    <div id="profileErrorMessage" class="error-message hidden"></div>
-
-    <!-- Boutons d'action -->
     <div class="modal-actions">
       <button id="saveProfileBtn" class="main-btn">Enregistrer</button>
       <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
@@ -312,28 +298,23 @@
   </div>
 </div>
 
-<div id="passwordModal" class="modal" style="display: none;">
+<!-- Modale de mot de passe (séparée) -->
+<div id="passwordModal" class="modal hidden">
   <div class="modal-content">
     <h2>Changer le mot de passe</h2>
-
-    <!-- Champs pour le mot de passe -->
     <div class="form-group">
       <label for="currentPassword">Mot de passe actuel :</label>
-      <input type="password" id="currentPassword" class="form-input" placeholder="Mot de passe actuel">
+      <input type="password" id="currentPassword" class="form-input">
     </div>
     <div class="form-group">
       <label for="newPassword">Nouveau mot de passe :</label>
-      <input type="password" id="newPassword" class="form-input" placeholder="Nouveau mot de passe">
+      <input type="password" id="newPassword" class="form-input">
     </div>
     <div class="form-group">
-      <label for="confirmNewPassword">Confirmer le nouveau mot de passe :</label>
-      <input type="password" id="confirmNewPassword" class="form-input" placeholder="Confirmer">
+      <label for="confirmNewPassword">Confirmer :</label>
+      <input type="password" id="confirmNewPassword" class="form-input">
     </div>
-
-    <!-- Message d'erreur/succès -->
-    <div id="passwordErrorMessage" style="display: none;"></div>
-
-    <!-- Boutons d'action -->
+    <div id="passwordErrorMessage" class="error-message hidden"></div>
     <div class="modal-actions">
       <button id="validatePasswordBtn" class="main-btn">Valider</button>
       <button id="cancelPasswordBtn" class="secondary-btn">Annuler</button>

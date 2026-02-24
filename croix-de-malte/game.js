@@ -570,63 +570,15 @@ async function uploadAvatar(file) {
   }
 }
 
-/**
- * Initialise tous les écouteurs pour la modale de profil et le menu dropdown
- */
+/*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
+
 function initProfileModalListeners() {
-  // ===== MENU DROPDOWN =====
-  const profileBtn = document.getElementById("profileBtn");
-  const profileDropdown = document.getElementById("profileDropdown");
-  if (!profileBtn || !profileDropdown) {
-    console.error("Menu profil: éléments manquants");
-    return;
-  }
-
-  // Ouvre/ferme le dropdown
-  profileBtn.addEventListener("click", (e) => {
-    if (typeof playClickSound === 'function') playClickSound();
-    e.stopPropagation();
-    if (profileBtn.disabled) return;
-    profileDropdown.classList.toggle("show");
-  });
-
-  // Ferme le dropdown en cliquant ailleurs ou avec Echap
-  document.addEventListener("click", (e) => {
-    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-      profileDropdown.classList.remove("show");
-    }
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      profileDropdown.classList.remove("show");
-    }
-  });
-
-  // ===== MODALE DE PROFIL =====
-  const editProfileBtn = document.getElementById("editProfileBtn");
-  if (editProfileBtn) {
-    const newEditProfileBtn = editProfileBtn.cloneNode(true);
-    editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
-    newEditProfileBtn.addEventListener("click", async (e) => {
-      if (typeof playClickSound === 'function') playClickSound();
-      e.stopPropagation();
-      document.getElementById("profileModal").classList.remove("hidden");
-    });
-  }
-
   // Bouton "Changer le mot de passe" dans la modale de profil
   const changePasswordBtn = document.getElementById("changePasswordBtn");
   if (changePasswordBtn) {
     changePasswordBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      document.getElementById("passwordModal").style.display = "flex";
-      const saveBtn = document.getElementById("saveProfileBtn");
-      const cancelBtn = document.getElementById("cancelProfileBtn");
-      if (saveBtn && cancelBtn) {
-        saveBtn.disabled = true;
-        cancelBtn.disabled = true;
-      }
+      document.getElementById("profileModal").classList.add("hidden"); // Cache la modale de profil
+      document.getElementById("passwordModal").classList.remove("hidden"); // Affiche la modale de mot de passe
     });
   }
 
@@ -634,17 +586,13 @@ function initProfileModalListeners() {
   const cancelPasswordBtn = document.getElementById("cancelPasswordBtn");
   if (cancelPasswordBtn) {
     cancelPasswordBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      document.getElementById("passwordModal").style.display = "none";
-      const saveBtn = document.getElementById("saveProfileBtn");
-      const cancelBtn = document.getElementById("cancelProfileBtn");
-      if (saveBtn && cancelBtn) {
-        saveBtn.disabled = false;
-        cancelBtn.disabled = false;
-      }
+      document.getElementById("passwordModal").classList.add("hidden"); // Cache la modale de mot de passe
+      document.getElementById("profileModal").classList.remove("hidden"); // Réaffiche la modale de profil
+      // Réinitialise les champs
       document.getElementById("currentPassword").value = "";
       document.getElementById("newPassword").value = "";
       document.getElementById("confirmNewPassword").value = "";
+      document.getElementById("passwordErrorMessage").classList.add("hidden");
     });
   }
 
@@ -652,35 +600,7 @@ function initProfileModalListeners() {
   const validatePasswordBtn = document.getElementById("validatePasswordBtn");
   if (validatePasswordBtn) {
     validatePasswordBtn.addEventListener("click", async () => {
-      if (typeof playClickSound === 'function') playClickSound();
       await changePassword();
-      document.getElementById("passwordModal").style.display = "none";
-      const saveBtn = document.getElementById("saveProfileBtn");
-      const cancelBtn = document.getElementById("cancelProfileBtn");
-      if (saveBtn && cancelBtn) {
-        saveBtn.disabled = false;
-        cancelBtn.disabled = false;
-      }
-    });
-  }
-
-  // Lien "Mot de passe oublié"
-  const forgotPasswordLink = document.getElementById("forgotPasswordLink");
-  if (forgotPasswordLink) {
-    forgotPasswordLink.addEventListener("click", async (e) => {
-      e.preventDefault();
-      if (typeof playClickSound === 'function') playClickSound();
-      await resetPassword();
-    });
-  }
-
-  // Bouton de déconnexion
-  const logoutProfileBtn = document.getElementById("logoutProfileBtn");
-  if (logoutProfileBtn) {
-    logoutProfileBtn.addEventListener("click", async () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      if (typeof logout === 'function') await logout();
-      profileDropdown.classList.remove("show");
     });
   }
 
@@ -688,12 +608,7 @@ function initProfileModalListeners() {
   const cancelProfileBtn = document.getElementById("cancelProfileBtn");
   if (cancelProfileBtn) {
     cancelProfileBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const modal = document.getElementById("profileModal");
-      if (modal) modal.classList.add("hidden");
-      const avatarPreview = document.getElementById("profileAvatarPreview");
-      if (avatarPreview && !tempAvatarUrl) updateProfileInfo(true);
-      tempAvatarUrl = null;
+      document.getElementById("profileModal").classList.add("hidden");
     });
   }
 
@@ -702,54 +617,55 @@ function initProfileModalListeners() {
   if (saveProfileBtn) {
     saveProfileBtn.addEventListener("click", saveProfileChanges);
   }
+}
 
-  // Fermeture de la modale en cliquant en dehors
-  const profileModal = document.getElementById("profileModal");
-  if (profileModal) {
-    profileModal.addEventListener("click", (e) => {
-      if (e.target === e.currentTarget) {
-        e.currentTarget.classList.add("hidden");
-      }
-    });
+// Fonction pour changer le mot de passe
+async function changePassword() {
+  const currentPassword = document.getElementById("currentPassword").value.trim();
+  const newPassword = document.getElementById("newPassword").value.trim();
+  const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
+  const errorMessage = document.getElementById("passwordErrorMessage");
+
+  // Vérifications
+  if (!currentPassword || !newPassword || !confirmNewPassword) {
+    errorMessage.textContent = "Tous les champs sont obligatoires.";
+    errorMessage.classList.remove("hidden");
+    return;
   }
 
-  // Bouton "Changer l'avatar"
-  const changeAvatarBtn = document.getElementById("changeAvatarBtn");
-  if (changeAvatarBtn) {
-    changeAvatarBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const avatarUpload = document.getElementById("avatarUpload");
-      if (avatarUpload) avatarUpload.click();
-    });
+  if (newPassword !== confirmNewPassword) {
+    errorMessage.textContent = "Les mots de passe ne correspondent pas.";
+    errorMessage.classList.remove("hidden");
+    return;
   }
 
-  // Gestion du fichier avatar
-  const avatarUpload = document.getElementById("avatarUpload");
-  if (avatarUpload) {
-    avatarUpload.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+  if (newPassword.length < 6) {
+    errorMessage.textContent = "Le mot de passe doit faire au moins 6 caractères.";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
 
-      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-      if (!validTypes.includes(file.type)) {
-        alert("Seuls les fichiers JPEG/PNG sont acceptés");
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) {
-        alert("L'image ne doit pas dépasser 2Mo");
-        return;
-      }
+  try {
+    const { error } = await supa.auth.updateUser({ password: newPassword });
+    if (error) throw error;
 
-      const preview = document.getElementById("profileAvatarPreview");
-      if (preview) preview.src = URL.createObjectURL(file);
+    // Succès : ferme la modale de mot de passe et réaffiche celle de profil
+    errorMessage.textContent = "Mot de passe changé avec succès !";
+    errorMessage.style.color = "green";
+    errorMessage.classList.remove("hidden");
 
-      try {
-        tempAvatarUrl = await uploadAvatar(file);
-      } catch (err) {
-        console.error("Erreur lors du changement d'avatar:", err);
-        alert("Erreur lors du changement d'avatar: " + err.message);
-      }
-    });
+    setTimeout(() => {
+      document.getElementById("passwordModal").classList.add("hidden");
+      document.getElementById("profileModal").classList.remove("hidden");
+      // Réinitialise les champs
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmNewPassword").value = "";
+      errorMessage.classList.add("hidden");
+    }, 2000);
+  } catch (err) {
+    errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
+    errorMessage.classList.remove("hidden");
   }
 }
 
@@ -1642,18 +1558,27 @@ function resumeGame() {
 }
 
 function enableModalBehavior(overlayId, panelSelector, closeFn) {
+  // Vérifie que l'overlay existe
   const overlay = document.getElementById(overlayId);
-  const panel = overlay.querySelector(panelSelector);
+  if (!overlay) {
+    console.error(`Overlay avec ID "${overlayId}" non trouvé !`);
+    return;
+  }
 
-  // Clic sur le fond sombre → fermer
+  // Vérifie que le panel existe dans l'overlay
+  const panel = overlay.querySelector(panelSelector);
+  if (!panel) {
+    console.error(`Panel avec sélecteur "${panelSelector}" non trouvé dans l'overlay "${overlayId}" !`);
+    return;
+  }
+
+  // Ajoute les écouteurs uniquement si les éléments existent
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeFn();
   });
 
-  // Clic dans la fenêtre → ne pas fermer
   panel.addEventListener("click", (e) => e.stopPropagation());
 }
-
 
 // ===============================
 //   DESSIN DE LA GRILLE
