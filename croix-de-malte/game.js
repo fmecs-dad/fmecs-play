@@ -327,21 +327,21 @@ async function updateProfileInfo(force = false) {
   const { data: { session }, error } = await supa.auth.getSession();
   if (!session) {
     console.log("Pas de session active - annulation de la mise à jour du profil");
-    return; // Quitte la fonction si pas de session
+    return;
   }
-  // 1. Récupération du bouton profil et initialisation
+
+  // 1. Récupération des éléments DOM
   const profileBtn = document.getElementById("profileBtn");
   const profileAvatar = document.getElementById("profileAvatar");
   const avatarPreview = document.getElementById("profileAvatarPreview");
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
   const profileDropdown = document.getElementById("profileDropdown");
 
-  // Désactive le bouton par défaut (sera réactivé si utilisateur connecté)
+  // Désactive le bouton par défaut
   if (profileBtn) profileBtn.disabled = true;
 
   // 2. Vérification de la connexion
   try {
-    // Vérification du token seulement si pas forcé
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
@@ -350,9 +350,7 @@ async function updateProfileInfo(force = false) {
       }
     }
 
-    // Récupération de l'utilisateur
     const { data: { user }, error: userError } = await supa.auth.getUser();
-
     if (userError) {
       console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
       localStorage.removeItem('supabase.access.token');
@@ -365,7 +363,7 @@ async function updateProfileInfo(force = false) {
       return;
     }
 
-    // 3. Récupération des informations du joueur
+    // 3. Récupération des infos du joueur
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
@@ -377,34 +375,29 @@ async function updateProfileInfo(force = false) {
       return;
     }
 
-    // 4. Mise à jour de l'interface utilisateur
+    // 4. Mise à jour de l'UI
     console.log("[updateProfileInfo] Utilisateur connecté - mise à jour UI");
-
-    // Active le bouton profil
     if (profileBtn) {
       profileBtn.disabled = false;
       profileBtn.title = "Voir votre profil";
     }
 
-    // 5. Mise à jour de l'avatar avec URL SIGNÉE
+    // Mise à jour de l'avatar
     if (profileAvatar && player.avatar_url) {
       try {
-        // Génération de l'URL signée
         const { data: signedData, error: signError } = await supa.storage
           .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600); // Valide 1 heure
+          .createSignedUrl(player.avatar_url, 3600);
 
         if (signError) throw signError;
 
         profileAvatar.src = signedData.signedUrl;
         console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
 
-        // Vérification du chargement
         const testImg = new Image();
-        testImg.onload = () => console.log("[updateProfileInfo]");
-        testImg.onerror = () => console.error("[updateProfileInfo]");
+        testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé");
+        testImg.onerror = () => console.error("[updateProfileInfo] Erreur chargement avatar");
         testImg.src = signedData.signedUrl;
-
       } catch (err) {
         console.error("[updateProfileInfo] Erreur génération URL signée:", err);
         profileAvatar.src = "images/avatarDefault.png";
@@ -413,26 +406,28 @@ async function updateProfileInfo(force = false) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    // Met à jour le pseudo
+    // Mise à jour du pseudo dans le bouton profil (si nécessaire)
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
-      pseudoDisplay.title = player?.pseudo || "Utilisateur";
     }
 
-    // Met à jour les informations dans le dropdown
-    const profileEmail = document.getElementById("profileEmail");
-    const profileCreationDate = document.getElementById("profileCreationDate");
+    // 5. Mise à jour des infos dans le DROPDOWN (UNIQUEMENT email et date de création)
+    const dropdownEmailDisplay = document.getElementById("dropdownEmailDisplay");
+    const dropdownJoinDateDisplay = document.getElementById("dropdownJoinDate");
 
-    if (profileEmail) profileEmail.textContent = user.email || "Email non défini";
-    if (profileCreationDate && player?.created_at) {
-      profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString();
+    if (dropdownEmailDisplay) {
+      dropdownEmailDisplay.textContent = user.email || "email@example.com";
+    }
+
+    if (dropdownJoinDateDisplay && player?.created_at) {
+      const joinDate = new Date(player.created_at);
+      dropdownJoinDateDisplay.textContent = joinDate.toLocaleDateString('fr-FR');
     }
 
     console.log("[updateProfileInfo] Mise à jour terminée avec succès");
 
   } catch (err) {
     console.error("[updateProfileInfo] Erreur inattendue:", err);
-    // En cas d'erreur, on s'assure que le bouton est désactivé
     if (profileBtn) profileBtn.disabled = true;
   }
 }
