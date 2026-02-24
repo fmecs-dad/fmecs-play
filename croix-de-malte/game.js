@@ -455,8 +455,8 @@ async function updateProfileInfo(force = false) {
     }
 
     // 9. AFFICHAGE DU MEILLEUR SCORE (PARTIE MANQUANTE AJOUTÉE)
-    const bestScoreDisplay = document.getElementById("bestScoreDisplay");
-    if (bestScoreDisplay) {
+    const bestScoreTop = document.getElementById("bestScoreTop");
+    if (bestScoreTop) {
       try {
         const { data: bestScore, error: scoreError } = await supa
           .from("scores")
@@ -467,21 +467,21 @@ async function updateProfileInfo(force = false) {
           .single();
 
         if (!scoreError) {
-          bestScoreDisplay.textContent = bestScore ? bestScore.score : "0";
-          console.log("Meilleur score affiché:", bestScore ? bestScore.score : "0");
+          bestScoreTop.textContent = bestScore ? bestScore.score : "0";
+          console.log("Meilleur score affiché (bestScoreTop):", bestScore ? bestScore.score : "0");
         } else if (scoreError.code !== 'PGRST116') { // PGRST116 = aucun résultat
           console.error("Erreur lors de la récupération du meilleur score:", scoreError);
-          bestScoreDisplay.textContent = "0";
+          bestScoreTop.textContent = "0";
         } else {
-          bestScoreDisplay.textContent = "0"; // Aucun score encore
-          console.log("Aucun score trouvé pour ce joueur");
+          bestScoreTop.textContent = "0"; // Aucun score encore
+          console.log("Aucun score trouvé pour ce joueur (bestScoreTop)");
         }
       } catch (err) {
         console.error("Erreur inattendue lors de la récupération du meilleur score:", err);
-        bestScoreDisplay.textContent = "0";
+        bestScoreTop.textContent = "0";
       }
     } else {
-      console.warn("Élément bestScoreDisplay non trouvé");
+      console.warn("Élément bestScoreTop non trouvé");
     }
 
   } catch (err) {
