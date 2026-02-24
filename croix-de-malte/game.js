@@ -858,74 +858,69 @@ async function saveProfileChanges() {
   }
 
   try {
-    // 3. Récupération de la session
+    // 1. Récupération de la session
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // 4. Mise à jour du pseudo dans la table players
+    // 2. Mise à jour du pseudo dans players (doit fonctionner)
     const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
-
     if (playerError) throw playerError;
 
-    // 5. Mise à jour de l'email via Supabase Auth (corrigé)
+    // 3. Mise à jour de l'email (version corrigée)
     if (newEmail !== session.user.email) {
-      const { error: authError } = await supa.auth.updateUser({
-        email: newEmail,
-        // Supabase Auth met automatiquement à jour la table 'users'
-      });
-      if (authError) {
-        console.error("Erreur mise à jour email:", authError);
-        throw authError;
+      try {
+        const { error: authError } = await supa.auth.updateUser(
+          { email: newEmail },
+          { emailRedirectTo: window.location.origin }
+        );
+        if (authError) {
+          console.error("Détails erreur email:", authError);
+          // On ne bloque pas, mais on informe l'utilisateur
+          errorMessage.textContent = "Email non mis à jour. " + authError.message;
+          errorMessage.classList.remove("hidden");
+        }
+      } catch (e) {
+        console.error("Exception mise à jour email:", e);
       }
     }
 
-    // 6. Mise à jour COMPLÈTE des scores (corrigé)
-    // Utilisation de .neq() pour s'assurer que toutes les lignes sont bien mises à jour
-    const { error: scoresError } = await supa
+    // 4. Mise à jour des scores (version corrigée)
+    const { data: scores, error: fetchError } = await supa
       .from("scores")
-      .update({ pseudo: newPseudo })
+      .select("id")
       .eq("player_id", session.user.id);
 
-    if (scoresError) {
-      console.error("Erreur mise à jour scores:", scoresError);
-      throw scoresError;
-    } else {
-      console.log("Scores mis à jour avec succès");
-      // Vérification supplémentaire
-      const { data: verification, error: verifError } = await supa
-        .from("scores")
-        .select("pseudo")
-        .eq("player_id", session.user.id)
-        .limit(3); // Vérifie quelques lignes
+    if (fetchError) throw fetchError;
 
-      if (!verifError) {
-        console.log("Vérification scores:", verification);
+    if (scores && scores.length > 0) {
+      const { error: updateError } = await supa
+        .from("scores")
+        .update({ pseudo: newPseudo })
+        .in("id", scores.map(s => s.id));
+
+      if (updateError) {
+        console.error("Erreur mise à jour scores:", updateError);
+        throw updateError;
       }
     }
 
-    // 7. Mise à jour de l'interface
-    const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
-    const profileEmailDisplay = document.getElementById("profileEmail");
-
+    // 5. Mise à jour de l'interface
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // 8. Mise à jour du meilleur score
-    document.getElementById("authOverlay").classList.add("hidden");
-    updateBestScoreTop();
-
-    // 9. Fermeture de la modale
+    // 6. Fermeture
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
-    console.log("Profil et données mises à jour avec succès");
+    console.log("Mises à jour terminées");
 
 } catch (err) {
     console.error("Erreur complète:", err);
-    errorMessage.textContent = err.message || "Une erreur est survenue";
+    errorMessage.textContent = "Erreur: " + (err.message || "Opération annulée");
     errorMessage.classList.remove("hidden");
+    if (profileBtn) profileBtn.disabled = false;
 }
 }
 
