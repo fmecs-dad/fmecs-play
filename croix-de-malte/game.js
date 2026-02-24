@@ -602,50 +602,68 @@ function initProfileModalListeners() {
     });
   }
 
-// Écouteur pour le bouton "Changer le mot de passe"
-const toggleChangePasswordBtn = document.getElementById("toggleChangePasswordBtn");
+// Écouteur pour le bouton "Changer le mot de passe" dans la modale de profil
+const toggleChangePasswordBtn = document.getElementById("changePasswordBtn"); // ID dans ton HTML : "changePasswordBtn"
 if (toggleChangePasswordBtn) {
   toggleChangePasswordBtn.addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
-    const changePasswordSection = document.getElementById("changePasswordSection");
+
+    // Ouvre la modale de mot de passe
+    document.getElementById("passwordModal").style.display = "flex";
+
+    // Désactive les boutons "Enregistrer" et "Annuler" de la modale de profil
     const saveBtn = document.getElementById("saveProfileBtn");
     const cancelBtn = document.getElementById("cancelProfileBtn");
-
-    if (changePasswordSection) {
-      changePasswordSection.classList.toggle("hidden");
-
-      // Désactive les boutons "Enregistrer" et "Annuler" si la section est visible
-      if (!changePasswordSection.classList.contains("hidden")) {
-        saveBtn.disabled = true;
-        cancelBtn.disabled = true;
-      } else {
-        saveBtn.disabled = false;
-        cancelBtn.disabled = false;
-      }
+    if (saveBtn && cancelBtn) {
+      saveBtn.disabled = true;
+      cancelBtn.disabled = true;
     }
   });
 }
 
-  // Écouteur pour le bouton de validation du changement de mot de passe
-const changePasswordBtn = document.getElementById("changePasswordBtn");
-if (changePasswordBtn) {
-  changePasswordBtn.addEventListener("click", async () => {
+// Écouteur pour le bouton "Annuler" de la modale de mot de passe
+const cancelPasswordBtn = document.getElementById("cancelPasswordBtn");
+if (cancelPasswordBtn) {
+  cancelPasswordBtn.addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
-    await changePassword();
 
-    // Réactive les boutons "Enregistrer" et "Annuler" après le changement de mot de passe
+    // Ferme la modale de mot de passe
+    document.getElementById("passwordModal").style.display = "none";
+
+    // Réactive les boutons de la modale de profil
     const saveBtn = document.getElementById("saveProfileBtn");
     const cancelBtn = document.getElementById("cancelProfileBtn");
-    const changePasswordSection = document.getElementById("changePasswordSection");
-
-    if (saveBtn && cancelBtn && changePasswordSection) {
+    if (saveBtn && cancelBtn) {
       saveBtn.disabled = false;
       cancelBtn.disabled = false;
-      changePasswordSection.classList.add("hidden"); // Cache la section après validation
     }
+
+    // Réinitialise les champs de mot de passe
+    document.getElementById("currentPassword").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("confirmNewPassword").value = "";
   });
 }
 
+// Écouteur pour le bouton "Valider le changement" de la modale de mot de passe
+const validatePasswordBtn = document.getElementById("validatePasswordBtn");
+if (validatePasswordBtn) {
+  validatePasswordBtn.addEventListener("click", async () => {
+    if (typeof playClickSound === 'function') playClickSound();
+    await changePassword(); // Appelle ta fonction existante
+
+    // Ferme la modale de mot de passe après validation
+    document.getElementById("passwordModal").style.display = "none";
+
+    // Réactive les boutons de la modale de profil
+    const saveBtn = document.getElementById("saveProfileBtn");
+    const cancelBtn = document.getElementById("cancelProfileBtn");
+    if (saveBtn && cancelBtn) {
+      saveBtn.disabled = false;
+      cancelBtn.disabled = false;
+    }
+  });
+}
   // Écouteur pour le lien "Mot de passe oublié"
   const forgotPasswordLink = document.getElementById("forgotPasswordLink");
   if (forgotPasswordLink) {
@@ -655,28 +673,6 @@ if (changePasswordBtn) {
       await resetPassword();
     });
   }
-
-// Écouteur pour le bouton "Annuler" du changement de mot de passe
-const cancelChangePasswordBtn = document.getElementById("cancelChangePasswordBtn");
-if (cancelChangePasswordBtn) {
-  cancelChangePasswordBtn.addEventListener("click", () => {
-    if (typeof playClickSound === 'function') playClickSound();
-    const changePasswordSection = document.getElementById("changePasswordSection");
-    const saveBtn = document.getElementById("saveProfileBtn");
-    const cancelBtn = document.getElementById("cancelProfileBtn");
-
-    if (changePasswordSection && saveBtn && cancelBtn) {
-      changePasswordSection.classList.add("hidden");
-      saveBtn.disabled = false;
-      cancelBtn.disabled = false;
-
-      // Réinitialise les champs de mot de passe
-      document.getElementById("profileCurrentPassword").value = "";
-      document.getElementById("profileNewPassword").value = "";
-      document.getElementById("profileConfirmPassword").value = "";
-    }
-  });
-}
   
 // Écouteur pour le bouton de déconnexion dans le menu profil
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
@@ -775,32 +771,38 @@ if (avatarUpload) {
 
 // Fonction pour changer le mot de passe
 async function changePassword() {
-  const currentPasswordInput = document.getElementById("profileCurrentPassword");
-  const newPasswordInput = document.getElementById("profileNewPassword");
-  const confirmPasswordInput = document.getElementById("profileConfirmPassword");
-  const errorMessage = document.getElementById("profileErrorMessage");
+  const currentPassword = document.getElementById("currentPassword").value.trim();
+  const newPassword = document.getElementById("newPassword").value.trim();
+  const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
+  const passwordModalContent = document.querySelector("#passwordModal .modal-content");
 
-  if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput || !errorMessage) return;
+  // Crée ou récupère le message d'erreur
+  let errorMessage = document.getElementById("passwordErrorMessage");
+  if (!errorMessage) {
+    errorMessage = document.createElement("div");
+    errorMessage.id = "passwordErrorMessage";
+    errorMessage.style.color = "#ff6b6b";
+    errorMessage.style.marginBottom = "15px";
+    errorMessage.style.textAlign = "center";
+    passwordModalContent.insertBefore(errorMessage, passwordModalContent.firstChild.nextSibling);
+  }
 
-  const currentPassword = currentPasswordInput.value.trim();
-  const newPassword = newPasswordInput.value.trim();
-  const confirmPassword = confirmPasswordInput.value.trim();
-
-  if (!currentPassword || !newPassword || !confirmPassword) {
-    errorMessage.textContent = "Tous les champs de mot de passe sont obligatoires.";
-    errorMessage.classList.remove("hidden");
+  // Vérifications
+  if (!currentPassword || !newPassword || !confirmNewPassword) {
+    errorMessage.textContent = "Tous les champs sont obligatoires.";
+    errorMessage.style.display = "block";
     return;
   }
 
-  if (newPassword !== confirmPassword) {
+  if (newPassword !== confirmNewPassword) {
     errorMessage.textContent = "Les nouveaux mots de passe ne correspondent pas.";
-    errorMessage.classList.remove("hidden");
+    errorMessage.style.display = "block";
     return;
   }
 
   if (newPassword.length < 6) {
     errorMessage.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
-    errorMessage.classList.remove("hidden");
+    errorMessage.style.display = "block";
     return;
   }
 
@@ -808,27 +810,30 @@ async function changePassword() {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Mettre à jour le mot de passe directement
+    // Mise à jour du mot de passe via Supabase
     const { error: updateError } = await supa.auth.updateUser({
       password: newPassword
     });
 
     if (updateError) throw updateError;
 
-    // Réinitialiser les champs de mot de passe
-    currentPasswordInput.value = "";
-    newPasswordInput.value = "";
-    confirmPasswordInput.value = "";
-
+    // Succès : message vert
     errorMessage.textContent = "Mot de passe changé avec succès !";
-    errorMessage.classList.remove("hidden");
     errorMessage.style.color = "green";
+    errorMessage.style.display = "block";
+
+    // Réinitialise les champs après 2 secondes
+    setTimeout(() => {
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmNewPassword").value = "";
+      errorMessage.style.display = "none";
+    }, 2000);
 
   } catch (err) {
-    console.error("Erreur lors du changement de mot de passe:", err);
     errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
-    errorMessage.classList.remove("hidden");
-    errorMessage.style.color = "red";
+    errorMessage.style.color = "#ff6b6b";
+    errorMessage.style.display = "block";
   }
 }
 
