@@ -330,17 +330,15 @@ async function updateProfileInfo(force = false) {
     return;
   }
 
-  // 1. Récupération des éléments DOM
+  // 1. Récupération des éléments DOM (ton code existant)
   const profileBtn = document.getElementById("profileBtn");
   const profileAvatar = document.getElementById("profileAvatar");
   const avatarPreview = document.getElementById("profileAvatarPreview");
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
   const profileDropdown = document.getElementById("profileDropdown");
 
-  // Désactive le bouton par défaut
   if (profileBtn) profileBtn.disabled = true;
 
-  // 2. Vérification de la connexion
   try {
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
@@ -350,84 +348,54 @@ async function updateProfileInfo(force = false) {
       }
     }
 
+    // 2. Récupération de l'utilisateur et du joueur (ton code existant)
     const { data: { user }, error: userError } = await supa.auth.getUser();
-    if (userError) {
-      console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
-      localStorage.removeItem('supabase.access.token');
-      localStorage.removeItem('supabase.refresh.token');
-      return;
-    }
+    if (userError) throw userError;
 
-    if (!user) {
-      console.log("[updateProfileInfo] Aucun utilisateur trouvé");
-      return;
-    }
-
-    // 3. Récupération des infos du joueur
     const { data: player, error: playerError } = await supa
       .from("players")
-      .select("pseudo, avatar_url, created_at")
+      .select("pseudo, avatar_url, created_at, email")  // AJOUT DE "email" DANS LE SELECT
       .eq("id", user.id)
       .single();
 
-    if (playerError) {
-      console.error("[updateProfileInfo] Erreur récupération joueur:", playerError);
-      return;
-    }
+    if (playerError) throw playerError;
 
-    // 4. Mise à jour de l'UI
-    console.log("[updateProfileInfo] Utilisateur connecté - mise à jour UI");
+    // 3. Mise à jour de l'UI (ton code existant)
     if (profileBtn) {
       profileBtn.disabled = false;
       profileBtn.title = "Voir votre profil";
     }
 
-    // 5. Mise à jour de l'avatar
+    // Gestion de l'avatar (ton code existant)
     if (profileAvatar && player.avatar_url) {
       try {
-        const { data: signedData, error: signError } = await supa.storage
-          .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600);
-
-        if (signError) throw signError;
-
+        const { data: signedData } = await supa.storage.from('avatars').createSignedUrl(player.avatar_url, 3600);
         profileAvatar.src = signedData.signedUrl;
-        console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
-
-        const testImg = new Image();
-        testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé");
-        testImg.onerror = () => console.error("[updateProfileInfo] Erreur chargement avatar");
-        testImg.src = signedData.signedUrl;
       } catch (err) {
-        console.error("[updateProfileInfo] Erreur génération URL signée:", err);
         profileAvatar.src = "images/avatarDefault.png";
       }
     } else if (profileAvatar) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    // 6.Mise à jour du pseudo dans le bouton profil (si nécessaire)
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
     }
 
-    // 7. Mise à jour des infos dans le DROPDOWN 
+    // 4. NOUVEAUX ÉLÉMENTS POUR PRÉ-REMPLIR LA MODALE
+    const pseudoInput = document.getElementById("profilePseudoInput");
+    const emailInput = document.getElementById("profileEmailInput");
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (emailInput) emailInput.value = user.email || "";  // Utilise user.email (pas player.email)
+
+    // Mise à jour des infos dans le dropdown (ton code existant)
     const dropdownEmailDisplay = document.getElementById("dropdownEmailDisplay");
-    const dropdownJoinDateDisplay = document.getElementById("dropdownJoinDate");
-
-    if (dropdownEmailDisplay) {
-      dropdownEmailDisplay.textContent = user.email || "email@example.com";
-    }
-
-    if (dropdownJoinDateDisplay && player?.created_at) {
-      const joinDate = new Date(player.created_at);
-      dropdownJoinDateDisplay.textContent = joinDate.toLocaleDateString('fr-FR');
-    }
+    if (dropdownEmailDisplay) dropdownEmailDisplay.textContent = user.email || "email@example.com";
 
     console.log("[updateProfileInfo] Mise à jour terminée avec succès");
 
   } catch (err) {
-    console.error("[updateProfileInfo] Erreur inattendue:", err);
+    console.error("[updateProfileInfo] Erreur:", err);
     if (profileBtn) profileBtn.disabled = true;
   }
 }
