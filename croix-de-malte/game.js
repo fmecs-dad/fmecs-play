@@ -348,25 +348,28 @@ async function updateProfileInfo(force = false) {
       }
     }
 
-    // 2. Récupération de l'utilisateur et du joueur (ton code existant)
+    // 1. Récupération de l'utilisateur (pour l'email)
     const { data: { user }, error: userError } = await supa.auth.getUser();
     if (userError) throw userError;
 
+    // 2. Récupération des données joueur (sans email)
     const { data: player, error: playerError } = await supa
       .from("players")
-      .select("pseudo, avatar_url, created_at, email")  // AJOUT DE "email" DANS LE SELECT
+      .select("pseudo, avatar_url, created_at")
       .eq("id", user.id)
       .single();
 
     if (playerError) throw playerError;
 
-    // 3. Mise à jour de l'UI (ton code existant)
-    if (profileBtn) {
-      profileBtn.disabled = false;
-      profileBtn.title = "Voir votre profil";
-    }
+    // 3. Pré-remplissage des champs
+    const pseudoInput = document.getElementById("profilePseudoInput");
+    const emailInput = document.getElementById("profileEmailInput");
 
-    // Gestion de l'avatar (ton code existant)
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (emailInput) emailInput.value = user.email || "";  // Email vient de user, pas de players
+
+    // 4. Mise à jour de l'avatar (ton code existant)
+    const profileAvatar = document.getElementById("profileAvatar");
     if (profileAvatar && player.avatar_url) {
       try {
         const { data: signedData } = await supa.storage.from('avatars').createSignedUrl(player.avatar_url, 3600);
@@ -378,17 +381,7 @@ async function updateProfileInfo(force = false) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    if (pseudoDisplay) {
-      pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
-    }
-
-    // 4. NOUVEAUX ÉLÉMENTS POUR PRÉ-REMPLIR LA MODALE
-    const pseudoInput = document.getElementById("profilePseudoInput");
-    const emailInput = document.getElementById("profileEmailInput");
-    if (pseudoInput) pseudoInput.value = player.pseudo || "";
-    if (emailInput) emailInput.value = user.email || "";  // Utilise user.email (pas player.email)
-
-    // Mise à jour des infos dans le dropdown (ton code existant)
+    // 5. Mise à jour du dropdown
     const dropdownEmailDisplay = document.getElementById("dropdownEmailDisplay");
     if (dropdownEmailDisplay) dropdownEmailDisplay.textContent = user.email || "email@example.com";
 
@@ -396,7 +389,6 @@ async function updateProfileInfo(force = false) {
 
   } catch (err) {
     console.error("[updateProfileInfo] Erreur:", err);
-    if (profileBtn) profileBtn.disabled = true;
   }
 }
 
