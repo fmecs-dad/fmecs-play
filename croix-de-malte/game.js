@@ -454,35 +454,7 @@ async function updateProfileInfo(force = false) {
       console.error("Élément profileEmailInput introuvable !");
     }
 
-    // 9. AFFICHAGE DU MEILLEUR SCORE (PARTIE MANQUANTE AJOUTÉE)
-    const bestScoreTop = document.getElementById("bestScoreTop");
-    if (bestScoreTop) {
-      try {
-        const { data: bestScore, error: scoreError } = await supa
-          .from("scores")
-          .select("score")
-          .eq("player_id", user.id)
-          .order("score", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (!scoreError) {
-          bestScoreTop.textContent = bestScore ? bestScore.score : "0";
-          console.log("Meilleur score affiché (bestScoreTop):", bestScore ? bestScore.score : "0");
-        } else if (scoreError.code !== 'PGRST116') { // PGRST116 = aucun résultat
-          console.error("Erreur lors de la récupération du meilleur score:", scoreError);
-          bestScoreTop.textContent = "0";
-        } else {
-          bestScoreTop.textContent = "0"; // Aucun score encore
-          console.log("Aucun score trouvé pour ce joueur (bestScoreTop)");
-        }
-      } catch (err) {
-        console.error("Erreur inattendue lors de la récupération du meilleur score:", err);
-        bestScoreTop.textContent = "0";
-      }
-    } else {
-      console.warn("Élément bestScoreTop non trouvé");
-    }
+    console.log("[updateProfileInfo] Mise à jour terminée avec succès");
 
   } catch (err) {
     console.error("[updateProfileInfo] Erreur inattendue:", err);
@@ -662,6 +634,7 @@ function initProfileModalListeners() {
   } else {
     console.error("Bouton saveProfileBtn introuvable !");
   }
+  
 
   // 3. Écouteur pour le bouton "Annuler"
   const cancelProfileBtn = document.getElementById("cancelProfileBtn");
