@@ -595,91 +595,139 @@ async function uploadAvatar(file) {
 
 /*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
 
-async function saveProfileChanges() {
-  // 1. Récupération des éléments
-  const pseudoInput = document.getElementById("profilePseudoInput");
-  const emailInput = document.getElementById("profileEmailInput");
-  const profileModal = document.getElementById("profileModal");
+function initProfileModalListeners() {
+  console.log("Initialisation des écouteurs de la modale de profil");
 
-  // Création du message d'erreur s'il n'existe pas
-  let errorMessage = document.getElementById("profileErrorMessage");
-  if (!errorMessage) {
-    errorMessage = document.createElement("div");
-    errorMessage.id = "profileErrorMessage";
-    errorMessage.className = "error-message hidden";
-    errorMessage.style.color = "red";
-    errorMessage.style.marginBottom = "15px";
-    profileModal.querySelector('.panel').prepend(errorMessage);
+  // 1. Écouteur pour le bouton "Modifier le profil"
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  if (editProfileBtn) {
+    editProfileBtn.addEventListener("click", async () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      console.log("Bouton 'Modifier le profil' cliqué");
+
+      // Ouverture de la modale
+      const modal = document.getElementById("profileModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        console.log("Modale de profil ouverte");
+
+        // Pré-remplissage des champs (optionnel, si pas déjà fait par updateProfileInfo)
+        await updateProfileInfo(true);
+      } else {
+        console.error("Modale profileModal introuvable !");
+      }
+    });
+  } else {
+    console.error("Bouton editProfileBtn introuvable !");
   }
 
-  // 2. Validation des champs
-  const newPseudo = pseudoInput.value.trim();
-  const newEmail = emailInput.value.trim();
-
-  if (!newPseudo) {
-    errorMessage.textContent = "Le pseudo ne peut pas être vide";
-    errorMessage.classList.remove("hidden");
-    return;
+  // 2. Écouteur pour le bouton "Enregistrer"
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+  if (saveProfileBtn) {
+    saveProfileBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      console.log("Bouton 'Enregistrer' cliqué");
+      saveProfileChanges();
+    });
+  } else {
+    console.error("Bouton saveProfileBtn introuvable !");
   }
 
-  if (!newEmail) {
-    errorMessage.textContent = "L'email ne peut pas être vide";
-    errorMessage.classList.remove("hidden");
-    return;
+  // 3. Écouteur pour le bouton "Annuler"
+  const cancelProfileBtn = document.getElementById("cancelProfileBtn");
+  if (cancelProfileBtn) {
+    cancelProfileBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      console.log("Bouton 'Annuler' cliqué");
+
+      const modal = document.getElementById("profileModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        console.log("Modale de profil fermée");
+
+        // Réinitialisation de l'aperçu de l'avatar si nécessaire
+        const avatarPreview = document.getElementById("profileAvatarPreview");
+        if (avatarPreview && !window.tempAvatarUrl) {
+          avatarPreview.src = "images/avatarDefault.png";
+        }
+      } else {
+        console.error("Modale profileModal introuvable !");
+      }
+    });
+  } else {
+    console.error("Bouton cancelProfileBtn introuvable !");
   }
 
-  try {
-    // 3. Récupération de la session
-    const { data: { session }, error } = await supa.auth.getSession();
-    if (error || !session) throw new Error("Utilisateur non connecté");
+  // 4. Écouteur pour le bouton "Changer l'avatar"
+  const changeAvatarBtn = document.getElementById("changeAvatarBtn");
+  if (changeAvatarBtn) {
+    changeAvatarBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      console.log("Bouton 'Changer l'avatar' cliqué");
 
-    // 4. Mise à jour du pseudo dans la table players
-    const { error: playerError } = await supa
-      .from("players")
-      .update({ pseudo: newPseudo })
-      .eq("id", session.user.id);
-
-    if (playerError) throw playerError;
-
-    // 5. Mise à jour de l'email si différent
-    if (newEmail !== session.user.email) {
-      const { error: authError } = await supa.auth.updateUser({ email: newEmail });
-      if (authError) throw authError;
-    }
-
-    // 6. Mise à jour du pseudo DANS TOUTES LES LIGNES DE SCORES (CORRECTION)
-    const { error: scoresError } = await supa
-      .from("scores")
-      .update({ pseudo: newPseudo })
-      .eq("player_id", session.user.id);
-
-    if (scoresError) {
-      console.error("Erreur lors de la mise à jour des scores:", scoresError);
-      // Même en cas d'erreur sur les scores, on continue pour ne pas bloquer l'utilisateur
-    }
-
-    // 7. Mise à jour de l'interface
-    const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
-    const profileEmailDisplay = document.getElementById("profileEmail");
-
-    if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
-    if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
-
-    // 8. Fermeture de la modale
-    profileModal.classList.add("hidden");
-    errorMessage.classList.add("hidden");
-    console.log("Profil et scores mis à jour avec succès");
-
-    // Réinitialisation de l'avatar temporaire si nécessaire
-    if (window.tempAvatarUrl) {
-      window.tempAvatarUrl = null;
-    }
-
-  } catch (err) {
-    console.error("Erreur lors de la sauvegarde du profil:", err);
-    errorMessage.textContent = err.message || "Une erreur est survenue";
-    errorMessage.classList.remove("hidden");
+      const avatarUpload = document.getElementById("avatarUpload");
+      if (avatarUpload) {
+        avatarUpload.click();
+      } else {
+        console.error("Input avatarUpload introuvable !");
+      }
+    });
+  } else {
+    console.error("Bouton changeAvatarBtn introuvable !");
   }
+
+  // 5. Gestion du téléchargement d'avatar
+  const avatarUpload = document.getElementById("avatarUpload");
+  if (avatarUpload) {
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Seuls les fichiers JPEG/PNG sont acceptés");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert("L'image ne doit pas dépasser 2Mo");
+        return;
+      }
+
+      const preview = document.getElementById("profileAvatarPreview");
+      if (preview) {
+        preview.src = URL.createObjectURL(file);
+        console.log("Aperçu de l'avatar mis à jour");
+      } else {
+        console.error("Élément profileAvatarPreview introuvable !");
+      }
+
+      try {
+        if (typeof uploadAvatar === 'function') {
+          window.tempAvatarUrl = await uploadAvatar(file);
+          console.log("Avatar temporaire stocké");
+        }
+      } catch (err) {
+        console.error("Erreur lors du téléchargement de l'avatar:", err);
+      }
+    });
+  } else {
+    console.error("Input avatarUpload introuvable !");
+  }
+
+  // 6. Fermeture de la modale en cliquant en dehors
+  const modal = document.getElementById("profileModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+        console.log("Modale fermée en cliquant en dehors");
+      }
+    });
+  } else {
+    console.error("Modale profileModal introuvable !");
+  }
+
+  console.log("Initialisation des écouteurs terminée avec succès");
 }
 
 /*** Change le mot de passe de l'utilisateur ***/
@@ -774,23 +822,12 @@ async function resetPassword() {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  // 1. Récupération des éléments existants
+  // 1. Récupération des éléments
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
   const profileModal = document.getElementById("profileModal");
 
-  // Vérification des éléments obligatoires
-  if (!pseudoInput || !emailInput || !profileModal) {
-    console.error("Éléments manquants:", {
-      pseudoInput: pseudoInput,
-      emailInput: emailInput,
-      profileModal: profileModal
-    });
-    alert("Erreur: éléments manquants dans la modale");
-    return;
-  }
-
-  // 2. Création du message d'erreur s'il n'existe pas
+  // Création du message d'erreur s'il n'existe pas
   let errorMessage = document.getElementById("profileErrorMessage");
   if (!errorMessage) {
     errorMessage = document.createElement("div");
@@ -798,11 +835,10 @@ async function saveProfileChanges() {
     errorMessage.className = "error-message hidden";
     errorMessage.style.color = "red";
     errorMessage.style.marginBottom = "15px";
-    const firstChild = profileModal.querySelector('.panel').firstChild;
-    profileModal.querySelector('.panel').insertBefore(errorMessage, firstChild);
+    profileModal.querySelector('.panel').prepend(errorMessage);
   }
 
-  // 3. Validation des champs
+  // 2. Validation des champs
   const newPseudo = pseudoInput.value.trim();
   const newEmail = emailInput.value.trim();
 
@@ -819,11 +855,11 @@ async function saveProfileChanges() {
   }
 
   try {
-    // 4. Mise à jour des données
+    // 3. Récupération de la session
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour du pseudo
+    // 4. Mise à jour du pseudo dans la table players
     const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
@@ -831,31 +867,34 @@ async function saveProfileChanges() {
 
     if (playerError) throw playerError;
 
-    // Mise à jour de l'email si différent
+    // 5. Mise à jour de l'email si différent
     if (newEmail !== session.user.email) {
       const { error: authError } = await supa.auth.updateUser({ email: newEmail });
       if (authError) throw authError;
     }
 
-    // Mise à jour des scores
+    // 6. Mise à jour du pseudo DANS TOUTES LES LIGNES DE SCORES (CORRECTION)
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
 
-    if (scoresError) throw scoresError;
+    if (scoresError) {
+      console.error("Erreur lors de la mise à jour des scores:", scoresError);
+      // Même en cas d'erreur sur les scores, on continue pour ne pas bloquer l'utilisateur
+    }
 
-    // 5. Mise à jour de l'interface
+    // 7. Mise à jour de l'interface
     const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
     const profileEmailDisplay = document.getElementById("profileEmail");
 
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // 6. Fermeture de la modale
+    // 8. Fermeture de la modale
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
-    console.log("Profil mis à jour avec succès");
+    console.log("Profil et scores mis à jour avec succès");
 
     // Réinitialisation de l'avatar temporaire si nécessaire
     if (window.tempAvatarUrl) {
