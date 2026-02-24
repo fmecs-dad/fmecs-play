@@ -596,142 +596,140 @@ async function uploadAvatar(file) {
 /*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
 
 function initProfileModalListeners() {
+  console.log("[initProfileModalListeners] Initialisation des écouteurs de la modale de profil");
 
-  // Écouteur pour le bouton "Enregistrer" (NOUVEAU: Ajout manquant)
-  const saveProfileBtn = document.getElementById("saveProfileBtn");
-  if (saveProfileBtn) {
-    saveProfileBtn.addEventListener("click", saveProfileChanges);
-    console.log("Écouteur pour le bouton Enregistrer ajouté");
-  } else {
-    console.error("Bouton saveProfileBtn introuvable !");
-  }
-
-  // Autres écouteurs existants (ton code original)
+  // 1. Écouteur pour le bouton "Modifier le profil"
   const editProfileBtn = document.getElementById("editProfileBtn");
   if (editProfileBtn) {
     editProfileBtn.addEventListener("click", async () => {
       if (typeof playClickSound === 'function') playClickSound();
-      document.getElementById("profileModal").classList.remove("hidden");
-      console.log("Modale de profil ouverte");
+      console.log("Bouton 'Modifier le profil' cliqué");
+
+      const modal = document.getElementById("profileModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        console.log("Modale de profil ouverte");
+      } else {
+        console.error("Modale profileModal introuvable !");
+      }
     });
+  } else {
+    console.error("Bouton editProfileBtn introuvable !");
   }
 
-  // Bouton "Changer le mot de passe" dans la modale de profil
-  const changePasswordBtn = document.getElementById("changePasswordBtn");
-  if (changePasswordBtn) {
-    changePasswordBtn.addEventListener("click", () => {
-      document.getElementById("profileModal").classList.add("hidden"); // Cache la modale de profil
-      document.getElementById("passwordModal").classList.remove("hidden"); // Affiche la modale de mot de passe
+  // 2. Écouteur pour le bouton "Enregistrer"
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+  if (saveProfileBtn) {
+    saveProfileBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      console.log("Bouton 'Enregistrer' cliqué");
+      saveProfileChanges();
     });
+  } else {
+    console.error("Bouton saveProfileBtn introuvable !");
   }
 
-  // Bouton "Annuler" de la modale de mot de passe
-  const cancelPasswordBtn = document.getElementById("cancelPasswordBtn");
-  if (cancelPasswordBtn) {
-    cancelPasswordBtn.addEventListener("click", () => {
-      document.getElementById("passwordModal").classList.add("hidden"); // Cache la modale de mot de passe
-      document.getElementById("profileModal").classList.remove("hidden"); // Réaffiche la modale de profil
-      // Réinitialise les champs
-      document.getElementById("currentPassword").value = "";
-      document.getElementById("newPassword").value = "";
-      document.getElementById("confirmNewPassword").value = "";
-      document.getElementById("passwordErrorMessage").classList.add("hidden");
-    });
-  }
-
-  // Bouton "Valider" de la modale de mot de passe
-  const validatePasswordBtn = document.getElementById("validatePasswordBtn");
-  if (validatePasswordBtn) {
-    validatePasswordBtn.addEventListener("click", async () => {
-      await changePassword();
-    });
-  }
-
-  // Écouteur pour le bouton "Annuler"
+  // 3. Écouteur pour le bouton "Annuler"
   const cancelProfileBtn = document.getElementById("cancelProfileBtn");
   if (cancelProfileBtn) {
     cancelProfileBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      document.getElementById("profileModal").classList.add("hidden");
-      console.log("Modale de profil fermée");
-    });
-  }
-}
+      console.log("Bouton 'Annuler' cliqué");
 
-  // Bouton "Changer l'avatar"
+      const modal = document.getElementById("profileModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        console.log("Modale de profil fermée");
+      } else {
+        console.error("Modale profileModal introuvable !");
+      }
+
+      // Réinitialisation de l'aperçu de l'avatar si nécessaire
+      const avatarPreview = document.getElementById("profileAvatarPreview");
+      if (avatarPreview && window.tempAvatarUrl === undefined) {
+        updateProfileInfo(true); // Force la mise à jour de l'avatar
+      }
+    });
+  } else {
+    console.error("Bouton cancelProfileBtn introuvable !");
+  }
+
+  // 4. Écouteur pour le bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      document.getElementById("avatarUpload").click();
+      console.log("Bouton 'Changer l'avatar' cliqué");
+
+      const avatarUpload = document.getElementById("avatarUpload");
+      if (avatarUpload) {
+        avatarUpload.click();
+      } else {
+        console.error("Input avatarUpload introuvable !");
+      }
     });
+  } else {
+    console.error("Bouton changeAvatarBtn introuvable !");
   }
 
-  // Gestion du fichier avatar
+  // 5. Écouteur pour le champ de téléchargement d'avatar
   const avatarUpload = document.getElementById("avatarUpload");
   if (avatarUpload) {
     avatarUpload.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      // Logique pour prévisualiser et uploader l'avatar
+
+      // Vérification du format et de la taille
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Seuls les fichiers JPEG/PNG sont acceptés");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert("L'image ne doit pas dépasser 2Mo");
+        return;
+      }
+
+      // Aperçu de l'image
       const preview = document.getElementById("profileAvatarPreview");
-      if (preview) preview.src = URL.createObjectURL(file);
+      if (preview) {
+        preview.src = URL.createObjectURL(file);
+        console.log("Aperçu de l'avatar mis à jour");
+      } else {
+        console.error("Élément profileAvatarPreview introuvable !");
+      }
+
+      // Stockage temporaire de l'avatar (si tu utilises cette variable globale)
+      try {
+        if (typeof uploadAvatar === 'function') {
+          window.tempAvatarUrl = await uploadAvatar(file);
+          console.log("Avatar temporaire stocké:", window.tempAvatarUrl);
+        }
+      } catch (err) {
+        console.error("Erreur lors du stockage de l'avatar:", err);
+      }
     });
+  } else {
+    console.error("Input avatarUpload introuvable !");
   }
 
-// Fonction pour changer le mot de passe
-async function changePassword() {
-  const currentPassword = document.getElementById("currentPassword").value.trim();
-  const newPassword = document.getElementById("newPassword").value.trim();
-  const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
-  const errorMessage = document.getElementById("passwordErrorMessage");
-
-  // Vérifications
-  if (!currentPassword || !newPassword || !confirmNewPassword) {
-    errorMessage.textContent = "Tous les champs sont obligatoires.";
-    errorMessage.classList.remove("hidden");
-    return;
+  // 6. Écouteur pour fermer la modale en cliquant en dehors
+  const modal = document.getElementById("profileModal");
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.add("hidden");
+        console.log("Modale fermée en cliquant en dehors");
+      }
+    });
+  } else {
+    console.error("Modale profileModal introuvable !");
   }
 
-  if (newPassword !== confirmNewPassword) {
-    errorMessage.textContent = "Les mots de passe ne correspondent pas.";
-    errorMessage.classList.remove("hidden");
-    return;
-  }
-
-  if (newPassword.length < 6) {
-    errorMessage.textContent = "Le mot de passe doit faire au moins 6 caractères.";
-    errorMessage.classList.remove("hidden");
-    return;
-  }
-
-  try {
-    const { error } = await supa.auth.updateUser({ password: newPassword });
-    if (error) throw error;
-
-    // Succès : ferme la modale de mot de passe et réaffiche celle de profil
-    errorMessage.textContent = "Mot de passe changé avec succès !";
-    errorMessage.style.color = "green";
-    errorMessage.classList.remove("hidden");
-
-    setTimeout(() => {
-      document.getElementById("passwordModal").classList.add("hidden");
-      document.getElementById("profileModal").classList.remove("hidden");
-      // Réinitialise les champs
-      document.getElementById("currentPassword").value = "";
-      document.getElementById("newPassword").value = "";
-      document.getElementById("confirmNewPassword").value = "";
-      errorMessage.classList.add("hidden");
-    }, 2000);
-  } catch (err) {
-    errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
-    errorMessage.classList.remove("hidden");
-  }
+  console.log("[initProfileModalListeners] Initialisation terminée avec succès");
 }
 
-/**
- * Change le mot de passe de l'utilisateur
- */
+/*** Change le mot de passe de l'utilisateur ***/
 async function changePassword() {
   const currentPassword = document.getElementById("currentPassword").value.trim();
   const newPassword = document.getElementById("newPassword").value.trim();
@@ -823,12 +821,19 @@ async function resetPassword() {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
+  // Vérification des éléments critiques
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
   const errorMessage = document.getElementById("profileErrorMessage");
+  const profileModal = document.getElementById("profileModal");
 
-  if (!pseudoInput || !emailInput || !errorMessage) {
-    console.error("Un ou plusieurs éléments de la modale sont manquants");
+  // Vérification des éléments obligatoires
+  if (!pseudoInput || !emailInput || !errorMessage || !profileModal) {
+    console.error("Un ou plusieurs éléments critiques de la modale sont manquants:");
+    console.log("pseudoInput:", pseudoInput);
+    console.log("emailInput:", emailInput);
+    console.log("errorMessage:", errorMessage);
+    console.log("profileModal:", profileModal);
     return;
   }
 
@@ -874,12 +879,17 @@ async function saveProfileChanges() {
     if (scoresError) throw scoresError;
 
     // Mise à jour de l'interface
-    document.getElementById("profilePseudoDisplay").textContent = newPseudo;
-    document.getElementById("profileEmail").textContent = newEmail;
+    const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
+    const profileEmailDisplay = document.getElementById("profileEmail");
+
+    if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
+    if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
     // Fermeture de la modale
-    document.getElementById("profileModal").classList.add("hidden");
+    profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
+
+    console.log("Profil mis à jour avec succès");
 
   } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
