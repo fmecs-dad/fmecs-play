@@ -411,13 +411,13 @@ async function updateProfileInfo(force = false) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    // 6. Mise à jour du pseudo dans le bouton (optionnel si redondant)
+    // 6. Mise à jour du pseudo dans le bouton
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
       pseudoDisplay.title = player?.pseudo || "Utilisateur";
     }
 
-    // 7. Mise à jour du dropdown (CRITIQUE)
+    // 7. Mise à jour du dropdown
     const profileEmail = document.getElementById("profileEmail");
     const profileCreationDate = document.getElementById("profileCreationDate");
 
@@ -436,7 +436,7 @@ async function updateProfileInfo(force = false) {
       console.error("Élément profileCreationDate introuvable !");
     }
 
-    // 8. Pré-remplissage de la modale (CRITIQUE)
+    // 8. Pré-remplissage de la modale
     const pseudoInput = document.getElementById("profilePseudoInput");
     const emailInput = document.getElementById("profileEmailInput");
 
@@ -452,6 +452,36 @@ async function updateProfileInfo(force = false) {
       console.log("Email modale pré-rempli:", user.email);
     } else {
       console.error("Élément profileEmailInput introuvable !");
+    }
+
+    // 9. AFFICHAGE DU MEILLEUR SCORE (PARTIE MANQUANTE AJOUTÉE)
+    const bestScoreDisplay = document.getElementById("bestScoreDisplay");
+    if (bestScoreDisplay) {
+      try {
+        const { data: bestScore, error: scoreError } = await supa
+          .from("scores")
+          .select("score")
+          .eq("player_id", user.id)
+          .order("score", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!scoreError) {
+          bestScoreDisplay.textContent = bestScore ? bestScore.score : "0";
+          console.log("Meilleur score affiché:", bestScore ? bestScore.score : "0");
+        } else if (scoreError.code !== 'PGRST116') { // PGRST116 = aucun résultat
+          console.error("Erreur lors de la récupération du meilleur score:", scoreError);
+          bestScoreDisplay.textContent = "0";
+        } else {
+          bestScoreDisplay.textContent = "0"; // Aucun score encore
+          console.log("Aucun score trouvé pour ce joueur");
+        }
+      } catch (err) {
+        console.error("Erreur inattendue lors de la récupération du meilleur score:", err);
+        bestScoreDisplay.textContent = "0";
+      }
+    } else {
+      console.warn("Élément bestScoreDisplay non trouvé");
     }
 
   } catch (err) {
@@ -873,7 +903,7 @@ async function saveProfileChanges() {
       if (authError) throw authError;
     }
 
-    // 6. Mise à jour du pseudo DANS TOUTES LES LIGNES DE SCORES (CORRECTION)
+    // 6. Mise à jour COMPLÈTE des scores (CORRECTION CRITIQUE)
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
@@ -881,7 +911,9 @@ async function saveProfileChanges() {
 
     if (scoresError) {
       console.error("Erreur lors de la mise à jour des scores:", scoresError);
-      // Même en cas d'erreur sur les scores, on continue pour ne pas bloquer l'utilisateur
+      // On continue même en cas d'erreur pour ne pas bloquer l'utilisateur
+    } else {
+      console.log("Tous les scores du joueur ont été mis à jour avec le nouveau pseudo");
     }
 
     // 7. Mise à jour de l'interface
@@ -891,15 +923,13 @@ async function saveProfileChanges() {
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // 8. Fermeture de la modale
+    // 8. Mise à jour du meilleur score dans le bandeau (NOUVEAU)
+    await updateBestScoreDisplay(session.user.id);
+
+    // 9. Fermeture de la modale
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
     console.log("Profil et scores mis à jour avec succès");
-
-    // Réinitialisation de l'avatar temporaire si nécessaire
-    if (window.tempAvatarUrl) {
-      window.tempAvatarUrl = null;
-    }
 
   } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
