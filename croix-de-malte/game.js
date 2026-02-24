@@ -874,9 +874,20 @@ async function saveProfileChanges() {
     if (newEmail !== session.user.email) {
       const { error: authError } = await supa.auth.updateUser({ email: newEmail });
       if (authError) throw authError;
+
+      // NOUVEAU: Mise à jour de l'email dans la table players
+      const { error: playerEmailError } = await supa
+        .from("players")
+        .update({ email: newEmail })
+        .eq("id", session.user.id);
+
+      if (playerEmailError) {
+        console.error("Erreur mise à jour email dans players:", playerEmailError);
+        throw playerEmailError;
+      }
     }
 
-    // 6. Mise à jour COMPLÈTE des scores (CORRECTION CRITIQUE)
+    // 6. Mise à jour COMPLÈTE des scores (OPTIMISÉE)
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
@@ -884,7 +895,7 @@ async function saveProfileChanges() {
 
     if (scoresError) {
       console.error("Erreur lors de la mise à jour des scores:", scoresError);
-      // On continue même en cas d'erreur pour ne pas bloquer l'utilisateur
+      throw scoresError;
     } else {
       console.log("Tous les scores du joueur ont été mis à jour avec le nouveau pseudo");
     }
@@ -896,22 +907,20 @@ async function saveProfileChanges() {
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // 8. Mise à jour du meilleur score dans le bandeau (NOUVEAU)
-    //await updateBestScoreTop(session.user.id);
+    // 8. Mise à jour du meilleur score dans le bandeau
     document.getElementById("authOverlay").classList.add("hidden");
     updateBestScoreTop();
-
 
     // 9. Fermeture de la modale
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
-    console.log("Profil et scores mis à jour avec succès");
+    console.log("Profil, email et scores mis à jour avec succès");
 
-  } catch (err) {
+} catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
     errorMessage.textContent = err.message || "Une erreur est survenue";
     errorMessage.classList.remove("hidden");
-  }
+}
 }
 
 // ===============================
