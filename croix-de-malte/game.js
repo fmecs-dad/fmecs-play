@@ -2661,7 +2661,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.addEventListener("click", (e) => {
         if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
           profileDropdown.classList.remove("show");
-          console.log("Fermeture menu profil (clic externe)");
         }
       });
     };
