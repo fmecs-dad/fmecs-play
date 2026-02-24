@@ -324,7 +324,11 @@ async function ouvrirProfil() {
 
 async function updateProfileInfo(force = false) {
   console.log("[updateProfileInfo] Début de la mise à jour du profil");
-
+  const { data: { session }, error } = await supa.auth.getSession();
+  if (!session) {
+    console.log("Pas de session active - annulation de la mise à jour du profil");
+    return; // Quitte la fonction si pas de session
+  }
   // 1. Récupération du bouton profil et initialisation
   const profileBtn = document.getElementById("profileBtn");
   const profileAvatar = document.getElementById("profileAvatar");
@@ -2626,7 +2630,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
-      //updateProfileInfo(); // Mise à jour du profil pour les utilisateurs déjà connectés
     } else {
       console.log("Aucun utilisateur connecté au démarrage");
       updateAuthUI(null);
@@ -2777,7 +2780,7 @@ document.addEventListener("keydown", (e) => {
     });
   }
 
-  // Mise à jour des informations du profil (votre code existant)
+  // Mise à jour des informations du profil 
   if (typeof updateProfileInfo === 'function') updateProfileInfo();
 
   // Écouteurs pour les boutons de la modale
@@ -3058,16 +3061,6 @@ if (burgerHelpBtn) {
 
   // --- SIGNUP ---
 
-  const acceptPrivacyCheckbox = document.getElementById('acceptPrivacyPolicy');
-  const registerButton = document.getElementById('whySignupRegisterBtn');
-
-  if (acceptPrivacyCheckbox && registerButton) { // Vérifie que les éléments existent
-    registerButton.disabled = true;
-    acceptPrivacyCheckbox.addEventListener('change', function() {
-      registerButton.disabled = !this.checked;
-    });
-  }
-
   document.getElementById("signupBtn").addEventListener("click", () => {
     playClickSound();
     document.getElementById("authOverlay").classList.add("hidden");
@@ -3241,7 +3234,7 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
-    // 4. Mise à jour du profil IMMEDIATEMENT (NOUVEAU)
+    // 4. Mise à jour du profil 
     await updateProfileInfo().catch(err => {
       console.error("Erreur mise à jour profil :", err);
     });
