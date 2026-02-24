@@ -335,6 +335,46 @@ body {
   transform: translateY(-1px);
 }
 
+/* Style pour les sections */
+.profile-section, .password-section {
+  margin-bottom: 20px;
+}
+
+.profile-section label, .password-section label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.profile-section input, .password-section input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Style pour les boutons */
+.profile-actions, .password-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.secondary-btn {
+  background: #ccc;
+  color: #222;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.main-btn:disabled, .secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Section des actions */
 .profile-actions {
   display: flex;
@@ -343,6 +383,7 @@ body {
   padding-top: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 
 /* Style pour la modale de profil */
 #profileModal {
