@@ -143,23 +143,21 @@
 
   <!-- Bloc 6 : Menu Profil -->
 <div id="profileContainer">
-  <button id="profileBtn" class="profile-btn" disabled>
-    <img id="profileAvatar" src="images/avatarDefault.png" class="avatar-icon" alt="Avatar utilisateur">
-    <span id="profilePseudoDisplay" class="profile-pseudo"></span>
+  <button id="profileBtn" class="profile-btn">
+    <img id="profileAvatar" class="avatar-icon" src="default-avatar.png" alt="Avatar">
+    <span id="profilePseudoDisplay">Joueur</span>
   </button>
+
   <div id="profileDropdown" class="profile-dropdown">
     <div class="profile-info">
-  <div class="profile-info-item">
-    <strong>Email:</strong>
-    <span id="profileEmail"></span>
-  </div>
-  <div class="profile-info-item">
-    <strong>Joueur depuis:</strong>
-    <span id="profileCreationDate"></span>
-  </div>
-  </div>
-    <button id="editProfileBtn" class="profile-btn">Modifier le Profil</button>
-    <button id="logoutProfileBtn" class="profile-btn">Se déconnecter</button>
+      <p><strong>Pseudo:</strong> <span id="dropdownPseudoDisplay">Joueur</span></p>
+      <p><strong>Email:</strong> <span id="dropdownEmailDisplay">email@example.com</span></p>
+    </div>
+
+    <div class="profile-actions">
+      <button id="editProfileBtn" class="main-btn">Modifier le profil</button>
+      <button id="logoutProfileBtn" class="secondary-btn">Déconnexion</button>
+    </div>
   </div>
 </div>
 </div>
@@ -283,24 +281,31 @@
 </div>
  
 <!--- Profil --->
-<div id="profileModal" class="modal">
+<div id="profileModal" class="modal hidden">
   <div class="modal-content">
     <h2>Modifier mon profil</h2>
 
     <!-- Champs du profil -->
-    <div class="profile-section">
-      <label>Pseudo :</label>
-      <input type="text" id="editPseudo" value="PseudoActuel">
+    <div class="form-group">
+      <label for="profilePseudoInput">Pseudo :</label>
+      <input type="text" id="profilePseudoInput" class="form-input" placeholder="Ton pseudo">
+    </div>
 
-      <label>Avatar :</label>
-      <input type="file" id="editAvatar">
+    <div class="form-group">
+      <label for="avatarUpload">Avatar :</label>
+      <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+      <button id="changeAvatarBtn" class="secondary-btn">Changer l'avatar</button>
+      <img id="profileAvatarPreview" class="avatar-preview" src="" alt="Aperçu avatar">
     </div>
 
     <!-- Bouton pour ouvrir la modale de mot de passe -->
     <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
 
-    <!-- Boutons du profil (désactivés si modale de mot de passe ouverte) -->
-    <div class="profile-actions">
+    <!-- Message d'erreur -->
+    <div id="profileErrorMessage" class="error-message hidden"></div>
+
+    <!-- Boutons d'action -->
+    <div class="modal-actions">
       <button id="saveProfileBtn" class="main-btn">Enregistrer</button>
       <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
     </div>
@@ -312,20 +317,25 @@
     <h2>Changer le mot de passe</h2>
 
     <!-- Champs pour le mot de passe -->
-    <div class="password-section">
-      <label>Mot de passe actuel :</label>
-      <input type="password" id="currentPassword">
-
-      <label>Nouveau mot de passe :</label>
-      <input type="password" id="newPassword">
-
-      <label>Confirmer le nouveau mot de passe :</label>
-      <input type="password" id="confirmNewPassword">
+    <div class="form-group">
+      <label for="currentPassword">Mot de passe actuel :</label>
+      <input type="password" id="currentPassword" class="form-input" placeholder="Mot de passe actuel">
+    </div>
+    <div class="form-group">
+      <label for="newPassword">Nouveau mot de passe :</label>
+      <input type="password" id="newPassword" class="form-input" placeholder="Nouveau mot de passe">
+    </div>
+    <div class="form-group">
+      <label for="confirmNewPassword">Confirmer le nouveau mot de passe :</label>
+      <input type="password" id="confirmNewPassword" class="form-input" placeholder="Confirmer">
     </div>
 
-    <!-- Boutons de la modale de mot de passe -->
-    <div class="password-actions">
-      <button id="validatePasswordBtn" class="main-btn">Valider le changement</button>
+    <!-- Message d'erreur/succès -->
+    <div id="passwordErrorMessage" style="display: none;"></div>
+
+    <!-- Boutons d'action -->
+    <div class="modal-actions">
+      <button id="validatePasswordBtn" class="main-btn">Valider</button>
       <button id="cancelPasswordBtn" class="secondary-btn">Annuler</button>
     </div>
   </div>

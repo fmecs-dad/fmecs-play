@@ -550,121 +550,121 @@ async function checkSessionOnStartup() {
 // ===============================
 
 /**
- * Initialise tous les écouteurs pour la modale de profil
+ * Upload un avatar vers Supabase
  */
-
 async function uploadAvatar(file) {
   try {
-    console.log("Début de uploadAvatar");
-
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Générer un chemin relatif sans l'URL complète
     const filePath = `${session.user.id}/${Date.now()}${file.name.match(/\.[0-9a-z]+$/i)[0]}`;
-
-    console.log("Chemin du fichier:", filePath);
-
-    // Upload du fichier
     const { data: uploadData, error: uploadError } = await supa.storage
       .from('avatars')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+      .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
     if (uploadError) throw uploadError;
-
-    console.log("Upload réussi");
-
-    // Retourner uniquement le chemin relatif
     return filePath;
-
   } catch (err) {
     console.error("Erreur dans uploadAvatar:", err);
     throw err;
   }
 }
 
+/**
+ * Initialise tous les écouteurs pour la modale de profil et le menu dropdown
+ */
 function initProfileModalListeners() {
-  const editProfileBtn = document.getElementById("editProfileBtn");
+  // ===== MENU DROPDOWN =====
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+  if (!profileBtn || !profileDropdown) {
+    console.error("Menu profil: éléments manquants");
+    return;
+  }
 
-// Supprimez d'abord tout écouteur existant pour éviter les doublons
+  // Ouvre/ferme le dropdown
+  profileBtn.addEventListener("click", (e) => {
+    if (typeof playClickSound === 'function') playClickSound();
+    e.stopPropagation();
+    if (profileBtn.disabled) return;
+    profileDropdown.classList.toggle("show");
+  });
+
+  // Ferme le dropdown en cliquant ailleurs ou avec Echap
+  document.addEventListener("click", (e) => {
+    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      profileDropdown.classList.remove("show");
+    }
+  });
+
+  // ===== MODALE DE PROFIL =====
+  const editProfileBtn = document.getElementById("editProfileBtn");
   if (editProfileBtn) {
     const newEditProfileBtn = editProfileBtn.cloneNode(true);
     editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
-
     newEditProfileBtn.addEventListener("click", async (e) => {
       if (typeof playClickSound === 'function') playClickSound();
       e.stopPropagation();
-      console.log("Bouton Modifier cliqué");
-      await ouvrirProfil();
+      document.getElementById("profileModal").classList.remove("hidden");
     });
   }
 
-// Écouteur pour le bouton "Changer le mot de passe" dans la modale de profil
-const toggleChangePasswordBtn = document.getElementById("changePasswordBtn"); // ID dans ton HTML : "changePasswordBtn"
-if (toggleChangePasswordBtn) {
-  toggleChangePasswordBtn.addEventListener("click", () => {
-    if (typeof playClickSound === 'function') playClickSound();
+  // Bouton "Changer le mot de passe" dans la modale de profil
+  const changePasswordBtn = document.getElementById("changePasswordBtn");
+  if (changePasswordBtn) {
+    changePasswordBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      document.getElementById("passwordModal").style.display = "flex";
+      const saveBtn = document.getElementById("saveProfileBtn");
+      const cancelBtn = document.getElementById("cancelProfileBtn");
+      if (saveBtn && cancelBtn) {
+        saveBtn.disabled = true;
+        cancelBtn.disabled = true;
+      }
+    });
+  }
 
-    // Ouvre la modale de mot de passe
-    document.getElementById("passwordModal").style.display = "flex";
+  // Bouton "Annuler" de la modale de mot de passe
+  const cancelPasswordBtn = document.getElementById("cancelPasswordBtn");
+  if (cancelPasswordBtn) {
+    cancelPasswordBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      document.getElementById("passwordModal").style.display = "none";
+      const saveBtn = document.getElementById("saveProfileBtn");
+      const cancelBtn = document.getElementById("cancelProfileBtn");
+      if (saveBtn && cancelBtn) {
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
+      }
+      document.getElementById("currentPassword").value = "";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmNewPassword").value = "";
+    });
+  }
 
-    // Désactive les boutons "Enregistrer" et "Annuler" de la modale de profil
-    const saveBtn = document.getElementById("saveProfileBtn");
-    const cancelBtn = document.getElementById("cancelProfileBtn");
-    if (saveBtn && cancelBtn) {
-      saveBtn.disabled = true;
-      cancelBtn.disabled = true;
-    }
-  });
-}
+  // Bouton "Valider" de la modale de mot de passe
+  const validatePasswordBtn = document.getElementById("validatePasswordBtn");
+  if (validatePasswordBtn) {
+    validatePasswordBtn.addEventListener("click", async () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      await changePassword();
+      document.getElementById("passwordModal").style.display = "none";
+      const saveBtn = document.getElementById("saveProfileBtn");
+      const cancelBtn = document.getElementById("cancelProfileBtn");
+      if (saveBtn && cancelBtn) {
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
+      }
+    });
+  }
 
-// Écouteur pour le bouton "Annuler" de la modale de mot de passe
-const cancelPasswordBtn = document.getElementById("cancelPasswordBtn");
-if (cancelPasswordBtn) {
-  cancelPasswordBtn.addEventListener("click", () => {
-    if (typeof playClickSound === 'function') playClickSound();
-
-    // Ferme la modale de mot de passe
-    document.getElementById("passwordModal").style.display = "none";
-
-    // Réactive les boutons de la modale de profil
-    const saveBtn = document.getElementById("saveProfileBtn");
-    const cancelBtn = document.getElementById("cancelProfileBtn");
-    if (saveBtn && cancelBtn) {
-      saveBtn.disabled = false;
-      cancelBtn.disabled = false;
-    }
-
-    // Réinitialise les champs de mot de passe
-    document.getElementById("currentPassword").value = "";
-    document.getElementById("newPassword").value = "";
-    document.getElementById("confirmNewPassword").value = "";
-  });
-}
-
-// Écouteur pour le bouton "Valider le changement" de la modale de mot de passe
-const validatePasswordBtn = document.getElementById("validatePasswordBtn");
-if (validatePasswordBtn) {
-  validatePasswordBtn.addEventListener("click", async () => {
-    if (typeof playClickSound === 'function') playClickSound();
-    await changePassword(); // Appelle ta fonction existante
-
-    // Ferme la modale de mot de passe après validation
-    document.getElementById("passwordModal").style.display = "none";
-
-    // Réactive les boutons de la modale de profil
-    const saveBtn = document.getElementById("saveProfileBtn");
-    const cancelBtn = document.getElementById("cancelProfileBtn");
-    if (saveBtn && cancelBtn) {
-      saveBtn.disabled = false;
-      cancelBtn.disabled = false;
-    }
-  });
-}
-  // Écouteur pour le lien "Mot de passe oublié"
+  // Lien "Mot de passe oublié"
   const forgotPasswordLink = document.getElementById("forgotPasswordLink");
   if (forgotPasswordLink) {
     forgotPasswordLink.addEventListener("click", async (e) => {
@@ -673,55 +673,47 @@ if (validatePasswordBtn) {
       await resetPassword();
     });
   }
-  
-// Écouteur pour le bouton de déconnexion dans le menu profil
+
+  // Bouton de déconnexion
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");
   if (logoutProfileBtn) {
     logoutProfileBtn.addEventListener("click", async () => {
       if (typeof playClickSound === 'function') playClickSound();
-      if (typeof logout === 'function') {
-        await logout();
-      }
-      const dropdown = document.getElementById("profileDropdown");
-      if (dropdown) dropdown.classList.remove("show");
+      if (typeof logout === 'function') await logout();
+      profileDropdown.classList.remove("show");
     });
   }
 
-  // Écouteur pour le bouton "Annuler"
-  const cancelBtn = document.getElementById("cancelProfileBtn");
-  if (cancelBtn) {
-    cancelBtn.addEventListener("click", () => {
+  // Bouton "Annuler" de la modale de profil
+  const cancelProfileBtn = document.getElementById("cancelProfileBtn");
+  if (cancelProfileBtn) {
+    cancelProfileBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
       const modal = document.getElementById("profileModal");
       if (modal) modal.classList.add("hidden");
-
-      // Réinitialisez l'aperçu de l'avatar si l'utilisateur annule
       const avatarPreview = document.getElementById("profileAvatarPreview");
-      if (avatarPreview && !tempAvatarUrl) {
-        // Rechargez l'avatar actuel
-        updateProfileInfo(true);
-      }
-      tempAvatarUrl = null; // Réinitialisez l'URL temporaire
+      if (avatarPreview && !tempAvatarUrl) updateProfileInfo(true);
+      tempAvatarUrl = null;
     });
   }
 
-  // Écouteur pour le bouton "Enregistrer"
-  const saveBtn = document.getElementById("saveProfileBtn");
-  if (saveBtn) {
-    saveBtn.addEventListener("click", saveProfileChanges);
+  // Bouton "Enregistrer" de la modale de profil
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+  if (saveProfileBtn) {
+    saveProfileBtn.addEventListener("click", saveProfileChanges);
   }
 
-  // Écouteur pour fermer la modale en cliquant en dehors
-  const modal = document.getElementById("profileModal");
-  if (modal) {
-    modal.addEventListener("click", (e) => {
+  // Fermeture de la modale en cliquant en dehors
+  const profileModal = document.getElementById("profileModal");
+  if (profileModal) {
+    profileModal.addEventListener("click", (e) => {
       if (e.target === e.currentTarget) {
         e.currentTarget.classList.add("hidden");
       }
     });
   }
 
-  // Écouteur pour le bouton "Changer l'avatar"
+  // Bouton "Changer l'avatar"
   const changeAvatarBtn = document.getElementById("changeAvatarBtn");
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
@@ -731,52 +723,45 @@ if (validatePasswordBtn) {
     });
   }
 
-  // Gestion du fichier sélectionné pour l'avatar
+  // Gestion du fichier avatar
+  const avatarUpload = document.getElementById("avatarUpload");
+  if (avatarUpload) {
+    avatarUpload.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-const avatarUpload = document.getElementById("avatarUpload");
-if (avatarUpload) {
-  avatarUpload.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+      if (!validTypes.includes(file.type)) {
+        alert("Seuls les fichiers JPEG/PNG sont acceptés");
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert("L'image ne doit pas dépasser 2Mo");
+        return;
+      }
 
-    // Vérification du format et de la taille
-    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-    if (!validTypes.includes(file.type)) {
-      alert("Seuls les fichiers JPEG/PNG sont acceptés");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      alert("L'image ne doit pas dépasser 2Mo");
-      return;
-    }
+      const preview = document.getElementById("profileAvatarPreview");
+      if (preview) preview.src = URL.createObjectURL(file);
 
-    // Aperçu de l'image
-    const preview = document.getElementById("profileAvatarPreview");
-    if (preview) {
-      preview.src = URL.createObjectURL(file);
-      console.log("Aperçu de l'image mis à jour");
-    }
-
-    // Stockez temporairement l'URL de l'avatar
-    try {
-      tempAvatarUrl = await uploadAvatar(file);
-      console.log("Avatar temporaire stocké:", tempAvatarUrl);
-    } catch (err) {
-      console.error("Erreur complète lors du changement d'avatar:", err);
-      alert("Erreur lors du changement d'avatar: " + err.message);
-    }
-  });
-}
+      try {
+        tempAvatarUrl = await uploadAvatar(file);
+      } catch (err) {
+        console.error("Erreur lors du changement d'avatar:", err);
+        alert("Erreur lors du changement d'avatar: " + err.message);
+      }
+    });
+  }
 }
 
-// Fonction pour changer le mot de passe
+/**
+ * Change le mot de passe de l'utilisateur
+ */
 async function changePassword() {
   const currentPassword = document.getElementById("currentPassword").value.trim();
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
   const passwordModalContent = document.querySelector("#passwordModal .modal-content");
 
-  // Crée ou récupère le message d'erreur
   let errorMessage = document.getElementById("passwordErrorMessage");
   if (!errorMessage) {
     errorMessage = document.createElement("div");
@@ -787,7 +772,6 @@ async function changePassword() {
     passwordModalContent.insertBefore(errorMessage, passwordModalContent.firstChild.nextSibling);
   }
 
-  // Vérifications
   if (!currentPassword || !newPassword || !confirmNewPassword) {
     errorMessage.textContent = "Tous les champs sont obligatoires.";
     errorMessage.style.display = "block";
@@ -810,26 +794,19 @@ async function changePassword() {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour du mot de passe via Supabase
-    const { error: updateError } = await supa.auth.updateUser({
-      password: newPassword
-    });
-
+    const { error: updateError } = await supa.auth.updateUser({ password: newPassword });
     if (updateError) throw updateError;
 
-    // Succès : message vert
     errorMessage.textContent = "Mot de passe changé avec succès !";
     errorMessage.style.color = "green";
     errorMessage.style.display = "block";
 
-    // Réinitialise les champs après 2 secondes
     setTimeout(() => {
       document.getElementById("currentPassword").value = "";
       document.getElementById("newPassword").value = "";
       document.getElementById("confirmNewPassword").value = "";
       errorMessage.style.display = "none";
     }, 2000);
-
   } catch (err) {
     errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
     errorMessage.style.color = "#ff6b6b";
@@ -837,7 +814,9 @@ async function changePassword() {
   }
 }
 
-// Fonction pour réinitialiser le mot de passe
+/**
+ * Réinitialise le mot de passe via email
+ */
 async function resetPassword() {
   const emailInput = document.getElementById("profileEmailInput");
   const errorMessage = document.getElementById("profileErrorMessage");
@@ -845,34 +824,29 @@ async function resetPassword() {
   if (!emailInput || !errorMessage) return;
 
   const email = emailInput.value.trim();
-
   if (!email) {
-    errorMessage.textContent = "Veuillez vérifier votre email pour réinitialiser le mot de passe.";
+    errorMessage.textContent = "Veuillez saisir votre email pour réinitialiser le mot de passe.";
     errorMessage.classList.remove("hidden");
     return;
   }
 
   try {
     const { error } = await supa.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password' // Assurez-vous que cette URL est correcte
+      redirectTo: window.location.origin + '/reset-password'
     });
-
     if (error) throw error;
-
     errorMessage.textContent = "Un email de réinitialisation a été envoyé.";
     errorMessage.classList.remove("hidden");
     errorMessage.style.color = "green";
-
   } catch (err) {
-    console.error("Erreur lors de la réinitialisation du mot de passe:", err);
-    errorMessage.textContent = err.message || "Erreur lors de l'envoi de l'email de réinitialisation.";
+    errorMessage.textContent = err.message || "Erreur lors de l'envoi de l'email.";
     errorMessage.classList.remove("hidden");
     errorMessage.style.color = "red";
   }
 }
 
 /**
- * Fonction pour sauvegarder les modifications du profil
+ * Sauvegarde les modifications du profil
  */
 async function saveProfileChanges() {
   const pseudoInput = document.getElementById("profilePseudoInput");
@@ -881,7 +855,6 @@ async function saveProfileChanges() {
   if (!pseudoInput || !errorMessage) return;
 
   const newPseudo = pseudoInput.value.trim();
-
   if (!newPseudo) {
     errorMessage.textContent = "Le pseudo ne peut pas être vide";
     errorMessage.classList.remove("hidden");
@@ -897,7 +870,6 @@ async function saveProfileChanges() {
       .from("players")
       .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
-
     if (playerError) throw playerError;
 
     // Mise à jour du pseudo dans la table scores
@@ -905,21 +877,19 @@ async function saveProfileChanges() {
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
-
     if (scoresError) throw scoresError;
 
     // Mise à jour de l'interface
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    const profileAvatar = document.getElementById("profileAvatar");
-    const avatarPreview = document.getElementById("profileAvatarPreview");
-
     if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
 
-    // Mise à jour de l'avatar si un nouvel avatar a été sélectionné
+    // Mise à jour de l'avatar si nécessaire
     if (tempAvatarUrl) {
       const { data: signedData } = await supa.storage
         .from('avatars')
         .createSignedUrl(tempAvatarUrl, 3600);
+      const profileAvatar = document.getElementById("profileAvatar");
+      const avatarPreview = document.getElementById("profileAvatarPreview");
       if (profileAvatar) profileAvatar.src = signedData.signedUrl;
       if (avatarPreview) avatarPreview.src = signedData.signedUrl;
     }
@@ -927,11 +897,8 @@ async function saveProfileChanges() {
     // Fermeture de la modale
     const modal = document.getElementById("profileModal");
     if (modal) modal.classList.add("hidden");
-
-    // Réinitialisation du message d'erreur
     errorMessage.classList.add("hidden");
-    tempAvatarUrl = null; // Réinitialisez l'URL temporaire
-
+    tempAvatarUrl = null;
   } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
     errorMessage.textContent = err.message || "Une erreur est survenue";
@@ -2658,7 +2625,7 @@ function closeWhySignup() {
 }
 
 // ===============================
-//   DOMContentLoaded (correction ciblée pour le menu profil)
+//   DOMContentLoaded 
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("=== Initialisation DOM ===");
