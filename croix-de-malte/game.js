@@ -338,8 +338,7 @@ async function updateProfileInfo(force = false) {
   const profileDropdown = document.getElementById("profileDropdown");
 
   if (profileBtn) profileBtn.disabled = true;
-  
-  // 2. Vérification de la connexion
+
   try {
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
@@ -349,11 +348,10 @@ async function updateProfileInfo(force = false) {
       }
     }
 
-    // 1. Récupération de l'utilisateur
+    // 2. Récupération de l'utilisateur et du joueur (ton code existant)
     const { data: { user }, error: userError } = await supa.auth.getUser();
     if (userError) throw userError;
 
-    // 2. Récupération des données joueur
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
@@ -362,15 +360,14 @@ async function updateProfileInfo(force = false) {
 
     if (playerError) throw playerError;
 
-    // 3. Pré-remplissage des champs
+    // 3. Pré-remplissage des champs (ton code existant)
     const pseudoInput = document.getElementById("profilePseudoInput");
     const emailInput = document.getElementById("profileEmailInput");
 
     if (pseudoInput) pseudoInput.value = player.pseudo || "";
-    if (emailInput) emailInput.value = user.email || "";  // Email vient de user, pas de players
+    if (emailInput) emailInput.value = user.email || "";
 
     // 4. Mise à jour de l'avatar (ton code existant)
-    const profileAvatar = document.getElementById("profileAvatar");
     if (profileAvatar && player.avatar_url) {
       try {
         const { data: signedData } = await supa.storage.from('avatars').createSignedUrl(player.avatar_url, 3600);
@@ -382,11 +379,15 @@ async function updateProfileInfo(force = false) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    // 5. Mise à jour du dropdown
+    // 5. NOUVELLES LIGNES POUR METTRE À JOUR LE DROPDOWN (email et date de création)
     const dropdownEmailDisplay = document.getElementById("dropdownEmailDisplay");
-    if (dropdownEmailDisplay) dropdownEmailDisplay.textContent = user.email || "email@example.com";
+    const dropdownJoinDateDisplay = document.getElementById("dropdownJoinDate");
 
-    console.log("[updateProfileInfo] Mise à jour terminée avec succès");
+    if (dropdownEmailDisplay) dropdownEmailDisplay.textContent = user.email || "email@example.com";
+    if (dropdownJoinDateDisplay && player.created_at) {
+      const joinDate = new Date(player.created_at);
+      dropdownJoinDateDisplay.textContent = joinDate.toLocaleDateString('fr-FR');
+    }
 
   } catch (err) {
     console.error("[updateProfileInfo] Erreur:", err);
