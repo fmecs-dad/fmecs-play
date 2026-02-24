@@ -596,7 +596,7 @@ async function uploadAvatar(file) {
 /*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
 
 function initProfileModalListeners() {
-  console.log("[initProfileModalListeners] Initialisation des écouteurs de la modale de profil");
+  console.log("Initialisation des écouteurs de la modale de profil");
 
   // 1. Écouteur pour le bouton "Modifier le profil"
   const editProfileBtn = document.getElementById("editProfileBtn");
@@ -605,10 +605,14 @@ function initProfileModalListeners() {
       if (typeof playClickSound === 'function') playClickSound();
       console.log("Bouton 'Modifier le profil' cliqué");
 
+      // Ouverture de la modale
       const modal = document.getElementById("profileModal");
       if (modal) {
         modal.classList.remove("hidden");
         console.log("Modale de profil ouverte");
+
+        // Pré-remplissage des champs (optionnel, si pas déjà fait par updateProfileInfo)
+        await updateProfileInfo(true);
       } else {
         console.error("Modale profileModal introuvable !");
       }
@@ -640,14 +644,14 @@ function initProfileModalListeners() {
       if (modal) {
         modal.classList.add("hidden");
         console.log("Modale de profil fermée");
+
+        // Réinitialisation de l'aperçu de l'avatar si nécessaire
+        const avatarPreview = document.getElementById("profileAvatarPreview");
+        if (avatarPreview && !window.tempAvatarUrl) {
+          avatarPreview.src = "images/avatarDefault.png";
+        }
       } else {
         console.error("Modale profileModal introuvable !");
-      }
-
-      // Réinitialisation de l'aperçu de l'avatar si nécessaire
-      const avatarPreview = document.getElementById("profileAvatarPreview");
-      if (avatarPreview && window.tempAvatarUrl === undefined) {
-        updateProfileInfo(true); // Force la mise à jour de l'avatar
       }
     });
   } else {
@@ -672,14 +676,13 @@ function initProfileModalListeners() {
     console.error("Bouton changeAvatarBtn introuvable !");
   }
 
-  // 5. Écouteur pour le champ de téléchargement d'avatar
+  // 5. Gestion du téléchargement d'avatar
   const avatarUpload = document.getElementById("avatarUpload");
   if (avatarUpload) {
     avatarUpload.addEventListener("change", async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      // Vérification du format et de la taille
       const validTypes = ["image/jpeg", "image/png", "image/jpg"];
       if (!validTypes.includes(file.type)) {
         alert("Seuls les fichiers JPEG/PNG sont acceptés");
@@ -690,7 +693,6 @@ function initProfileModalListeners() {
         return;
       }
 
-      // Aperçu de l'image
       const preview = document.getElementById("profileAvatarPreview");
       if (preview) {
         preview.src = URL.createObjectURL(file);
@@ -699,26 +701,25 @@ function initProfileModalListeners() {
         console.error("Élément profileAvatarPreview introuvable !");
       }
 
-      // Stockage temporaire de l'avatar (si tu utilises cette variable globale)
       try {
         if (typeof uploadAvatar === 'function') {
           window.tempAvatarUrl = await uploadAvatar(file);
-          console.log("Avatar temporaire stocké:", window.tempAvatarUrl);
+          console.log("Avatar temporaire stocké");
         }
       } catch (err) {
-        console.error("Erreur lors du stockage de l'avatar:", err);
+        console.error("Erreur lors du téléchargement de l'avatar:", err);
       }
     });
   } else {
     console.error("Input avatarUpload introuvable !");
   }
 
-  // 6. Écouteur pour fermer la modale en cliquant en dehors
+  // 6. Fermeture de la modale en cliquant en dehors
   const modal = document.getElementById("profileModal");
   if (modal) {
     modal.addEventListener("click", (e) => {
-      if (e.target === e.currentTarget) {
-        e.currentTarget.classList.add("hidden");
+      if (e.target === modal) {
+        modal.classList.add("hidden");
         console.log("Modale fermée en cliquant en dehors");
       }
     });
@@ -726,7 +727,7 @@ function initProfileModalListeners() {
     console.error("Modale profileModal introuvable !");
   }
 
-  console.log("[initProfileModalListeners] Initialisation terminée avec succès");
+  console.log("Initialisation des écouteurs terminée avec succès");
 }
 
 /*** Change le mot de passe de l'utilisateur ***/
@@ -821,22 +822,35 @@ async function resetPassword() {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  // Vérification des éléments critiques
+  // 1. Récupération des éléments existants
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
-  const errorMessage = document.getElementById("profileErrorMessage");
   const profileModal = document.getElementById("profileModal");
 
   // Vérification des éléments obligatoires
-  if (!pseudoInput || !emailInput || !errorMessage || !profileModal) {
-    console.error("Un ou plusieurs éléments critiques de la modale sont manquants:");
-    console.log("pseudoInput:", pseudoInput);
-    console.log("emailInput:", emailInput);
-    console.log("errorMessage:", errorMessage);
-    console.log("profileModal:", profileModal);
+  if (!pseudoInput || !emailInput || !profileModal) {
+    console.error("Éléments manquants:", {
+      pseudoInput: pseudoInput,
+      emailInput: emailInput,
+      profileModal: profileModal
+    });
+    alert("Erreur: éléments manquants dans la modale");
     return;
   }
 
+  // 2. Création du message d'erreur s'il n'existe pas
+  let errorMessage = document.getElementById("profileErrorMessage");
+  if (!errorMessage) {
+    errorMessage = document.createElement("div");
+    errorMessage.id = "profileErrorMessage";
+    errorMessage.className = "error-message hidden";
+    errorMessage.style.color = "red";
+    errorMessage.style.marginBottom = "15px";
+    const firstChild = profileModal.querySelector('.panel').firstChild;
+    profileModal.querySelector('.panel').insertBefore(errorMessage, firstChild);
+  }
+
+  // 3. Validation des champs
   const newPseudo = pseudoInput.value.trim();
   const newEmail = emailInput.value.trim();
 
@@ -853,10 +867,11 @@ async function saveProfileChanges() {
   }
 
   try {
+    // 4. Mise à jour des données
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // Mise à jour du pseudo dans la table players
+    // Mise à jour du pseudo
     const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
@@ -864,13 +879,13 @@ async function saveProfileChanges() {
 
     if (playerError) throw playerError;
 
-    // Mise à jour de l'email via Supabase Auth
+    // Mise à jour de l'email si différent
     if (newEmail !== session.user.email) {
       const { error: authError } = await supa.auth.updateUser({ email: newEmail });
       if (authError) throw authError;
     }
 
-    // Mise à jour du pseudo dans la table scores
+    // Mise à jour des scores
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
@@ -878,18 +893,22 @@ async function saveProfileChanges() {
 
     if (scoresError) throw scoresError;
 
-    // Mise à jour de l'interface
+    // 5. Mise à jour de l'interface
     const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
     const profileEmailDisplay = document.getElementById("profileEmail");
 
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // Fermeture de la modale
+    // 6. Fermeture de la modale
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
-
     console.log("Profil mis à jour avec succès");
+
+    // Réinitialisation de l'avatar temporaire si nécessaire
+    if (window.tempAvatarUrl) {
+      window.tempAvatarUrl = null;
+    }
 
   } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
