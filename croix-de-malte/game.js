@@ -628,6 +628,14 @@ function initProfileModalListeners() {
   }
 }
 
+  // Bouton "Changer l'avatar"
+  const changeAvatarBtn = document.getElementById("changeAvatarBtn");
+  if (changeAvatarBtn) {
+    changeAvatarBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
+      document.getElementById("avatarUpload").click();
+    });
+  }
 // Fonction pour changer le mot de passe
 async function changePassword() {
   const currentPassword = document.getElementById("currentPassword").value.trim();
