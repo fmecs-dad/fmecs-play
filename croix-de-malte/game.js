@@ -327,31 +327,39 @@ async function updateProfileInfo(force = false) {
   const { data: { session }, error } = await supa.auth.getSession();
   if (!session) {
     console.log("Pas de session active - annulation de la mise à jour du profil");
+    // MODIFIÉ: Réactive le bouton même sans session
+    const profileBtn = document.getElementById("profileBtn");
+    if (profileBtn) profileBtn.disabled = false;
     return;
   }
 
-  // 1. Récupération des éléments DOM (ton code existant)
+  // 1. Récupération des éléments DOM (TON CODE ORIGINAL)
   const profileBtn = document.getElementById("profileBtn");
   const profileAvatar = document.getElementById("profileAvatar");
   const avatarPreview = document.getElementById("profileAvatarPreview");
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
   const profileDropdown = document.getElementById("profileDropdown");
 
+  // Désactive temporairement le bouton
   if (profileBtn) profileBtn.disabled = true;
 
   try {
+    // 2. Vérification de la connexion (TON CODE ORIGINAL)
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
         console.log("[updateProfileInfo] Pas de token - utilisateur déconnecté");
+        // MODIFIÉ: Réactive le bouton
+        if (profileBtn) profileBtn.disabled = false;
         return;
       }
     }
 
-    // 2. Récupération de l'utilisateur et du joueur (ton code existant)
+    // 3. Récupération de l'utilisateur (TON CODE ORIGINAL)
     const { data: { user }, error: userError } = await supa.auth.getUser();
     if (userError) throw userError;
 
+    // 4. Récupération des données joueur (TON CODE ORIGINAL)
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
@@ -360,14 +368,13 @@ async function updateProfileInfo(force = false) {
 
     if (playerError) throw playerError;
 
-    // 3. Pré-remplissage des champs (ton code existant)
-    const pseudoInput = document.getElementById("profilePseudoInput");
-    const emailInput = document.getElementById("profileEmailInput");
+    // 5. Réactive le bouton profil (TON CODE ORIGINAL + AJOUT SÉCURITÉ)
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.title = "Voir votre profil";
+    }
 
-    if (pseudoInput) pseudoInput.value = player.pseudo || "";
-    if (emailInput) emailInput.value = user.email || "";
-
-    // 4. Mise à jour de l'avatar (ton code existant)
+    // 6. Mise à jour de l'avatar (TON CODE ORIGINAL)
     if (profileAvatar && player.avatar_url) {
       try {
         const { data: signedData } = await supa.storage.from('avatars').createSignedUrl(player.avatar_url, 3600);
@@ -379,7 +386,7 @@ async function updateProfileInfo(force = false) {
       profileAvatar.src = "images/avatarDefault.png";
     }
 
-    // 5. NOUVELLES LIGNES POUR METTRE À JOUR LE DROPDOWN (email et date de création)
+    // 7. NOUVEAU: Mise à jour du dropdown (email et date de création)
     const dropdownEmailDisplay = document.getElementById("dropdownEmailDisplay");
     const dropdownJoinDateDisplay = document.getElementById("dropdownJoinDate");
 
@@ -389,8 +396,17 @@ async function updateProfileInfo(force = false) {
       dropdownJoinDateDisplay.textContent = joinDate.toLocaleDateString('fr-FR');
     }
 
+    // 8. Pré-remplissage des champs de la modale (TON CODE ORIGINAL)
+    const pseudoInput = document.getElementById("profilePseudoInput");
+    const emailInput = document.getElementById("profileEmailInput");
+
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (emailInput) emailInput.value = user.email || "";
+
   } catch (err) {
     console.error("[updateProfileInfo] Erreur:", err);
+    // MODIFIÉ: Réactive le bouton en cas d'erreur
+    if (profileBtn) profileBtn.disabled = false;
   }
 }
 
