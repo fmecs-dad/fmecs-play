@@ -897,7 +897,10 @@ async function saveProfileChanges() {
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
     // 8. Mise à jour du meilleur score dans le bandeau (NOUVEAU)
-    await updateBestScoreTop(session.user.id);
+    //await updateBestScoreTop(session.user.id);
+    document.getElementById("authOverlay").classList.add("hidden");
+    updateBestScoreTop();
+
 
     // 9. Fermeture de la modale
     profileModal.classList.add("hidden");
