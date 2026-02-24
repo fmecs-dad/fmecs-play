@@ -2615,13 +2615,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 4. Activation des comportements des modales (votre code existant)
     if (typeof enableModalBehavior === 'function') {
-      enableModalBehavior("whySignupModal", ".modal-content", closeWhySignup);
-      enableModalBehavior("authOverlay", ".modal-content", closeLogin);
-      enableModalBehavior("profileModal", ".modal-content", closeProfile);  // Corrigé
-      enableModalBehavior("helpOverlay", ".modal-content", closeHelp);
-      enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);  // Spécifique
-      enableModalBehavior("endGameOverlay", ".modal-content", closeEndGame);
-      enableModalBehavior("bestScoreOverlay", ".modal-content", closeBestScore);
+      enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
+      enableModalBehavior("authOverlay", ".panel", closeLogin);
+      enableModalBehavior("profileModal", ".panel", closeProfile);
+      enableModalBehavior("helpOverlay", ".panel", closeHelp);
+      enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
+      enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
+      enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     }
 
     // 5. Initialisation du canvas (votre code existant)
