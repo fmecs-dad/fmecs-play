@@ -1558,21 +1558,19 @@ function resumeGame() {
 }
 
 function enableModalBehavior(overlayId, panelSelector, closeFn) {
-  // Vérifie que l'overlay existe
   const overlay = document.getElementById(overlayId);
   if (!overlay) {
-    console.error(`Overlay avec ID "${overlayId}" non trouvé !`);
+    console.warn(`Overlay "${overlayId}" non trouvé.`);
     return;
   }
 
-  // Vérifie que le panel existe dans l'overlay
   const panel = overlay.querySelector(panelSelector);
   if (!panel) {
-    console.error(`Panel avec sélecteur "${panelSelector}" non trouvé dans l'overlay "${overlayId}" !`);
+    console.warn(`Panel avec sélecteur "${panelSelector}" non trouvé dans "${overlayId}". Sélecteurs disponibles :`, Array.from(overlay.children).map(el => el.className));
     return;
   }
 
-  // Ajoute les écouteurs uniquement si les éléments existent
+  // Ajoute les écouteurs
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeFn();
   });
@@ -2617,13 +2615,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 4. Activation des comportements des modales (votre code existant)
     if (typeof enableModalBehavior === 'function') {
-      enableModalBehavior("whySignupModal", ".panel", closeWhySignup);
-      enableModalBehavior("authOverlay", ".panel", closeLogin);
-      enableModalBehavior("profileModal", ".panel", closeProfile);
-      enableModalBehavior("helpOverlay", ".panel", closeHelp);
-      enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);
-      enableModalBehavior("endGameOverlay", ".panel", closeEndGame);
-      enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
+      enableModalBehavior("whySignupModal", ".modal-content", closeWhySignup);
+      enableModalBehavior("authOverlay", ".modal-content", closeLogin);
+      enableModalBehavior("profileModal", ".modal-content", closeProfile);  // Corrigé
+      enableModalBehavior("helpOverlay", ".modal-content", closeHelp);
+      enableModalBehavior("leaderboardOverlay", ".leaderboard-panel", closeLeaderboard);  // Spécifique
+      enableModalBehavior("endGameOverlay", ".modal-content", closeEndGame);
+      enableModalBehavior("bestScoreOverlay", ".modal-content", closeBestScore);
     }
 
     // 5. Initialisation du canvas (votre code existant)
