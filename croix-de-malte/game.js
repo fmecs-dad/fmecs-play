@@ -603,25 +603,48 @@ function initProfileModalListeners() {
   }
 
 // Écouteur pour le bouton "Changer le mot de passe"
-  const toggleChangePasswordBtn = document.getElementById("toggleChangePasswordBtn");
-  if (toggleChangePasswordBtn) {
-    toggleChangePasswordBtn.addEventListener("click", () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      const changePasswordSection = document.getElementById("changePasswordSection");
-      if (changePasswordSection) {
-        changePasswordSection.classList.toggle("hidden");
+const toggleChangePasswordBtn = document.getElementById("toggleChangePasswordBtn");
+if (toggleChangePasswordBtn) {
+  toggleChangePasswordBtn.addEventListener("click", () => {
+    if (typeof playClickSound === 'function') playClickSound();
+    const changePasswordSection = document.getElementById("changePasswordSection");
+    const saveBtn = document.getElementById("saveProfileBtn");
+    const cancelBtn = document.getElementById("cancelProfileBtn");
+
+    if (changePasswordSection) {
+      changePasswordSection.classList.toggle("hidden");
+
+      // Désactive les boutons "Enregistrer" et "Annuler" si la section est visible
+      if (!changePasswordSection.classList.contains("hidden")) {
+        saveBtn.disabled = true;
+        cancelBtn.disabled = true;
+      } else {
+        saveBtn.disabled = false;
+        cancelBtn.disabled = false;
       }
-    });
-  }
+    }
+  });
+}
 
   // Écouteur pour le bouton de validation du changement de mot de passe
-  const changePasswordBtn = document.getElementById("changePasswordBtn");
-  if (changePasswordBtn) {
-    changePasswordBtn.addEventListener("click", async () => {
-      if (typeof playClickSound === 'function') playClickSound();
-      await changePassword();
-    });
-  }
+const changePasswordBtn = document.getElementById("changePasswordBtn");
+if (changePasswordBtn) {
+  changePasswordBtn.addEventListener("click", async () => {
+    if (typeof playClickSound === 'function') playClickSound();
+    await changePassword();
+
+    // Réactive les boutons "Enregistrer" et "Annuler" après le changement de mot de passe
+    const saveBtn = document.getElementById("saveProfileBtn");
+    const cancelBtn = document.getElementById("cancelProfileBtn");
+    const changePasswordSection = document.getElementById("changePasswordSection");
+
+    if (saveBtn && cancelBtn && changePasswordSection) {
+      saveBtn.disabled = false;
+      cancelBtn.disabled = false;
+      changePasswordSection.classList.add("hidden"); // Cache la section après validation
+    }
+  });
+}
 
   // Écouteur pour le lien "Mot de passe oublié"
   const forgotPasswordLink = document.getElementById("forgotPasswordLink");
@@ -632,6 +655,28 @@ function initProfileModalListeners() {
       await resetPassword();
     });
   }
+
+// Écouteur pour le bouton "Annuler" du changement de mot de passe
+const cancelChangePasswordBtn = document.getElementById("cancelChangePasswordBtn");
+if (cancelChangePasswordBtn) {
+  cancelChangePasswordBtn.addEventListener("click", () => {
+    if (typeof playClickSound === 'function') playClickSound();
+    const changePasswordSection = document.getElementById("changePasswordSection");
+    const saveBtn = document.getElementById("saveProfileBtn");
+    const cancelBtn = document.getElementById("cancelProfileBtn");
+
+    if (changePasswordSection && saveBtn && cancelBtn) {
+      changePasswordSection.classList.add("hidden");
+      saveBtn.disabled = false;
+      cancelBtn.disabled = false;
+
+      // Réinitialise les champs de mot de passe
+      document.getElementById("profileCurrentPassword").value = "";
+      document.getElementById("profileNewPassword").value = "";
+      document.getElementById("profileConfirmPassword").value = "";
+    }
+  });
+}
   
 // Écouteur pour le bouton de déconnexion dans le menu profil
   const logoutProfileBtn = document.getElementById("logoutProfileBtn");

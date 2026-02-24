@@ -283,63 +283,50 @@
 </div>
  
 <!--- Profil --->
-<div id="profileModal" class="modal hidden">
-  <div class="panel">
+<div id="profileModal" class="modal">
+  <div class="modal-content">
     <h2>Modifier mon profil</h2>
 
-    <div id="profileErrorMessage" class="error-message hidden">
-      Une erreur est survenue.
+    <!-- Champs du profil -->
+    <div class="profile-section">
+      <label>Pseudo :</label>
+      <input type="text" id="editPseudo" value="PseudoActuel">
+
+      <label>Avatar :</label>
+      <input type="file" id="editAvatar">
     </div>
 
-    <div class="form-group">
-      <label for="profilePseudoInput">Pseudo</label>
-      <input type="text" id="profilePseudoInput" class="form-input">
+    <!-- Bouton pour ouvrir la modale de mot de passe -->
+    <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
+
+    <!-- Boutons du profil (désactivés si modale de mot de passe ouverte) -->
+    <div class="profile-actions">
+      <button id="saveProfileBtn" class="main-btn">Enregistrer</button>
+      <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="passwordModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h2>Changer le mot de passe</h2>
+
+    <!-- Champs pour le mot de passe -->
+    <div class="password-section">
+      <label>Mot de passe actuel :</label>
+      <input type="password" id="currentPassword">
+
+      <label>Nouveau mot de passe :</label>
+      <input type="password" id="newPassword">
+
+      <label>Confirmer le nouveau mot de passe :</label>
+      <input type="password" id="confirmNewPassword">
     </div>
 
-    <div class="form-group">
-      <label>Avatar</label>
-      <img id="profileAvatarPreview" src="images/avatarDefault.png" class="avatar-preview">
-      <input type="file" id="avatarUpload" accept="image/png, image/jpeg" style="display: none;">
-      <button id="changeAvatarBtn" class="btn btn-secondary" style="margin-top: 10px; width: 100%;">Changer l'avatar</button>
-    </div>
-
-    <div class="form-group">
-      <label for="profileEmailInput">Email</label>
-      <input type="email" id="profileEmailInput" class="form-input" readonly>
-    </div>
-    
-    <div class="form-group">
-      <button id="toggleChangePasswordBtn" class="btn btn-secondary" style="width: 100%; margin-top: 10px;">Changer le mot de passe</button>
-    </div>
-
-    <div id="changePasswordSection" class="hidden">
-      <div class="form-group">
-        <label for="profileCurrentPassword">Mot de passe actuel</label>
-        <input type="password" id="profileCurrentPassword" class="form-input" placeholder="Mot de passe actuel">
-      </div>
-
-      <div class="form-group">
-        <label for="profileNewPassword">Nouveau mot de passe</label>
-        <input type="password" id="profileNewPassword" class="form-input" placeholder="Nouveau mot de passe">
-      </div>
-
-      <div class="form-group">
-        <label for="profileConfirmPassword">Confirmer le nouveau mot de passe</label>
-        <input type="password" id="profileConfirmPassword" class="form-input" placeholder="Confirmer le nouveau mot de passe">
-      </div>
-
-      <div class="form-group">
-        <button id="changePasswordBtn" class="btn btn-primary" style="width: 100%;">Valider le changement</button>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <a href="#" id="forgotPasswordLink" class="forgot-password-link">Mot de passe oublié ?</a>
-    </div>
-
-    <div class="modal-actions">
-      <button id="saveProfileBtn" class="btn btn-primary">Enregistrer</button>
-      <button id="cancelProfileBtn" class="btn btn-secondary">Annuler</button>
+    <!-- Boutons de la modale de mot de passe -->
+    <div class="password-actions">
+      <button id="validatePasswordBtn" class="main-btn">Valider le changement</button>
+      <button id="cancelPasswordBtn" class="secondary-btn">Annuler</button>
     </div>
   </div>
 </div>
@@ -367,11 +354,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
