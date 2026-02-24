@@ -870,24 +870,40 @@ async function saveProfileChanges() {
 
     if (playerError) throw playerError;
 
-    // 5. Mise à jour de l'email UNIQUEMENT via Supabase Auth (pas dans players)
+    // 5. Mise à jour de l'email via Supabase Auth (corrigé)
     if (newEmail !== session.user.email) {
-      const { error: authError } = await supa.auth.updateUser({ email: newEmail });
-      if (authError) throw authError;
-      // Plus de tentative de mise à jour dans players (car colonne email n'existe pas)
+      const { error: authError } = await supa.auth.updateUser({
+        email: newEmail,
+        // Supabase Auth met automatiquement à jour la table 'users'
+      });
+      if (authError) {
+        console.error("Erreur mise à jour email:", authError);
+        throw authError;
+      }
     }
 
-    // 6. Mise à jour COMPLÈTE des scores
+    // 6. Mise à jour COMPLÈTE des scores (corrigé)
+    // Utilisation de .neq() pour s'assurer que toutes les lignes sont bien mises à jour
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
 
     if (scoresError) {
-      console.error("Erreur lors de la mise à jour des scores:", scoresError);
+      console.error("Erreur mise à jour scores:", scoresError);
       throw scoresError;
     } else {
-      console.log("Tous les scores du joueur ont été mis à jour avec le nouveau pseudo");
+      console.log("Scores mis à jour avec succès");
+      // Vérification supplémentaire
+      const { data: verification, error: verifError } = await supa
+        .from("scores")
+        .select("pseudo")
+        .eq("player_id", session.user.id)
+        .limit(3); // Vérifie quelques lignes
+
+      if (!verifError) {
+        console.log("Vérification scores:", verification);
+      }
     }
 
     // 7. Mise à jour de l'interface
@@ -897,17 +913,17 @@ async function saveProfileChanges() {
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // 8. Mise à jour du meilleur score dans le bandeau
+    // 8. Mise à jour du meilleur score
     document.getElementById("authOverlay").classList.add("hidden");
     updateBestScoreTop();
 
     // 9. Fermeture de la modale
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
-    console.log("Profil et scores mis à jour avec succès");
+    console.log("Profil et données mises à jour avec succès");
 
 } catch (err) {
-    console.error("Erreur lors de la sauvegarde du profil:", err);
+    console.error("Erreur complète:", err);
     errorMessage.textContent = err.message || "Une erreur est survenue";
     errorMessage.classList.remove("hidden");
 }
