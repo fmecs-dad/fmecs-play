@@ -870,24 +870,14 @@ async function saveProfileChanges() {
 
     if (playerError) throw playerError;
 
-    // 5. Mise à jour de l'email si différent
+    // 5. Mise à jour de l'email UNIQUEMENT via Supabase Auth (pas dans players)
     if (newEmail !== session.user.email) {
       const { error: authError } = await supa.auth.updateUser({ email: newEmail });
       if (authError) throw authError;
-
-      // NOUVEAU: Mise à jour de l'email dans la table players
-      const { error: playerEmailError } = await supa
-        .from("players")
-        .update({ email: newEmail })
-        .eq("id", session.user.id);
-
-      if (playerEmailError) {
-        console.error("Erreur mise à jour email dans players:", playerEmailError);
-        throw playerEmailError;
-      }
+      // Plus de tentative de mise à jour dans players (car colonne email n'existe pas)
     }
 
-    // 6. Mise à jour COMPLÈTE des scores (OPTIMISÉE)
+    // 6. Mise à jour COMPLÈTE des scores
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
@@ -914,7 +904,7 @@ async function saveProfileChanges() {
     // 9. Fermeture de la modale
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
-    console.log("Profil, email et scores mis à jour avec succès");
+    console.log("Profil et scores mis à jour avec succès");
 
 } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
