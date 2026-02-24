@@ -597,19 +597,25 @@ async function uploadAvatar(file) {
 
 function initProfileModalListeners() {
 
-  // Supprimez d'abord tout écouteur existant pour éviter les doublons
+  // Écouteur pour le bouton "Enregistrer" (NOUVEAU: Ajout manquant)
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+  if (saveProfileBtn) {
+    saveProfileBtn.addEventListener("click", saveProfileChanges);
+    console.log("Écouteur pour le bouton Enregistrer ajouté");
+  } else {
+    console.error("Bouton saveProfileBtn introuvable !");
+  }
+
+  // Autres écouteurs existants (ton code original)
   const editProfileBtn = document.getElementById("editProfileBtn");
   if (editProfileBtn) {
-    const newEditProfileBtn = editProfileBtn.cloneNode(true);
-    editProfileBtn.parentNode.replaceChild(newEditProfileBtn, editProfileBtn);
-
-    newEditProfileBtn.addEventListener("click", async (e) => {
+    editProfileBtn.addEventListener("click", async () => {
       if (typeof playClickSound === 'function') playClickSound();
-      e.stopPropagation();
-      console.log("Bouton Modifier cliqué");
-      await ouvrirProfil();
+      document.getElementById("profileModal").classList.remove("hidden");
+      console.log("Modale de profil ouverte");
     });
   }
+
   // Bouton "Changer le mot de passe" dans la modale de profil
   const changePasswordBtn = document.getElementById("changePasswordBtn");
   if (changePasswordBtn) {
@@ -641,18 +647,14 @@ function initProfileModalListeners() {
     });
   }
 
-  // Bouton "Annuler" de la modale de profil
+  // Écouteur pour le bouton "Annuler"
   const cancelProfileBtn = document.getElementById("cancelProfileBtn");
   if (cancelProfileBtn) {
     cancelProfileBtn.addEventListener("click", () => {
+      if (typeof playClickSound === 'function') playClickSound();
       document.getElementById("profileModal").classList.add("hidden");
+      console.log("Modale de profil fermée");
     });
-  }
-
-  // Bouton "Enregistrer" de la modale de profil
-  const saveProfileBtn = document.getElementById("saveProfileBtn");
-  if (saveProfileBtn) {
-    saveProfileBtn.addEventListener("click", saveProfileChanges);
   }
 }
 
@@ -819,18 +821,28 @@ async function resetPassword() {
   }
 }
 
-/**
- * Sauvegarde les modifications du profil
- */
+/*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
   const pseudoInput = document.getElementById("profilePseudoInput");
+  const emailInput = document.getElementById("profileEmailInput");
   const errorMessage = document.getElementById("profileErrorMessage");
 
-  if (!pseudoInput || !errorMessage) return;
+  if (!pseudoInput || !emailInput || !errorMessage) {
+    console.error("Un ou plusieurs éléments de la modale sont manquants");
+    return;
+  }
 
   const newPseudo = pseudoInput.value.trim();
+  const newEmail = emailInput.value.trim();
+
   if (!newPseudo) {
     errorMessage.textContent = "Le pseudo ne peut pas être vide";
+    errorMessage.classList.remove("hidden");
+    return;
+  }
+
+  if (!newEmail) {
+    errorMessage.textContent = "L'email ne peut pas être vide";
     errorMessage.classList.remove("hidden");
     return;
   }
@@ -844,35 +856,31 @@ async function saveProfileChanges() {
       .from("players")
       .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
+
     if (playerError) throw playerError;
+
+    // Mise à jour de l'email via Supabase Auth
+    if (newEmail !== session.user.email) {
+      const { error: authError } = await supa.auth.updateUser({ email: newEmail });
+      if (authError) throw authError;
+    }
 
     // Mise à jour du pseudo dans la table scores
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
+
     if (scoresError) throw scoresError;
 
     // Mise à jour de l'interface
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
-
-    // Mise à jour de l'avatar si nécessaire
-    if (tempAvatarUrl) {
-      const { data: signedData } = await supa.storage
-        .from('avatars')
-        .createSignedUrl(tempAvatarUrl, 3600);
-      const profileAvatar = document.getElementById("profileAvatar");
-      const avatarPreview = document.getElementById("profileAvatarPreview");
-      if (profileAvatar) profileAvatar.src = signedData.signedUrl;
-      if (avatarPreview) avatarPreview.src = signedData.signedUrl;
-    }
+    document.getElementById("profilePseudoDisplay").textContent = newPseudo;
+    document.getElementById("profileEmail").textContent = newEmail;
 
     // Fermeture de la modale
-    const modal = document.getElementById("profileModal");
-    if (modal) modal.classList.add("hidden");
+    document.getElementById("profileModal").classList.add("hidden");
     errorMessage.classList.add("hidden");
-    tempAvatarUrl = null;
+
   } catch (err) {
     console.error("Erreur lors de la sauvegarde du profil:", err);
     errorMessage.textContent = err.message || "Une erreur est survenue";
@@ -2666,6 +2674,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Appel de l'initialisation du menu profil
     setupProfileMenu();
     initProfileModalListeners(); // Écouteurs de la modale (inclut maintenant l'avatar)
+    console.log("Écouteurs de la modale de profil initialisés");
 
     // 3. Appel à initialFlow (votre code existant)
     const user = session ? session.user : null;
