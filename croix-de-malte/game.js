@@ -871,6 +871,18 @@ async function saveProfileChanges() {
       .eq("id", session.user.id);
     if (playerError) throw playerError;
 
+    // 6. Mise à jour des scores
+    // Méthode directe et vérifiée
+    const { error: scoresError } = await supa
+      .from("scores")
+      .update({ pseudo: newPseudo })
+      .eq("player_id", session.user.id);
+
+    if (scoresError) {
+      console.error("Erreur scores:", scoresError);
+      throw scoresError; // Bloque si erreur réelle
+    }
+
     // 5. Mise à jour de l'email (CORRECTION FINALE)
     if (newEmail !== session.user.email) {
       const { error: authError } = await supa.auth.updateUser({
@@ -883,18 +895,6 @@ async function saveProfileChanges() {
         errorMessage.classList.remove("hidden");
         // On ne bloque PAS le processus
       }
-    }
-
-    // 6. Mise à jour des scores
-    // Méthode directe et vérifiée
-    const { error: scoresError } = await supa
-      .from("scores")
-      .update({ pseudo: newPseudo })
-      .eq("player_id", session.user.id);
-
-    if (scoresError) {
-      console.error("Erreur scores:", scoresError);
-      throw scoresError; // Bloque si erreur réelle
     }
 
     // 7. Mise à jour de l'interface (ton code existant)
