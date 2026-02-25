@@ -870,14 +870,15 @@ async function saveProfileChanges() {
       .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
     if (playerError) throw playerError;
-
+    
     // 6. Mise à jour des scores
     // Méthode directe et vérifiée
     const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
-
+console.log(session.user.id);
+console.log(player_id);
     if (scoresError) {
       console.error("Erreur scores:", scoresError);
       throw scoresError; // Bloque si erreur réelle
