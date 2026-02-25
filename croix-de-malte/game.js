@@ -268,11 +268,13 @@ async function ouvrirProfil() {
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
+    // Récupération des données du joueur
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url")
       .eq("id", session.user.id)
       .single();
+
     if (playerError) throw playerError;
 
     // 1. Pré-remplissage des champs texte
@@ -281,23 +283,31 @@ async function ouvrirProfil() {
     if (pseudoInput) pseudoInput.value = player.pseudo || "";
     if (emailInput) emailInput.value = session.user.email || "";
 
-    // 2. Chargement de l'avatar dans la modale (CORRIGÉ)
+    // 2. Chargement de l'avatar dans la modale (CORRECTION CIBLEE)
     const avatarPreview = document.getElementById("profileAvatarPreview");
     if (avatarPreview) {
       if (player.avatar_url) {
-        try {
-          const { data: signedData } = await supa.storage
-            .from('avatars')
-            .createSignedUrl(player.avatar_url, 3600);
-          avatarPreview.src = signedData.signedUrl + "?v=" + Date.now(); // Cache busting
-          avatarPreview.onerror = () => {
+        // Utilisation directe de l'URL publique si possible, sinon URL signée
+        const avatarUrl = player.avatar_url.startsWith('http')
+          ? player.avatar_url + "?t=" + Date.now()
+          : "";
+
+        if (avatarUrl) {
+          avatarPreview.src = avatarUrl;
+        } else {
+          // Génération de l'URL signée si nécessaire
+          try {
+            const { data: signedData } = await supa.storage
+              .from('avatars')
+              .createSignedUrl(player.avatar_url, 3600);
+            avatarPreview.src = signedData.signedUrl + "?t=" + Date.now();
+          } catch (err) {
+            console.error("Erreur chargement avatar:", err);
             avatarPreview.src = "images/avatarDefault.png";
-          };
-        } catch (err) {
-          console.error("Erreur chargement avatar modale:", err);
-          avatarPreview.src = "images/avatarDefault.png";
+          }
         }
       } else {
+        // Pas d'avatar personnalisé, on utilise l'avatar par défaut
         avatarPreview.src = "images/avatarDefault.png";
       }
     }
@@ -308,6 +318,11 @@ async function ouvrirProfil() {
 
   } catch (err) {
     console.error("Erreur ouverture profil:", err);
+    // En cas d'erreur, on affiche quand même la modale avec l'avatar par défaut
+    const avatarPreview = document.getElementById("profileAvatarPreview");
+    if (avatarPreview) avatarPreview.src = "images/avatarDefault.png";
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.classList.remove("hidden");
   }
 }
 
