@@ -265,62 +265,75 @@ async function ouvrirProfil() {
   console.log("Ouverture de la modale de profil");
 
   try {
+    // 1. Récupération des données
     const { data: { session }, error } = await supa.auth.getSession();
-    if (error || !session) throw new Error("Utilisateur non connecté");
+    if (error || !session) {
+      console.error("Session invalide");
+      return;
+    }
 
-    // Récupération des données du joueur
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url")
       .eq("id", session.user.id)
       .single();
 
-    if (playerError) throw playerError;
-
-    // 1. Pré-remplissage des champs texte
+    // 2. Pré-remplissage des champs texte
     const pseudoInput = document.getElementById("profilePseudoInput");
     const emailInput = document.getElementById("profileEmailInput");
-    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (pseudoInput) pseudoInput.value = player?.pseudo || "";
     if (emailInput) emailInput.value = session.user.email || "";
 
-    // 2. Chargement de l'avatar dans la modale (CORRECTION CIBLEE)
+    // 3. Gestion de l'avatar (SOLUTION DIRECTE)
     const avatarPreview = document.getElementById("profileAvatarPreview");
     if (avatarPreview) {
-      if (player.avatar_url) {
-        // Utilisation directe de l'URL publique si possible, sinon URL signée
-        const avatarUrl = player.avatar_url.startsWith('http')
-          ? player.avatar_url + "?t=" + Date.now()
-          : "";
+      if (player?.avatar_url) {
+        // Solution 1: Essayer d'abord avec une URL directe (si l'avatar est public)
+        avatarPreview.src = "images/avatarDefault.png"; // Par défaut
 
-        if (avatarUrl) {
-          avatarPreview.src = avatarUrl;
-        } else {
-          // Génération de l'URL signée si nécessaire
-          try {
-            const { data: signedData } = await supa.storage
-              .from('avatars')
-              .createSignedUrl(player.avatar_url, 3600);
-            avatarPreview.src = signedData.signedUrl + "?t=" + Date.now();
-          } catch (err) {
-            console.error("Erreur chargement avatar:", err);
-            avatarPreview.src = "images/avatarDefault.png";
-          }
+        try {
+          // Génération de l'URL signée
+          const { data: signedData } = await supa.storage
+            .from('avatars')
+            .createSignedUrl(player.avatar_url, 3600);
+
+          // Chargement de l'image avec vérification
+          const testImg = new Image();
+          testImg.onload = () => {
+            avatarPreview.src = signedData.signedUrl;
+            console.log("Avatar chargé avec succès");
+          };
+          testImg.onerror = () => {
+            console.error("Impossible de charger l'avatar, utilisation de l'avatar par défaut");
+          };
+          testImg.src = signedData.signedUrl;
+        } catch (err) {
+          console.error("Erreur génération URL signée:", err);
         }
       } else {
-        // Pas d'avatar personnalisé, on utilise l'avatar par défaut
+        // Pas d'avatar personnalisé
         avatarPreview.src = "images/avatarDefault.png";
+        console.log("Utilisation de l'avatar par défaut (aucun avatar personnalisé)");
       }
+    } else {
+      console.error("Élément profileAvatarPreview introuvable !");
     }
 
-    // 3. Affichage de la modale
+    // 4. Affichage de la modale
     const modal = document.getElementById("profileModal");
-    if (modal) modal.classList.remove("hidden");
+    if (modal) {
+      modal.classList.remove("hidden");
+    } else {
+      console.error("Modale introuvable !");
+    }
 
   } catch (err) {
-    console.error("Erreur ouverture profil:", err);
+    console.error("Erreur globale:", err);
+
     // En cas d'erreur, on affiche quand même la modale avec l'avatar par défaut
     const avatarPreview = document.getElementById("profileAvatarPreview");
     if (avatarPreview) avatarPreview.src = "images/avatarDefault.png";
+
     const modal = document.getElementById("profileModal");
     if (modal) modal.classList.remove("hidden");
   }
