@@ -303,21 +303,21 @@ async function ouvrirProfil() {
 
     // Correction pour l'avatar
     if (avatarPreview) {
-  if (player.avatar_url) {
-    try {
-      const { data: signedData } = await supa.storage
-        .from('avatars')
-        .createSignedUrl(player.avatar_url, 3600);
-      avatarPreview.src = signedData.signedUrl + "?t=" + Date.now();
-    } catch (err) {
-      console.error("Erreur chargement avatar modale:", err);
-      avatarPreview.src = "images/avatarDefault.png";
-    }
-  } else {
-    avatarPreview.src = "images/avatarDefault.png";
-  }
-}
-}
+       if (player.avatar_url) {
+         try {
+           const { data: signedData } = await supa.storage
+          .from('avatars')
+          .createSignedUrl(player.avatar_url, 3600);
+          avatarPreview.src = signedData.signedUrl + "?t=" + Date.now();
+         } catch (err) {
+            console.error("Erreur chargement avatar modale:", err);
+            avatarPreview.src = "images/avatarDefault.png";
+         }
+       } else {
+        avatarPreview.src = "images/avatarDefault.png";
+       }
+     }
+   }
 
     // Affichage de la modale
     if (modal) modal.classList.remove("hidden");
