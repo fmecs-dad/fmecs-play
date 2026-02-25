@@ -343,21 +343,20 @@ async function updateProfileInfo(force = false) {
   console.log("[updateProfileInfo] Début de la mise à jour du profil");
 
   
-  
+  // Désactive le bouton par défaut
+  if (profileBtn) profileBtn.disabled = true;
 
   try {
 
-    // Désactive le bouton par défaut
-  if (profileBtn) profileBtn.disabled = true;
-
-  // 1. Vérification de la session
-  const { data: { session }, error } = await supa.auth.getSession();
-  if (!session) {
-    console.log("Pas de session active");
-    const profileBtn = document.getElementById("profileBtn");
-    if (profileBtn) profileBtn.disabled = false;
-    return;
-  }
+    // 1. Vérification de la connexion
+    if (!force) {
+      const token = localStorage.getItem('supabase.access.token');
+      if (!token) {
+        console.log("[updateProfileInfo] Pas de token - utilisateur déconnecté");
+        if (profileBtn) profileBtn.disabled = false;
+        return;
+      }
+    }
 
     // 2. Récupération des données utilisateur
     const { data: { user }, error: userError } = await supa.auth.getUser();
