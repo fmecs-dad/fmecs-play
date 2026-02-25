@@ -342,6 +342,9 @@ async function ouvrirProfil() {
 async function updateProfileInfo(force = false) {
   console.log("[updateProfileInfo] Début de la mise à jour du profil");
 
+  // Désactive le bouton par défaut
+  if (profileBtn) profileBtn.disabled = true;
+
   // 1. Vérification de la session
   const { data: { session }, error } = await supa.auth.getSession();
   if (!session) {
