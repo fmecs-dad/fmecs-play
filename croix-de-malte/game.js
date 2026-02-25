@@ -303,16 +303,21 @@ async function ouvrirProfil() {
 
     // Correction pour l'avatar
     if (avatarPreview) {
-      if (player.avatar_url) {
-        const { data: signedData } = await supa.storage
-          .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600);
-        avatarPreview.src = signedData.signedUrl;
-        console.log("Avatar dans la modale mis à jour:", signedData.signedUrl);
-      } else {
-        avatarPreview.src = "images/avatarDefault.png";
-      }
+  if (player.avatar_url) {
+    try {
+      const { data: signedData } = await supa.storage
+        .from('avatars')
+        .createSignedUrl(player.avatar_url, 3600);
+      avatarPreview.src = signedData.signedUrl + "?t=" + Date.now();
+    } catch (err) {
+      console.error("Erreur chargement avatar modale:", err);
+      avatarPreview.src = "images/avatarDefault.png";
     }
+  } else {
+    avatarPreview.src = "images/avatarDefault.png";
+  }
+}
+}
 
     // Affichage de la modale
     if (modal) modal.classList.remove("hidden");
@@ -668,9 +673,40 @@ function initProfileModalListeners() {
       if (typeof playClickSound === 'function') playClickSound();
       console.log("Bouton 'Changer l'avatar' cliqué");
 
-      const avatarUpload = document.getElementById("avatarUpload");
       if (avatarUpload) {
-        avatarUpload.click();
+  avatarUpload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validation du fichier...
+    const preview = document.getElementById("profileAvatarPreview");
+    if (preview) {
+      preview.src = URL.createObjectURL(file);
+      window.tempAvatarFile = file; // Stocke pour l'enregistrement
+    }
+  });
+}
+
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      alert("Seuls les fichiers JPEG/PNG sont acceptés");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert("L'image ne doit pas dépasser 2Mo");
+      return;
+    }
+
+    const preview = document.getElementById("profileAvatarPreview");
+    if (preview) {
+      preview.src = URL.createObjectURL(file);
+      console.log("Aperçu de l'avatar mis à jour");
+
+      // Stocke le fichier pour l'enregistrement ultérieur
+      window.tempAvatarFile = file;
+    }
+  });
+}
       } else {
         console.error("Input avatarUpload introuvable !");
       }
@@ -681,41 +717,7 @@ function initProfileModalListeners() {
 
   // 5. Gestion du téléchargement d'avatar
   const avatarUpload = document.getElementById("avatarUpload");
-  if (avatarUpload) {
-    avatarUpload.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const validTypes = ["image/jpeg", "image/png", "image/jpg"];
-      if (!validTypes.includes(file.type)) {
-        alert("Seuls les fichiers JPEG/PNG sont acceptés");
-        return;
-      }
-      if (file.size > 2 * 1024 * 1024) {
-        alert("L'image ne doit pas dépasser 2Mo");
-        return;
-      }
-
-      const preview = document.getElementById("profileAvatarPreview");
-      if (preview) {
-        preview.src = URL.createObjectURL(file);
-        console.log("Aperçu de l'avatar mis à jour");
-      } else {
-        console.error("Élément profileAvatarPreview introuvable !");
-      }
-
-      try {
-        if (typeof uploadAvatar === 'function') {
-          window.tempAvatarUrl = await uploadAvatar(file);
-          console.log("Avatar temporaire stocké");
-        }
-      } catch (err) {
-        console.error("Erreur lors du téléchargement de l'avatar:", err);
-      }
-    });
-  } else {
-    console.error("Input avatarUpload introuvable !");
-  }
+  	
 
   // 6. Fermeture de la modale en cliquant en dehors
   const modal = document.getElementById("profileModal");
@@ -907,6 +909,35 @@ async function saveProfileChanges() {
     profileModal.classList.add("hidden");
     errorMessage.classList.add("hidden");
     console.log("Mises à jour terminées");
+
+    // Gestion de l'avatar dans saveProfileChanges()
+const avatarUpload = document.getElementById("avatarUpload");
+if (avatarUpload && avatarUpload.files[0]) {
+  const file = avatarUpload.files[0];
+  try {
+    // Upload vers Supabase Storage
+    const filePath = `avatars/${session.user.id}/${Date.now()}_${file.name}`;
+    const { error: uploadError } = await supa.storage
+      .from('avatars')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    // Mise à jour de l'URL dans la base de données
+    const { error: updateError } = await supa
+      .from("players")
+      .update({ avatar_url: filePath })
+      .eq("id", session.user.id);
+
+    if (updateError) throw updateError;
+
+    console.log("Avatar mis à jour avec succès:", filePath);
+  } catch (err) {
+    console.error("Erreur mise à jour avatar:", err);
+    errorMessage.textContent = "Erreur lors de la mise à jour de l'avatar.";
+    errorMessage.classList.remove("hidden");
+  }
+}
 
   } catch (err) {
     console.error("Erreur:", err);
