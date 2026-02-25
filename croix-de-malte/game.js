@@ -344,58 +344,38 @@ async function updateProfileInfo(force = false) {
 
   // 1. Récupération des éléments DOM
   const profileBtn = document.getElementById("profileBtn");
-  const profileAvatar = document.getElementById("profileAvatar");
-  const pseudoDisplay = document.getElementById("profilePseudoDisplay");
 
-  // Désactive le bouton par défaut (ton code existant)
+  // Désactive le bouton par défaut (comme dans ton code original)
   if (profileBtn) profileBtn.disabled = true;
 
   try {
-    // 2. Vérification de la session (modifiée pour gérer la déconnexion)
-    const { data: { session }, error } = await supa.auth.getSession();
-
-    if (!session) {
-      // Utilisateur NON connecté
-      console.log("Utilisateur non connecté - désactivation du bouton profil");
-
-      if (profileBtn) {
-        profileBtn.disabled = true;
-        profileBtn.title = "Vous devez être connecté pour accéder à votre profil";
-      }
-
-      // Réinitialise l'avatar et le pseudo
-      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
-      if (pseudoDisplay) pseudoDisplay.textContent = "Connectez-vous";
-
-      return; // On quitte la fonction
-    }
-
-    // 3. Vérification de la connexion (ton code existant)
+    // 2. Vérification de la connexion (ton code original)
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
         console.log("[updateProfileInfo] Pas de token - utilisateur déconnecté");
-        if (profileBtn) profileBtn.disabled = false;
-        return;
+        return; // On quitte la fonction (bouton reste désactivé)
       }
     }
 
-    // 4. Récupération des données utilisateur (ton code existant)
+    // 3. Récupération de l'utilisateur (ton code original)
     const { data: { user }, error: userError } = await supa.auth.getUser();
     if (userError) {
       console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
       localStorage.removeItem('supabase.access.token');
       localStorage.removeItem('supabase.refresh.token');
-      if (profileBtn) profileBtn.disabled = false;
-      return;
+      return; // On quitte la fonction (bouton reste désactivé)
     }
 
     if (!user) {
       console.log("[updateProfileInfo] Aucun utilisateur trouvé");
-      if (profileBtn) profileBtn.disabled = false;
-      return;
+      return; // On quitte la fonction (bouton reste désactivé)
     }
 
+    // 4. Utilisateur connecté : active le bouton (modification minimale)
+    if (profileBtn) profileBtn.disabled = false;
+
+    // 5. Récupération du joueur (ton code original)
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
@@ -416,13 +396,8 @@ async function updateProfileInfo(force = false) {
       return updateProfileInfo(true);
     }
 
-    // 5. Réactive le bouton profil pour les utilisateurs connectés
-    if (profileBtn) {
-      profileBtn.disabled = false;
-      profileBtn.title = "Voir votre profil";
-    }
-
-    // 6. Mise à jour de l'avatar dans la topbar (ton code existant)
+    // 6. Mise à jour de l'avatar (ton code original)
+    const profileAvatar = document.getElementById("profileAvatar");
     if (profileAvatar) {
       if (player.avatar_url) {
         try {
@@ -441,13 +416,13 @@ async function updateProfileInfo(force = false) {
           const testImg = new Image();
           testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
           testImg.onerror = () => {
-            console.error("[updateProfileInfo] Erreur chargement avatar");
+            console.error("[updateProfileInfo] Vérification échouée");
             profileAvatar.src = "images/avatarDefault.png";
           };
           testImg.src = signedData.signedUrl;
 
         } catch (err) {
-          console.error("[updateProfileInfo] Erreur avatar:", err);
+          console.error("[updateProfileInfo] Erreur avatar:", err.message);
           profileAvatar.src = "images/avatarDefault.png";
         }
       } else {
@@ -457,7 +432,8 @@ async function updateProfileInfo(force = false) {
       console.error("Élément profileAvatar introuvable dans le DOM !");
     }
 
-    // 7. Mise à jour du pseudo et autres infos (ton code existant)
+    // 7. Mise à jour des informations (ton code original)
+    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player.pseudo || "Utilisateur";
       pseudoDisplay.title = player.pseudo || "Utilisateur";
@@ -475,14 +451,70 @@ async function updateProfileInfo(force = false) {
 
   } catch (err) {
     console.error("[updateProfileInfo] Erreur inattendue:", err);
-
-    // En cas d'erreur, on s'assure que l'avatar par défaut est affiché
     if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
-
-  } finally {
-    // Ne pas réactiver le bouton en cas d'erreur (ton code existant)
-    if (profileBtn) profileBtn.disabled = false;
   }
+}
+
+// Fonction pour récupérer la session (utilise le JWT stocké)
+async function getSession() {
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) {
+      console.log("[getSession] Aucun token trouvé");
+      return null;
+    }
+
+    const { data: { user }, error } = await supa.auth.getUser();
+    if (error) {
+      console.warn("[getSession] Token invalide:", error.message);
+      localStorage.removeItem('supabase.access.token');
+      localStorage.removeItem('supabase.refresh.token');
+      return null;
+    }
+
+    return user;
+  } catch (err) {
+    console.error("[getSession] Erreur:", err);
+    return null;
+  }
+}
+
+function setupProfileMenu() {
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  if (!profileBtn || !profileDropdown) {
+    console.error("Menu profil: éléments manquants");
+    return;
+  }
+
+  // Écouteur d'ouverture/fermeture
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (profileBtn.disabled) {
+      console.log("Bouton désactivé - clic ignoré");
+      return;
+    }
+
+    const isShowing = profileDropdown.classList.toggle("show");
+
+    // Logs de débogage avancés
+    console.log("Dropdown togglé. Visible ?", isShowing);
+    console.log("Styles après toggle:", {
+      display: window.getComputedStyle(profileDropdown).display,
+      visibility: window.getComputedStyle(profileDropdown).visibility,
+      opacity: window.getComputedStyle(profileDropdown).opacity,
+      transform: window.getComputedStyle(profileDropdown).transform
+    });
+  });
+
+  // Écouteur de fermeture externe
+  document.addEventListener("click", (e) => {
+    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
+      profileDropdown.classList.remove("show");
+      console.log("Dropdown fermé (clic externe)");
+    }
+  });
 }
 
 // Fonction de déconnexion
