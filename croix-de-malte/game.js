@@ -877,8 +877,7 @@ async function saveProfileChanges() {
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
-console.log(session.user.id);
-console.log(player_id);
+
     if (scoresError) {
       console.error("Erreur scores:", scoresError);
       throw scoresError; // Bloque si erreur réelle
