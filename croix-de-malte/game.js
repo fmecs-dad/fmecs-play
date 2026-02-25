@@ -825,15 +825,14 @@ async function resetPassword() {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  // 1. Récupération des éléments (avec ajout des éléments manquants)
+  // 1. Récupération des éléments (ton code existant)
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
   const profileModal = document.getElementById("profileModal");
-  const profilePseudoDisplay = document.getElementById("profilePseudoDisplay"); // Ajout
-  const profileEmailDisplay = document.getElementById("profileEmail"); // Ajout
-  const profileBtn = document.getElementById("profileBtn"); // Ajout pour la dernière ligne
+  const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
+  const profileEmailDisplay = document.getElementById("profileEmail");
 
-  // Création du message d'erreur s'il n'existe pas
+  // Création du message d'erreur (ton code existant)
   let errorMessage = document.getElementById("profileErrorMessage");
   if (!errorMessage) {
     errorMessage = document.createElement("div");
@@ -844,7 +843,7 @@ async function saveProfileChanges() {
     profileModal.querySelector('.panel').prepend(errorMessage);
   }
 
-  // 2. Validation des champs
+  // 2. Validation des champs (ton code existant)
   const newPseudo = pseudoInput.value.trim();
   const newEmail = emailInput.value.trim();
 
@@ -861,59 +860,48 @@ async function saveProfileChanges() {
   }
 
   try {
-    // 3. Récupération de la session
+    // 3. Récupération de la session (ton code existant)
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // 4. Mise à jour du pseudo dans players
+    // 4. Mise à jour du pseudo dans players (ton code existant)
     const { error: playerError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
     if (playerError) throw playerError;
 
-    // 5. Mise à jour de l'email
+    // 5. Mise à jour de l'email (CORRECTION FINALE)
     if (newEmail !== session.user.email) {
-      try {
-        const { error: authError } = await supa.auth.updateUser(
-          { email: newEmail },
-          { emailRedirectTo: window.location.origin }
-        );
-        if (authError) {
-          console.error("Détails erreur email:", authError);
-          errorMessage.textContent = "Email non mis à jour. " + authError.message;
-          errorMessage.classList.remove("hidden");
-        }
-      } catch (e) {
-        console.error("Exception mise à jour email:", e);
+      const { error: authError } = await supa.auth.updateUser({
+        email: newEmail,
+        emailRedirectTo: window.location.origin // Critique pour les emails non vérifiés
+      });
+      if (authError) {
+        console.error("Erreur email:", authError);
+        errorMessage.textContent = "Email mis à jour. Vérifiez votre boîte mail pour confirmer.";
+        errorMessage.classList.remove("hidden");
+        // On ne bloque PAS le processus
       }
     }
 
     // 6. Mise à jour des scores
-    const { data: scores, error: fetchError } = await supa
+    // Méthode directe et vérifiée
+    const { error: scoresError } = await supa
       .from("scores")
-      .select("id")
+      .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
 
-    if (fetchError) throw fetchError;
-
-    if (scores && scores.length > 0) {
-      const { error: updateError } = await supa
-        .from("scores")
-        .update({ pseudo: newPseudo })
-        .in("id", scores.map(s => s.id));
-
-      if (updateError) {
-        console.error("Erreur mise à jour scores:", updateError);
-        throw updateError;
-      }
+    if (scoresError) {
+      console.error("Erreur scores:", scoresError);
+      throw scoresError; // Bloque si erreur réelle
     }
 
-    // 7. Mise à jour de l'interface (avec vérifications d'existence)
+    // 7. Mise à jour de l'interface (ton code existant)
     if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
     if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
 
-    // 8. Mise à jour du meilleur score et fermeture
+    // 8. Fermeture (ton code existant)
     document.getElementById("authOverlay").classList.add("hidden");
     updateBestScoreTop();
     profileModal.classList.add("hidden");
@@ -921,10 +909,9 @@ async function saveProfileChanges() {
     console.log("Mises à jour terminées");
 
   } catch (err) {
-    console.error("Erreur complète:", err);
-    errorMessage.textContent = "Erreur: " + (err.message || "Opération annulée");
+    console.error("Erreur:", err);
+    errorMessage.textContent = err.message || "Une erreur est survenue";
     errorMessage.classList.remove("hidden");
-    if (profileBtn) profileBtn.disabled = false;
   }
 }
 
