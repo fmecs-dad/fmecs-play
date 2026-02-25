@@ -2620,6 +2620,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
   });
 
+  document.addEventListener("DOMContentLoaded", function() {
+  const privacyCheckbox = document.getElementById("acceptPrivacyPolicy");
+  const registerBtn = document.getElementById("whySignupRegisterBtn");
+
+  if (privacyCheckbox && registerBtn) {
+    privacyCheckbox.addEventListener("change", function() {
+      registerBtn.disabled = !this.checked;
+    });
+  }
+});
+
   try {
     // 1. Initialisation de base (votre code existant)
     const { data: { session }, error } = await supa.auth.getSession();
