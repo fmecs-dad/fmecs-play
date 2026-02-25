@@ -317,7 +317,6 @@ async function ouvrirProfil() {
         avatarPreview.src = "images/avatarDefault.png";
        }
      }
-   }
 
     // Affichage de la modale
     if (modal) modal.classList.remove("hidden");
