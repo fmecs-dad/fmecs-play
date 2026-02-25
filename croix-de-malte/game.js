@@ -389,25 +389,23 @@ async function updateProfileInfo(force = false) {
     // 5. Mise à jour de l'avatar
     if (profileAvatar && player.avatar_url) {
       try {
-        // Génération de l'URL signée
         const { data: signedData, error: signError } = await supa.storage
           .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600); // Valide 1 heure
+          .createSignedUrl(player.avatar_url, 3600);
 
         if (signError) throw signError;
 
         profileAvatar.src = signedData.signedUrl;
         console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
 
-        // Vérification du chargement
         const testImg = new Image();
-        testImg.onload = () => console.log("[updateProfileInfo]");
-        testImg.onerror = () => console.error("[updateProfileInfo]");
+        testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
+        testImg.onerror = () => console.error("[updateProfileInfo] Erreur chargement avatar");
         testImg.src = signedData.signedUrl;
 
       } catch (err) {
         console.error("[updateProfileInfo] Erreur génération URL signée:", err);
-        profileAvatar.src = "images/avatarDefault.png";
+        if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
       }
     } else if (profileAvatar) {
       profileAvatar.src = "images/avatarDefault.png";
@@ -706,15 +704,14 @@ function initProfileModalListeners() {
         console.error("Élément profileAvatarPreview introuvable !");
       }
 
-      // Stockez temporairement l'URL de l'avatar
-    try {
-      tempAvatarUrl = await uploadAvatar(file);
-      console.log("Avatar temporaire stocké:", tempAvatarUrl);
-    } catch (err) {
-      console.error("Erreur complète lors du changement d'avatar:", err);
-      alert("Erreur lors du changement d'avatar: " + err.message);
-    }
-
+      try {
+        if (typeof uploadAvatar === 'function') {
+          window.tempAvatarUrl = await uploadAvatar(file);
+          console.log("Avatar temporaire stocké");
+        }
+      } catch (err) {
+        console.error("Erreur lors du téléchargement de l'avatar:", err);
+      }
     });
   } else {
     console.error("Input avatarUpload introuvable !");
