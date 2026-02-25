@@ -342,13 +342,35 @@ async function ouvrirProfil() {
 async function updateProfileInfo(force = false) {
   console.log("[updateProfileInfo] Début de la mise à jour du profil");
 
-  
-  // Désactive le bouton par défaut
+  // 1. Récupération des éléments DOM
+  const profileBtn = document.getElementById("profileBtn");
+  const profileAvatar = document.getElementById("profileAvatar");
+  const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+
+  // Désactive le bouton par défaut (ton code existant)
   if (profileBtn) profileBtn.disabled = true;
 
   try {
+    // 2. Vérification de la session (modifiée pour gérer la déconnexion)
+    const { data: { session }, error } = await supa.auth.getSession();
 
-    // 1. Vérification de la connexion
+    if (!session) {
+      // Utilisateur NON connecté
+      console.log("Utilisateur non connecté - désactivation du bouton profil");
+
+      if (profileBtn) {
+        profileBtn.disabled = true;
+        profileBtn.title = "Vous devez être connecté pour accéder à votre profil";
+      }
+
+      // Réinitialise l'avatar et le pseudo
+      if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+      if (pseudoDisplay) pseudoDisplay.textContent = "Connectez-vous";
+
+      return; // On quitte la fonction
+    }
+
+    // 3. Vérification de la connexion (ton code existant)
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
@@ -358,9 +380,21 @@ async function updateProfileInfo(force = false) {
       }
     }
 
-    // 2. Récupération des données utilisateur
+    // 4. Récupération des données utilisateur (ton code existant)
     const { data: { user }, error: userError } = await supa.auth.getUser();
-    if (userError) throw userError;
+    if (userError) {
+      console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
+      localStorage.removeItem('supabase.access.token');
+      localStorage.removeItem('supabase.refresh.token');
+      if (profileBtn) profileBtn.disabled = false;
+      return;
+    }
+
+    if (!user) {
+      console.log("[updateProfileInfo] Aucun utilisateur trouvé");
+      if (profileBtn) profileBtn.disabled = false;
+      return;
+    }
 
     const { data: player, error: playerError } = await supa
       .from("players")
@@ -370,7 +404,6 @@ async function updateProfileInfo(force = false) {
 
     if (playerError) {
       console.warn("Joueur non trouvé, création d'un nouveau profil...");
-      // Si le joueur n'existe pas, on le crée avec des valeurs par défaut
       const { error: createError } = await supa
         .from("players")
         .insert({
@@ -380,59 +413,51 @@ async function updateProfileInfo(force = false) {
         });
 
       if (createError) throw createError;
-      // On relance la fonction pour charger les données du nouveau joueur
       return updateProfileInfo(true);
     }
 
-    // 3. Mise à jour de l'avatar dans la topbar (CORRECTION COMPLÈTE)
-    const profileAvatar = document.getElementById("profileAvatar");
+    // 5. Réactive le bouton profil pour les utilisateurs connectés
+    if (profileBtn) {
+      profileBtn.disabled = false;
+      profileBtn.title = "Voir votre profil";
+    }
+
+    // 6. Mise à jour de l'avatar dans la topbar (ton code existant)
     if (profileAvatar) {
       if (player.avatar_url) {
         try {
-          // Génération de l'URL signée
           const { data: signedData, error: signError } = await supa.storage
             .from('avatars')
             .createSignedUrl(player.avatar_url, 3600);
 
-          if (signError) {
-            throw new Error(`Erreur génération URL: ${signError.message}`);
-          }
+          if (signError) throw signError;
 
-          // Utilisation de l'URL avec cache busting
           profileAvatar.src = signedData.signedUrl;
-
-          // Gestion des erreurs de chargement de l'image
           profileAvatar.onerror = () => {
-            console.error("[updateProfileInfo] Erreur chargement avatar topbar - passage à l'avatar par défaut");
+            console.error("[updateProfileInfo] Erreur chargement avatar topbar");
             profileAvatar.src = "images/avatarDefault.png";
           };
 
-          // Vérification supplémentaire du chargement
           const testImg = new Image();
-          testImg.onload = () => {
-            console.log("[updateProfileInfo] Avatar topbar chargé avec succès");
-          };
+          testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
           testImg.onerror = () => {
-            console.error("[updateProfileInfo] Vérification échouée - l'URL signée est peut-être invalide");
+            console.error("[updateProfileInfo] Erreur chargement avatar");
             profileAvatar.src = "images/avatarDefault.png";
           };
           testImg.src = signedData.signedUrl;
 
         } catch (err) {
-          console.error("[updateProfileInfo] Erreur complète avatar topbar:", err.message);
+          console.error("[updateProfileInfo] Erreur avatar:", err);
           profileAvatar.src = "images/avatarDefault.png";
         }
       } else {
-        // Pas d'avatar personnalisé, on utilise l'avatar par défaut
         profileAvatar.src = "images/avatarDefault.png";
-        console.log("[updateProfileInfo] Utilisation de l'avatar par défaut (aucun avatar personnalisé)");
       }
     } else {
       console.error("Élément profileAvatar introuvable dans le DOM !");
     }
 
-    // 4. Mise à jour du reste des informations (pseudo, email, etc.)
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
+    // 7. Mise à jour du pseudo et autres infos (ton code existant)
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player.pseudo || "Utilisateur";
       pseudoDisplay.title = player.pseudo || "Utilisateur";
@@ -452,77 +477,12 @@ async function updateProfileInfo(force = false) {
     console.error("[updateProfileInfo] Erreur inattendue:", err);
 
     // En cas d'erreur, on s'assure que l'avatar par défaut est affiché
-    const profileAvatar = document.getElementById("profileAvatar");
-    if (profileAvatar) {
-      profileAvatar.src = "images/avatarDefault.png";
-    }
+    if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
 
   } finally {
-    const profileBtn = document.getElementById("profileBtn");
+    // Ne pas réactiver le bouton en cas d'erreur (ton code existant)
     if (profileBtn) profileBtn.disabled = false;
   }
-}
-
-// Fonction pour récupérer la session (utilise le JWT stocké)
-async function getSession() {
-  try {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) {
-      console.log("[getSession] Aucun token trouvé");
-      return null;
-    }
-
-    const { data: { user }, error } = await supa.auth.getUser();
-    if (error) {
-      console.warn("[getSession] Token invalide:", error.message);
-      localStorage.removeItem('supabase.access.token');
-      localStorage.removeItem('supabase.refresh.token');
-      return null;
-    }
-
-    return user;
-  } catch (err) {
-    console.error("[getSession] Erreur:", err);
-    return null;
-  }
-}
-
-function setupProfileMenu() {
-  const profileBtn = document.getElementById("profileBtn");
-  const profileDropdown = document.getElementById("profileDropdown");
-
-  if (!profileBtn || !profileDropdown) {
-    console.error("Menu profil: éléments manquants");
-    return;
-  }
-
-  // Écouteur d'ouverture/fermeture
-  profileBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (profileBtn.disabled) {
-      console.log("Bouton désactivé - clic ignoré");
-      return;
-    }
-
-    const isShowing = profileDropdown.classList.toggle("show");
-
-    // Logs de débogage avancés
-    console.log("Dropdown togglé. Visible ?", isShowing);
-    console.log("Styles après toggle:", {
-      display: window.getComputedStyle(profileDropdown).display,
-      visibility: window.getComputedStyle(profileDropdown).visibility,
-      opacity: window.getComputedStyle(profileDropdown).opacity,
-      transform: window.getComputedStyle(profileDropdown).transform
-    });
-  });
-
-  // Écouteur de fermeture externe
-  document.addEventListener("click", (e) => {
-    if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
-      profileDropdown.classList.remove("show");
-      console.log("Dropdown fermé (clic externe)");
-    }
-  });
 }
 
 // Fonction de déconnexion
