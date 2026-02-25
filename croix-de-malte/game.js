@@ -262,53 +262,37 @@ async function initialiserProfilEtLancerJeu(session) {
 //   FONCTIONS DE PROFIL
 // ===============================
 async function ouvrirProfil() {
-  console.log("Ouverture du profil...");
-
-  const { data: { session }, error } = await supa.auth.getSession();
-  if (error || !session) {
-    console.warn("Aucun utilisateur connecté");
-    return;
-  }
+  console.log("Ouverture de la modale de profil");
 
   try {
+    const { data: { session }, error } = await supa.auth.getSession();
+    if (error || !session) throw new Error("Utilisateur non connecté");
+
     const { data: player, error: playerError } = await supa
       .from("players")
-      .select("*")
+      .select("pseudo, avatar_url")
       .eq("id", session.user.id)
       .single();
-
     if (playerError) throw playerError;
 
-    // Mise à jour des éléments dans le dropdown
-    const profileEmail = document.getElementById("profileEmail");
-    const profileCreationDate = document.getElementById("profileCreationDate");
-
-    if (profileEmail) {
-      profileEmail.textContent = session.user.email;
-    }
-
-    if (profileCreationDate && player.created_at) {
-      const date = new Date(player.created_at);
-      profileCreationDate.textContent = date.toLocaleDateString();
-    }
-
-    // Mise à jour de la modale de modification
+    // 1. Pré-remplissage des champs texte
     const pseudoInput = document.getElementById("profilePseudoInput");
     const emailInput = document.getElementById("profileEmailInput");
-    const avatarPreview = document.getElementById("profileAvatarPreview");
-
     if (pseudoInput) pseudoInput.value = player.pseudo || "";
     if (emailInput) emailInput.value = session.user.email || "";
 
-    // Chargement de l'avatar dans la modale (CORRIGÉ)
+    // 2. Chargement de l'avatar dans la modale (CORRIGÉ)
+    const avatarPreview = document.getElementById("profileAvatarPreview");
     if (avatarPreview) {
       if (player.avatar_url) {
         try {
           const { data: signedData } = await supa.storage
             .from('avatars')
             .createSignedUrl(player.avatar_url, 3600);
-          avatarPreview.src = signedData.signedUrl + "?t=" + Date.now();
-          console.log("Avatar modale chargé:", signedData.signedUrl);
+          avatarPreview.src = signedData.signedUrl + "?v=" + Date.now(); // Cache busting
+          avatarPreview.onerror = () => {
+            avatarPreview.src = "images/avatarDefault.png";
+          };
         } catch (err) {
           console.error("Erreur chargement avatar modale:", err);
           avatarPreview.src = "images/avatarDefault.png";
@@ -318,13 +302,19 @@ async function ouvrirProfil() {
       }
     }
 
+    // 3. Affichage de la modale
+    const modal = document.getElementById("profileModal");
+    if (modal) modal.classList.remove("hidden");
+
   } catch (err) {
-    console.error("Erreur lors de l'ouverture du profil:", err);
+    console.error("Erreur ouverture profil:", err);
   }
 }
 
 async function updateProfileInfo(force = false) {
   console.log("[updateProfileInfo] Début de la mise à jour du profil");
+
+  // 1. Vérification de la session
   const { data: { session }, error } = await supa.auth.getSession();
   if (!session) {
     console.log("Pas de session active - annulation de la mise à jour du profil");
@@ -333,17 +323,16 @@ async function updateProfileInfo(force = false) {
     return;
   }
 
-  // 1. Récupération des éléments DOM
+  // 2. Récupération des éléments DOM
   const profileBtn = document.getElementById("profileBtn");
-  const profileAvatar = document.getElementById("profileAvatar");
+  const profileAvatar = document.getElementById("profileAvatar"); // Avatar dans la topbar
   const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-  const profileDropdown = document.getElementById("profileDropdown");
 
   // Désactive le bouton par défaut
   if (profileBtn) profileBtn.disabled = true;
 
   try {
-    // 2. Vérification de la connexion
+    // 3. Vérification de la connexion
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
@@ -353,7 +342,7 @@ async function updateProfileInfo(force = false) {
       }
     }
 
-    // 3. Récupération de l'utilisateur et du joueur
+    // 4. Récupération de l'utilisateur et du joueur
     const { data: { user }, error: userError } = await supa.auth.getUser();
     if (userError) {
       console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
@@ -381,79 +370,64 @@ async function updateProfileInfo(force = false) {
       return;
     }
 
-    // 4. Réactive le bouton profil
+    // 5. Réactive le bouton profil
     if (profileBtn) {
       profileBtn.disabled = false;
       profileBtn.title = "Voir votre profil";
     }
 
-    // 5. Mise à jour de l'avatar (CORRIGÉ)
-    if (profileAvatar && player.avatar_url) {
-      try {
-        const { data: signedData, error: signError } = await supa.storage
-          .from('avatars')
-          .createSignedUrl(player.avatar_url, 3600);
+    // 6. Mise à jour de l'AVATAR DANS LA TOPBAR (CORRIGÉ)
+    if (profileAvatar) {
+      if (player.avatar_url) {
+        try {
+          const { data: signedData, error: signError } = await supa.storage
+            .from('avatars')
+            .createSignedUrl(player.avatar_url, 3600);
 
-        if (signError) throw signError;
+          if (signError) throw signError;
 
-        profileAvatar.src = signedData.signedUrl + "?t=" + Date.now(); // Force le rafraîchissement
-        console.log("[updateProfileInfo] Avatar chargé avec URL signée:", signedData.signedUrl);
+          // Utilisation directe de l'URL signée avec cache busting
+          profileAvatar.src = signedData.signedUrl + "?v=" + Date.now();
+          console.log("[updateProfileInfo] Avatar topbar chargé:", signedData.signedUrl);
 
-        const testImg = new Image();
-        testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
-        testImg.onerror = () => console.error("[updateProfileInfo] Erreur chargement avatar");
-        testImg.src = signedData.signedUrl;
+          // Vérification du chargement
+          profileAvatar.onerror = () => {
+            console.error("[updateProfileInfo] Erreur chargement avatar topbar");
+            profileAvatar.src = "images/avatarDefault.png";
+          };
 
-      } catch (err) {
-        console.error("[updateProfileInfo] Erreur génération URL signée:", err);
-        if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
+        } catch (err) {
+          console.error("[updateProfileInfo] Erreur génération URL avatar topbar:", err);
+          profileAvatar.src = "images/avatarDefault.png";
+        }
+      } else {
+        profileAvatar.src = "images/avatarDefault.png";
       }
-    } else if (profileAvatar) {
-      profileAvatar.src = "images/avatarDefault.png";
+    } else {
+      console.error("Élément profileAvatar introuvable dans la topbar !");
     }
 
-    // 6. Mise à jour du pseudo dans le bouton
+    // 7. Mise à jour du pseudo dans le bouton
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player?.pseudo || "Utilisateur";
       pseudoDisplay.title = player?.pseudo || "Utilisateur";
     }
 
-    // 7. Mise à jour du dropdown
+    // 8. Mise à jour du dropdown (si nécessaire)
     const profileEmail = document.getElementById("profileEmail");
     const profileCreationDate = document.getElementById("profileCreationDate");
 
-    if (profileEmail) {
-      profileEmail.textContent = user.email || "email@example.com";
-      console.log("Email dropdown mis à jour:", user.email);
-    } else {
-      console.error("Élément profileEmail introuvable !");
-    }
-
+    if (profileEmail) profileEmail.textContent = user.email || "email@example.com";
     if (profileCreationDate && player.created_at) {
-      const creationDate = new Date(player.created_at);
-      profileCreationDate.textContent = creationDate.toLocaleDateString('fr-FR');
-      console.log("Date de création mise à jour:", creationDate);
-    } else if (!profileCreationDate) {
-      console.error("Élément profileCreationDate introuvable !");
+      profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString('fr-FR');
     }
 
-    // 8. Pré-remplissage de la modale
+    // 9. Pré-remplissage de la modale (pour quand elle s'ouvrira)
     const pseudoInput = document.getElementById("profilePseudoInput");
     const emailInput = document.getElementById("profileEmailInput");
 
-    if (pseudoInput) {
-      pseudoInput.value = player.pseudo || "";
-      console.log("Pseudo modale pré-rempli:", player.pseudo);
-    } else {
-      console.error("Élément profilePseudoInput introuvable !");
-    }
-
-    if (emailInput) {
-      emailInput.value = user.email || "";
-      console.log("Email modale pré-rempli:", user.email);
-    } else {
-      console.error("Élément profileEmailInput introuvable !");
-    }
+    if (pseudoInput) pseudoInput.value = player.pseudo || "";
+    if (emailInput) emailInput.value = user.email || "";
 
     console.log("[updateProfileInfo] Mise à jour terminée avec succès");
 
@@ -815,27 +789,22 @@ async function resetPassword() {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  // 1. Récupération des éléments
+  console.log("Enregistrement des modifications du profil");
+
+  // 1. Récupération des éléments et validation
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
-  const profileModal = document.getElementById("profileModal");
-  const profilePseudoDisplay = document.getElementById("profilePseudoDisplay");
-  const profileEmailDisplay = document.getElementById("profileEmail");
+  const newPseudo = pseudoInput.value.trim();
+  const newEmail = emailInput.value.trim();
 
-  // Message d'erreur
   let errorMessage = document.getElementById("profileErrorMessage");
   if (!errorMessage) {
     errorMessage = document.createElement("div");
     errorMessage.id = "profileErrorMessage";
     errorMessage.className = "error-message hidden";
     errorMessage.style.color = "red";
-    errorMessage.style.marginBottom = "15px";
-    profileModal.querySelector('.panel').prepend(errorMessage);
+    document.getElementById("profileModal").querySelector('.panel').prepend(errorMessage);
   }
-
-  // 2. Validation des champs
-  const newPseudo = pseudoInput.value.trim();
-  const newEmail = emailInput.value.trim();
 
   if (!newPseudo) {
     errorMessage.textContent = "Le pseudo ne peut pas être vide";
@@ -843,72 +812,37 @@ async function saveProfileChanges() {
     return;
   }
 
-  if (!newEmail) {
-    errorMessage.textContent = "L'email ne peut pas être vide";
-    errorMessage.classList.remove("hidden");
-    return;
-  }
-
   try {
-    // 3. Récupération de la session
+    // 2. Récupération de la session
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // 4. Mise à jour du pseudo dans players
-    const { error: playerError } = await supa
-      .from("players")
-      .update({ pseudo: newPseudo })
-      .eq("id", session.user.id);
-    if (playerError) throw playerError;
+    // 3. Mise à jour du pseudo
+    await supa.from("players").update({ pseudo: newPseudo }).eq("id", session.user.id);
+    await supa.from("scores").update({ pseudo: newPseudo }).eq("player_id", session.user.id);
 
-    // 5. Mise à jour des scores
-    const { error: scoresError } = await supa
-      .from("scores")
-      .update({ pseudo: newPseudo })
-      .eq("player_id", session.user.id);
-    if (scoresError) throw scoresError;
-
-    // 6. Mise à jour de l'email
+    // 4. Mise à jour de l'email (optionnel)
     if (newEmail !== session.user.email) {
-      const { error: authError } = await supa.auth.updateUser({
-        email: newEmail,
-        emailRedirectTo: window.location.origin
-      });
-      if (authError) {
-        console.error("Erreur email:", authError);
-        errorMessage.textContent = "Email mis à jour. Vérifiez votre boîte mail pour confirmer.";
-        errorMessage.classList.remove("hidden");
-      }
+      await supa.auth.updateUser({ email: newEmail, emailRedirectTo: window.location.origin });
     }
 
-    // 7. Gestion de l'avatar (CORRIGÉ)
-    if (window.tempAvatarFile) {
+    // 5. Gestion de l'avatar (CORRIGÉ)
+    const avatarUpload = document.getElementById("avatarUpload");
+    if (avatarUpload && avatarUpload.files[0]) {
+      const file = avatarUpload.files[0];
       try {
-        const filePath = `avatars/${session.user.id}/${Date.now()}_${window.tempAvatarFile.name}`;
+        const filePath = `avatars/${session.user.id}/${Date.now()}_${file.name}`;
+
+        // Upload du fichier
         const { error: uploadError } = await supa.storage
           .from('avatars')
-          .upload(filePath, window.tempAvatarFile);
-
+          .upload(filePath, file);
         if (uploadError) throw uploadError;
 
-        const { error: updateError } = await supa
-          .from("players")
-          .update({ avatar_url: filePath })
-          .eq("id", session.user.id);
-
-        if (updateError) throw updateError;
+        // Mise à jour de l'URL dans la base de données
+        await supa.from("players").update({ avatar_url: filePath }).eq("id", session.user.id);
 
         console.log("Avatar mis à jour avec succès:", filePath);
-
-        // Mise à jour de l'avatar dans l'interface
-        const profileAvatar = document.getElementById("profileAvatar");
-        if (profileAvatar) {
-          const { data: signedData } = await supa.storage
-            .from('avatars')
-            .createSignedUrl(filePath, 3600);
-          profileAvatar.src = signedData.signedUrl + "?t=" + Date.now();
-        }
-
       } catch (err) {
         console.error("Erreur mise à jour avatar:", err);
         errorMessage.textContent = "Erreur lors de la mise à jour de l'avatar.";
@@ -916,19 +850,13 @@ async function saveProfileChanges() {
       }
     }
 
-    // 8. Mise à jour de l'interface
-    if (profilePseudoDisplay) profilePseudoDisplay.textContent = newPseudo;
-    if (profileEmailDisplay) profileEmailDisplay.textContent = newEmail;
-
-    // 9. Fermeture
-    document.getElementById("authOverlay").classList.add("hidden");
-    updateBestScoreTop();
-    profileModal.classList.add("hidden");
-    errorMessage.classList.add("hidden");
+    // 6. Fermeture et rafraîchissement
+    document.getElementById("profileModal").classList.add("hidden");
+    await updateProfileInfo(true); // Rafraîchit tout, y compris l'avatar de la topbar
     console.log("Profil mis à jour avec succès");
 
   } catch (err) {
-    console.error("Erreur:", err);
+    console.error("Erreur enregistrement:", err);
     errorMessage.textContent = err.message || "Une erreur est survenue";
     errorMessage.classList.remove("hidden");
   }
