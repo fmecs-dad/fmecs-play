@@ -2620,15 +2620,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
   });
 
-  document.addEventListener("DOMContentLoaded", function() {
-  const privacyCheckbox = document.getElementById("acceptPrivacyPolicy");
-  const registerBtn = document.getElementById("whySignupRegisterBtn");
-
-  if (privacyCheckbox && registerBtn) {
-    privacyCheckbox.addEventListener("change", function() {
-      registerBtn.disabled = !this.checked;
-    });
-  }
+  // Activation du bouton "S'inscrire" quand la case est cochée
+document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
+  document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
 });
 
   try {
