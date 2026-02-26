@@ -442,7 +442,7 @@ if (profileAvatar) {
   }
 } */
 
-    // 7. Mise à jour des informations (ton code original)
+  /*   // 7. Mise à jour des informations (ton code original)
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player.pseudo || "Utilisateur";
@@ -458,7 +458,7 @@ if (profileAvatar) {
     }
 
     console.log("[updateProfileInfo] Mise à jour terminée avec succès");
-
+ */
   } catch (err) {
     console.error("[updateProfileInfo] Erreur inattendue:", err);
     if (profileAvatar) profileAvatar.src = "images/avatarDefault.png";
