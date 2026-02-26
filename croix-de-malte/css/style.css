@@ -1317,7 +1317,7 @@ footer {
   right: 0;
   background: #333333; /* Fond opaque comme fmecs.fr */
   border-top: 1px solid #444444; /* Bandeau supérieur comme fmecs.fr */
-  padding: 15px;
+  padding: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1354,4 +1354,5 @@ footer {
 
 .footer-copyright {
   margin-left: auto;
+
   color: #ffffff;
