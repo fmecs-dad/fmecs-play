@@ -1341,8 +1341,8 @@ footer {
 }
 
 .footer-logo {
-  height: 30px;          /* Hauteur fixe */
-  width: 30px;          /* Largeur fixe (car image carrée) */
+  height: 30px !important;          /* Hauteur fixe */
+  width: 30px !important;          /* Largeur fixe (car image carrée) */
   object-fit: contain;   /* Conserve les proportions */
   margin-right: 15px;
   display: block;        /* Évite les problèmes de layout */
