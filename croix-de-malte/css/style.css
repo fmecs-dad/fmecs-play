@@ -1296,6 +1296,34 @@ body {
 
 /* === BAS DE PAGE === */
 
+#game-footer-container .footer-content {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+
+#game-footer-container .footer-text,
+#game-footer-container .footer-link,
+#game-footer-container .footer-copyright {
+  color: white !important;
+  margin-right: 15px !important;
+}
+
+#game-footer-container .footer-link {
+  text-decoration: none !important;
+}
+
+#game-footer-container .footer-copyright {
+  margin-left: auto !important;
+  font-size: 12px !important;
+}
+
+#game-footer-container .footer-copyright a {
+  color: white !important;
+}
+
 footer {
   position: fixed;
   bottom: 0;
@@ -1325,6 +1353,16 @@ footer {
   color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
   height: 60px;
   min-height: 60px; /
+}
+
+.transparent-footer,
+.transparent-footer * {
+  color: white !important;
+}
+
+.transparent-footer a {
+  color: inherit !important; /* Hérite du blanc */
+  text-decoration: none !important;
 }
 
 .footer-content {
