@@ -1299,74 +1299,43 @@ body {
 /* === BAS DE PAGE === */
 
 footer {
-    text-align: center;
-    padding: 25px;
-    background: #333333;
-    border-top: 1px solid #444444;
-    color: #ccc;
-}
-
-.logo img {
-    height: 48px;
-    width: auto;
-    display: block;
-}
-
-.transparent-footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(51, 51, 51, 0.9) !important; /* Fond semi-transparent */
+  background: #333;
   padding: 15px;
   display: flex;
   align-items: center;
-  justify-content: center;
   z-index: 1000;
-  width: 100%;
-}
-
-.transparent-footer * {
-  color: white !important; /* Force le texte en blanc pour tous les éléments */
-  text-decoration: none !important; /* Supprime le soulignement des liens */
 }
 
 .footer-content {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  flex-wrap: wrap; /* Permet le retour à la ligne sur petits écrans */
 }
 
 .footer-logo {
-  height: 30px !important;          /* Hauteur fixe */
-  width: 30px !important;          /* Largeur fixe (car image carrée) */
-  object-fit: contain;   /* Conserve les proportions */
-  margin-right: 15px;
-  display: block;        /* Évite les problèmes de layout */
-  flex-shrink: 0;        /* Empêche le logo de rétrécir */
+  height: 70px;
+  margin-right: 30px;
 }
 
 .footer-text {
-  margin-right: 5px !important;
+  margin-right: 15px;
+  color: #ffffff;
 }
 
 .footer-link {
-  color: white !important; /* Force la couleur blanche */
-  margin-right: 10px !important;
+  margin-right: 15px;
+  color: #ffffff;
+  text-decoration: none;
 }
 
 .footer-link:hover {
-  text-decoration: underline !important;
+  text-decoration: underline;
 }
 
 .footer-copyright {
   margin-left: auto;
-  font-size: 12px !important;
-}
-
-.footer-copyright a {
-  color: white !important; /* Force la couleur blanche pour les liens */
-}
+  color: #ffffff;
