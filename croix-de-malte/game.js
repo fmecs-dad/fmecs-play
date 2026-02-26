@@ -398,39 +398,49 @@ async function updateProfileInfo(force = false) {
 
     // 6. Mise à jour de l'avatar (ton code original)
     const profileAvatar = document.getElementById("profileAvatar");
-    if (profileAvatar) {
-      if (player.avatar_url) {
-        try {
-          const { data: signedData, error: signError } = await supa.storage
-            .from('avatars')
-            .createSignedUrl(player.avatar_url, 3600);
+if (profileAvatar) {
+  if (player.avatar_url) {
+    try {
+      const { data: signedData, error: signError } = await supa.storage
+        .from('avatars')
+        .createSignedUrl(player.avatar_url, 3600);
 
-          if (signError) throw signError;
+      if (signError) throw signError;
 
-          profileAvatar.src = signedData.signedUrl;
-          profileAvatar.onerror = () => {
-            console.error("[updateProfileInfo] Erreur chargement avatar topbar");
-            profileAvatar.src = "images/avatarDefault.png";
-          };
+      // Utilisez requestAnimationFrame pour éviter les re-rendus
+      requestAnimationFrame(() => {
+        profileAvatar.src = signedData.signedUrl;
+      });
 
-          const testImg = new Image();
-          testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
-          testImg.onerror = () => {
-            console.error("[updateProfileInfo] Vérification échouée");
-            profileAvatar.src = "images/avatarDefault.png";
-          };
-          testImg.src = signedData.signedUrl;
-
-        } catch (err) {
-          console.error("[updateProfileInfo] Erreur avatar:", err.message);
+      profileAvatar.onerror = () => {
+        console.error("[updateProfileInfo] Erreur chargement avatar topbar");
+        requestAnimationFrame(() => {
           profileAvatar.src = "images/avatarDefault.png";
-        }
-      } else {
+        });
+      };
+
+      const testImg = new Image();
+      testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
+      testImg.onerror = () => {
+        console.error("[updateProfileInfo] Vérification échouée");
+        requestAnimationFrame(() => {
+          profileAvatar.src = "images/avatarDefault.png";
+        });
+      };
+      testImg.src = signedData.signedUrl;
+
+    } catch (err) {
+      console.error("[updateProfileInfo] Erreur avatar:", err.message);
+      requestAnimationFrame(() => {
         profileAvatar.src = "images/avatarDefault.png";
-      }
-    } else {
-      console.error("Élément profileAvatar introuvable dans le DOM !");
+      });
     }
+  } else {
+    requestAnimationFrame(() => {
+      profileAvatar.src = "images/avatarDefault.png";
+    });
+  }
+}
 
     // 7. Mise à jour des informations (ton code original)
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
