@@ -1320,9 +1320,10 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 100001;
   width: 100%;
   color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
+  height: 60px;
   min-height: 60px; /
 }
 
