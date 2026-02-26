@@ -11,9 +11,7 @@ html, body {
   box-sizing: border-box;
 }
 
-img, canvas {
-  max-width: 100%;
-}
+
 
 /* utile si tu veux réutiliser .flex */
 .flex {
@@ -1317,7 +1315,7 @@ footer {
 }
 
 .footer-logo {
-  height: 70px;
+  height: 	px;
   margin-right: 30px;
 }
 
