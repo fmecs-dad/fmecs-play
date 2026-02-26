@@ -1341,3 +1341,16 @@ footer {
   color: #ffffff;
 
 }
+
+.footer-content a.footer-link,
+.footer-copyright a.footer-link {
+    color: white !important;
+    text-decoration: none !important;
+}
+
+/* Style au survol */
+.footer-content a.footer-link:hover,
+.footer-copyright a.footer-link:hover {
+    color: white !important;
+    opacity: 0.9;
+}
