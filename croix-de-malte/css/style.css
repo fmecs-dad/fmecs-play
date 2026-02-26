@@ -1350,15 +1350,3 @@ body {
   font-size: 12px;
 }
 
-footer {
-  position: fixed;
-  bottom: ;
-  left: 0;
-  right: 0;
-  background: #333;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  z-index: 100003;
-}
-
