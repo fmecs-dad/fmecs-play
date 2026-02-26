@@ -1307,7 +1307,7 @@ footer {
   padding: 15px;
   display: flex;
   align-items: center;
-  z-index: 1000;
+  z-index: 100003;
 }
 
 .footer-content {
