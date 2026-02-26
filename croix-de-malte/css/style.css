@@ -1298,6 +1298,21 @@ body {
 
 /* === BAS DE PAGE === */
 
+.transparent-footer {
+  position: fixed;
+  bottom: 0;  /* Corrige le problème de "bottom: ;" vide */
+  left: 0;
+  right: 0;
+  background: rgba(51, 51, 51, 0.9);  /* Fond légèrement transparent */
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* Centrer le contenu */
+  z-index: 1000;
+  width: 100%;
+  color: white !important;  /* Force la couleur blanche pour tout le texte */
+}
+
 footer {
   position: fixed;
   bottom: ;
