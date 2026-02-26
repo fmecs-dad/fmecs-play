@@ -397,7 +397,7 @@ async function updateProfileInfo(force = false) {
     }
 
     // 6. Mise à jour de l'avatar (ton code original)
-    const profileAvatar = document.getElementById("profileAvatar");
+/*     const profileAvatar = document.getElementById("profileAvatar");
 if (profileAvatar) {
   if (player.avatar_url) {
     try {
@@ -440,7 +440,7 @@ if (profileAvatar) {
       profileAvatar.src = "images/avatarDefault.png";
     });
   }
-}
+} */
 
     // 7. Mise à jour des informations (ton code original)
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
