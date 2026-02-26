@@ -1395,6 +1395,7 @@ footer {
   margin-left: auto;
   color: #ffffff;
 }
+
 /* Réinitialisation complète pour le footer */
 #game-footer,
 #game-footer * {
@@ -1413,7 +1414,7 @@ footer {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    z-index: 1000 !important;
+    z-index: 10005 !important;
     width: 100% !important;
     color: white !important;
 }
