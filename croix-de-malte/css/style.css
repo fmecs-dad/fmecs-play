@@ -1297,56 +1297,59 @@ body {
 
 
 /* === BAS DE PAGE === */
-
-/* === BAS DE PAGE === */
 .transparent-footer {
   position: fixed;
-  bottom: 0;  /* Corrige le problème de "bottom: ;" vide */
+  bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(51, 51, 51, 0.9);  /* Fond légèrement transparent */
+  background: rgba(51, 51, 51, 0.9) !important; /* Fond semi-transparent */
   padding: 15px;
   display: flex;
   align-items: center;
-  justify-content: center;  /* Centrer le contenu */
+  justify-content: center;
   z-index: 1000;
   width: 100%;
-  color: white !important;  /* Force la couleur blanche pour tout le texte */
+}
+
+.transparent-footer * {
+  color: white !important; /* Force le texte en blanc pour tous les éléments */
+  text-decoration: none !important; /* Supprime le soulignement des liens */
 }
 
 .footer-content {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 1200px;  /* Limite la largeur maximale */
-  margin: 0 auto;    /* Centre le contenu */
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap; /* Permet le retour à la ligne sur petits écrans */
 }
 
 .footer-logo {
-  height: 40px;  /* Réduit la taille du logo */
-  width: auto;   /* Conserve les proportions */
-  margin-right: 15px;
-  filter: brightness(0) invert(1);  /* Rend le logo blanc si nécessaire */
+  height: 30px !important; /* Taille réduite */
+  width: auto !important;
+  margin-right: 10px;
+  display: block; /* Évite les problèmes de layout */
 }
 
-.footer-text,
-.footer-link,
-.footer-copyright {
-  color: #ffffff !important;  /* Force la couleur blanche */
-  font-size: 14px;  /* Taille de police cohérente */
-  margin-right: 10px;
+.footer-text {
+  margin-right: 5px !important;
 }
 
 .footer-link {
-  text-decoration: none;
+  color: white !important; /* Force la couleur blanche */
+  margin-right: 10px !important;
 }
 
 .footer-link:hover {
-  text-decoration: underline;
+  text-decoration: underline !important;
 }
 
 .footer-copyright {
   margin-left: auto;
-  font-size: 12px;
+  font-size: 12px !important;
 }
 
+.footer-copyright a {
+  color: white !important; /* Force la couleur blanche pour les liens */
+}
