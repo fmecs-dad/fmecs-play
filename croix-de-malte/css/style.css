@@ -1394,3 +1394,54 @@ footer {
 .footer-copyright {
   margin-left: auto;
   color: #ffffff;
+}
+/* Réinitialisation complète pour le footer */
+#game-footer,
+#game-footer * {
+    all: unset !important;
+}
+
+/* Styles de base pour le footer */
+#game-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #333333 !important;
+    border-top: 1px solid #444444 !important;
+    padding: 25px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 1000 !important;
+    width: 100% !important;
+    color: white !important;
+}
+
+/* Conteneur du footer */
+#game-footer .footer-content {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+}
+
+/* Texte et liens */
+#game-footer .footer-text,
+#game-footer .footer-link,
+#game-footer .footer-copyright {
+    color: white !important;
+    margin-right: 15px !important;
+}
+
+/* Lien */
+#game-footer .footer-link {
+    text-decoration: none !important;
+}
+
+/* Copyright */
+#game-footer .footer-copyright {
+    margin-left: auto !important;
+    font-size: 12px !important;
+}
