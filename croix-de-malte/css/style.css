@@ -1316,7 +1316,7 @@ footer {
   left: 0;
   right: 0;
   background: #333333; /* Fond opaque comme fmecs.fr */
-  padding: 60px;
+  padding: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
