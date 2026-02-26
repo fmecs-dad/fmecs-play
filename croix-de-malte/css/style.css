@@ -1341,10 +1341,12 @@ footer {
 }
 
 .footer-logo {
-  height: 30px !important; /* Taille réduite */
-  width: auto !important;
-  margin-right: 10px;
-  display: block; /* Évite les problèmes de layout */
+  height: 30px;          /* Hauteur fixe */
+  width: 30px;          /* Largeur fixe (car image carrée) */
+  object-fit: contain;   /* Conserve les proportions */
+  margin-right: 15px;
+  display: block;        /* Évite les problèmes de layout */
+  flex-shrink: 0;        /* Empêche le logo de rétrécir */
 }
 
 .footer-text {
