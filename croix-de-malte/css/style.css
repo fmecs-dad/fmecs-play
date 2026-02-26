@@ -1297,6 +1297,15 @@ body {
 
 
 /* === BAS DE PAGE === */
+
+footer {
+    text-align: center;
+    padding: 25px;
+    background: #333333;
+    border-top: 1px solid #444444;
+    color: #ccc;
+}
+
 .transparent-footer {
   position: fixed;
   bottom: 0;
