@@ -1298,6 +1298,7 @@ body {
 
 /* === BAS DE PAGE === */
 
+/* === BAS DE PAGE === */
 .transparent-footer {
   position: fixed;
   bottom: 0;  /* Corrige le problème de "bottom: ;" vide */
@@ -1313,6 +1314,42 @@ body {
   color: white !important;  /* Force la couleur blanche pour tout le texte */
 }
 
+.footer-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;  /* Limite la largeur maximale */
+  margin: 0 auto;    /* Centre le contenu */
+}
+
+.footer-logo {
+  height: 40px;  /* Réduit la taille du logo */
+  width: auto;   /* Conserve les proportions */
+  margin-right: 15px;
+  filter: brightness(0) invert(1);  /* Rend le logo blanc si nécessaire */
+}
+
+.footer-text,
+.footer-link,
+.footer-copyright {
+  color: #ffffff !important;  /* Force la couleur blanche */
+  font-size: 14px;  /* Taille de police cohérente */
+  margin-right: 10px;
+}
+
+.footer-link {
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  margin-left: auto;
+  font-size: 12px;
+}
+
 footer {
   position: fixed;
   bottom: ;
@@ -1325,34 +1362,3 @@ footer {
   z-index: 100003;
 }
 
-.footer-content {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.footer-logo {
-  height: 70px;
-  margin-right: 30px;
-}
-
-.footer-text {
-  margin-right: 15px;
-  color: #ffffff;
-}
-
-.footer-link {
-  margin-right: 15px;
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.footer-link:hover {
-  text-decoration: underline;
-}
-
-.footer-copyright {
-  margin-left: auto;
-  color: #ffffff;
-
-}
