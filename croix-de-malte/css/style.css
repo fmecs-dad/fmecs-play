@@ -1296,34 +1296,6 @@ body {
 
 /* === BAS DE PAGE === */
 
-#game-footer-container .footer-content {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-  max-width: 1200px !important;
-  margin: 0 auto !important;
-}
-
-#game-footer-container .footer-text,
-#game-footer-container .footer-link,
-#game-footer-container .footer-copyright {
-  color: white !important;
-  margin-right: 15px !important;
-}
-
-#game-footer-container .footer-link {
-  text-decoration: none !important;
-}
-
-#game-footer-container .footer-copyright {
-  margin-left: auto !important;
-  font-size: 12px !important;
-}
-
-#game-footer-container .footer-copyright a {
-  color: white !important;
-}
-
 footer {
   position: fixed;
   bottom: 0;
@@ -1333,36 +1305,7 @@ footer {
   padding: 15px;
   display: flex;
   align-items: center;
-  width: 100%;
-  color: #ccc;
-  z-index: 100003;
-}
-
-.transparent-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #333333; /* Fond opaque comme fmecs.fr */
-  padding: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100001;
-  width: 100%;
-  color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
-  height: 60px;
-  min-height: 60px; /
-}
-
-.transparent-footer,
-.transparent-footer * {
-  color: white !important;
-}
-
-.transparent-footer a {
-  color: inherit !important; /* Hérite du blanc */
-  text-decoration: none !important;
+  z-index: 1000;
 }
 
 .footer-content {
@@ -1372,7 +1315,7 @@ footer {
 }
 
 .footer-logo {
-  height: 	px;
+  height: 70px;
   margin-right: 30px;
 }
 
@@ -1394,55 +1337,4 @@ footer {
 .footer-copyright {
   margin-left: auto;
   color: #ffffff;
-}
-
-/* Réinitialisation complète pour le footer */
-#game-footer,
-#game-footer * {
-    all: unset !important;
-}
-
-/* Styles de base pour le footer */
-#game-footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: #333333 !important;
-    border-top: 1px solid #444444 !important;
-    padding: 25px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 10005 !important;
-    width: 100% !important;
-    color: white !important;
-}
-
-/* Conteneur du footer */
-#game-footer .footer-content {
-    display: flex !important;
-    align-items: center !important;
-    width: 100% !important;
-    max-width: 1200px !important;
-    margin: 0 auto !important;
-}
-
-/* Texte et liens */
-#game-footer .footer-text,
-#game-footer .footer-link,
-#game-footer .footer-copyright {
-    color: white !important;
-    margin-right: 15px !important;
-}
-
-/* Lien */
-#game-footer .footer-link {
-    text-decoration: none !important;
-}
-
-/* Copyright */
-#game-footer .footer-copyright {
-    margin-left: auto !important;
-    font-size: 12px !important;
 }
