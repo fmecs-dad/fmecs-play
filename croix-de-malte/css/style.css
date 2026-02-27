@@ -511,6 +511,70 @@ body {
   background: #555;
 }
 
+/* === BAS DE PAGE === */
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #333;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: #ccc;
+  z-index: 100003;
+}
+
+.transparent-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #333333; /* Fond opaque comme fmecs.fr */
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100001;
+  width: 100%;
+  color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
+  height: 60px;
+  min-height: 60px; /
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.footer-logo {
+  height: 70px;
+  margin-right: 30px;
+}
+
+.footer-text {
+  margin-right: 15px;
+  color: #ffffff;
+}
+
+.footer-link {
+  margin-right: 15px;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  margin-left: auto;
+  color: #ffffff;
+}
+
 /* === HELP CLOSE BUTTON === */
 
 #closeHelpBtn {
@@ -1294,66 +1358,3 @@ body {
   text-align: center;
 
 
-/* === BAS DE PAGE === */
-
-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #333;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  color: #ccc;
-  z-index: 100003;
-}
-
-.transparent-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #333333; /* Fond opaque comme fmecs.fr */
-  padding: 25px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100001;
-  width: 100%;
-  color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
-  height: 60px;
-  min-height: 60px; /
-}
-
-.footer-content {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.footer-logo {
-  height: 70px;
-  margin-right: 30px;
-}
-
-.footer-text {
-  margin-right: 15px;
-  color: #ffffff;
-}
-
-.footer-link {
-  margin-right: 15px;
-  color: #ffffff;
-  text-decoration: none;
-}
-
-.footer-link:hover {
-  text-decoration: underline;
-}
-
-.footer-copyright {
-  margin-left: auto;
-  color: #ffffff;
-}
