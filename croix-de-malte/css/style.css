@@ -1305,7 +1305,26 @@ footer {
   padding: 15px;
   display: flex;
   align-items: center;
-  z-index: 1000;
+  width: 100%;
+  color: #ccc;
+  z-index: 100003;
+}
+
+.transparent-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #333333; /* Fond opaque comme fmecs.fr */
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100001;
+  width: 100%;
+  color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
+  height: 60px;
+  min-height: 60px; /
 }
 
 .footer-content {
