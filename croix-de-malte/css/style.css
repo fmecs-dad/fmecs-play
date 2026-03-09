@@ -485,8 +485,10 @@ body {
   border-radius: 4px;
   margin-bottom: 15px;
   text-align: center;
+}
 
 /* Style pour le message d'erreur/succès dans la modale de mot de passe */
+
 #passwordErrorMessage {
   padding: 10px;
   border-radius: 4px;
@@ -613,7 +615,7 @@ footer {
   width: 100%;
   color: #ccc; /* Couleur de texte par défaut comme fmecs.fr */
   height: 100px;
-  min-height: 100px; /
+  min-height: 100px;
 }
 
 .footer-content {
