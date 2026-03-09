@@ -281,29 +281,45 @@
   </div>
 </div>
 
-<!-- Modale de profil -->
+<!-- Modale de profil (réorganisée) -->
 <div id="profileModal" class="modal hidden">
   <div class="panel">
     <h2>Modifier mon profil</h2>
+
+    <!-- BLOC AVATAR (déplacé en haut) -->
+    <div class="form-group avatar-section">
+      <label for="avatarUpload">Avatar :</label>
+      <div class="avatar-container">
+        <img id="profileAvatarPreview" class="avatar-preview" src="images/avatarDefault.png" alt="Aperçu avatar">
+        <button id="changeAvatarBtn" class="secondary-btn">Changer l'avatar</button>
+        <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
+      </div>
+    </div>
+
+    <!-- SÉPARATEUR (ligne horizontale) -->
+    <hr class="modal-separator">
+
+    <!-- CHAMPS PSEUDO & EMAIL (raccourcis et alignés) -->
     <div class="form-group">
       <label for="profilePseudoInput">Pseudo :</label>
-      <input type="text" id="profilePseudoInput" class="form-input" placeholder="Ton pseudo">
+      <input type="text" id="profilePseudoInput" class="form-input short-input" placeholder="Ton pseudo">
     </div>
     <div class="form-group">
       <label for="profileEmailInput">Email :</label>
-      <input type="email" id="profileEmailInput" class="form-input" placeholder="Ton email">
+      <input type="email" id="profileEmailInput" class="form-input short-input" placeholder="Ton email">
     </div>
-    <div class="form-group avatar-group">
-      <label for="avatarUpload">Avatar :</label>
-      <input type="file" id="avatarUpload" accept="image/*" style="display: none;">
-      <img id="profileAvatarPreview" class="avatar-preview" src="images/avatarDefault.png" alt="Aperçu avatar">
-      <button id="changeAvatarBtn" class="secondary-btn">Changer l'avatar</button>
-    </div>
-    <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
+
+    <!-- SÉPARATEUR -->
+    <hr class="modal-separator">
+
+    <!-- BOUTONS D'ACTION (Enregistrer/Annuler) -->
     <div class="modal-actions">
       <button id="saveProfileBtn" class="main-btn">Enregistrer</button>
       <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
     </div>
+
+    <!-- BOUTON "CHANGER LE MOT DE PASSE" (aligné à gauche, en dessous) -->
+    <button id="changePasswordBtn" class="secondary-btn password-btn">Changer le mot de passe</button>
   </div>
 </div>
 
