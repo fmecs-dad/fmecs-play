@@ -373,6 +373,61 @@ body {
   box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
 }
 
+/* ===== MODALE DE PROFIL (CORRIGÉE) ===== */
+#profileModal .panel {
+  text-align: left; /* Alignement général à gauche */
+}
+
+#profileModal .form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+#profileModal .form-group.avatar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alignement à gauche */
+}
+
+#profileModal .form-group.avatar-group label {
+  margin-bottom: 10px; /* Espace entre le label et l'image */
+}
+
+#profileModal #profileAvatarPreview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  margin: 0 auto 10px; /* Centre l'image horizontalement, espace en bas */
+}
+
+#profileModal #changeAvatarBtn {
+  width: 100%;
+  max-width: 200px; /* Largeur fixe pour correspondre au bouton "Changer le mot de passe" */
+  margin: 0 auto 15px; /* Centre le bouton horizontalement, espace en bas */
+  display: block;
+}
+
+#profileModal #changePasswordBtn {
+  width: 100%;
+  max-width: 200px; /* Même largeur que le bouton "Changer l'avatar" */
+  margin: 0 0 20px; /* Aligné à gauche, espace en bas */
+  display: block;
+}
+
+/* Boutons "Changer l'avatar" et "Changer le mot de passe" */
+#profileModal #changeAvatarBtn,
+#profileModal #changePasswordBtn {
+  background: #444;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 /* Boutons (commun à toutes les modales) */
 .modal-actions {
   display: flex;
