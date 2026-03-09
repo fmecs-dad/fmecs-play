@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Morpion Solitaire – Croix de Malte</title>
-  <link rel="preload" as="image" href="images/monfond.jpg">
+  <!link rel="preload" as="image" href="images/monfond.jpg">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" type="image/png" href="favicon.png?v=1">
 </head>
@@ -280,7 +280,7 @@
     </div>
   </div>
 </div>
- 
+
 <!--- Modification Profil --->
 <div id="profileModal" class="modal hidden">
   <div class="panel">
@@ -309,7 +309,7 @@
 
 <!-- Modale de mot de passe (séparée) -->
 <div id="passwordModal" class="modal hidden">
-  <div class="panel">
+  <div class="modal-content">
     <h2>Changer le mot de passe</h2>
     <div class="form-group">
       <label for="currentPassword">Mot de passe actuel :</label>
@@ -347,9 +347,10 @@
     </span>
   </div>
 </footer>
- 
+
 <script src="/croix-de-malte/lib/supabase.js"></script>
 <script src="game.js"></script>
 
 </body>
+
 </html>
