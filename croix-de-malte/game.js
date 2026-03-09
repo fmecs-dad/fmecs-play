@@ -2845,6 +2845,24 @@ document.getElementById("profileModal")?.addEventListener("click", (e) => {
   }
 });
 
+// Écouteur pour le bouton "Changer le mot de passe"
+document.getElementById('changePasswordBtn').addEventListener('click', function() {
+  // Masquer la modale de profil
+  document.getElementById('profileModal').classList.add('hidden');
+
+  // Afficher la modale de changement de mot de passe
+  document.getElementById('passwordModal').classList.remove('hidden');
+});
+
+// Écouteur pour le bouton "Annuler" dans la modale de mot de passe
+document.getElementById('cancelPasswordBtn').addEventListener('click', function() {
+  // Masquer la modale de mot de passe
+  document.getElementById('passwordModal').classList.add('hidden');
+
+  // Réafficher la modale de profil
+  document.getElementById('profileModal').classList.remove('hidden');
+});
+
   // ===============================
   //   FIN DE PARTIE
   // ===============================
