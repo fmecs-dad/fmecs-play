@@ -405,7 +405,6 @@ body {
   max-width: 500px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: left; /* Alignement général à gauche */
 }
 
 #profileModal h2 {
@@ -413,52 +412,6 @@ body {
   margin-top: 0;
   margin-bottom: 20px;
   text-align: center;
-}
-
-#profileModal .form-group.avatar-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Alignement à gauche */
-}
-
-#profileModal .form-group.avatar-group label {
-  margin-bottom: 10px; /* Espace entre le label et l'image */
-}
-
-#profileModal #profileAvatarPreview {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid white;
-  margin-bottom: 10px; /* Espace entre l'image et le bouton */
-}
-
-#profileModal #changeAvatarBtn {
-  width: 100%; /* Même largeur que le bouton "Changer le mot de passe" */
-  max-width: 200px; /* Largeur fixe pour les deux boutons */
-  background: #444;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 15px; /* Espace sous le bouton */
-}
-
-#profileModal #changePasswordBtn {
-  width: 100%; /* Même largeur que le bouton "Changer l'avatar" */
-  max-width: 200px; /* Largeur fixe pour les deux boutons */
-  background: #444;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-bottom: 20px; /* Espace avant les boutons "Enregistrer/Annuler" */
-  display: block; /* Pour que le bouton prenne toute la largeur disponible */
 }
 
 /* ===== SECTION CHANGEMENT MOT DE PASSE ===== */
