@@ -487,6 +487,33 @@ body {
   margin: 0 auto 15px;
 }
 
+.avatar-section {
+  text-align: center; /* Centre l'avatar et le bouton */
+  margin-bottom: 15px;
+}
+
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-separator {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 15px 0;
+}
+
+.short-input {
+  max-width: 250px; /* Largeur réduite pour les champs */
+}
+
+.password-btn {
+  margin-top: 15px; /* Espace au-dessus du bouton */
+  display: block; /* Pour l'aligner à gauche */
+}
+
 /* === BAS DE PAGE === */
 
 footer {
