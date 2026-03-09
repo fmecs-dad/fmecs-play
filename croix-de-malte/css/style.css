@@ -428,12 +428,7 @@ body {
   font-size: 14px;
 }
 
-/* Correction MINIMALE pour les boutons dans .modal-actions */
-#profileModal .modal-actions .main-btn,
-#profileModal .modal-actions .secondary-btn {
-  height: auto; /* Annule toute hauteur forcée */
-  padding: 8px 16px; /* Padding uniforme (comme les autres boutons) */
-}
+
 
 /* Boutons (commun à toutes les modales) */
 .modal-actions {
@@ -461,6 +456,13 @@ body {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+}
+
+/* Correction MINIMALE pour les boutons dans .modal-actions */
+#profileModal .modal-actions .main-btn,
+#profileModal .modal-actions .secondary-btn {
+  height: auto; /* Annule toute hauteur forcée */
+  padding: 8px 16px; /* Padding uniforme (comme les autres boutons) */
 }
 
 .main-btn:disabled, .secondary-btn:disabled {
