@@ -514,6 +514,54 @@ body {
   display: block; /* Pour l'aligner à gauche */
 }
 
+/* Alignement des labels/champs */
+.inline-form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.inline-form-group label {
+  width: 80px; /* Largeur fixe pour aligner les labels */
+  margin-right: 10px;
+  text-align: right; /* Alignement à droite pour un effet "formulaire" */
+}
+
+/* Largeur des champs raccourcis */
+.short-input {
+  max-width: 200px; /* Largeur réduite */
+}
+
+/* Espacement des séparateurs */
+.modal-separator {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 20px 0; /* Espace ajusté pour éviter le chevauchement */
+}
+
+/* Alignement des 3 boutons (même largeur, espacés) */
+.button-group {
+  display: flex;
+  justify-content: center; /* Centre le groupe de boutons */
+  gap: 10px; /* Espace entre les boutons */
+  margin-top: 20px;
+}
+
+.button-group button {
+  width: 120px; /* Même largeur pour les 3 boutons */
+}
+
+/* Bouton "Enregistrer" en bleu (action principale) */
+#saveProfileBtn {
+  background: #0078d4;
+}
+
+/* Boutons secondaires en gris */
+#cancelProfileBtn,
+#changePasswordBtn {
+  background: #444;
+}
+
 /* === BAS DE PAGE === */
 
 footer {
