@@ -717,28 +717,32 @@ function initProfileModalListeners() {
 
 /*** Change le mot de passe de l'utilisateur ***/
 async function changePassword() {
-  console.log("Entrée dans la fonction de mdp");
   const currentPassword = document.getElementById("currentPassword").value.trim();
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
 
-  // Sélection du conteneur correct
   const passwordModalPanel = document.querySelector("#passwordModal .panel");
 
   let errorMessage = document.getElementById("passwordErrorMessage");
+
   if (!errorMessage) {
     errorMessage = document.createElement("div");
     errorMessage.id = "passwordErrorMessage";
     errorMessage.style.color = "#ff6b6b";
     errorMessage.style.marginBottom = "15px";
     errorMessage.style.textAlign = "center";
+    errorMessage.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
+    errorMessage.style.padding = "10px";
+    errorMessage.style.borderRadius = "4px";
 
-    // Insertion après le titre
     const titleElement = document.querySelector("#passwordModal h2");
-    titleElement.insertAdjacentElement("afterend", errorMessage);
+    if (titleElement) {
+      titleElement.insertAdjacentElement("afterend", errorMessage);
+    } else {
+      passwordModalPanel.insertBefore(errorMessage, passwordModalPanel.firstChild);
+    }
   }
 
-  // Le reste de votre code reste inchangé
   if (!currentPassword || !newPassword || !confirmNewPassword) {
     errorMessage.textContent = "Tous les champs sont obligatoires.";
     errorMessage.style.display = "block";
@@ -766,6 +770,7 @@ async function changePassword() {
 
     errorMessage.textContent = "Mot de passe changé avec succès !";
     errorMessage.style.color = "green";
+    errorMessage.style.backgroundColor = "rgba(0, 255, 0, 0.1)";
     errorMessage.style.display = "block";
 
     setTimeout(() => {
@@ -777,6 +782,7 @@ async function changePassword() {
   } catch (err) {
     errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
     errorMessage.style.color = "#ff6b6b";
+    errorMessage.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
     errorMessage.style.display = "block";
   }
 }
