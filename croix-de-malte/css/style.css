@@ -452,6 +452,12 @@ body {
   background: #444;
 }
 
+/* Correction spécifique pour "Changer le mot de passe" */
+#profileModal #changePasswordBtn {
+  white-space: nowrap;   /* Texte sur une ligne */
+  min-width: 150px;      /* Largeur adaptée au texte long */
+}
+
 /* Style du conteneur des boutons */
 .button-group {
   display: flex;
