@@ -720,7 +720,9 @@ async function changePassword() {
   const currentPassword = document.getElementById("currentPassword").value.trim();
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
-  const passwordModalContent = document.querySelector("#passwordModal .modal-content");
+
+  // Sélection du conteneur correct
+  const passwordModalPanel = document.querySelector("#passwordModal .panel");
 
   let errorMessage = document.getElementById("passwordErrorMessage");
   if (!errorMessage) {
@@ -729,9 +731,13 @@ async function changePassword() {
     errorMessage.style.color = "#ff6b6b";
     errorMessage.style.marginBottom = "15px";
     errorMessage.style.textAlign = "center";
-    passwordModalContent.insertBefore(errorMessage, passwordModalContent.firstChild.nextSibling);
+
+    // Insertion après le titre
+    const titleElement = document.querySelector("#passwordModal h2");
+    titleElement.insertAdjacentElement("afterend", errorMessage);
   }
 
+  // Le reste de votre code reste inchangé
   if (!currentPassword || !newPassword || !confirmNewPassword) {
     errorMessage.textContent = "Tous les champs sont obligatoires.";
     errorMessage.style.display = "block";
@@ -773,6 +779,7 @@ async function changePassword() {
     errorMessage.style.display = "block";
   }
 }
+
 
 /**
  * Réinitialise le mot de passe via email
