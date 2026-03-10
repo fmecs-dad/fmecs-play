@@ -542,7 +542,6 @@ body {
   border-radius: 4px;
   margin-bottom: 15px;
   text-align: center;
-  display: none;
 }
 
 .error-message.hidden {
