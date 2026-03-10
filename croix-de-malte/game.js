@@ -717,6 +717,7 @@ function initProfileModalListeners() {
 
 /*** Change le mot de passe de l'utilisateur ***/
 async function changePassword() {
+  console.log("Entrée dans la fonction de mdp");
   const currentPassword = document.getElementById("currentPassword").value.trim();
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
@@ -779,7 +780,6 @@ async function changePassword() {
     errorMessage.style.display = "block";
   }
 }
-
 
 /**
  * Réinitialise le mot de passe via email
