@@ -2854,6 +2854,9 @@ document.getElementById('changePasswordBtn').addEventListener('click', function(
   document.getElementById('passwordModal').classList.remove('hidden');
 });
 
+// Écouteur pour le bouton "Valider" de la modale de changement de mot de passe
+document.getElementById("validatePasswordBtn").addEventListener("click", changePassword);
+
 // Écouteur pour le bouton "Annuler" dans la modale de mot de passe
 document.getElementById('cancelPasswordBtn').addEventListener('click', function() {
   // Masquer la modale de mot de passe
