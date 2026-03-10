@@ -286,7 +286,6 @@
   <div class="panel">
     <h2>Modifier mon profil</h2>
 
-    <!-- BLOC AVATAR -->
     <div class="form-group avatar-section">
       <label for="avatarUpload">Avatar :</label>
       <div class="avatar-container">
@@ -296,10 +295,8 @@
       </div>
     </div>
 
-    <!-- SÉPARATEUR -->
     <hr class="modal-separator">
 
-    <!-- CHAMPS PSEUDO & EMAIL -->
     <div class="form-group inline-form-group">
       <label for="profilePseudoInput">Pseudo :</label>
       <input type="text" id="profilePseudoInput" class="form-input short-input" placeholder="Ton pseudo">
@@ -309,18 +306,19 @@
       <input type="email" id="profileEmailInput" class="form-input short-input" placeholder="Ton email">
     </div>
 
-    <!-- SÉPARATEUR -->
     <hr class="modal-separator">
 
-    <!-- BOUTONS ALIGNÉS (3 boutons avec même classe secondary-btn) -->
+    <!-- BOUTONS -->
+    <div class="main-buttons">
+      <button id="saveProfileBtn" class="secondary-btn">Enregistrer</button>
+      <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
+    </div>
+
+    <hr class="modal-separator">
+
     <div class="button-group">
-  <div class="main-buttons">
-    <button id="saveProfileBtn" class="secondary-btn">Enregistrer</button>
-    <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
-  </div>
-  <hr class="modal-separator"> <!-- Séparateur au-dessus de "Changer le mot de passe" -->
-  <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
-</div>
+      <button id="changePasswordBtn" class="secondary-btn">Changer le mot de passe</button>
+    </div>
   </div>
 </div>
 
