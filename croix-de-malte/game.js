@@ -2872,6 +2872,29 @@ document.getElementById('changePasswordBtn').addEventListener('click', function(
   document.getElementById('passwordModal').classList.remove('hidden');
 });
 
+// Écouteur pour le bouton "Valider" de la modale de changement de mot de passe
+document.getElementById("validatePasswordBtn").addEventListener("click", changePassword);
+
+// Écouteur pour le bouton "Annuler" dans la modale de mot de passe
+document.getElementById('cancelPasswordBtn').addEventListener('click', function() {
+  // Vider les champs de saisie
+  document.getElementById("currentPassword").value = "";
+  document.getElementById("newPassword").value = "";
+  document.getElementById("confirmNewPassword").value = "";
+
+  // Masquer le message d'erreur s'il est affiché
+  const errorMessage = document.getElementById("passwordErrorMessage");
+  if (errorMessage) {
+    errorMessage.classList.add("hidden");
+  }
+
+  // Masquer la modale de mot de passe
+  document.getElementById('passwordModal').classList.add('hidden');
+
+  // Réafficher la modale de profil
+  document.getElementById('profileModal').classList.remove('hidden');
+});
+
 
   // ===============================
   //   FIN DE PARTIE
