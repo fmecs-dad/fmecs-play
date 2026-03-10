@@ -497,12 +497,6 @@ body {
   max-width: 250px; /* Largeur réduite pour les champs */
 }
 
-.password-btn {
-  margin-top: 15px; /* Espace au-dessus du bouton */
-  display: block; /* Pour l'aligner à gauche */
-}
-
-
 /* === BAS DE PAGE === */
 
 footer {
