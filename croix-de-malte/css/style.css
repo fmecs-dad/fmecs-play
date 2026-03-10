@@ -434,43 +434,60 @@ body {
   margin: 20px 0;
 }
 
-/* ===== MODALE DE PROFIL - BOUTONS CORRIGÉS ===== */
+/* ===== MODALE DE PROFIL - BOUTONS AVEC EFFETS DROPDOWN ===== */
 #profileModal .button-group {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 20px;
-  flex-wrap: wrap; /* Permet un retour à la ligne si nécessaire */
+  margin-top: 25px;
+  flex-wrap: wrap;
 }
 
 #profileModal .button-group button {
   height: 36px;
-  padding: 0 12px; /* Padding réduit pour éviter le débordement */
-  line-height: 36px; /* Centrage vertical parfait */
+  padding: 0 12px;
+  line-height: 36px;
   text-align: center;
   white-space: nowrap;
   box-sizing: border-box;
-  min-width: auto; /* Largeur automatique */
-  width: auto; /* Largeur ajustée au contenu */
-  max-width: 100%; /* Évite le débordement */
-}
-
-/* Bouton "Enregistrer" en bleu */
-#profileModal #saveProfileBtn {
-  background: #0078d4;
+  min-width: auto;
+  width: auto;
+  max-width: 100%;
+  background: #2d2d2d; /* Couleur de fond identique au dropdown */
   color: white;
+  border: none;
+  border-radius: 6px; /* Même arrondi que le dropdown */
+  cursor: pointer;
+  transition: all 0.2s ease; /* Même transition que le dropdown */
+  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Bordure subtile comme le dropdown */
 }
 
-/* Boutons "Annuler" et "Changer le mot de passe" en gris */
+/* Effet de survol identique au dropdown */
+#profileModal .button-group button:hover {
+  background: #3a3a3a; /* Même couleur de survol que le dropdown */
+  transform: translateY(-1px); /* Même effet de déplacement que le dropdown */
+}
+
+/* Bouton "Enregistrer" (même style mais couleur différente si souhaité) */
+#profileModal #saveProfileBtn {
+  background: #0078d4; /* Bleu pour l'action principale (optionnel) */
+}
+
+#profileModal #saveProfileBtn:hover {
+  background: #0066cc; /* Bleu plus foncé au survol */
+  transform: translateY(-1px);
+}
+
+/* Boutons "Annuler" et "Changer le mot de passe" (style dropdown) */
 #profileModal #cancelProfileBtn,
 #profileModal #changePasswordBtn {
-  background: #444;
-  color: white;
+  background: #2d2d2d; /* Même couleur que le dropdown */
 }
 
 /* Ajustement spécifique pour "Changer le mot de passe" */
 #profileModal #changePasswordBtn {
-  min-width: 150px; /* Largeur minimale pour ce bouton */
+  min-width: 150px;
 }
 
 /* Boutons (commun à toutes les modales) */
