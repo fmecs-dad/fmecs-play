@@ -492,7 +492,7 @@ body {
 
 /* Style du séparateur */
 #profileModal .button-separator {
-  width: 80%;
+  /*width: 80%;*/
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 10px 0;
@@ -579,12 +579,6 @@ body {
   align-items: center;
   gap: 10px;
 }
-
-/*.modal-separator {
-  border: none;
-  border-top: 1px solid #333;
-  margin: 15px 0;
-}*/
 
 /* === BAS DE PAGE === */
 
