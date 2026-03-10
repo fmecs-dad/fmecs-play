@@ -375,7 +375,7 @@ body {
 
 /* ===== MODALE DE PROFIL (CORRIGÉE) ===== */
 #profileModal .panel {
-  text-align: left; /* Alignement général à gauche */
+  text-align: left;
 }
 
 #profileModal .form-group {
@@ -383,14 +383,14 @@ body {
   text-align: left;
 }
 
-#profileModal .form-group.avatar-group {
+#profileModal .form-group.avatar-section {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Alignement à gauche */
+  align-items: flex-start;
 }
 
 #profileModal .form-group.avatar-group label {
-  margin-bottom: 10px; /* Espace entre le label et l'image */
+  margin-bottom: 10px;
 }
 
 #profileModal #profileAvatarPreview {
@@ -399,21 +399,65 @@ body {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
-  margin: 0 auto 10px; /* Centre l'image horizontalement, espace en bas */
+  margin: 0 auto 10px;
 }
 
 #profileModal #changeAvatarBtn {
   width: 100%;
-  max-width: 200px; /* Largeur fixe pour correspondre au bouton "Changer le mot de passe" */
-  margin: 0 auto 15px; /* Centre le bouton horizontalement, espace en bas */
+  max-width: 200px;
+  margin: 0 auto 15px;
   display: block;
 }
 
-/* Uniformisation des 3 boutons */
+/* Alignement des labels/champs */
+.inline-form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.inline-form-group label {
+  width: 80px;
+  margin-right: 10px;
+  text-align: right;
+}
+
+/* Largeur des champs raccourcis */
+.short-input {
+  max-width: 200px;
+}
+
+/* Espacement des séparateurs */
+.modal-separator {
+  border: none;
+  border-top: 1px solid #333;
+  margin: 20px 0;
+}
+
+/* ===== CORRECTION DES 3 BOUTONS (3 LIGNES CLÉS) ===== */
 #profileModal .button-group button {
   height: 36px;          /* Même hauteur pour tous */
   min-width: 120px;      /* Même largeur minimale */
   line-height: 1;        /* Alignement vertical du texte */
+}
+
+/* Bouton "Enregistrer" en bleu (action principale) */
+#profileModal #saveProfileBtn {
+  background: #0078d4;
+}
+
+/* Boutons secondaires en gris */
+#profileModal #cancelProfileBtn,
+#profileModal #changePasswordBtn {
+  background: #444;
+}
+
+/* Style du conteneur des boutons */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 /* Boutons (commun à toutes les modales) */
