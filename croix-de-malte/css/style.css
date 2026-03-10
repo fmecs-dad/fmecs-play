@@ -434,15 +434,25 @@ body {
   margin: 20px 0;
 }
 
-/* ===== MODALE DE PROFIL - BOUTONS AVEC EFFETS DROPDOWN ===== */
+/* ===== MODALE DE PROFIL - BOUTONS AVEC SÉPARATEUR ===== */
+/* Conteneur principal des boutons */
 #profileModal .button-group {
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  flex-direction: column; /* Empile verticalement */
+  align-items: center; /* Centre horizontalement */
+  gap: 10px; /* Espace entre les éléments */
   margin-top: 25px;
-  flex-wrap: wrap;
 }
 
+/* Conteneur pour "Enregistrer" et "Annuler" (alignés horizontalement) */
+#profileModal .main-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Espace entre les deux boutons */
+  width: 100%;
+}
+
+/* Style des boutons (inchangé) */
 #profileModal .button-group button {
   height: 36px;
   padding: 0 12px;
@@ -450,43 +460,53 @@ body {
   text-align: center;
   white-space: nowrap;
   box-sizing: border-box;
-  min-width: 120px;
-  width: auto;
-  max-width: 100%;
-  background: #2d2d2d; /* Couleur de fond identique au dropdown */
+  background: #2d2d2d;
   color: white;
   border: none;
-  border-radius: 6px; /* Même arrondi que le dropdown */
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease; /* Même transition que le dropdown */
+  transition: all 0.2s ease;
   font-size: 14px;
 }
 
-/* Effet de survol identique au dropdown */
-#profileModal .button-group button:hover {
-  background: #3a3a3a; /* Même couleur de survol que le dropdown */
-  transform: translateY(-1px); /* Même effet de déplacement que le dropdown */
+/* Largeur minimale pour "Enregistrer" et "Annuler" */
+#profileModal #saveProfileBtn,
+#profileModal #cancelProfileBtn {
+  min-width: 120px;
 }
 
-/* Bouton "Enregistrer" (même style mais couleur différente si souhaité) */
+/* Bouton "Enregistrer" en bleu */
 #profileModal #saveProfileBtn {
-  background: #0078d4; /* Bleu pour l'action principale (optionnel) */
+  background: #0078d4;
 }
 
 #profileModal #saveProfileBtn:hover {
-  background: #0066cc; /* Bleu plus foncé au survol */
+  background: #0066cc;
   transform: translateY(-1px);
 }
 
-/* Boutons "Annuler" et "Changer le mot de passe" (style dropdown) */
-#profileModal #cancelProfileBtn,
-#profileModal #changePasswordBtn {
-  background: #2d2d2d; /* Même couleur que le dropdown */
-}
-
-/* Ajustement spécifique pour "Changer le mot de passe" */
+/* Bouton "Changer le mot de passe" */
 #profileModal #changePasswordBtn {
   min-width: 150px;
+}
+
+/* Style du séparateur */
+#profileModal .button-separator {
+  width: 80%;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+/* Effet de survol pour tous les boutons */
+#profileModal .button-group button:hover {
+  background: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+/* Exception pour "Enregistrer" (déjà géré ci-dessus) */
+#profileModal #saveProfileBtn:hover {
+  background: #0066cc;
 }
 
 /* Boutons (commun à toutes les modales) */
