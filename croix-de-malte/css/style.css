@@ -409,26 +409,12 @@ body {
   display: block;
 }
 
-#profileModal #changePasswordBtn {
-  width: 100%;
-  max-width: 200px; /* Même largeur que le bouton "Changer l'avatar" */
-  margin: 0 0 20px; /* Aligné à gauche, espace en bas */
-  display: block;
+/* Uniformisation des 3 boutons */
+#profileModal .button-group button {
+  height: 36px;          /* Même hauteur pour tous */
+  min-width: 120px;      /* Même largeur minimale */
+  line-height: 1;        /* Alignement vertical du texte */
 }
-
-/* Boutons "Changer l'avatar" et "Changer le mot de passe" */
-#profileModal #changeAvatarBtn,
-#profileModal #changePasswordBtn {
-  background: #444;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-
 
 /* Boutons (commun à toutes les modales) */
 .modal-actions {
