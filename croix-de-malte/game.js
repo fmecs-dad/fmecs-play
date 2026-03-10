@@ -721,43 +721,31 @@ async function changePassword() {
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
 
-  const passwordModalPanel = document.querySelector("#passwordModal .panel");
-
   let errorMessage = document.getElementById("passwordErrorMessage");
 
   if (!errorMessage) {
     errorMessage = document.createElement("div");
     errorMessage.id = "passwordErrorMessage";
-    errorMessage.style.color = "#ff6b6b";
-    errorMessage.style.marginBottom = "15px";
-    errorMessage.style.textAlign = "center";
-    errorMessage.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
-    errorMessage.style.padding = "10px";
-    errorMessage.style.borderRadius = "4px";
-
+    errorMessage.className = "error-message"; // Ajoute la classe pour les styles CSS
     const titleElement = document.querySelector("#passwordModal h2");
-    if (titleElement) {
-      titleElement.insertAdjacentElement("afterend", errorMessage);
-    } else {
-      passwordModalPanel.insertBefore(errorMessage, passwordModalPanel.firstChild);
-    }
+    titleElement.insertAdjacentElement("afterend", errorMessage);
   }
 
   if (!currentPassword || !newPassword || !confirmNewPassword) {
     errorMessage.textContent = "Tous les champs sont obligatoires.";
-    errorMessage.style.display = "block";
+    errorMessage.classList.remove("hidden"); // Affiche le message
     return;
   }
 
   if (newPassword !== confirmNewPassword) {
     errorMessage.textContent = "Les nouveaux mots de passe ne correspondent pas.";
-    errorMessage.style.display = "block";
+    errorMessage.classList.remove("hidden"); // Affiche le message
     return;
   }
 
   if (newPassword.length < 6) {
     errorMessage.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
-    errorMessage.style.display = "block";
+    errorMessage.classList.remove("hidden"); // Affiche le message
     return;
   }
 
@@ -769,21 +757,19 @@ async function changePassword() {
     if (updateError) throw updateError;
 
     errorMessage.textContent = "Mot de passe changé avec succès !";
-    errorMessage.style.color = "green";
-    errorMessage.style.backgroundColor = "rgba(0, 255, 0, 0.1)";
-    errorMessage.style.display = "block";
+    errorMessage.style.color = "green"; // Conservez le style inline pour la couleur verte
+    errorMessage.classList.remove("hidden"); // Affiche le message
 
     setTimeout(() => {
       document.getElementById("currentPassword").value = "";
       document.getElementById("newPassword").value = "";
       document.getElementById("confirmNewPassword").value = "";
-      errorMessage.style.display = "none";
+      errorMessage.classList.add("hidden"); // Masque le message
     }, 2000);
   } catch (err) {
     errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
-    errorMessage.style.color = "#ff6b6b";
-    errorMessage.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
-    errorMessage.style.display = "block";
+    errorMessage.style.color = "#ff6b6b"; // Conservez le style inline pour la couleur rouge
+    errorMessage.classList.remove("hidden"); // Affiche le message
   }
 }
 
