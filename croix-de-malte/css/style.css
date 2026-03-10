@@ -450,7 +450,7 @@ body {
   text-align: center;
   white-space: nowrap;
   box-sizing: border-box;
-  min-width: auto;
+  min-width: 120px;
   width: auto;
   max-width: 100%;
   background: #2d2d2d; /* Couleur de fond identique au dropdown */
