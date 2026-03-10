@@ -456,6 +456,7 @@ body {
 #profileModal #changePasswordBtn {
   white-space: nowrap;   /* Texte sur une ligne */
   min-width: 150px;      /* Largeur adaptée au texte long */
+  text-align: center;
 }
 
 /* Style du conteneur des boutons */
