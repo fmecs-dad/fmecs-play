@@ -717,6 +717,7 @@ function initProfileModalListeners() {
 
 /*** Change le mot de passe de l'utilisateur ***/
 async function changePassword() {
+  console.log("Entrée dans la fonction");
   // const currentPassword = document.getElementById("currentPassword").value.trim(); // Champ masqué, pas besoin de le vérifier
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
