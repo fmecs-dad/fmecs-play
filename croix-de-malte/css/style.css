@@ -434,37 +434,38 @@ body {
   margin: 20px 0;
 }
 
-/* ===== CORRECTION DES 3 BOUTONS (3 LIGNES CLÉS) ===== */
+/* ===== MODALE DE PROFIL - BOUTONS CORRIGÉS ===== */
+/* Styles de base pour TOUS les boutons du groupe */
 #profileModal .button-group button {
-  height: 36px;          /* Même hauteur pour tous */
-  min-width: 120px;      /* Même largeur minimale */
-  line-height: 1;        /* Alignement vertical du texte */
+  height: 36px;                  /* Hauteur fixe */
+  min-width: 150px;              /* Largeur minimale adaptée au texte le plus long */
+  padding: 0 16px;               /* Padding horizontal seulement */
+  line-height: 36px;             /* Alignement vertical parfait (égale à la hauteur) */
+  text-align: center;            /* Centrage horizontal du texte */
+  white-space: nowrap;           /* Texte sur une seule ligne */
+  box-sizing: border-box;        /* Inclut padding dans la largeur totale */
 }
 
-/* Bouton "Enregistrer" en bleu (action principale) */
+/* Bouton "Enregistrer" en bleu */
 #profileModal #saveProfileBtn {
   background: #0078d4;
+  color: white;
 }
 
-/* Boutons secondaires en gris */
+/* Boutons "Annuler" et "Changer le mot de passe" en gris */
 #profileModal #cancelProfileBtn,
 #profileModal #changePasswordBtn {
   background: #444;
-}
-
-/* Correction spécifique pour "Changer le mot de passe" */
-#profileModal #changePasswordBtn {
-  white-space: nowrap;   /* Texte sur une ligne */
-  min-width: 150px;      /* Largeur adaptée au texte long */
-  text-align: center;
+  color: white;
 }
 
 /* Style du conteneur des boutons */
-.button-group {
+#profileModal .button-group {
   display: flex;
   justify-content: center;
   gap: 10px;
   margin-top: 20px;
+  flex-wrap: nowrap;             /* Empêche les retours à la ligne */
 }
 
 /* Boutons (commun à toutes les modales) */
