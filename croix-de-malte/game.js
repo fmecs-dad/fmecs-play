@@ -717,9 +717,7 @@ function initProfileModalListeners() {
 
 /*** Change le mot de passe de l'utilisateur ***/
 async function changePassword() {
-  console.log("Fonction changePassword exécutée");
-
-  const currentPassword = document.getElementById("currentPassword").value.trim();
+  // const currentPassword = document.getElementById("currentPassword").value.trim(); // Champ masqué, pas besoin de le vérifier
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
 
@@ -728,39 +726,32 @@ async function changePassword() {
   if (!errorMessage) {
     errorMessage = document.createElement("div");
     errorMessage.id = "passwordErrorMessage";
-    errorMessage.className = "error-message";
+    errorMessage.className = "error-message hidden";
     const titleElement = document.querySelector("#passwordModal h2");
     if (titleElement) {
       titleElement.insertAdjacentElement("afterend", errorMessage);
-      console.log("Message inséré après le titre");
     } else {
-      const panelElement = document.querySelector("#passwordModal .panel");
-      panelElement.insertBefore(errorMessage, panelElement.firstChild);
-      console.log("Titre non trouvé, message inséré au début du panel");
+      console.error("Le titre h2 n'a pas été trouvé dans #passwordModal");
+      return;
     }
   }
 
-  if (!currentPassword || !newPassword || !confirmNewPassword) {
-    errorMessage.textContent = "Tous les champs sont obligatoires.";
+  // if (!currentPassword || !newPassword || !confirmNewPassword) { // Champ masqué, vérification désactivée
+  if (!newPassword || !confirmNewPassword) {
+    errorMessage.textContent = "Les champs 'Nouveau mot de passe' et 'Confirmer le mot de passe' sont obligatoires.";
     errorMessage.classList.remove("hidden");
-    errorMessage.style.display = "block !important"; // Force l'affichage
-    console.log("Message d'erreur affiché : Tous les champs sont obligatoires.");
     return;
   }
 
   if (newPassword !== confirmNewPassword) {
     errorMessage.textContent = "Les nouveaux mots de passe ne correspondent pas.";
     errorMessage.classList.remove("hidden");
-    errorMessage.style.display = "block !important";
-    console.log("Message d'erreur affiché : Mots de passe différents.");
     return;
   }
 
   if (newPassword.length < 6) {
     errorMessage.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
     errorMessage.classList.remove("hidden");
-    errorMessage.style.display = "block !important";
-    console.log("Message d'erreur affiché : Mot de passe trop court.");
     return;
   }
 
@@ -774,24 +765,20 @@ async function changePassword() {
     errorMessage.textContent = "Mot de passe changé avec succès !";
     errorMessage.style.color = "green";
     errorMessage.classList.remove("hidden");
-    errorMessage.style.display = "block !important";
-    console.log("Message de succès affiché : Mot de passe changé.");
 
     setTimeout(() => {
-      document.getElementById("currentPassword").value = "";
+      // document.getElementById("currentPassword").value = ""; // Champ masqué, pas besoin de le réinitialiser
       document.getElementById("newPassword").value = "";
       document.getElementById("confirmNewPassword").value = "";
       errorMessage.classList.add("hidden");
-      console.log("Message masqué après 2 secondes.");
     }, 2000);
   } catch (err) {
     errorMessage.textContent = err.message || "Erreur lors du changement de mot de passe.";
     errorMessage.style.color = "#ff6b6b";
     errorMessage.classList.remove("hidden");
-    errorMessage.style.display = "block !important";
-    console.log("Message d'erreur affiché :", err.message);
   }
 }
+
 
 /**
  * Réinitialise le mot de passe via email
