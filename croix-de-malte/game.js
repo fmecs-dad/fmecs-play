@@ -3230,7 +3230,7 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
 
       if (insertError) {
         console.error("Erreur INSERT player :", insertError);
-        alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
+        alert("Erreur lors de l'enregistrement du joueur : " + insertError.message);
         return;
       }
       console.log("Joueur inséré avec succès dans la table players.");
