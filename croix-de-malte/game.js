@@ -3124,7 +3124,7 @@ if (burgerHelpBtn) {
 
   document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
   playClickSound();
-
+  console.log("C'est ici");
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value.trim();
   const pseudo = document.getElementById("signupPseudoInput").value.trim();
