@@ -3105,25 +3105,6 @@ if (burgerHelpBtn) {
 // ===============================
 
 // Écouteurs pour les boutons de fermeture
-document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("authOverlay")?.classList.add("hidden");
-});
-
-document.getElementById("closePseudoModalBtn")?.addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("createPseudoModal")?.classList.add("hidden");
-  document.getElementById("authOverlay")?.classList.remove("hidden");
-});
-
-// Écouteur pour afficher la modale de création de pseudo
-document.getElementById("showSignupModalBtn")?.addEventListener("click", () => {
-  playClickSound();
-  document.getElementById("authOverlay")?.classList.add("hidden");
-  document.getElementById("createPseudoModal")?.classList.remove("hidden");
-});
-
-// Écouteur pour le bouton "Enregistrer" de la modale de création de pseudo
 document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () => {
   playClickSound();
   const email = document.getElementById("authEmail")?.value.trim();
@@ -3230,7 +3211,7 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
 
       if (insertError) {
         console.error("Erreur INSERT player :", insertError);
-        alert("Erreur lors de l'enregistrement du joueur : " + insertError.message);
+        alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
         return;
       }
       console.log("Joueur inséré avec succès dans la table players.");
@@ -3253,6 +3234,7 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
     alert("Erreur : " + err.message);
   }
 });
+
 
 // --- LOGIN ---
 document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
