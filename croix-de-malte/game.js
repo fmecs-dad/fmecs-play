@@ -3240,6 +3240,13 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
     if (typeof updateAuthUI === 'function') {
       await updateAuthUI(session.user);
     }
+    
+    // Mise à jour du profil
+    if (typeof updateProfileInfo === 'function') {
+      await updateProfileInfo().catch(err => {
+        console.error("Erreur mise à jour profil :", err);
+      });
+    }
 
     // Fermeture des modales
     document.getElementById("createPseudoModal")?.classList.add("hidden");
