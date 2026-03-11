@@ -1377,7 +1377,7 @@ const leaderboardPanel = leaderboardOverlay.querySelector(".leaderboard-panel");
 // Clic sur le fond sombre → fermer
 leaderboardOverlay.addEventListener("click", (e) => {
   if (e.target === leaderboardOverlay) {
-    playClickSound();
+    if (typeof playClickSound === 'function') playClickSound();
     closeLeaderboard();
   }
 });
@@ -1465,6 +1465,7 @@ function showBestScorePanel() {
 
 
 document.getElementById("closeBestScore").addEventListener("click", () => {
+  if (typeof playClickSound === 'function') playClickSound();
   document.getElementById("bestScoreOverlay").classList.add("hidden");
 });
 
@@ -3025,15 +3026,14 @@ if (burgerAuthBtn) {
   // ===============================
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
-    playClickSound();
+    if (typeof playClickSound === 'function') playClickSound();
     localStorage.removeItem("currentGameState");
     startNewGame();
     initGame();
   });
 
   document.getElementById("burgerStepBtn").addEventListener("click", () => {
-    playClickSound();
-
+    if (typeof playClickSound === 'function') playClickSound();
     if (!tutorialRunning) {
       localStorage.removeItem("currentGameState");
       document.getElementById("readyModal").classList.add("hidden");
@@ -3106,26 +3106,26 @@ if (burgerHelpBtn) {
 
 // Écouteurs pour les boutons de fermeture
 document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   document.getElementById("authOverlay")?.classList.add("hidden");
 });
 
 document.getElementById("closePseudoModalBtn")?.addEventListener("click", () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   document.getElementById("createPseudoModal")?.classList.add("hidden");
   document.getElementById("authOverlay")?.classList.remove("hidden");
 });
 
 // Écouteur pour afficher la modale de création de pseudo
 document.getElementById("showSignupModalBtn")?.addEventListener("click", () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   document.getElementById("authOverlay")?.classList.add("hidden");
   document.getElementById("createPseudoModal")?.classList.remove("hidden");
 });
 
 // Écouteur pour le bouton "Enregistrer" de la modale de création de pseudo
 document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   const email = document.getElementById("authEmail")?.value.trim();
   const password = document.getElementById("authPassword")?.value.trim();
   const pseudo = document.getElementById("signupPseudoInput")?.value.trim();
@@ -3263,7 +3263,7 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
 
 // --- LOGIN ---
 document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   e.preventDefault();
 
   const email = document.getElementById("authEmail")?.value.trim();
@@ -3364,13 +3364,13 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
 // ===============================
 
 document.getElementById("whySignupRegisterBtn")?.addEventListener("click", () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   closeWhySignup();
   document.getElementById("authOverlay")?.classList.remove("hidden");
 });
 
 document.getElementById("whySignupContinueBtn")?.addEventListener("click", () => {
-  playClickSound();
+  if (typeof playClickSound === 'function') playClickSound();
   const dontRemind = document.getElementById("whySignupDontRemind")?.checked;
   if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
