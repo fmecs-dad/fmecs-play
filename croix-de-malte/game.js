@@ -3329,14 +3329,16 @@ async function fetchBestScore(userId) {
 //   WHY SIGNUP
 // ===============================
 
-document.getElementById("whySignupRegisterBtn").addEventListener("click", () => {
+document.getElementById("whySignupRegisterBtn")?.addEventListener("click", () => {
   playClickSound();
   closeWhySignup();
-  document.getElementById("authOverlay").classList.remove("hidden");
+  const authOverlay = document.getElementById("authOverlay");
+  if (authOverlay) {
+    authOverlay.classList.remove("hidden");
+  }
 });
 
 document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-
   const dontRemind = document.getElementById("whySignupDontRemind").checked;
   if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
