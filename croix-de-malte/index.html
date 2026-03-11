@@ -11,23 +11,35 @@
 
 <body>
 
-<!-- Modale "Vous n'êtes pas connecté / inscrit" -->
+<!-- Modale "Vous n’êtes pas connecté / inscrit" -->
 <div id="whySignupModal" class="overlay overlay-center hidden">
-  <!-- Contenu de la modale -->
-</div>
-
-<!-- Modale d'authentification -->
-<div id="authOverlay" class="overlay overlay-center hidden">
   <div class="panel">
-    <button id="closeAuthBtn" class="close-btn">✕</button>
-    <h2>Connexion / Inscription</h2>
-    <label for="authEmail">Email</label>
-    <input type="email" id="authEmail" class="modal-input" />
-    <label for="authPassword">Mot de passe</label>
-    <input type="password" id="authPassword" class="modal-input" />
-    <div class="auth-buttons">
-      <button id="showSignupModalBtn" class="main-btn">Créer un compte</button>
-      <button id="loginBtn" class="main-btn">Se connecter</button>
+    <h2>Vous n'êtes pas connecté / inscrit</h2>
+    <p>En créant un compte, vous pourrez :</p>
+    <ul style="text-align:left; max-width:360px; margin:0 auto 16px;">
+      <li>Enregistrer vos meilleurs scores</li>
+      <li>Apparaître dans le leaderboard</li>
+      <li>Associer un pseudo et un avatar</li>
+    </ul>
+
+    <!-- Case à cocher pour accepter la politique de confidentialité (RGPD) -->
+    <div style="margin: 12px 0; font-size: 14px;">
+      <label class="privacy-label">
+        <input type="checkbox" id="acceptPrivacyPolicy" required />
+        J’accepte la <a href="https://fmecs.fr/politique-de-confidentialite.html" target="_blank" class="privacy-link">politique de confidentialité</a>.
+      </label>
+    </div>
+
+    <div style="margin: 12px 0;">
+      <label style="font-size: 14px;">
+        <input type="checkbox" id="whySignupDontRemind" />
+        Ne plus me le rappeler
+      </label>
+    </div>
+
+    <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: center;">
+      <button id="whySignupRegisterBtn" class="main-btn" disabled>S’inscrire</button>
+      <button id="whySignupContinueBtn" class="main-btn">Continuer sans compte</button>
     </div>
   </div>
 </div>
