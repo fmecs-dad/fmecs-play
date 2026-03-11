@@ -3102,33 +3102,33 @@ if (burgerHelpBtn) {
   
 // ===============================
 //   AUTHENTIFICATION (v2)
- // ===============================
+// ===============================
 
 // Écouteurs pour les boutons de fermeture
-document.getElementById("closeAuthBtn").addEventListener("click", () => {
+document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
   playClickSound();
-  document.getElementById("authOverlay").classList.add("hidden");
+  document.getElementById("authOverlay")?.classList.add("hidden");
 });
 
-document.getElementById("closePseudoModalBtn").addEventListener("click", () => {
+document.getElementById("closePseudoModalBtn")?.addEventListener("click", () => {
   playClickSound();
-  document.getElementById("createPseudoModal").classList.add("hidden");
-  document.getElementById("authOverlay").classList.remove("hidden");
+  document.getElementById("createPseudoModal")?.classList.add("hidden");
+  document.getElementById("authOverlay")?.classList.remove("hidden");
 });
 
 // Écouteur pour afficher la modale de création de pseudo
-document.getElementById("showSignupModalBtn").addEventListener("click", () => {
+document.getElementById("showSignupModalBtn")?.addEventListener("click", () => {
   playClickSound();
-  document.getElementById("authOverlay").classList.add("hidden");
-  document.getElementById("createPseudoModal").classList.remove("hidden");
+  document.getElementById("authOverlay")?.classList.add("hidden");
+  document.getElementById("createPseudoModal")?.classList.remove("hidden");
 });
 
 // Écouteur pour le bouton "Enregistrer" de la modale de création de pseudo
-document.getElementById("confirmPseudoBtn").addEventListener("click", async () => {
+document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () => {
   playClickSound();
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value.trim();
-  const pseudo = document.getElementById("signupPseudoInput").value.trim();
+  const email = document.getElementById("authEmail")?.value.trim();
+  const password = document.getElementById("authPassword")?.value.trim();
+  const pseudo = document.getElementById("signupPseudoInput")?.value.trim();
 
   if (!email || !password || !pseudo) {
     alert("Merci de remplir tous les champs.");
@@ -3137,11 +3137,17 @@ document.getElementById("confirmPseudoBtn").addEventListener("click", async () =
 
   try {
     // Vérification pseudo unique
-    const { data: existingPseudo } = await supa
+    const { data: existingPseudo, error: checkPseudoError } = await supa
       .from("players")
       .select("id")
       .eq("pseudo", pseudo)
       .maybeSingle();
+
+    if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
+      console.error("Erreur SELECT pseudo :", checkPseudoError);
+      alert("Erreur interne.");
+      return;
+    }
 
     if (existingPseudo) {
       alert("Ce pseudo est déjà pris.");
@@ -3149,7 +3155,7 @@ document.getElementById("confirmPseudoBtn").addEventListener("click", async () =
     }
 
     // Inscription de l'utilisateur
-    const { error: signupError } = await supa.auth.signUp({
+    const { data: signupData, error: signupError } = await supa.auth.signUp({
       email,
       password,
       options: {
@@ -3162,7 +3168,7 @@ document.getElementById("confirmPseudoBtn").addEventListener("click", async () =
     if (signupError) throw signupError;
 
     // Connexion automatique après l'inscription
-    const { error: signinError } = await supa.auth.signInWithPassword({
+    const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
       email,
       password
     });
@@ -3180,24 +3186,66 @@ document.getElementById("confirmPseudoBtn").addEventListener("click", async () =
 
     const userId = session.user.id;
 
-    // Insertion dans players
-    const { error: insertError } = await supa
+    // Vérifier si le joueur existe déjà dans la table players
+    const { data: existingPlayer, error: checkPlayerError } = await supa
       .from("players")
-      .insert({
-        id: userId,
-        pseudo: pseudo,
-        created_at: new Date().toISOString(),
-        premium: false
-      });
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
 
-    if (insertError) throw insertError;
+    if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
+      console.error("Erreur SELECT player :", checkPlayerError);
+      alert("Erreur interne.");
+      return;
+    }
+
+    // Insertion ou mise à jour dans players
+    if (existingPlayer) {
+      console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+
+      const { error: updateError } = await supa
+        .from("players")
+        .update({
+          pseudo: pseudo
+        })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Erreur UPDATE player :", updateError);
+        alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
+        return;
+      }
+      console.log("Pseudo mis à jour avec succès dans la table players.");
+    } else {
+      console.log("Insertion d'un nouveau joueur dans la table players...");
+
+      const { error: insertError } = await supa
+        .from("players")
+        .insert({
+          id: userId,
+          pseudo: pseudo,
+          created_at: new Date().toISOString(),
+          premium: false
+        });
+
+      if (insertError) {
+        console.error("Erreur INSERT player :", insertError);
+        alert("Erreur lors de l'enregistrement du joueur : " + insertError.message);
+        return;
+      }
+      console.log("Joueur inséré avec succès dans la table players.");
+    }
 
     // Mise à jour UI
-    await updateAuthUI(session.user);
+    if (typeof updateAuthUI === 'function') {
+      await updateAuthUI(session.user);
+    }
 
     // Fermeture des modales
-    document.getElementById("createPseudoModal").classList.add("hidden");
-    playSound("successSound");
+    document.getElementById("createPseudoModal")?.classList.add("hidden");
+    if (typeof playSound === 'function') {
+      playSound("successSound");
+    }
     alert("Compte créé ! Bienvenue dans le jeu.");
 
   } catch (err) {
@@ -3207,12 +3255,12 @@ document.getElementById("confirmPseudoBtn").addEventListener("click", async () =
 });
 
 // --- LOGIN ---
-document.getElementById("loginBtn").addEventListener("click", async (e) => {
-  playClickSound()
+document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
+  playClickSound();
   e.preventDefault();
 
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value.trim();
+  const email = document.getElementById("authEmail")?.value.trim();
+  const password = document.getElementById("authPassword")?.value.trim();
 
   if (!email || !password) {
     alert("Veuillez remplir tous les champs.");
@@ -3245,28 +3293,36 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     localStorage.setItem('supabase.access.token', session.access_token);
     localStorage.setItem('supabase.refresh.token', session.refresh_token);
 
-    // 4. Mise à jour du profil 
-    await updateProfileInfo().catch(err => {
-      console.error("Erreur mise à jour profil :", err);
-    });
+    // 4. Mise à jour du profil
+    if (typeof updateProfileInfo === 'function') {
+      await updateProfileInfo().catch(err => {
+        console.error("Erreur mise à jour profil :", err);
+      });
+    }
 
     // 5. Récupération du meilleur score
-    const bestScoreData = await fetchBestScore(session.user.id).catch(err => {
-      console.error("Erreur récupération score :", err);
-      return null;
-    });
-    if (bestScoreData) {
-      saveBestScore(bestScoreData);
-      console.log("Meilleur score récupéré et sauvegardé :", bestScoreData);
+    if (typeof fetchBestScore === 'function') {
+      const bestScoreData = await fetchBestScore(session.user.id).catch(err => {
+        console.error("Erreur récupération score :", err);
+        return null;
+      });
+      if (bestScoreData) {
+        if (typeof saveBestScore === 'function') {
+          saveBestScore(bestScoreData);
+        }
+        console.log("Meilleur score récupéré et sauvegardé :", bestScoreData);
+      }
     }
 
     // 6. Mise à jour de l'UI
-    await updateAuthUI(session.user).catch(err => {
-      console.error("Erreur dans updateAuthUI :", err);
-    });
+    if (typeof updateAuthUI === 'function') {
+      await updateAuthUI(session.user).catch(err => {
+        console.error("Erreur dans updateAuthUI :", err);
+      });
+    }
 
-    // 7. Récupération du pseudo (déjà présent dans votre code)
-    if (session.user) {
+    // 7. Récupération du pseudo
+    if (session.user && typeof fetchPlayerPseudo === 'function') {
       const pseudo = await fetchPlayerPseudo(session.user.id).catch(err => {
         console.error("Erreur récupération pseudo :", err);
         return null;
@@ -3275,13 +3331,15 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
     }
 
     // 8. Fermeture de la modale et mise à jour du score
-    document.getElementById("authOverlay").classList.add("hidden");
-    updateBestScoreTop();
+    document.getElementById("authOverlay")?.classList.add("hidden");
+    if (typeof updateBestScoreTop === 'function') {
+      updateBestScoreTop();
+    }
 
-    // 9. Réinitialisation du menu profil (NOUVEAU)
+    // 9. Réinitialisation du menu profil
     const profileBtn = document.getElementById("profileBtn");
     if (profileBtn) {
-      profileBtn.disabled = false; // Force l'activation
+      profileBtn.disabled = false;
       console.log("Bouton profil activé après connexion");
     }
 
@@ -3294,40 +3352,6 @@ document.getElementById("loginBtn").addEventListener("click", async (e) => {
   }
 });
 
-// Fonctions utilitaires simplifiées
-async function fetchBestScore(userId) {
-  if (!userId) return null;
-
-  try {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) return null;
-
-    supa.auth.setSession(token);
-
-    const { data, error } = await supa
-      .from("scores")
-      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
-      .eq("player_id", userId)
-      .order("score", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error("Erreur fetchBestScore:", error);
-      return null;
-    }
-
-    return data ? {
-      ...data,
-      duration: Math.floor(data.duration_ms / 1000)
-    } : null;
-
-  } catch (err) {
-    console.error("Erreur inattendue fetchBestScore:", err);
-    return null;
-  }
-}
-
 // ===============================
 //   WHY SIGNUP
 // ===============================
@@ -3335,18 +3359,22 @@ async function fetchBestScore(userId) {
 document.getElementById("whySignupRegisterBtn")?.addEventListener("click", () => {
   playClickSound();
   closeWhySignup();
-  const authOverlay = document.getElementById("authOverlay");
-  if (authOverlay) {
-    authOverlay.classList.remove("hidden");
-  }
+  document.getElementById("authOverlay")?.classList.remove("hidden");
 });
 
-document.getElementById("whySignupContinueBtn").addEventListener("click", () => {
-  const dontRemind = document.getElementById("whySignupDontRemind").checked;
+document.getElementById("whySignupContinueBtn")?.addEventListener("click", () => {
+  playClickSound();
+  const dontRemind = document.getElementById("whySignupDontRemind")?.checked;
   if (dontRemind) localStorage.setItem("skipWhySignup", "1");
 
   closeWhySignup();
-  document.getElementById("readyModal").classList.remove("hidden");
+  document.getElementById("readyModal")?.classList.remove("hidden");
 });
+
+// Fonction pour fermer la modale whySignupModal
+function closeWhySignup() {
+  document.getElementById("whySignupModal")?.classList.add("hidden");
+}
+
 console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
