@@ -490,6 +490,7 @@ function setupProfileMenu() {
 
   // Écouteur d'ouverture/fermeture
   profileBtn.addEventListener("click", (e) => {
+    if (typeof playClickSound === 'function') playClickSound();
     e.stopPropagation();
     if (profileBtn.disabled) {
       console.log("Bouton désactivé - clic ignoré");
@@ -2877,9 +2878,11 @@ document.getElementById('changePasswordBtn').addEventListener('click', function(
 
 // Écouteur pour le bouton "Valider" de la modale de changement de mot de passe
 document.getElementById("validatePasswordBtn").addEventListener("click", changePassword);
+if (typeof playClickSound === 'function') playClickSound();
 
 // Écouteur pour le bouton "Annuler" dans la modale de mot de passe
 document.getElementById('cancelPasswordBtn').addEventListener('click', function() {
+  if (typeof playClickSound === 'function') playClickSound();
   // Vider les champs de saisie
   document.getElementById("currentPassword").value = "";
   document.getElementById("newPassword").value = "";
