@@ -621,7 +621,6 @@ function initProfileModalListeners() {
   if (saveProfileBtn) {
     saveProfileBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      console.log("Bouton 'Enregistrer' cliqué");
       saveProfileChanges();
     });
   } else {
@@ -3098,34 +3097,32 @@ if (burgerHelpBtn) {
     });
   }
   
-  // ===============================
-  //   AUTHENTIFICATION (v1)
-  // ===============================
+// ===============================
+//   AUTHENTIFICATION (v2)
+ // ===============================
 
-  document.getElementById("closeAuthBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("authOverlay").classList.add("hidden");
-  });
-
-  document.getElementById("closeSignupBtn").addEventListener("click", function(e) {
-  e.stopPropagation(); // Empêche la propagation de l'événement aux éléments parents
-  console.log("Bouton de fermeture cliqué !");
+// Écouteurs pour les boutons de fermeture
+document.getElementById("closeAuthBtn").addEventListener("click", () => {
   playClickSound();
-  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.add("hidden");
+});
+
+document.getElementById("closePseudoModalBtn").addEventListener("click", () => {
+  playClickSound();
+  document.getElementById("createPseudoModal").classList.add("hidden");
   document.getElementById("authOverlay").classList.remove("hidden");
 });
 
-  // --- SIGNUP ---
-
-  document.getElementById("signupBtn").addEventListener("click", () => {
-    playClickSound();
-    document.getElementById("authOverlay").classList.add("hidden");
-    document.getElementById("signupModal").classList.remove("hidden");
-  });
-
-  document.getElementById("signupConfirmBtn").addEventListener("click", async () => {
+// Écouteur pour afficher la modale de création de pseudo
+document.getElementById("showSignupModalBtn").addEventListener("click", () => {
   playClickSound();
-  console.log("C'est ici");
+  document.getElementById("authOverlay").classList.add("hidden");
+  document.getElementById("createPseudoModal").classList.remove("hidden");
+});
+
+// Écouteur pour le bouton "Enregistrer" de la modale de création de pseudo
+document.getElementById("confirmPseudoBtn").addEventListener("click", async () => {
+  playClickSound();
   const email = document.getElementById("authEmail").value.trim();
   const password = document.getElementById("authPassword").value.trim();
   const pseudo = document.getElementById("signupPseudoInput").value.trim();
@@ -3135,96 +3132,52 @@ if (burgerHelpBtn) {
     return;
   }
 
-  // Vérification pseudo unique
-  const { data: existingPseudo, error: checkPseudoError } = await supa
-    .from("players")
-    .select("id")
-    .eq("pseudo", pseudo)
-    .maybeSingle();
-
-  if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
-    console.error("Erreur SELECT pseudo :", checkPseudoError);
-    alert("Erreur interne.");
-    return;
-  }
-
-  if (existingPseudo) {
-    alert("Ce pseudo est déjà pris.");
-    return;
-  }
-
-  // Inscription de l'utilisateur
-  const { data: signupData, error: signupError } = await supa.auth.signUp({
-    email,
-    password
-  });
-
-  if (signupError) {
-    console.error("Erreur lors de l'inscription :", signupError);
-    alert("Erreur lors de l'inscription : " + signupError.message);
-    return;
-  }
-
-  // Connexion automatique après l'inscription
-  const { error: signinError, data: signinData } = await supa.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (signinError) {
-    console.error("Erreur lors de la connexion après inscription :", signinError);
-    alert("Erreur lors de la connexion : " + signinError.message);
-    return;
-  }
-
-  // Récupérer la session après la connexion
-  const { data: { session }, error: sessionError } = await supa.auth.getSession();
-
-  if (sessionError || !session) {
-    console.error("Erreur récupération session :", sessionError);
-    alert("Impossible de récupérer la session.");
-    return;
-  }
-
-  // Stocker le JWT après connexion
-  localStorage.setItem('supabase.access.token', session.access_token);
-  localStorage.setItem('supabase.refresh.token', session.refresh_token);
-
-  const userId = session.user.id;
-  console.log("ID de l'utilisateur :", userId);
-
-  // Vérifier si le joueur existe déjà dans la table players
-  const { data: existingPlayer, error: checkPlayerError } = await supa
-    .from("players")
-    .select("id")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (checkPlayerError && checkPlayerError.code !== "PGRST116") {
-    console.error("Erreur SELECT player :", checkPlayerError);
-    alert("Erreur interne.");
-    return;
-  }
-
-  // Insertion dans players
-  if (existingPlayer) {
-    console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
-
-    const { error: updateError } = await supa
+  try {
+    // Vérification pseudo unique
+    const { data: existingPseudo } = await supa
       .from("players")
-      .update({
-        pseudo: pseudo
-      })
-      .eq("id", userId);
+      .select("id")
+      .eq("pseudo", pseudo)
+      .maybeSingle();
 
-    if (updateError) {
-      console.error("Erreur UPDATE player :", updateError);
-      alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
-    } else {
-      console.log("Pseudo mis à jour avec succès dans la table players.");
+    if (existingPseudo) {
+      alert("Ce pseudo est déjà pris.");
+      return;
     }
-  } else {
-    console.log("Insertion d'un nouveau joueur dans la table players...");
+
+    // Inscription de l'utilisateur
+    const { error: signupError } = await supa.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          pseudo: pseudo,
+        }
+      }
+    });
+
+    if (signupError) throw signupError;
+
+    // Connexion automatique après l'inscription
+    const { error: signinError } = await supa.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (signinError) throw signinError;
+
+    // Récupérer la session après la connexion
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+
+    if (sessionError || !session) throw sessionError;
+
+    // Stocker le JWT après connexion
+    localStorage.setItem('supabase.access.token', session.access_token);
+    localStorage.setItem('supabase.refresh.token', session.refresh_token);
+
+    const userId = session.user.id;
+
+    // Insertion dans players
     const { error: insertError } = await supa
       .from("players")
       .insert({
@@ -3234,22 +3187,50 @@ if (burgerHelpBtn) {
         premium: false
       });
 
-    if (insertError) {
-      console.error("Erreur INSERT player :", insertError);
-      alert("Erreur lors de l’enregistrement du joueur : " + insertError.message);
-    } else {
-      console.log("Joueur inséré avec succès dans la table players.");
-    }
+    if (insertError) throw insertError;
+
+    // Mise à jour UI
+    await updateAuthUI(session.user);
+
+    // Fermeture des modales
+    document.getElementById("createPseudoModal").classList.add("hidden");
+    playSound("successSound");
+    alert("Compte créé ! Bienvenue dans le jeu.");
+
+  } catch (err) {
+    console.error("Erreur :", err.message);
+    alert("Erreur : " + err.message);
+  }
+});
+
+// Fonction pour mettre à jour l'interface utilisateur
+async function updateAuthUI(user) {
+  const profilePseudoDisplay = document.getElementById('profilePseudoDisplay');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileCreationDate = document.getElementById('profileCreationDate');
+
+  if (!user) {
+    profilePseudoDisplay.textContent = 'Invité';
+    profileEmail.textContent = 'non connecté';
+    profileCreationDate.textContent = 'non définie';
+    return;
   }
 
-  // Mise à jour UI
-  updateAuthUI(session.user);
+  try {
+    const { data: playerData } = await supa
+      .from("players")
+      .select("pseudo, created_at")
+      .eq("id", user.id)
+      .single();
 
-  // Fermeture modals
-  document.getElementById("signupModal").classList.add("hidden");
-  playSound("successSound");
-  alert("Compte créé ! Bienvenue dans le jeu.");
-});
+    profilePseudoDisplay.textContent = playerData?.pseudo || user.email.split('@')[0];
+    profileEmail.textContent = user.email || 'non défini';
+    profileCreationDate.textContent = playerData?.created_at ? new Date(playerData.created_at).toLocaleDateString() : 'non définie';
+
+  } catch (err) {
+    console.error("Erreur lors de la mise à jour de l'UI :", err);
+  }
+}
 
 // --- LOGIN ---
 document.getElementById("loginBtn").addEventListener("click", async (e) => {
