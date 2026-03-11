@@ -3108,6 +3108,7 @@ if (burgerHelpBtn) {
   });
 
   document.getElementById("closeSignupBtn").addEventListener("click", () => {
+    console.log("Bouton de fermeture cliqué"); // Ajoute ce log
     playClickSound();
     document.getElementById("signupModal").classList.add("hidden");
     document.getElementById("authOverlay").classList.remove("hidden");
