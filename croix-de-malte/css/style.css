@@ -940,6 +940,11 @@ footer {
   cursor: pointer;
 }
 
+#closeSignupBtn {
+  z-index: 1000;
+  cursor: pointer;
+}
+
 /* === END GAME PANEL === */
 
 #endGamePanel {
