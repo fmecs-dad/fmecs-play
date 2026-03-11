@@ -2625,9 +2625,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Activation du bouton "S'inscrire" quand la case est cochée
-document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
-  document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
-});
+  document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
+    document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
+  });
 
   try {
     // 1. Initialisation de base (votre code existant)
