@@ -2858,6 +2858,7 @@ document.getElementById("profileModal")?.addEventListener("click", (e) => {
 
 // Écouteur pour le bouton "Changer le mot de passe"
 document.getElementById('changePasswordBtn').addEventListener('click', function() {
+  if (typeof playClickSound === 'function') playClickSound();
   // Masquer la modale de profil
   document.getElementById('profileModal').classList.add('hidden');
 
