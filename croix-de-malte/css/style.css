@@ -938,10 +938,11 @@ footer {
   border: none;
   font-size: 22px;
   cursor: pointer;
+  z_index:100002; 
 }
 
 #closeSignupBtn {
-  z-index: 1000;
+  z-index: 100001;
   cursor: pointer;
 }
 
