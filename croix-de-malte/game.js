@@ -3203,35 +3203,6 @@ document.getElementById("confirmPseudoBtn").addEventListener("click", async () =
   }
 });
 
-// Fonction pour mettre à jour l'interface utilisateur
-async function updateAuthUI(user) {
-  const profilePseudoDisplay = document.getElementById('profilePseudoDisplay');
-  const profileEmail = document.getElementById('profileEmail');
-  const profileCreationDate = document.getElementById('profileCreationDate');
-
-  if (!user) {
-    profilePseudoDisplay.textContent = 'Invité';
-    profileEmail.textContent = 'non connecté';
-    profileCreationDate.textContent = 'non définie';
-    return;
-  }
-
-  try {
-    const { data: playerData } = await supa
-      .from("players")
-      .select("pseudo, created_at")
-      .eq("id", user.id)
-      .single();
-
-    profilePseudoDisplay.textContent = playerData?.pseudo || user.email.split('@')[0];
-    profileEmail.textContent = user.email || 'non défini';
-    profileCreationDate.textContent = playerData?.created_at ? new Date(playerData.created_at).toLocaleDateString() : 'non définie';
-
-  } catch (err) {
-    console.error("Erreur lors de la mise à jour de l'UI :", err);
-  }
-}
-
 // --- LOGIN ---
 document.getElementById("loginBtn").addEventListener("click", async (e) => {
   playClickSound()
