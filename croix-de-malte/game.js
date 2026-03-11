@@ -3107,17 +3107,13 @@ if (burgerHelpBtn) {
     document.getElementById("authOverlay").classList.add("hidden");
   });
 
-  const closeSignupBtn = document.getElementById("closeSignupBtn");
-  if (closeSignupBtn) {
-    closeSignupBtn.addEventListener("click", () => {
-      console.log("Bouton de fermeture cliqué");
-      playClickSound();
-      document.getElementById("signupModal").classList.add("hidden");
-      document.getElementById("authOverlay").classList.remove("hidden");
-    });
-  } else {
-    console.error("Le bouton closeSignupBtn n'a pas été trouvé.");
-  }
+  document.getElementById("closeSignupBtn").addEventListener("click", function(e) {
+  e.stopPropagation(); // Empêche la propagation de l'événement aux éléments parents
+  console.log("Bouton de fermeture cliqué !");
+  playClickSound();
+  document.getElementById("signupModal").classList.add("hidden");
+  document.getElementById("authOverlay").classList.remove("hidden");
+});
 
   // --- SIGNUP ---
 
