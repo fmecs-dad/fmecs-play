@@ -937,7 +937,8 @@ footer {
   background: transparent;
   border: none;
   font-size: 22px;
-  cursor: pointer; 
+  cursor: pointer;
+  z-index: 100003; 
 }
 
 #closeSignupBtn {
