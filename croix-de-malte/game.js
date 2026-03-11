@@ -2608,7 +2608,10 @@ function closeProfile() {
 }
 
 function closeWhySignup() {
-  document.getElementById("whySignupModal").classList.add("hidden");
+  const whySignupModal = document.getElementById("whySignupModal");
+  if (whySignupModal) {
+    whySignupModal.classList.add("hidden");
+  }
 }
 
 // ===============================
