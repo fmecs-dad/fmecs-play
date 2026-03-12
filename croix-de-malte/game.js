@@ -1748,9 +1748,10 @@ function snapToAlignedPoint(first, clicked, mx, my) {
   let best = clicked;
   let bestDist = Infinity;
 
-  if (c.x < 0 || c.x >= size || c.y < 0 || c.y >= size) continue;
-
   for (const c of candidates) {
+
+    if (c.x < 0 || c.x >= size || c.y < 0 || c.y >= size) continue;
+
     const px = offset + c.x * spacing;
     const py = offset + c.y * spacing;
     const dist = Math.hypot(mx - px, my - py);
