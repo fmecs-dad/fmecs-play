@@ -1713,7 +1713,7 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  if (bestDist <= 15) return best;
+  if (bestDist <= 25) return best;
 
   return null;
 }
@@ -1748,6 +1748,8 @@ function snapToAlignedPoint(first, clicked, mx, my) {
   let best = clicked;
   let bestDist = Infinity;
 
+  if (c.x < 0 || c.x >= size || c.y < 0 || c.y >= size) continue;
+
   for (const c of candidates) {
     const px = offset + c.x * spacing;
     const py = offset + c.y * spacing;
@@ -1760,7 +1762,7 @@ function snapToAlignedPoint(first, clicked, mx, my) {
   }
 
   // 4. Tolérance
-  if (bestDist <= 15) return best;
+  if (bestDist <= 25) return best;
 
   return clicked; // pas de snap possible
 }
@@ -3078,7 +3080,7 @@ if (burgerHelpBtn) {
   }
 
   // ===============================
-  //   READY BUTTON (version originale préservée exactement)
+  //   READY BUTTON
   // ===============================
   const readyBtn = document.getElementById("readyBtn");
   if (readyBtn) {
@@ -3096,7 +3098,7 @@ if (burgerHelpBtn) {
         board.classList.add("slide-in-premium");
         void board.offsetWidth;
         board.classList.add("show");
-
+        // Décalage du son pour l'affichage de la grille
         setTimeout(() => {
           if (typeof playStartGameSound === 'function') playStartGameSound();
         }, 1500);
@@ -3105,7 +3107,7 @@ if (burgerHelpBtn) {
   }
   
 // ===============================
-//   AUTHENTIFICATION (v2)
+//   AUTHENTIFICATION
 // ===============================
 
 // Écouteurs pour les boutons de fermeture
