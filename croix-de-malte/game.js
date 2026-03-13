@@ -1645,16 +1645,15 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
 // Redimensionne le canvas et redessine tout
 function resizeCanvas() {
-    const containerWidth = canvas.parentElement.clientWidth;
-    const containerHeight = canvas.parentElement.clientHeight;
-    const canvasSize = Math.min(containerWidth, containerHeight) * 0.9;
+    const canvasSize = calculateGridParams();
+    const ratio = window.devicePixelRatio;
 
-    canvas.width = canvasSize * window.devicePixelRatio;
-    canvas.height = canvasSize * window.devicePixelRatio;
+    canvas.width = canvasSize * ratio;
+    canvas.height = canvasSize * ratio;
     canvas.style.width = canvasSize + 'px';
     canvas.style.height = canvasSize + 'px';
 
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     redrawEverything();
 }
 
@@ -1712,17 +1711,15 @@ function drawSegment(segmentPoints) {
 // ===============================
 
 function getNearestPoint(mx, my) {
-    // Obtenir les coordonnées du canvas par rapport à la fenêtre
     const rect = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
 
-    // Convertir les coordonnées de la souris en coordonnées relatives au canvas
-    const x = mx - rect.left;
-    const y = my - rect.top;
+    const x = (mx - rect.left) * ratio;
+    const y = (my - rect.top) * ratio;
 
     let best = null;
     let bestDist = Infinity;
 
-    // Parcourir tous les points de la grille
     for (let yGrid = 0; yGrid < size; yGrid++) {
         for (let xGrid = 0; xGrid < size; xGrid++) {
             const px = offset + xGrid * spacing;
@@ -1739,7 +1736,6 @@ function getNearestPoint(mx, my) {
         }
     }
 
-    // Vérifier si le point est suffisamment proche
     if (bestDist <= spacing * 0.5) {
         return best;
     }
