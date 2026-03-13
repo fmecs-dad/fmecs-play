@@ -1820,19 +1820,19 @@ function initMaltaCross() {
         }
     }
 
-    // Calculer le centre de la grille
-    const centerX = Math.floor(size / 2);
-    const centerY = Math.floor(size / 2);
+    // Coordonnées visuelles du centre de la grille
+    const visualCenterX = 20;
+    const visualCenterY = 15;
 
     // Point de référence dans la croix brute
     const refX = -3;
     const refY = 3;
 
-    // Calculer l'offset pour centrer la croix
-    const offsetX = centerX - refX;
-    const offsetY = centerY - refY;
+    // Calculer l'offset pour centrer la croix sur le centre visuel
+    const offsetX = visualCenterX - refX;
+    const offsetY = visualCenterY - refY;
 
-    // Application de l’offset pour centrer la croix
+    // Application de l’offset
     pts.forEach(p => {
         const key = `${p.x + offsetX},${p.y + offsetY}`;
         permanentPoints.add(key);
