@@ -1800,7 +1800,7 @@ function initMaltaCross() {
     permanentPoints.clear();
     activePoints.clear();
 
-    // Construction de la croix (inchangé)
+    // Construction brute de la croix
     let x = 0, y = 0;
     const pts = [];
     const add = (px, py) => pts.push({ x: px, y: py });
@@ -1820,14 +1820,19 @@ function initMaltaCross() {
         }
     }
 
-    // Centrer la croix dans la grille
+    // Calculer le centre de la grille
     const centerX = Math.floor(size / 2);
     const centerY = Math.floor(size / 2);
+
+    // Point de référence dans la croix brute
     const refX = -3;
     const refY = 3;
+
+    // Calculer l'offset pour centrer la croix
     const offsetX = centerX - refX;
     const offsetY = centerY - refY;
 
+    // Application de l’offset pour centrer la croix
     pts.forEach(p => {
         const key = `${p.x + offsetX},${p.y + offsetY}`;
         permanentPoints.add(key);
