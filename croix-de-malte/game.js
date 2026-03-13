@@ -1005,7 +1005,7 @@ let historyStack = [];
 let soundEnabled = true;
 let audioUnlocked = false;
 
-const size = 30;
+const size = 34;
 let offset;
 let spacing;
 
@@ -1116,6 +1116,11 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
   }
 }
 
+const tutorialSteps = [
+  { message: "Exemple 1 : une ligne horizontale.", start: { x: 15, y: 12 }, end: { x: 19, y: 12 } },
+  { message: "Exemple 2 : une ligne verticale.",   start: { x: 15, y: 12 }, end: { x: 15, y: 16 } },
+  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 12, y: 16 }, end: { x: 16, y: 12 } }
+];
 
 // ===============================
 //   MEILLEUR SCORE
@@ -1643,29 +1648,7 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
-// Redimensionne le canvas et redessine tout
-function resizeCanvas() {
-    const canvasSize = calculateGridParams();
-    const ratio = window.devicePixelRatio;
-
-    canvas.width = canvasSize * ratio;
-    canvas.height = canvasSize * ratio;
-    canvas.style.width = canvasSize + 'px';
-    canvas.style.height = canvasSize + 'px';
-
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    redrawEverything();
-}
-
-// Calcule dynamiquement l'espacement et l'offset
-function calculateGridParams() {
-    const maxCanvasSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
-    spacing = maxCanvasSize / (size - 1);
-    offset = spacing * 0.5;
-    return maxCanvasSize;
-}
-
-//const visualOrigin = offset - spacing;
+const visualOrigin = offset - spacing;
 
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1688,12 +1671,12 @@ function drawGrid() {
 }
 
 function drawPoint(x, y, color = "#000") {
-    const pointSize = spacing * 0.15; // Taille proportionnelle à l'espacement
-    ctx.beginPath();
-    ctx.arc(offset + x * spacing, offset + y * spacing, pointSize, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
+  ctx.beginPath();
+  ctx.arc(offset + x * spacing, offset + y * spacing, 3, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
 }
+
 
 function drawSegment(segmentPoints) {
   const [sx, sy] = segmentPoints[0].split(",").map(Number);
@@ -1711,42 +1694,28 @@ function drawSegment(segmentPoints) {
 // ===============================
 
 function getNearestPoint(mx, my) {
-    const rect = canvas.getBoundingClientRect();
+  let best = null;
+  let bestDist = Infinity;
 
-    // Convertir les coordonnées de la souris en coordonnées relatives au canvas
-    const x = mx - rect.left;
-    const y = my - rect.top;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const px = offset + x * spacing;
+      const py = offset + y * spacing;
 
-    // Vérifier que les coordonnées sont bien dans le canvas
-    if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
-        return null;
+      const dx = mx - px;
+      const dy = my - py;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = { x, y };
+      }
     }
+  }
 
-    let best = null;
-    let bestDist = Infinity;
+  if (bestDist <= 25) return best;
 
-    for (let yGrid = 0; yGrid < size; yGrid++) {
-        for (let xGrid = 0; xGrid < size; xGrid++) {
-            const px = offset + xGrid * spacing;
-            const py = offset + yGrid * spacing;
-
-            const dx = x - px;
-            const dy = y - py;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < bestDist) {
-                bestDist = dist;
-                best = { x: xGrid, y: yGrid };
-            }
-        }
-    }
-
-    // Vérifier si le point est suffisamment proche
-    if (bestDist <= spacing * 0.5) {
-        return best;
-    }
-
-    return null;
+  return null;
 }
 
 function snapToAlignedPoint(first, clicked, mx, my) {
@@ -1812,68 +1781,67 @@ function drawMaltaCross() {
 }
 
 function initMaltaCross() {
-    permanentPoints.clear();
-    activePoints.clear();
 
-    // Construction brute de la croix
-    let x = 0, y = 0;
-    const pts = [];
-    const add = (px, py) => pts.push({ x: px, y: py });
-    add(x, y);
+  permanentPoints.clear();
+  activePoints.clear();
 
-    const steps = [
-        [1,0,3],[0,1,3],[1,0,3],[0,1,3],
-        [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
-        [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
-    ];
+  // Construction brute de la croix
+  let x = 0, y = 0;
+  const pts = [];
+  const add = (px, py) => pts.push({ x: px, y: py });
+  add(x, y);
 
-    for (const [dx, dy, n] of steps) {
-        for (let i = 0; i < n; i++) {
-            x += dx;
-            y += dy;
-            add(x, y);
-        }
+  const steps = [
+    [1,0,3],[0,1,3],[1,0,3],[0,1,3],
+    [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
+    [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
+  ];
+
+  for (const [dx, dy, n] of steps) {
+    for (let i = 0; i < n; i++) {
+      x += dx;
+      y += dy;
+      add(x, y);
     }
+  }
 
-    // Trouver les limites de la croix brute
-    let minX = 0, maxX = 0, minY = 0, maxY = 0;
-    pts.forEach(p => {
-        minX = Math.min(minX, p.x);
-        maxX = Math.max(maxX, p.x);
-        minY = Math.min(minY, p.y);
-        maxY = Math.max(maxY, p.y);
-    });
+  // Point de référence dans la croix brute
+  const refX = -3;
+  const refY = 3;
 
-    // Calculer le centre de la croix brute
-    const centerX = (minX + maxX) / 2;
-    const centerY = (minY + maxY) / 2;
+  // Point logique où placer ce point
+  const targetLeftX = 12;
+  const targetLeftY = 15;
 
-    // Coordonnées visuelles du centre de la grille
-    const visualCenterX = 14;
-    const visualCenterY = 14;
+  const offsetX = targetLeftX - refX; // 15
+  const offsetY = targetLeftY - refY; // 12
 
-    // Calculer l'offset pour centrer la croix
-    const offsetX = visualCenterX - centerX;
-    const offsetY = visualCenterY - centerY;
-
-    // Application de l’offset
-    pts.forEach(p => {
-        const key = `${Math.round(p.x + offsetX)},${Math.round(p.y + offsetY)}`;
-        permanentPoints.add(key);
-        activePoints.add(key);
-    });
+  // Application de l’offset
+  pts.forEach(p => {
+    const key = `${p.x + offsetX},${p.y + offsetY}`;
+    permanentPoints.add(key);
+    activePoints.add(key);
+  });
 }
 
 function redrawEverything() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawGrid();
-    drawMaltaCross();
-    validatedSegments.forEach(seg => drawSegment(seg.points));
-    activePoints.forEach(key => {
-        const [x, y] = key.split(",").map(Number);
-        drawPoint(x, y);
-    });
+
+  // Le canvas s’adapte visuellement
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawGrid();
+
+  validatedSegments.forEach(seg => drawSegment(seg.points));
+
+  activePoints.forEach(key => {
+    const [x, y] = key.split(",").map(Number);
+    drawPoint(x, y);
+  });
 }
+
 
 // ===============================
 //   ARÊTES
@@ -2310,12 +2278,6 @@ function startNewGame() {
 //   TUTORIEL : CLIGNOTEMENT
 // ===============================
 
-const tutorialSteps = [
-  { message: "Exemple 1 : une ligne horizontale.", start: { x: 9, y: 13 }, end: { x: 13, y: 13 } },
-  { message: "Exemple 2 : une ligne verticale.",   start: { x: 16, y: 9 }, end: { x: 16, y: 13 } },
-  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 10, y: 14 }, end: { x: 14, y: 10 } }
-];
-
 function blinkPoint(x, y, duration = 1200) {
   return new Promise(resolve => {
     let visible = true;
@@ -2669,7 +2631,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     profileAvatar: !!document.getElementById("profileAvatar"),
     profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
   });
-
 
   // Activation du bouton "S'inscrire" quand la case est cochée
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
@@ -3429,30 +3390,6 @@ function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
 
-canvas.addEventListener('click', (event) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    console.log("Coordonnées de la souris :", { x, y });
-
-    const point = getNearestPoint(event.clientX, event.clientY);
-    if (point) {
-        console.log("Point cliqué :", point);
-    } else {
-        console.log("Hors grille");
-    }
-});
-
-window.addEventListener('load', () => {
-        resizeCanvas();
-        initMaltaCross();
-        redrawEverything();
-    });
-
-    window.addEventListener('resize', () => {
-        resizeCanvas();
-    });
 
 console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
