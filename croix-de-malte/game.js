@@ -1117,9 +1117,9 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
 }
 
 const tutorialSteps = [
-  { message: "Exemple 1 : une ligne horizontale.", start: { x: 15, y: 12 }, end: { x: 19, y: 12 } },
-  { message: "Exemple 2 : une ligne verticale.",   start: { x: 15, y: 12 }, end: { x: 15, y: 16 } },
-  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 12, y: 16 }, end: { x: 16, y: 12 } }
+  { message: "Exemple 1 : une ligne horizontale.", start: { x: 12, y: 14 }, end: { x: 14, y: 14 } },
+  { message: "Exemple 2 : une ligne verticale.",   start: { x: 10, y: 14 }, end: { x: 14, y: 14 } },
+  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 11, y: 15 }, end: { x: 15, y: 11 } }
 ];
 
 // ===============================
