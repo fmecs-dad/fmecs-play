@@ -1810,8 +1810,8 @@ function initMaltaCross() {
   const refY = 3;
 
   // Point logique où placer ce point
-  const targetLeftX = 11;
-  const targetLeftY = 14;
+  const targetLeftX = 10;
+  const targetLeftY = 13;
 
   const offsetX = targetLeftX - refX; // 11
   const offsetY = targetLeftY - refY; // 14
