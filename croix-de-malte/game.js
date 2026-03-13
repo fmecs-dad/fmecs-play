@@ -1005,7 +1005,7 @@ let historyStack = [];
 let soundEnabled = true;
 let audioUnlocked = false;
 
-const size = 34;
+const size = 30;
 let offset;
 let spacing;
 
