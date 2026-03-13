@@ -1858,6 +1858,7 @@ function initMaltaCross() {
 function redrawEverything() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
+    drawMaltaCross();
     validatedSegments.forEach(seg => drawSegment(seg.points));
     activePoints.forEach(key => {
         const [x, y] = key.split(",").map(Number);
