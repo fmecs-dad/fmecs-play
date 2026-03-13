@@ -1119,7 +1119,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
 const tutorialSteps = [
   { message: "Exemple 1 : une ligne horizontale.", start: { x: 9, y: 13 }, end: { x: 13, y: 13 } },
   { message: "Exemple 2 : une ligne verticale.",   start: { x: 16, y: 9 }, end: { x: 16, y: 13 } },
-  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 12, y: 16 }, end: { x: 16, y: 12 } }
+  { message: "Exemple 3 : une ligne diagonale.",   start: { x: 10, y: 15 }, end: { x: 14, y: 11 } }
 ];
 
 // ===============================
