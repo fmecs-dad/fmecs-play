@@ -1712,16 +1712,17 @@ function drawSegment(segmentPoints) {
 // ===============================
 
 function getNearestPoint(mx, my) {
+    // Obtenir les coordonnées du canvas par rapport à la fenêtre
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
 
-    const x = (mx - rect.left) * scaleX;
-    const y = (my - rect.top) * scaleY;
+    // Convertir les coordonnées de la souris en coordonnées relatives au canvas
+    const x = mx - rect.left;
+    const y = my - rect.top;
 
     let best = null;
     let bestDist = Infinity;
 
+    // Parcourir tous les points de la grille
     for (let yGrid = 0; yGrid < size; yGrid++) {
         for (let xGrid = 0; xGrid < size; xGrid++) {
             const px = offset + xGrid * spacing;
@@ -1729,7 +1730,7 @@ function getNearestPoint(mx, my) {
 
             const dx = x - px;
             const dy = y - py;
-            const dist = Math.sqrt(dx*dx + dy*dy);
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < bestDist) {
                 bestDist = dist;
@@ -1738,7 +1739,10 @@ function getNearestPoint(mx, my) {
         }
     }
 
-    if (bestDist <= spacing * 0.5) return best;
+    // Vérifier si le point est suffisamment proche
+    if (bestDist <= spacing * 0.5) {
+        return best;
+    }
 
     return null;
 }
