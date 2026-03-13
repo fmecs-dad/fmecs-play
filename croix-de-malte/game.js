@@ -1406,6 +1406,7 @@ function loadBestScore() {
 }
 
 function updateBestScoreTop() {
+  console.log("Entrée Score");
   const el = document.getElementById("bestScoreTop");
   if (!el) return;
 
