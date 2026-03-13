@@ -1667,23 +1667,20 @@ function resizeCanvas() {
 const visualOrigin = offset - spacing;
 
 function drawGrid() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#ddd";
-  ctx.lineWidth = 1;
+    // ... ton code existant pour dessiner la grille ...
 
-  for (let y = 0; y < size; y++) {
+    // Ajouter des lignes de repère pour le centre
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(offset, offset + y * spacing);
-    ctx.lineTo(offset + (size - 1) * spacing, offset + y * spacing);
+    ctx.moveTo(offset, offset + 15 * spacing); // Ligne horizontale au centre vertical
+    ctx.lineTo(offset + (size - 1) * spacing, offset + 15 * spacing);
     ctx.stroke();
-  }
 
-  for (let x = 0; x < size; x++) {
     ctx.beginPath();
-    ctx.moveTo(offset + x * spacing, offset);
-    ctx.lineTo(offset + x * spacing, offset + (size - 1) * spacing);
+    ctx.moveTo(offset + 15 * spacing, offset); // Ligne verticale au centre horizontal
+    ctx.lineTo(offset + 15 * spacing, offset + (size - 1) * spacing);
     ctx.stroke();
-  }
 }
 
 function drawPoint(x, y, color = "#000") {
