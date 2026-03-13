@@ -1810,11 +1810,11 @@ function initMaltaCross() {
   const refY = 3;
 
   // Point logique où placer ce point
-  const targetLeftX = 12;
-  const targetLeftY = 15;
+  const targetLeftX = 11;
+  const targetLeftY = 14;
 
-  const offsetX = targetLeftX - refX; // 15
-  const offsetY = targetLeftY - refY; // 12
+  const offsetX = targetLeftX - refX; // 11
+  const offsetY = targetLeftY - refY; // 14
 
   // Application de l’offset
   pts.forEach(p => {
