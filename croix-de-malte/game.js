@@ -1645,15 +1645,16 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
 // Redimensionne le canvas et redessine tout
 function resizeCanvas() {
-    const canvasSize = calculateGridParams();
-    const ratio = window.devicePixelRatio || 1;
+    const containerWidth = canvas.parentElement.clientWidth;
+    const containerHeight = canvas.parentElement.clientHeight;
+    const canvasSize = Math.min(containerWidth, containerHeight) * 0.9;
 
-    canvas.width = canvasSize * ratio;
-    canvas.height = canvasSize * ratio;
+    canvas.width = canvasSize * window.devicePixelRatio;
+    canvas.height = canvasSize * window.devicePixelRatio;
     canvas.style.width = canvasSize + 'px';
     canvas.style.height = canvasSize + 'px';
 
-    ctx.scale(ratio, ratio);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     redrawEverything();
 }
 
@@ -1688,12 +1689,12 @@ function drawGrid() {
 }
 
 function drawPoint(x, y, color = "#000") {
-  ctx.beginPath();
-  ctx.arc(offset + x * spacing, offset + y * spacing, 3, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.fill();
+    const pointSize = spacing * 0.15; // Taille proportionnelle à l'espacement
+    ctx.beginPath();
+    ctx.arc(offset + x * spacing, offset + y * spacing, pointSize, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
 }
-
 
 function drawSegment(segmentPoints) {
   const [sx, sy] = segmentPoints[0].split(",").map(Number);
@@ -1711,10 +1712,12 @@ function drawSegment(segmentPoints) {
 // ===============================
 
 function getNearestPoint(mx, my) {
-    // Obtenir les coordonnées relatives au canvas
     const rect = canvas.getBoundingClientRect();
-    const x = mx - rect.left;
-    const y = my - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (mx - rect.left) * scaleX;
+    const y = (my - rect.top) * scaleY;
 
     let best = null;
     let bestDist = Infinity;
@@ -1735,7 +1738,7 @@ function getNearestPoint(mx, my) {
         }
     }
 
-    if (bestDist <= 25) return best;
+    if (bestDist <= spacing * 0.5) return best;
 
     return null;
 }
@@ -3418,6 +3421,16 @@ document.getElementById("whySignupContinueBtn")?.addEventListener("click", () =>
 function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
+
+canvas.addEventListener('click', (event) => {
+    const point = getNearestPoint(event.clientX, event.clientY);
+    if (point) {
+        // Logique pour gérer le point cliqué
+        console.log("Point cliqué :", point);
+    } else {
+        console.log("Hors grille");
+    }
+});
 
 window.addEventListener('load', () => {
     resizeCanvas();          // Calcule spacing, offset et redimensionne le canvas
