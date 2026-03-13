@@ -2670,29 +2670,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
   });
 
-const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Écouteur d'événement pour les clics sur le canvas
-    canvas.addEventListener('click', (event) => {
-        const point = getNearestPoint(event.clientX, event.clientY);
-        if (point) {
-            console.log("Point cliqué :", point);
-            // Logique pour gérer le point cliqué
-        } else {
-            console.log("Hors grille");
-        }
-    });
-
-    window.addEventListener('load', () => {
-        resizeCanvas();
-        initMaltaCross();
-        redrawEverything();
-    });
-
-    window.addEventListener('resize', () => {
-        resizeCanvas();
-    });
 
   // Activation du bouton "S'inscrire" quand la case est cochée
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
@@ -3451,6 +3428,31 @@ document.getElementById("whySignupContinueBtn")?.addEventListener("click", () =>
 function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
+
+canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    console.log("Coordonnées de la souris :", { x, y });
+
+    const point = getNearestPoint(event.clientX, event.clientY);
+    if (point) {
+        console.log("Point cliqué :", point);
+    } else {
+        console.log("Hors grille");
+    }
+});
+
+window.addEventListener('load', () => {
+        resizeCanvas();
+        initMaltaCross();
+        redrawEverything();
+    });
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+    });
 
 console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
