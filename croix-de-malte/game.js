@@ -3415,6 +3415,7 @@ window.addEventListener('load', () => {
 
 window.addEventListener('resize', () => {
     resizeCanvas();          // Recalcule spacing, offset et redimensionne le canvas
+    initMaltaCross();        // Initialise la croix de Malt
     redrawEverything();      // Redessine tout
 });
 console.log("[DOMContentLoaded] Fin de l'initialisation");
