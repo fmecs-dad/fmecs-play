@@ -1654,8 +1654,8 @@ function calculateGridParams() {
 // Redimensionne le canvas et redessine tout
 function resizeCanvas() {
     const canvasSize = calculateGridParams();
-    canvas.width = canvasSize;
-    canvas.height = canvasSize;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     redrawEverything();
 }
 
@@ -1705,28 +1705,33 @@ function drawSegment(segmentPoints) {
 // ===============================
 
 function getNearestPoint(mx, my) {
-  let best = null;
-  let bestDist = Infinity;
+    // Obtenir les coordonnées relatives au canvas
+    const rect = canvas.getBoundingClientRect();
+    const x = mx - rect.left;
+    const y = my - rect.top;
 
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const px = offset + x * spacing;
-      const py = offset + y * spacing;
+    let best = null;
+    let bestDist = Infinity;
 
-      const dx = mx - px;
-      const dy = my - py;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+    for (let yGrid = 0; yGrid < size; yGrid++) {
+        for (let xGrid = 0; xGrid < size; xGrid++) {
+            const px = offset + xGrid * spacing;
+            const py = offset + yGrid * spacing;
 
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = { x, y };
-      }
+            const dx = x - px;
+            const dy = y - py;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist < bestDist) {
+                bestDist = dist;
+                best = { x: xGrid, y: yGrid };
+            }
+        }
     }
-  }
 
-  if (bestDist <= 25) return best;
+    if (bestDist <= 25) return best;
 
-  return null;
+    return null;
 }
 
 function snapToAlignedPoint(first, clicked, mx, my) {
