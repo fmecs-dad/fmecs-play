@@ -1820,21 +1820,30 @@ function initMaltaCross() {
         }
     }
 
+    // Trouver les limites de la croix brute
+    let minX = 0, maxX = 0, minY = 0, maxY = 0;
+    pts.forEach(p => {
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y);
+        maxY = Math.max(maxY, p.y);
+    });
+
+    // Calculer le centre de la croix brute
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
     // Coordonnées visuelles du centre de la grille
-    const visualCenterX = 10;  // Décalage de 15 points vers la gauche
-    const visualCenterY = 13;
+    const visualCenterX = 15;
+    const visualCenterY = 15;
 
-    // Point de référence dans la croix brute
-    const refX = -3;
-    const refY = 3;
-
-    // Calculer l'offset pour centrer la croix sur le centre visuel
-    const offsetX = visualCenterX - refX;
-    const offsetY = visualCenterY - refY;
+    // Calculer l'offset pour centrer la croix
+    const offsetX = visualCenterX - centerX;
+    const offsetY = visualCenterY - centerY;
 
     // Application de l’offset
     pts.forEach(p => {
-        const key = `${p.x + offsetX},${p.y + offsetY}`;
+        const key = `${Math.round(p.x + offsetX)},${Math.round(p.y + offsetY)}`;
         permanentPoints.add(key);
         activePoints.add(key);
     });
