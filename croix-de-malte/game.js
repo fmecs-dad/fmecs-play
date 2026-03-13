@@ -3347,9 +3347,7 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
 
     // 8. Fermeture de la modale et mise à jour du score
     document.getElementById("authOverlay")?.classList.add("hidden");
-    if (typeof updateBestScoreTop === 'function') {
       updateBestScoreTop();
-    }
 
     // 9. Réinitialisation du menu profil
     const profileBtn = document.getElementById("profileBtn");
