@@ -3396,11 +3396,13 @@ document.getElementById("whySignupContinueBtn")?.addEventListener("click", () =>
 function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
+window.addEventListener('load', () => {
+    resizeCanvas();
+    initMaltaCross();
+    redrawEverything();
+});
 
+window.addEventListener('resize', resizeCanvas);
 
 console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
-
-// Écouteurs pour le redimensionnement
-window.addEventListener('load', resizeCanvas);
-window.addEventListener('resize', resizeCanvas);
