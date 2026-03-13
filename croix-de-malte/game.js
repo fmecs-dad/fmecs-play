@@ -3396,13 +3396,16 @@ document.getElementById("whySignupContinueBtn")?.addEventListener("click", () =>
 function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
+
 window.addEventListener('load', () => {
-    resizeCanvas();
-    initMaltaCross();
-    redrawEverything();
+    resizeCanvas();          // Calcule spacing, offset et redimensionne le canvas
+    initMaltaCross();        // Initialise la croix de Malte
+    redrawEverything();     // Redessine tout
 });
 
-window.addEventListener('resize', resizeCanvas);
-
+window.addEventListener('resize', () => {
+    resizeCanvas();          // Recalcule spacing, offset et redimensionne le canvas
+    redrawEverything();      // Redessine tout
+});
 console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
