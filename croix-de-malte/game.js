@@ -1712,10 +1712,15 @@ function drawSegment(segmentPoints) {
 
 function getNearestPoint(mx, my) {
     const rect = canvas.getBoundingClientRect();
-    const ratio = window.devicePixelRatio || 1;
 
-    const x = (mx - rect.left) * ratio;
-    const y = (my - rect.top) * ratio;
+    // Convertir les coordonnées de la souris en coordonnées relatives au canvas
+    const x = mx - rect.left;
+    const y = my - rect.top;
+
+    // Vérifier que les coordonnées sont bien dans le canvas
+    if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
+        return null;
+    }
 
     let best = null;
     let bestDist = Infinity;
@@ -1736,6 +1741,7 @@ function getNearestPoint(mx, my) {
         }
     }
 
+    // Vérifier si le point est suffisamment proche
     if (bestDist <= spacing * 0.5) {
         return best;
     }
