@@ -1643,23 +1643,29 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
-// Calcule dynamiquement l'espacement et l'offset
-function calculateGridParams() {
-    const canvasSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
-    spacing = canvasSize / (size - 1);
-    offset = spacing * 0.5;
-    return canvasSize;
-}
-
 // Redimensionne le canvas et redessine tout
 function resizeCanvas() {
     const canvasSize = calculateGridParams();
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+    const ratio = window.devicePixelRatio || 1;
+
+    canvas.width = canvasSize * ratio;
+    canvas.height = canvasSize * ratio;
+    canvas.style.width = canvasSize + 'px';
+    canvas.style.height = canvasSize + 'px';
+
+    ctx.scale(ratio, ratio);
     redrawEverything();
 }
 
-const visualOrigin = offset - spacing;
+// Calcule dynamiquement l'espacement et l'offset
+function calculateGridParams() {
+    const maxCanvasSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+    spacing = maxCanvasSize / (size - 1);
+    offset = spacing * 0.5;
+    return maxCanvasSize;
+}
+
+//const visualOrigin = offset - spacing;
 
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
