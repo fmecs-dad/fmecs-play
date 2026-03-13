@@ -1411,7 +1411,7 @@ function updateBestScoreTop() {
   if (!el) return;
 
   const best = loadBestScore();
-  cxonsole.log(best)
+  console.log(best);
   if (!best || isNaN(Number(best.score))) {
     el.textContent = "";
     return;
