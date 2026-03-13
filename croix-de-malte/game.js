@@ -1005,7 +1005,7 @@ let historyStack = [];
 let soundEnabled = true;
 let audioUnlocked = false;
 
-const size = 34;
+const size = 30;
 let offset;
 let spacing;
 
@@ -1648,6 +1648,22 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
+// Calcule dynamiquement l'espacement et l'offset
+function calculateGridParams() {
+    const canvasSize = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+    spacing = canvasSize / (size - 1);
+    offset = spacing * 0.5;
+    return canvasSize;
+}
+
+// Redimensionne le canvas et redessine tout
+function resizeCanvas() {
+    const canvasSize = calculateGridParams();
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    redrawEverything();
+}
+
 const visualOrigin = offset - spacing;
 
 function drawGrid() {
@@ -1781,67 +1797,53 @@ function drawMaltaCross() {
 }
 
 function initMaltaCross() {
+    permanentPoints.clear();
+    activePoints.clear();
 
-  permanentPoints.clear();
-  activePoints.clear();
+    // Construction de la croix (inchangé)
+    let x = 0, y = 0;
+    const pts = [];
+    const add = (px, py) => pts.push({ x: px, y: py });
+    add(x, y);
 
-  // Construction brute de la croix
-  let x = 0, y = 0;
-  const pts = [];
-  const add = (px, py) => pts.push({ x: px, y: py });
-  add(x, y);
+    const steps = [
+        [1,0,3],[0,1,3],[1,0,3],[0,1,3],
+        [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
+        [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
+    ];
 
-  const steps = [
-    [1,0,3],[0,1,3],[1,0,3],[0,1,3],
-    [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
-    [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
-  ];
-
-  for (const [dx, dy, n] of steps) {
-    for (let i = 0; i < n; i++) {
-      x += dx;
-      y += dy;
-      add(x, y);
+    for (const [dx, dy, n] of steps) {
+        for (let i = 0; i < n; i++) {
+            x += dx;
+            y += dy;
+            add(x, y);
+        }
     }
-  }
 
-  // Point de référence dans la croix brute
-  const refX = -3;
-  const refY = 3;
+    // Centrer la croix dans la grille
+    const centerX = Math.floor(size / 2);
+    const centerY = Math.floor(size / 2);
+    const refX = -3;
+    const refY = 3;
+    const offsetX = centerX - refX;
+    const offsetY = centerY - refY;
 
-  // Point logique où placer ce point
-  const targetLeftX = 12;
-  const targetLeftY = 15;
-
-  const offsetX = targetLeftX - refX; // 15
-  const offsetY = targetLeftY - refY; // 12
-
-  // Application de l’offset
-  pts.forEach(p => {
-    const key = `${p.x + offsetX},${p.y + offsetY}`;
-    permanentPoints.add(key);
-    activePoints.add(key);
-  });
+    pts.forEach(p => {
+        const key = `${p.x + offsetX},${p.y + offsetY}`;
+        permanentPoints.add(key);
+        activePoints.add(key);
+    });
 }
 
 function redrawEverything() {
-
-  // Le canvas s’adapte visuellement
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawGrid();
-
-  validatedSegments.forEach(seg => drawSegment(seg.points));
-
-  activePoints.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    drawPoint(x, y);
-  });
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    validatedSegments.forEach(seg => drawSegment(seg.points));
+    activePoints.forEach(key => {
+        const [x, y] = key.split(",").map(Number);
+        drawPoint(x, y);
+    });
 }
-
 
 // ===============================
 //   ARÊTES
@@ -3393,3 +3395,7 @@ function closeWhySignup() {
 
 console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
+
+// Écouteurs pour le redimensionnement
+window.addEventListener('load', resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
