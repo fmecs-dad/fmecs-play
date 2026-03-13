@@ -1821,8 +1821,8 @@ function initMaltaCross() {
     }
 
     // Coordonnées visuelles du centre de la grille
-    const visualCenterX = 15;  // Décalage de 15 points vers la gauche
-    const visualCenterY = 15;
+    const visualCenterX = 05;  // Décalage de 15 points vers la gauche
+    const visualCenterY = 13;
 
     // Point de référence dans la croix brute
     const refX = -3;
