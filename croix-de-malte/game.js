@@ -1667,20 +1667,23 @@ function resizeCanvas() {
 const visualOrigin = offset - spacing;
 
 function drawGrid() {
-    // ... ton code existant pour dessiner la grille ...
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#ddd";
+  ctx.lineWidth = 1;
 
-    // Ajouter des lignes de repère pour le centre
-    ctx.strokeStyle = "red";
-    ctx.lineWidth = 2;
+  for (let y = 0; y < size; y++) {
     ctx.beginPath();
-    ctx.moveTo(offset, offset + 15 * spacing); // Ligne horizontale au centre vertical
-    ctx.lineTo(offset + (size - 1) * spacing, offset + 15 * spacing);
+    ctx.moveTo(offset, offset + y * spacing);
+    ctx.lineTo(offset + (size - 1) * spacing, offset + y * spacing);
     ctx.stroke();
+  }
 
+  for (let x = 0; x < size; x++) {
     ctx.beginPath();
-    ctx.moveTo(offset + 15 * spacing, offset); // Ligne verticale au centre horizontal
-    ctx.lineTo(offset + 15 * spacing, offset + (size - 1) * spacing);
+    ctx.moveTo(offset + x * spacing, offset);
+    ctx.lineTo(offset + x * spacing, offset + (size - 1) * spacing);
     ctx.stroke();
+  }
 }
 
 function drawPoint(x, y, color = "#000") {
@@ -1831,8 +1834,8 @@ function initMaltaCross() {
     const centerY = (minY + maxY) / 2;
 
     // Coordonnées visuelles du centre de la grille
-    const visualCenterX = 15;
-    const visualCenterY = 15;
+    const visualCenterX = 14;
+    const visualCenterY = 14;
 
     // Calculer l'offset pour centrer la croix
     const offsetX = visualCenterX - centerX;
