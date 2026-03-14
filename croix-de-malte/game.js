@@ -880,13 +880,6 @@ async function saveProfileChanges() {
     await updateProfileInfo(true); // Rafraîchit tout, y compris l'avatar de la topbar
     console.log("Profil mis à jour avec succès");
 
-    // 8. Fermeture (ton code existant)
-    document.getElementById("authOverlay").classList.add("hidden");
-    updateBestScoreTop();
-    profileModal.classList.add("hidden");
-    errorMessage.classList.add("hidden");
-    console.log("Mises à jour terminées");
-
   } catch (err) {
     console.error("Erreur enregistrement:", err);
     errorMessage.textContent = err.message || "Une erreur est survenue";
@@ -1418,7 +1411,7 @@ function updateBestScoreTop() {
   if (!el) return;
 
   const best = loadBestScore();
-  console.log(best);
+  console.log("best");
   if (!best || isNaN(Number(best.score))) {
     el.textContent = "";
     return;
