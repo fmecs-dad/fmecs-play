@@ -805,7 +805,7 @@ async function resetPassword(authEmailInputId, errorMessageId) {
 
   try {
     const { error } = await supa.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://play.fmecs.fr/croix-de-malte/resetpwd' //
+      redirectTo: 'https://play.fmecs.fr/croix-de-malte/resetpwd.html' //
     });
     if (error) throw error;
     errorMessage.textContent = "Un email de réinitialisation a été envoyé.";
