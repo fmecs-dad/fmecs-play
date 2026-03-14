@@ -1653,7 +1653,7 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
-const visualOrigin = offset - spacing;
+//const visualOrigin = offset - spacing;
 
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1827,6 +1827,10 @@ function initMaltaCross() {
     permanentPoints.add(key);
     activePoints.add(key);
   });
+  console.log("Spacing:", spacing);
+  console.log("Offset:", offsetX);
+  console.log("Target Left X:", targetLeftX);
+  console.log("Target Left Y:", targetLeftY);
 }
 
 function redrawEverything() {
