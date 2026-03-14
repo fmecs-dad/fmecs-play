@@ -789,12 +789,10 @@ async function changePassword() {
 }
 
 
-/**
- * Réinitialise le mot de passe via email
- */
-async function resetPassword() {
-  const emailInput = document.getElementById("profileEmailInput");
-  const errorMessage = document.getElementById("profileErrorMessage");
+/*** Réinitialise le mot de passe via email ***/
+async function resetPassword(authEmailInputId, errorMessageId) {
+  const emailInput = document.getElementById(authEmailInputId);
+  const errorMessage = document.getElementById(errorMessageId);
 
   if (!emailInput || !errorMessage) return;
 
@@ -819,6 +817,7 @@ async function resetPassword() {
     errorMessage.style.color = "red";
   }
 }
+
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
@@ -3117,6 +3116,14 @@ if (burgerHelpBtn) {
 // ===============================
 //   AUTHENTIFICATION
 // ===============================
+
+// Écouteurs pour le lien de mot de passe oublié
+const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+
+  forgotPasswordLink.addEventListener('click', async (event) => {
+    event.preventDefault();
+    await resetPassword('authEmail', 'authErrorMessage');
+  });
 
 // Écouteurs pour les boutons de fermeture
 document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
