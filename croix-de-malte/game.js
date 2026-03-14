@@ -183,7 +183,7 @@ async function updateAuthUI(user = null) {
     profilePseudoDisplay.title = "Invité";
     const best = loadBestScore();
     if (!best || isNaN(Number(best.score))) {
-      el.textContent = "";
+      bestScoreTop.textContent = "";
       return;
     }
     localStorage.removeItem("playerPseudo");
