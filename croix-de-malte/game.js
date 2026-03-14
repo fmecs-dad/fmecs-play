@@ -175,7 +175,6 @@ async function updateAuthUI(user = null) {
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
-    console.log("vrai");
     if (burgerAuthBtn) burgerAuthBtn.style.display = "block"; // Afficher le bouton
     if (burgerPseudo) burgerPseudo.textContent = "";
     if (profileBtn) profileBtn.disabled = true;
@@ -188,7 +187,7 @@ async function updateAuthUI(user = null) {
   if (profileBtn) profileBtn.disabled = false;
 
   // Correction ici : utiliser localStorage.getItem au lieu de localStorage.getElementById
-  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Joueur";
+  let fallbackPseudo = localStorage.getItem("playerPseudo") || "Invité";
   if (burgerPseudo) burgerPseudo.textContent = fallbackPseudo;
 
   try {
