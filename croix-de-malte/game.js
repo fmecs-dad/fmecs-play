@@ -179,8 +179,8 @@ async function updateAuthUI(user = null) {
     if (burgerPseudo) burgerPseudo.textContent = "";
     if (profileBtn) profileBtn.disabled = true;
     profileAvatar.src = "images/avatarDefault.png";
-    pseudoDisplay.textContent = "Invité";
-    pseudoDisplay.title = "Invité";
+    ProfilePseudoDisplay.textContent = "Invité";
+    ProfilePseudoDisplay.title = "Invité";
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
     return;
