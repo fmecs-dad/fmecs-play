@@ -181,7 +181,11 @@ async function updateAuthUI(user = null) {
     profileAvatar.src = "images/avatarDefault.png";
     profilePseudoDisplay.textContent = "Invité";
     profilePseudoDisplay.title = "Invité";
-    bestScoreTop ="";
+    const best = loadBestScore();
+    if (!best || isNaN(Number(best.score))) {
+      el.textContent = "";
+      return;
+    }
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
     return;
