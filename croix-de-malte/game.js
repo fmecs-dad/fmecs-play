@@ -3037,6 +3037,7 @@ if (burgerAuthBtn) {
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
 
+
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
     localStorage.removeItem("currentGameState");
@@ -3128,6 +3129,13 @@ const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
   if (typeof playClickSound === 'function') playClickSound();
   document.getElementById("authOverlay")?.classList.add("hidden");
+
+  // Réinitialiser le message d'erreur/succès
+  const authErrorMessage = document.getElementById("authErrorMessage");
+  if (authErrorMessage) {
+    authErrorMessage.textContent = '';
+    authErrorMessage.classList.add('hidden');
+  }
 });
 
 document.getElementById("closePseudoModalBtn")?.addEventListener("click", () => {
