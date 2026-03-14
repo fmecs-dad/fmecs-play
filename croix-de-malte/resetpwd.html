@@ -19,20 +19,24 @@
   <script src="/croix-de-malte/lib/supabase.js"></script>
   <script>
     const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
-    const supa = window.supabase.createClient(
+    const supabase = window.supabase.createClient(
       "https://gjzqghhqpycbcwykxvgw.supabase.co",
       SUPABASE_ANON_KEY
     );
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Récupérer l'access_token depuis le hash de l'URL
       const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
 
       if (accessToken) {
-        // Si un access_token est présent, l'utilisateur est déjà "connecté" via ce token
-        supa.auth.setSession(accessToken);
+        const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+        if (error) {
+          document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide ou expiré.";
+          document.getElementById('resetMessage').classList.remove('hidden');
+          return;
+        }
 
         document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
           event.preventDefault();
@@ -61,4 +65,3 @@
   </script>
 </body>
 </html>
-
