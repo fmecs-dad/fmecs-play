@@ -4,13 +4,97 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Réinitialisation du mot de passe</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-image: url('/croix-de-malte/images/background.jpg');
+      background-size: cover;
+    }
+
+    .reset-password-container {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    .reset-password-container h1 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    #resetPasswordForm {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #resetPasswordForm label {
+      text-align: left;
+      color: #555;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    #resetPasswordForm input {
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #resetPasswordForm button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    #resetPasswordForm button:hover {
+      background-color: #45a049;
+    }
+
+    #resetMessage {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="reset-password-container">
+    <img src="/croix-de-malte/images/logo.png" alt="Logo" class="logo">
     <h1>Réinitialiser votre mot de passe</h1>
     <form id="resetPasswordForm">
       <label for="newPassword">Nouveau mot de passe</label>
-      <input type="password" id="newPassword" required>
+      <input type="password" id="newPassword" required placeholder="Saisissez votre nouveau mot de passe">
       <button type="submit">Réinitialiser le mot de passe</button>
     </form>
     <p id="resetMessage" class="hidden"></p>
@@ -32,16 +116,18 @@
       if (!accessToken) {
         document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide.";
         document.getElementById('resetMessage').classList.remove('hidden');
+        document.getElementById('resetMessage').style.color = "red";
         return;
       }
 
       try {
-        // Vérifier que le token est valide en récupérant l'utilisateur
+        supa.auth.setSession(accessToken);
         const { data: { user }, error } = await supa.auth.getUser();
 
         if (error) {
           document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide ou expiré.";
           document.getElementById('resetMessage').classList.remove('hidden');
+          document.getElementById('resetMessage').style.color = "red";
           return;
         }
 
@@ -57,16 +143,20 @@
 
             resetMessage.textContent = "Votre mot de passe a été réinitialisé avec succès !";
             resetMessage.style.color = "green";
+            resetMessage.style.backgroundColor = "#e8f5e9";
             resetMessage.classList.remove('hidden');
           } catch (error) {
             resetMessage.textContent = error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.";
             resetMessage.style.color = "red";
+            resetMessage.style.backgroundColor = "#ffebee";
             resetMessage.classList.remove('hidden');
             console.error(error);
           }
         });
       } catch (error) {
         document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide ou expiré.";
+        document.getElementById('resetMessage').style.color = "red";
+        document.getElementById('resetMessage').style.backgroundColor = "#ffebee";
         document.getElementById('resetMessage').classList.remove('hidden');
         console.error(error);
       }
