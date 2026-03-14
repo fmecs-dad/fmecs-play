@@ -24,36 +24,41 @@
       SUPABASE_ANON_KEY
     );
 
-    document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const newPassword = document.getElementById('newPassword').value;
-      const resetMessage = document.getElementById('resetMessage');
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Récupérer l'access_token depuis le hash de l'URL
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
 
-      // Récupérer le token_hash de réinitialisation depuis l'URL
-      const queryParams = new URLSearchParams(window.location.search);
-      const tokenHash = queryParams.get('token_hash');
+      if (accessToken) {
+        // Si un access_token est présent, l'utilisateur est déjà "connecté" via ce token
+        supabase.auth.setSession(accessToken);
 
-      if (!tokenHash) {
-        resetMessage.textContent = "Token de réinitialisation manquant.";
-        resetMessage.classList.remove('hidden');
-        return;
-      }
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const newPassword = document.getElementById('newPassword').value;
+          const resetMessage = document.getElementById('resetMessage');
 
-      try {
-        // Utiliser la méthode correcte pour mettre à jour le mot de passe
-        const { error } = await supabase.auth.api.updateUser(tokenHash, { password: newPassword });
+          try {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-        if (error) throw error;
+            if (error) throw error;
 
-        resetMessage.textContent = "Votre mot de passe a été réinitialisé avec succès !";
-        resetMessage.style.color = "green";
-        resetMessage.classList.remove('hidden');
-      } catch (error) {
-        resetMessage.textContent = error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.";
-        resetMessage.style.color = "red";
-        resetMessage.classList.remove('hidden');
+            resetMessage.textContent = "Votre mot de passe a été réinitialisé avec succès !";
+            resetMessage.style.color = "green";
+            resetMessage.classList.remove('hidden');
+          } catch (error) {
+            resetMessage.textContent = error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.";
+            resetMessage.style.color = "red";
+            resetMessage.classList.remove('hidden');
+          }
+        });
+      } else {
+        document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide.";
+        document.getElementById('resetMessage').classList.remove('hidden');
       }
     });
   </script>
 </body>
 </html>
+
