@@ -18,9 +18,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
-    const supabaseUrl = 'TU_SUPABASE_URL';
-    const supabaseKey = 'TU_SUPABASE_KEY';
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
+    //const supabaseKey = 'TU_SUPABASE_KEY';
+    const supa = window.supabase.createClient(
+      "https://gjzqghhqpycbcwykxvgw.supabase.co",
+      SUPABASE_ANON_KEY
+    );
+
 
     document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
       event.preventDefault();
