@@ -178,6 +178,7 @@ async function updateAuthUI(user = null) {
     if (burgerAuthBtn) burgerAuthBtn.style.display = "block"; // Afficher le bouton
     if (burgerPseudo) burgerPseudo.textContent = "";
     if (profileBtn) profileBtn.disabled = true;
+    profileAvatar.src = "images/avatarDefault.png";
     localStorage.removeItem("playerPseudo");
     localStorage.removeItem("bestScoreData");
     return;
