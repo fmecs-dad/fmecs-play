@@ -805,7 +805,7 @@ async function resetPassword(authEmailInputId, errorMessageId) {
 
   try {
     const { error } = await supa.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/reset-password'
+      redirectTo: 'https://play.fmecs.fr/croix-de-malte/resetpwd' //
     });
     if (error) throw error;
     errorMessage.textContent = "Un email de réinitialisation a été envoyé.";
@@ -817,7 +817,6 @@ async function resetPassword(authEmailInputId, errorMessageId) {
     errorMessage.style.color = "red";
   }
 }
-
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {

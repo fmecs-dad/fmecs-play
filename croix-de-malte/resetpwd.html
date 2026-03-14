@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Réinitialisation du mot de passe</title>
+</head>
+<body>
+  <div class="reset-password-container">
+    <h1>Réinitialiser votre mot de passe</h1>
+    <form id="resetPasswordForm">
+      <label for="newPassword">Nouveau mot de passe</label>
+      <input type="password" id="newPassword" required>
+      <button type="submit">Réinitialiser le mot de passe</button>
+    </form>
+    <p id="resetMessage" class="hidden"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabaseUrl = 'TU_SUPABASE_URL';
+    const supabaseKey = 'TU_SUPABASE_KEY';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const newPassword = document.getElementById('newPassword').value;
+      const resetMessage = document.getElementById('resetMessage');
+
+      // Récupérer le token de réinitialisation depuis l'URL
+      const queryParams = new URLSearchParams(window.location.search);
+      const token = queryParams.get('token');
+
+      if (!token) {
+        resetMessage.textContent = "Token de réinitialisation manquant.";
+        resetMessage.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.api.updateUser(token, { password: newPassword });
+
+        if (error) throw error;
+
+        resetMessage.textContent = "Votre mot de passe a été réinitialisé avec succès !";
+        resetMessage.style.color = "green";
+        resetMessage.classList.remove('hidden');
+      } catch (error) {
+        resetMessage.textContent = error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.";
+        resetMessage.style.color = "red";
+        resetMessage.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
