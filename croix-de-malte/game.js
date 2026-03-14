@@ -1406,17 +1406,14 @@ function loadBestScore() {
 }
 
 function updateBestScoreTop() {
-  console.log("Entrée Score");
   const el = document.getElementById("bestScoreTop");
   if (!el) return;
 
   const best = loadBestScore();
-  console.log("best");
   if (!best || isNaN(Number(best.score))) {
     el.textContent = "";
     return;
   }
-  console.log("affichage score");
   const score = Number(best.score);
   const minutes = Math.floor(best.duration / 60);
   const seconds = best.duration % 60;
@@ -2489,7 +2486,6 @@ function initGame() {
 
   gameOver = false;
   paused = false;
-  console.log("avant le score");
   updateBestScoreTop();
 
 }
