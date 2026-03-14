@@ -2995,6 +2995,11 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   const burgerBtn = document.getElementById("burgerBtn");
   if (burgerBtn) {
     burgerBtn.addEventListener("click", () => {
+      const authErrorMessage = document.getElementById("authErrorMessage");
+      if (authErrorMessage) {
+        authErrorMessage.textContent = '';
+        authErrorMessage.classList.add('hidden');
+      }
       if (typeof playClickSound === 'function') playClickSound();
       const ov = document.getElementById("burgerOverlay");
       if (ov) ov.classList.toggle("show");
