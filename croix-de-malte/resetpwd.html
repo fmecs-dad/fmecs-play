@@ -37,7 +37,7 @@
 
       try {
         // Vérifier que le token est valide en récupérant l'utilisateur
-        const { data: { user }, error } = await supabase.auth.getUser();
+        const { data: { user }, error } = await supa.auth.getUser();
 
         if (error) {
           document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide ou expiré.";
@@ -51,7 +51,7 @@
           const resetMessage = document.getElementById('resetMessage');
 
           try {
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            const { error } = await supa.auth.updateUser({ password: newPassword });
 
             if (error) throw error;
 
