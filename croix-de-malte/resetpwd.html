@@ -19,7 +19,7 @@
   <script src="/croix-de-malte/lib/supabase.js"></script>
   <script>
     const SUPABASE_ANON_KEY = "sb_publishable_5dLGMNbcTZoT3_ixNE9XyA_Er8hV5Vb";
-    const supa = window.supabase.createClient(
+    const supabase = window.supabase.createClient(
       "https://gjzqghhqpycbcwykxvgw.supabase.co",
       SUPABASE_ANON_KEY
     );
@@ -29,38 +29,41 @@
       const params = new URLSearchParams(hash);
       const accessToken = params.get('access_token');
 
-      if (accessToken) {
-        const { data: { user }, error } = await supabase.auth.getUser(accessToken);
-
-        if (error) {
-          document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide ou expiré.";
-          document.getElementById('resetMessage').classList.remove('hidden');
-          return;
-        }
-
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
-          event.preventDefault();
-          const newPassword = document.getElementById('newPassword').value;
-          const resetMessage = document.getElementById('resetMessage');
-
-          try {
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-            if (error) throw error;
-
-            resetMessage.textContent = "Votre mot de passe a été réinitialisé avec succès !";
-            resetMessage.style.color = "green";
-            resetMessage.classList.remove('hidden');
-          } catch (error) {
-            resetMessage.textContent = error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.";
-            resetMessage.style.color = "red";
-            resetMessage.classList.remove('hidden');
-          }
-        });
-      } else {
+      if (!accessToken) {
         document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide.";
         document.getElementById('resetMessage').classList.remove('hidden');
+        return;
       }
+
+      const { data: { user }, error } = await supabase.auth.getUser(accessToken);
+
+      if (error) {
+        document.getElementById('resetMessage').textContent = "Lien de réinitialisation invalide ou expiré.";
+        document.getElementById('resetMessage').classList.remove('hidden');
+        return;
+      }
+
+      const resetPasswordForm = document.getElementById('resetPasswordForm');
+      resetPasswordForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const newPassword = document.getElementById('newPassword').value;
+        const resetMessage = document.getElementById('resetMessage');
+
+        try {
+          const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+          if (error) throw error;
+
+          resetMessage.textContent = "Votre mot de passe a été réinitialisé avec succès !";
+          resetMessage.style.color = "green";
+          resetMessage.classList.remove('hidden');
+        } catch (error) {
+          resetMessage.textContent = error.message || "Une erreur est survenue lors de la réinitialisation du mot de passe.";
+          resetMessage.style.color = "red";
+          resetMessage.classList.remove('hidden');
+          console.error(error);
+        }
+      });
     });
   </script>
 </body>
