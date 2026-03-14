@@ -6,7 +6,6 @@
   <title>Réinitialisation du mot de passe</title>
 </head>
 <body>
-  console.log("Bien arrivé");
   <div class="reset-password-container">
     <h1>Réinitialiser votre mot de passe</h1>
     <form id="resetPasswordForm">
@@ -25,24 +24,24 @@
       SUPABASE_ANON_KEY
     );
 
-
     document.getElementById('resetPasswordForm').addEventListener('submit', async (event) => {
       event.preventDefault();
       const newPassword = document.getElementById('newPassword').value;
       const resetMessage = document.getElementById('resetMessage');
 
-      // Récupérer le token de réinitialisation depuis l'URL
+      // Récupérer le token_hash de réinitialisation depuis l'URL
       const queryParams = new URLSearchParams(window.location.search);
-      const token = queryParams.get('token');
+      const tokenHash = queryParams.get('token_hash');
 
-      if (!token) {
+      if (!tokenHash) {
         resetMessage.textContent = "Token de réinitialisation manquant.";
         resetMessage.classList.remove('hidden');
         return;
       }
 
       try {
-        const { error } = await supabase.auth.api.updateUser(token, { password: newPassword });
+        // Utiliser la méthode correcte pour mettre à jour le mot de passe
+        const { error } = await supabase.auth.api.updateUser(tokenHash, { password: newPassword });
 
         if (error) throw error;
 
