@@ -175,6 +175,7 @@ async function updateAuthUI(user = null) {
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
+    console.log("vrai");
     if (burgerAuthBtn) burgerAuthBtn.style.display = "block"; // Afficher le bouton
     if (burgerPseudo) burgerPseudo.textContent = "";
     if (profileBtn) profileBtn.disabled = true;
@@ -3267,6 +3268,40 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
   }
 });
 
+// Fonctions utilitaires simplifiées
+async function fetchBestScore(userId) {
+  if (!userId) return null;
+
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) return null;
+
+    supa.auth.setSession(token);
+
+    const { data, error } = await supa
+      .from("scores")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error("Erreur fetchBestScore:", error);
+      return null;
+    }
+
+    return data ? {
+      ...data,
+      duration: Math.floor(data.duration_ms / 1000)
+    } : null;
+
+  } catch (err) {
+    console.error("Erreur inattendue fetchBestScore:", err);
+    return null;
+  }
+}
+
 // --- LOGIN ---
 document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
   if (typeof playClickSound === 'function') playClickSound();
@@ -3364,40 +3399,6 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
     alert("Une erreur inattendue est survenue.");
   }
 });
-
-// Fonctions utilitaires simplifiées
-async function fetchBestScore(userId) {
-  if (!userId) return null;
-
-  try {
-    const token = localStorage.getItem('supabase.access.token');
-    if (!token) return null;
-
-    supa.auth.setSession(token);
-
-    const { data, error } = await supa
-      .from("scores")
-      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
-      .eq("player_id", userId)
-      .order("score", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error("Erreur fetchBestScore:", error);
-      return null;
-    }
-
-    return data ? {
-      ...data,
-      duration: Math.floor(data.duration_ms / 1000)
-    } : null;
-
-  } catch (err) {
-    console.error("Erreur inattendue fetchBestScore:", err);
-    return null;
-  }
-}
 
 // ===============================
 //   WHY SIGNUP
