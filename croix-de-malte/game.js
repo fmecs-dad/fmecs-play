@@ -2486,6 +2486,7 @@ function initGame() {
 
   gameOver = false;
   paused = false;
+
   updateBestScoreTop();
 
 }
@@ -3344,9 +3345,9 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
 
     // 8. Fermeture de la modale et mise à jour du score
     document.getElementById("authOverlay")?.classList.add("hidden");
-    //if (typeof updateBestScoreTop === 'function') {
+    if (typeof updateBestScoreTop === 'function') {
       updateBestScoreTop();
-    //}
+    }
 
     // 9. Réinitialisation du menu profil
     const profileBtn = document.getElementById("profileBtn");
@@ -3363,6 +3364,40 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
     alert("Une erreur inattendue est survenue.");
   }
 });
+
+// Fonctions utilitaires simplifiées
+async function fetchBestScore(userId) {
+  if (!userId) return null;
+
+  try {
+    const token = localStorage.getItem('supabase.access.token');
+    if (!token) return null;
+
+    supa.auth.setSession(token);
+
+    const { data, error } = await supa
+      .from("scores")
+      .select("score, duration_ms, returnsUsed:undo_count, jokersUsed:jokers_used, created_at")
+      .eq("player_id", userId)
+      .order("score", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error("Erreur fetchBestScore:", error);
+      return null;
+    }
+
+    return data ? {
+      ...data,
+      duration: Math.floor(data.duration_ms / 1000)
+    } : null;
+
+  } catch (err) {
+    console.error("Erreur inattendue fetchBestScore:", err);
+    return null;
+  }
+}
 
 // ===============================
 //   WHY SIGNUP
