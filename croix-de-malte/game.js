@@ -1233,7 +1233,7 @@ function renderLeaderboardHeader(isLoggedIn) {
   if (!title || !hintContainer) return;
 
   // Titre toujours simple
-  title.textContent = "Leaderboard";
+  title.textContent = "Classement";
 
   // Si non connecté → afficher le message
   if (!isLoggedIn) {
