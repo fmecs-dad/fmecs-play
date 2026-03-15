@@ -1020,7 +1020,6 @@ let score = 0;
 let paused = false;
 let gameOver = false;
 
-let ctx;
 let canvas = document.getElementById('gameCanvas');
 let ctx = canvas.getContext('2d');
 
