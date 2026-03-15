@@ -1020,8 +1020,10 @@ let score = 0;
 let paused = false;
 let gameOver = false;
 
-let canvas = null;
-let ctx = null;
+let ctx;
+let canvas = document.getElementById('gameCanvas');
+let ctx = canvas.getContext('2d');
+
 let tutorialBtn = null;
 
 let activePoints = new Set();
@@ -1653,27 +1655,36 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
+// Fonction pour redimensionner le canvas
 function resizeCanvas() {
-  const canvas = document.getElementById('gameCanvas');
   const container = document.querySelector('.game-container');
 
   // Ajuste la taille du canvas en fonction de la fenêtre
-  const scale = Math.min(
-    window.innerWidth / 1920,  // Largeur de référence (1920px)
-    window.innerHeight / 1080  // Hauteur de référence (1080px)
-  );
+  let width = window.innerWidth * 0.9;
+  let height = window.innerHeight * 0.9;
 
-  canvas.style.width = `${1920 * scale}px`;
-  canvas.style.height = `${1080 * scale}px`;
+  if (width > height) {
+    width = height;
+  } else {
+    height = width;
+  }
+
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+
+  // Prend en compte la densité de pixels pour les écrans Retina
+  const pixelRatio = window.devicePixelRatio || 1;
+  canvas.width = width * pixelRatio;
+  canvas.height = height * pixelRatio;
+
+  // Calcule spacing et offset
+  const gridSize = 30; // Taille de la grille (30x30)
+  spacing = canvas.width / gridSize;
+  offset = spacing / 2;
 
   // Redessine tout après le redimensionnement
   redrawEverything();
 }
-
-// Appelle cette fonction au chargement et au redimensionnement de la fenêtre
-
-
-//const visualOrigin = offset - spacing;
 
 function drawGrid() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1853,14 +1864,9 @@ function initMaltaCross() {
   console.log("Target Left Y:", targetLeftY);
 }
 
+// Fonction pour redessiner tout le contenu
 function redrawEverything() {
-
-  // Le canvas s’adapte visuellement
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   drawGrid();
 
   validatedSegments.forEach(seg => drawSegment(seg.points));
@@ -1870,7 +1876,6 @@ function redrawEverything() {
     drawPoint(x, y);
   });
 }
-
 
 // ===============================
 //   ARÊTES
