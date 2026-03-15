@@ -1686,7 +1686,6 @@ function resizeCanvas() {
 }
 
 function drawGrid() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
 
@@ -1706,12 +1705,12 @@ function drawGrid() {
 }
 
 function drawPoint(x, y, color = "#000") {
+  const pointRadius = spacing * 0.1; // 10% de spacing pour adapter la taille des points
   ctx.beginPath();
-  ctx.arc(offset + x * spacing, offset + y * spacing, 3, 0, Math.PI * 2);
+  ctx.arc(offset + x * spacing, offset + y * spacing, pointRadius, 0, Math.PI * 2);
   ctx.fillStyle = color;
   ctx.fill();
 }
-
 
 function drawSegment(segmentPoints) {
   const [sx, sy] = segmentPoints[0].split(",").map(Number);
