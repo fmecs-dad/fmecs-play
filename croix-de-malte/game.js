@@ -1653,6 +1653,26 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
+function resizeCanvas() {
+  const canvas = document.getElementById('gameCanvas');
+  const container = document.querySelector('.game-container');
+
+  // Ajuste la taille du canvas en fonction de la fenêtre
+  const scale = Math.min(
+    window.innerWidth / 1920,  // Largeur de référence (1920px)
+    window.innerHeight / 1080  // Hauteur de référence (1080px)
+  );
+
+  canvas.style.width = `${1920 * scale}px`;
+  canvas.style.height = `${1080 * scale}px`;
+
+  // Redessine tout après le redimensionnement
+  redrawEverything();
+}
+
+// Appelle cette fonction au chargement et au redimensionnement de la fenêtre
+
+
 //const visualOrigin = offset - spacing;
 
 function drawGrid() {
@@ -2926,6 +2946,7 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   // ===============================
   //   CLIC SUR LA GRILLE
   // ===============================
+  
   if (canvas) {
     canvas.addEventListener("click", (e) => {
       if (gameOver) return;
@@ -3045,6 +3066,9 @@ if (burgerAuthBtn) {
   // ===============================
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
+ 
+  window.addEventListener('load', resizeCanvas);
+  window.addEventListener('resize', resizeCanvas);
 
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
