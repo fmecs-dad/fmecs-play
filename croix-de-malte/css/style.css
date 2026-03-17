@@ -738,8 +738,6 @@ footer {
 }
 
 /* === LABELS === */
-
-/* === LABELS === */
 #topLabels, #leftLabels {
   position: absolute;
   pointer-events: none;
@@ -770,6 +768,11 @@ footer {
   align-items: center;
   padding: 10px 0;
   box-sizing: border-box;
+}
+
+#topLabels span, #leftLabels span {
+  position: relative; /* Changé de absolute à relative */
+  display: block;
 }
 
 /* === FLASH MESSAGES === */
