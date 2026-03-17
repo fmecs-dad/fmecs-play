@@ -1661,13 +1661,13 @@ function resizeCanvas() {
 
   // Ajuste la taille du canvas en fonction du conteneur
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
-  canvas.style.width = `${containerSize}px`;
-  canvas.style.height = `${containerSize}px`;
+  canvas.style.width = `${containerSize - 60}px`; /* Prend en compte la bordure de 30px de chaque côté */
+  canvas.style.height = `${containerSize - 60}px`;
 
   // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = containerSize * pixelRatio;
-  canvas.height = containerSize * pixelRatio;
+  canvas.width = (containerSize - 60) * pixelRatio;
+  canvas.height = (containerSize - 60) * pixelRatio;
 
   // Calcule spacing et offset
   const gridSize = 30; // Taille de la grille (30x30)
@@ -1721,6 +1721,13 @@ function drawSegment(segmentPoints) {
 // ===============================
 
 function getNearestPoint(mx, my) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  const adjustedMx = (mx - rect.left) * scaleX;
+  const adjustedMy = (my - rect.top) * scaleY;
+
   let best = null;
   let bestDist = Infinity;
 
@@ -1729,9 +1736,9 @@ function getNearestPoint(mx, my) {
       const px = offset + x * spacing;
       const py = offset + y * spacing;
 
-      const dx = mx - px;
-      const dy = my - py;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+      const dx = adjustedMx - px;
+      const dy = adjustedMy - py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (dist < bestDist) {
         bestDist = dist;
@@ -1740,7 +1747,8 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  if (bestDist <= 25) return best;
+  // Ajuste la distance maximale pour tenir compte du zoom
+  if (bestDist <= spacing * 0.5) return best;
 
   return null;
 }
