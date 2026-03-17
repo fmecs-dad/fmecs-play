@@ -1656,25 +1656,18 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
 // Fonction pour redimensionner le canvas
 function resizeCanvas() {
-  const container = document.querySelector('.game-container');
+  const canvas = document.getElementById('gameCanvas');
+  const container = document.getElementById('canvasContainer');
 
-  // Ajuste la taille du canvas en fonction de la fenêtre
-  let width = window.innerWidth * 0.9;
-  let height = window.innerHeight * 0.9;
-
-  if (width > height) {
-    width = height;
-  } else {
-    height = width;
-  }
-
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
+  // Ajuste la taille du canvas en fonction du conteneur
+  const containerSize = Math.min(container.clientWidth, container.clientHeight);
+  canvas.style.width = `${containerSize}px`;
+  canvas.style.height = `${containerSize}px`;
 
   // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = width * pixelRatio;
-  canvas.height = height * pixelRatio;
+  canvas.width = containerSize * pixelRatio;
+  canvas.height = containerSize * pixelRatio;
 
   // Calcule spacing et offset
   const gridSize = 30; // Taille de la grille (30x30)
@@ -2950,53 +2943,54 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   //   CLIC SUR LA GRILLE
   // ===============================
   
-  if (canvas) {
-    canvas.addEventListener("click", (e) => {
-      if (gameOver) return;
-      if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
-      if (tutorialRunning) return;
-      if (paused && typeof resumeGame === 'function') resumeGame();
+  canvas.addEventListener("click", (e) => {
+  if (gameOver) return;
+  if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
+  if (tutorialRunning) return;
+  if (paused && typeof resumeGame === 'function') resumeGame();
 
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
 
-      const nearest = getNearestPoint(mx, my);
-      if (!nearest) {
-        if (typeof flash === 'function') flash("Hors grille", "error");
-        if (typeof playErrorSound === 'function') playErrorSound();
-        selectedStart = null;
-        return;
-      }
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top) * scaleY;
 
-      const { x, y } = nearest;
-
-      if (!selectedStart) {
-        selectedStart = { x, y };
-        return;
-      }
-
-      const result = getSegmentBetween(selectedStart, { x, y });
-      selectedStart = null;
-
-      if (result) {
-        if (typeof playSuccessSound === 'function') playSuccessSound();
-        validatedSegments.push(result);
-        if (typeof drawSegment === 'function') drawSegment(result.points);
-        score++;
-
-        const stepBtn = document.getElementById("burgerStepBtn");
-        if (stepBtn) {
-          stepBtn.disabled = true;
-          stepBtn.classList.add("disabled");
-        }
-
-        if (typeof updateCounters === 'function') updateCounters();
-        if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
-        if (typeof checkGameOver === 'function') checkGameOver();
-      }
-    });
+  const nearest = getNearestPoint(mx, my);
+  if (!nearest) {
+    if (typeof flash === 'function') flash("Hors grille", "error");
+    if (typeof playErrorSound === 'function') playErrorSound();
+    selectedStart = null;
+    return;
   }
+
+  const { x, y } = nearest;
+
+  if (!selectedStart) {
+    selectedStart = { x, y };
+    return;
+  }
+
+  const result = getSegmentBetween(selectedStart, { x, y });
+  selectedStart = null;
+
+  if (result) {
+    if (typeof playSuccessSound === 'function') playSuccessSound();
+    validatedSegments.push(result);
+    if (typeof drawSegment === 'function') drawSegment(result.points);
+    score++;
+
+    const stepBtn = document.getElementById("burgerStepBtn");
+    if (stepBtn) {
+      stepBtn.disabled = true;
+      stepBtn.classList.add("disabled");
+    }
+
+    if (typeof updateCounters === 'function') updateCounters();
+    if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
+    if (typeof checkGameOver === 'function') checkGameOver();
+  }
+});
 
   // ===============================
   //   BOUTONS TOP BAR
@@ -3071,7 +3065,9 @@ if (burgerAuthBtn) {
   // ===============================
  
   window.addEventListener('load', resizeCanvas);
+  resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('orientationchange', resizeCanvas);
 
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
