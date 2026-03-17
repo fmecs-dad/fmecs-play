@@ -1674,9 +1674,6 @@ function resizeCanvas() {
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  // Met à jour les positions des repères
-  updateLabels();
-
   // Redessine tout après le redimensionnement
   redrawEverything();
 }
