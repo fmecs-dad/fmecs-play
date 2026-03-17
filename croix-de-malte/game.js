@@ -1674,6 +1674,9 @@ function resizeCanvas() {
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
+  // Met à jour les positions des repères
+  updateLabels();
+
   // Redessine tout après le redimensionnement
   redrawEverything();
 }
@@ -1694,6 +1697,33 @@ function drawGrid() {
     ctx.moveTo(offset + x * spacing, offset);
     ctx.lineTo(offset + x * spacing, offset + (size - 1) * spacing);
     ctx.stroke();
+  }
+}
+
+function updateLabels() {
+  const topLabels = document.getElementById('topLabels');
+  const leftLabels = document.getElementById('leftLabels');
+
+  // Efface les anciens repères
+  topLabels.innerHTML = '';
+  leftLabels.innerHTML = '';
+
+  // Ajoute les repères horizontaux
+  for (let x = 0; x < size; x += 5) {
+    const span = document.createElement('span');
+    span.textContent = x + 1;
+    span.style.position = 'absolute';
+    span.style.left = `${offset + x * spacing - 5}px`; // Ajuste la position en fonction de spacing et offset
+    topLabels.appendChild(span);
+  }
+
+  // Ajoute les repères verticaux
+  for (let y = 0; y < size; y += 5) {
+    const span = document.createElement('span');
+    span.textContent = y + 1;
+    span.style.position = 'absolute';
+    span.style.top = `${offset + y * spacing - 10}px`; // Ajuste la position en fonction de spacing et offset
+    leftLabels.appendChild(span);
   }
 }
 
