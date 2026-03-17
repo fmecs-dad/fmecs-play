@@ -1659,18 +1659,18 @@ function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
-  // Ajuste la taille du canvas en fonction de la fenêtre
-  const containerSize = Math.min(window.innerWidth - 350, window.innerHeight - 100, 800); // 350px pour le bloc historique, 100px pour la barre supérieure
-  canvas.style.width = `${containerSize}px`;
-  canvas.style.height = `${containerSize}px`;
+  // Ajuste la taille du canvas en fonction du conteneur
+  const containerSize = Math.min(container.clientWidth, container.clientHeight);
+  canvas.style.width = `${containerSize - 60}px`;
+  canvas.style.height = `${containerSize - 60}px`;
 
   // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = containerSize * pixelRatio;
-  canvas.height = containerSize * pixelRatio;
+  canvas.width = (containerSize - 60) * pixelRatio;
+  canvas.height = (containerSize - 60) * pixelRatio;
 
   // Calcule spacing et offset
-  const gridSize = 30; // Taille de la grille (30x30)
+  const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
@@ -1748,12 +1748,10 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  // Ajuste la distance maximale pour tenir compte du zoom
   if (bestDist <= spacing * 0.5) return best;
 
   return null;
 }
-
 
 function snapToAlignedPoint(first, clicked, mx, my) {
   const { x: x1, y: y1 } = first;
