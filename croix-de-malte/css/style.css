@@ -742,22 +742,33 @@ footer {
 #topLabels, #leftLabels {
   position: absolute;
   pointer-events: none;
-}
-
-#topLabels span, #leftLabels span {
-  position: absolute;
   font-size: clamp(10px, 1.5vw, 12px);
   color: #444;
 }
 
 #topLabels {
-  top: -22px;
-  width: 100%;
+  top: 0;
+  left: 30px;
+  width: calc(100% - 60px);
+  height: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 #leftLabels {
-  left: -20px;
-  height: 100%;
+  left: 0;
+  top: 30px;
+  width: 20px;
+  height: calc(100% - 60px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 
 /* === FLASH MESSAGES === */
@@ -1373,4 +1384,5 @@ footer {
 #burgerOverlay button:hover {
   background: rgba(255,255,255,0.1);
 }
+
 
