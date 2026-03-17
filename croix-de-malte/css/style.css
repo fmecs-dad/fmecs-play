@@ -668,90 +668,83 @@ footer {
 
 #mainArea {
   display: flex;
+  flex-direction: row;
   flex: 1;
   align-items: flex-start;
   overflow: hidden;
-}
-
-#mainArea {
   min-height: 0;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 /* === BOARD === */
-
 #boardWrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding-top: 20px;
   padding-left: clamp(10px, 4vw, 60px);
-  flex: 1;
   overflow: visible;
-}
-
-#boardWrapper {
   min-height: 0;
 }
 
-.board-frame {
-  border: 30px solid transparent;
-  background-clip: padding-box;
-  border-image: url("../images/plateau.jpg") 30 round;
-}
-
-/* Plateau responsive */
 #canvasContainer {
   position: relative;
-  width: min(90vw, 90vh); /* Utilise 90% de la largeur ou de la hauteur de la fenêtre */
-  height: min(90vw, 90vh); /* Assure une forme carrée */
-  margin: 0 auto; /* Centre le conteneur */
+  width: min(600px, 90vh);
+  height: min(600px, 90vh);
   overflow: visible;
   z-index: 0;
 }
 
-#canvasContainer::before {
-  content: "";
-  position: absolute;
-  width: calc(100% + 20px);
-  height: calc(100% + 20px);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle,
-    rgba(255, 255, 255, 0.25) 40%,
-    rgba(0, 0, 0, 0.25) 100%
-  );
-  pointer-events: none;
-  z-index: -1;
-}
-
-#gameCanvas {
+.board-frame {
+  position: relative;
   width: 100%;
   height: 100%;
+  border: 30px solid transparent;
+  background-clip: padding-box;
+  border-image: url("../images/plateau.jpg") 30 round;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Canvas */
+#gameCanvas {
+  width: calc(100% - 60px); /* Prend en compte la bordure de 30px de chaque côté */
+  height: calc(100% - 60px);
   background: #fafafa;
   display: block;
   position: relative;
   z-index: 1;
 }
 
-/* === LABELS === */
-
+/* Repères horizontaux et verticaux */
 #topLabels, #leftLabels {
   position: absolute;
-  pointer-events: none;
-}
-
-#topLabels span, #leftLabels span {
-  position: absolute;
-  font-size: clamp(10px, 1.5vw, 12px);
-  color: #444;
+  display: flex;
+  font-size: 12px;
+  color: #666;
+  user-select: none;
 }
 
 #topLabels {
-  top: -22px;
-  width: 100%;
+  top: -20px;
+  left: 30px; /* Décalage pour tenir compte de la bordure */
+  width: calc(100% - 60px);
+  justify-content: space-between;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 #leftLabels {
   left: -20px;
-  height: 100%;
+  top: 30px; /* Décalage pour tenir compte de la bordure */
+  height: calc(100% - 60px);
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 
 /* === FLASH MESSAGES === */
@@ -788,6 +781,19 @@ footer {
 
 /* === SIDE PANEL === */
 
+/* Conteneur principal */
+#mainContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Bloc historique */
 #sidePanel {
   margin-top: 10px;
   margin-left: 20px;
@@ -795,9 +801,10 @@ footer {
   background: #fafafa;
   border: 1px solid #e0e0e0;
   padding: 20px 12px 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.25);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
   border-radius: 8px;
   overflow-y: auto;
+  flex-shrink: 0; /* Empêche le bloc historique de se réduire */
 }
 
 #historyTitle {
@@ -811,7 +818,7 @@ footer {
 #historyPanel {
   max-height: 600px;
   overflow-y: auto;
-  z-index:10001;
+  z-index: 10001;
 }
 
 #historyList {
@@ -829,10 +836,55 @@ footer {
   text-overflow: ellipsis;
 }
 
-#historyList li.gain { color: #008a00; font-weight: 600; }
-#historyList li.loss { color: #cc0000; font-weight: 600; }
-#historyList li.neutral { color: #222; }
+#historyList li.gain {
+  color: #008a00;
+  font-weight: 600;
+}
 
+#historyList li.loss {
+  color: #cc0000;
+  font-weight: 600;
+}
+
+#historyList li.neutral {
+  color: #222;
+}
+
+/* Conteneur de la grille */
+#canvasContainer {
+  position: relative;
+  width: min(600px, 90vh);/*60vw*/
+  height: min(600px, 60vh);/*60vw*/
+/*  margin-left: 20px;*/
+  overflow: visible;
+  z-index: 0;
+}
+
+#canvasContainer::before {
+  content: "";
+  position: absolute;
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle,
+    rgba(255, 255, 255, 0.25) 40%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Canvas */
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  background: #fafafa;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
 /* === HELP OVERLAY === */
 
 #helpOverlay {
