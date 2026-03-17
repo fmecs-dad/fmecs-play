@@ -1803,7 +1803,6 @@ function snapToAlignedPoint(first, clicked, mx, my) {
   return clicked; // pas de snap possible
 }
 
-
 // ===============================
 //   CROIX DE MALTE
 // ===============================
