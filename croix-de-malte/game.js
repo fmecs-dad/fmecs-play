@@ -1659,15 +1659,15 @@ function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
-  // Ajuste la taille du canvas en fonction du conteneur
-  const containerSize = Math.min(container.clientWidth, container.clientHeight);
-  canvas.style.width = `${containerSize - 60}px`; /* Prend en compte la bordure de 30px de chaque côté */
-  canvas.style.height = `${containerSize - 60}px`;
+  // Ajuste la taille du canvas en fonction de la fenêtre
+  const containerSize = Math.min(window.innerWidth - 350, window.innerHeight - 100, 800); // 350px pour le bloc historique, 100px pour la barre supérieure
+  canvas.style.width = `${containerSize}px`;
+  canvas.style.height = `${containerSize}px`;
 
   // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = (containerSize - 60) * pixelRatio;
-  canvas.height = (containerSize - 60) * pixelRatio;
+  canvas.width = containerSize * pixelRatio;
+  canvas.height = containerSize * pixelRatio;
 
   // Calcule spacing et offset
   const gridSize = 30; // Taille de la grille (30x30)
@@ -1725,6 +1725,7 @@ function getNearestPoint(mx, my) {
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
 
+  // Ajuste les coordonnées de la souris en tenant compte du zoom et de la position du canvas
   const adjustedMx = (mx - rect.left) * scaleX;
   const adjustedMy = (my - rect.top) * scaleY;
 
@@ -1752,6 +1753,7 @@ function getNearestPoint(mx, my) {
 
   return null;
 }
+
 
 function snapToAlignedPoint(first, clicked, mx, my) {
   const { x: x1, y: y1 } = first;
@@ -2951,31 +2953,21 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   //   CLIC SUR LA GRILLE
   // ===============================
   
-  canvas.addEventListener("click", (e) => {
+  canvas.addEventListener('click', (e) => {
   if (gameOver) return;
   if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
   if (tutorialRunning) return;
   if (paused && typeof resumeGame === 'function') resumeGame();
 
   const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-
-  const mx = (e.clientX - rect.left) * scaleX;
-  const my = (e.clientY - rect.top) * scaleY;
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
 
   const nearest = getNearestPoint(mx, my);
   if (!nearest) {
     if (typeof flash === 'function') flash("Hors grille", "error");
     if (typeof playErrorSound === 'function') playErrorSound();
     selectedStart = null;
-    return;
-  }
-
-  const { x, y } = nearest;
-
-  if (!selectedStart) {
-    selectedStart = { x, y };
     return;
   }
 
