@@ -3103,6 +3103,7 @@ if (burgerAuthBtn) {
   window.addEventListener('resize', () => {
     resizeCanvas();
     updateLabels();
+  });
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
