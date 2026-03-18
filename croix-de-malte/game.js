@@ -1656,35 +1656,6 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
 // Fonction pour redimensionner le canvas
 
-function updateLabels() {
-  const topLabels = document.getElementById('topLabels');
-  const leftLabels = document.getElementById('leftLabels');
-
-  topLabels.innerHTML = '';
-  leftLabels.innerHTML = '';
-
-  for (let x = 0; x < 30; x += 5) {
-    const span = document.createElement('span');
-    span.textContent = x + 1;
-    span.style.position = 'absolute';
-    span.style.left = `${offset + x * spacing - 5}px`;
-    topLabels.appendChild(span);
-  }
-
-  for (let y = 0; y < 30; y += 5) {
-    const span = document.createElement('span');
-    span.textContent = y + 1;
-    span.style.position = 'absolute';
-    span.style.top = `${offset + y * spacing - 10}px`;
-    leftLabels.appendChild(span);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-});
-
 function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
@@ -1701,8 +1672,36 @@ function resizeCanvas() {
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  updateLabels();
   redrawEverything();
+}
+
+function updateLabels() {
+  const topLabels = document.getElementById('topLabels');
+  const leftLabels = document.getElementById('leftLabels');
+  const canvas = document.getElementById('gameCanvas');
+
+  const labelPositions = [0, 4, 9, 14, 19, 24, 29]; // Positions pour les labels 1, 5, 10, 15, 20, 25, 30
+
+  topLabels.innerHTML = '';
+  leftLabels.innerHTML = '';
+
+  labelPositions.forEach((pos, index) => {
+    const labelValue = (index + 1) * 5;
+
+    // Top Labels
+    const topSpan = document.createElement('span');
+    topSpan.textContent = labelValue;
+    topSpan.style.position = 'absolute';
+    topSpan.style.left = `${offset + pos * spacing - 5}px`;
+    topLabels.appendChild(topSpan);
+
+    // Left Labels
+    const leftSpan = document.createElement('span');
+    leftSpan.textContent = labelValue;
+    leftSpan.style.position = 'absolute';
+    leftSpan.style.top = `${offset + pos * spacing - 10}px`;
+    leftLabels.appendChild(leftSpan);
+  });
 }
 
 function drawGrid() {
@@ -3100,7 +3099,10 @@ if (burgerAuthBtn) {
   // ===============================
  
   resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  updateLabels();
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    updateLabels();
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
