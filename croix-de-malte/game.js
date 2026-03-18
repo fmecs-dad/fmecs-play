@@ -1721,12 +1721,12 @@ function updateLabels() {
 
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.left = `${(label - 1) * (600 / 29)}px`;
+    span.style.left = `${30 + (label - 1) * (600 / 29)}px`;
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.top = `${(label - 1) * (600 / 29)}px`;
+    span.style.top = `${30 + (label - 1) * (600 / 29)}px`;
   });
 }
 
