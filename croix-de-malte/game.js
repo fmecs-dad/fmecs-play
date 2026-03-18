@@ -1015,6 +1015,7 @@ const size = 30;
 let offset;
 let spacing;
 let resizeTimeout;
+let canvas, ctx;
  
 let selectedStart = null;
 let score = 0;
@@ -1652,9 +1653,18 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
+// Fonctions utilitaires pour le canvas et les repères
 function resizeCanvas() {
-  const canvas = document.getElementById('gameCanvas');
+  if (!canvas || !ctx) {
+    console.error("Canvas ou contexte non initialisé");
+    return;
+  }
+
   const container = document.getElementById('canvasContainer');
+  if (!container) {
+    console.error("Conteneur non trouvé");
+    return;
+  }
 
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
@@ -1664,17 +1674,21 @@ function resizeCanvas() {
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
-  // Calcul de spacing et offset comme dans l'ancien code
-  spacing = canvas.width / (size + 1);
+  const gridSize = 30;
+  spacing = canvas.width / (gridSize + 1);
   offset = spacing;
 
   redrawEverything();
   updateLabels();
 }
   
-  function updateLabels() {
+function updateLabels() {
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
+
+  if (!topLabels.length || !leftLabels.length) {
+    return;
+  }
 
   topLabels.forEach(span => {
     const pos = Number(span.textContent);
@@ -1881,6 +1895,10 @@ function initMaltaCross() {
 
 // Fonction pour redessiner tout le contenu
 function redrawEverything() {
+  if (!ctx) {
+    console.error("Contexte non initialisé");
+    return;
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawGrid();
 
@@ -2752,20 +2770,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // 5. Initialisation du canvas
-    const canvas = document.getElementById("gameCanvas");
+    canvas = document.getElementById("gameCanvas");
     if (canvas) {
-      const ctx = canvas.getContext("2d");
-
-      // Calcul du canvas et de la grille
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-      spacing = canvas.width / (30 + 1);
-      offset = spacing;
-
-      // Positionnement initial des repères
-      updateLabels();
+      ctx = canvas.getContext("2d");
+      if (!ctx) {
+        console.error("Contexte 2D non disponible");
+        return;
+      }
     } else {
       console.error("Canvas non trouvé");
+      return;
     }
 
     // Ajout des écouteurs d'événements pour le redimensionnement
