@@ -1020,7 +1020,7 @@ let score = 0;
 let paused = false;
 let gameOver = false;
 
-let resizeTimeout;
+//let resizeTimeout;
 
 let tutorialBtn = null;
 
