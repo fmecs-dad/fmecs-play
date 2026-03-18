@@ -741,9 +741,11 @@ footer {
   position: absolute;
   top: 15px;
   left: 0;
-  width: 600px;
-  height: 20px;
+  width: 660px;
   display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+  box-sizing: border-box;
   font-size: 12px;
   color: #444;
   z-index: 10;
@@ -753,10 +755,10 @@ footer {
   position: absolute;
   left: 15px;
   top: 30px;
-  width: 30px;
   height: 600px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   font-size: 12px;
   color: #444;
   z-index: 10;
