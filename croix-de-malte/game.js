@@ -1014,7 +1014,7 @@ let audioUnlocked = false;
 const size = 30;
 let offset;
 let spacing;
-let resizeTimeout;
+//let resizeTimeout;
 let canvas, ctx;
  
 let selectedStart = null;
