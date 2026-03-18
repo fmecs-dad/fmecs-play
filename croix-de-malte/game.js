@@ -1675,8 +1675,8 @@ function resizeCanvas() {
   offset = spacing / 2;
 
   // Redessine tout après le redimensionnement
-  updateLabels();
   redrawEverything();
+  updateLabels();
 }
 
 function drawGrid() {
