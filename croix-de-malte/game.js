@@ -1681,18 +1681,24 @@ function drawGrid() {
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
 
+  console.log("Dessin des lignes horizontales :");
   for (let y = 0; y < size; y++) {
+    const yPos = offset + y * spacing;
     ctx.beginPath();
-    ctx.moveTo(offset, offset + y * spacing);
-    ctx.lineTo(offset + (size - 1) * spacing, offset + y * spacing);
+    ctx.moveTo(offset, yPos);
+    ctx.lineTo(offset + (size - 1) * spacing, yPos);
     ctx.stroke();
+    console.log(`Ligne ${y + 1} à ${yPos}px`);
   }
 
+  console.log("Dessin des lignes verticales :");
   for (let x = 0; x < size; x++) {
+    const xPos = offset + x * spacing;
     ctx.beginPath();
-    ctx.moveTo(offset + x * spacing, offset);
-    ctx.lineTo(offset + x * spacing, offset + (size - 1) * spacing);
+    ctx.moveTo(xPos, offset);
+    ctx.lineTo(xPos, offset + (size - 1) * spacing);
     ctx.stroke();
+    console.log(`Colonne ${x + 1} à ${xPos}px`);
   }
 }
 
