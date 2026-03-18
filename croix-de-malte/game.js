@@ -1716,6 +1716,16 @@ function drawSegment(segmentPoints) {
   ctx.stroke();
 }
 
+function checkLabelsPosition() {
+  const topLabels = document.getElementById('topLabels');
+  const leftLabels = document.getElementById('leftLabels');
+  const canvasContainer = document.getElementById('canvasContainer');
+
+  console.log("Position de #topLabels:", topLabels.getBoundingClientRect());
+  console.log("Position de #leftLabels:", leftLabels.getBoundingClientRect());
+  console.log("Position de #canvasContainer:", canvasContainer.getBoundingClientRect());
+}
+
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
 // ===============================
@@ -2735,6 +2745,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // 5. Initialisation du canvas (votre code existant)
+    checkLabelsPosition();
     canvas = document.getElementById("gameCanvas");
     if (canvas) {
       ctx = canvas.getContext("2d");
