@@ -1655,26 +1655,41 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 // ===============================
 
 // Fonction pour redimensionner le canvas
+
+function updateLabelsPosition() {
+  const topLabels = document.querySelectorAll('#topLabels span');
+  const leftLabels = document.querySelectorAll('#leftLabels span');
+
+  topLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.left = `${offset + (pos - 1) * spacing * 2 - 6}px`;
+  });
+
+  leftLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.top = `${offset + (pos - 1) * spacing * 2 - 6}px`;
+  });
+}
+
 function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
-  // Ajuste la taille du canvas en fonction du conteneur
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
 
-  // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
-  // Calcule spacing et offset
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  // Redessine tout après le redimensionnement
+  updateLabelsPosition(); // Ajoutez cette ligne
   redrawEverything();
 }
 
@@ -1801,78 +1816,6 @@ function snapToAlignedPoint(first, clicked, mx, my) {
   if (bestDist <= 25) return best;
 
   return clicked; // pas de snap possible
-}
-
-// ===============================
-//   CROIX DE MALTE
-// ===============================
-
-function drawMaltaCross() {
-  permanentPoints.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    drawPoint(x, y);
-  });
-}
-
-function initMaltaCross() {
-
-  permanentPoints.clear();
-  activePoints.clear();
-
-  // Construction brute de la croix
-  let x = 0, y = 0;
-  const pts = [];
-  const add = (px, py) => pts.push({ x: px, y: py });
-  add(x, y);
-
-  const steps = [
-    [1,0,3],[0,1,3],[1,0,3],[0,1,3],
-    [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
-    [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
-  ];
-
-  for (const [dx, dy, n] of steps) {
-    for (let i = 0; i < n; i++) {
-      x += dx;
-      y += dy;
-      add(x, y);
-    }
-  }
-
-  // Point de référence dans la croix brute
-  const refX = -3;
-  const refY = 3;
-
-  // Point logique où placer ce point
-  const targetLeftX = 10;
-  const targetLeftY = 13;
-
-  const offsetX = targetLeftX - refX; // 11
-  const offsetY = targetLeftY - refY; // 14
-
-  // Application de l’offset
-  pts.forEach(p => {
-    const key = `${p.x + offsetX},${p.y + offsetY}`;
-    permanentPoints.add(key);
-    activePoints.add(key);
-  });
-  console.log("Spacing:", spacing);
-  console.log("Offset:", offsetX);
-  console.log("Target Left X:", targetLeftX);
-  console.log("Target Left Y:", targetLeftY);
-}
-
-// Fonction pour redessiner tout le contenu
-function redrawEverything() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawGrid();
-
-  validatedSegments.forEach(seg => drawSegment(seg.points));
-
-  activePoints.forEach(key => {
-    const [x, y] = key.split(",").map(Number);
-    drawPoint(x, y);
-  });
 }
 
 // ===============================
