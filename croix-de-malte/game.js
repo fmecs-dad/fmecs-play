@@ -1659,22 +1659,29 @@ function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
+  console.log('Container dimensions:', container.clientWidth, container.clientHeight);
+
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
+
+  console.log('Canvas style dimensions:', canvas.style.width, canvas.style.height);
 
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
+  console.log('Canvas actual dimensions:', canvas.width, canvas.height);
+
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
+  console.log('Spacing:', spacing, 'Offset:', offset);
+
   redrawEverything();
   updateLabels();
 }
-
 
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
@@ -1720,17 +1727,22 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
-  const spacing = 16;  // Valeur exacte de spacing
-  const offset = 13;   // Valeur exacte de offset
+  console.log('Updating labels with spacing:', spacing, 'and offset:', offset);
 
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.left = `${offset + (label - 1) * spacing}px`;
+    const leftPos = offset + (label - 1) * spacing;
+    span.style.position = 'absolute';
+    span.style.left = `${leftPos}px`;
+    console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.top = `${offset + (label - 1) * spacing}px`;
+    const topPos = offset + (label - 1) * spacing;
+    span.style.position = 'absolute';
+    span.style.top = `${topPos}px`;
+    console.log(`Left Label ${label} positioned at ${topPos}px`);
   });
 }
 
