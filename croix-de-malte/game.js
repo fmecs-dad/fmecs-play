@@ -2651,7 +2651,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Fonction pour redimensionner le canvas
 
   let resizeTimeout;
-
+ 	
 function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
