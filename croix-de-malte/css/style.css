@@ -687,8 +687,8 @@ footer {
   border: 30px solid transparent;
   background-clip: padding-box;
   border-image: url("../images/plateau.jpg") 30 round;
-  width: min(660px, 90vw);
-  height: min(660px, 90vw);
+  width: 660px;
+  height: 660px;
   position: relative;
   margin: 0;
 }
@@ -713,8 +713,8 @@ footer {
 }
 
 #gameCanvas {
-  width: calc(100% - 60px) !important;
-  height: calc(100% - 60px) !important;
+  width: 600px;
+  height: 600px;
   background: #fafafa;
   display: block;
   margin: 30px;
@@ -726,7 +726,7 @@ footer {
 #topLabels, #leftLabels {
   position: absolute;
   pointer-events: none;
-  font-size: clamp(10px, 1.5vw, 12px);
+  font-size: 12px;
   color: #444;
   z-index: 10;
 }
@@ -734,11 +734,9 @@ footer {
 #topLabels {
   top: 0;
   left: 30px;
-  width: calc(100% - 60px);
-  height: 20px;
+  width: 600px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 0 10px;
   box-sizing: border-box;
 }
@@ -746,19 +744,12 @@ footer {
 #leftLabels {
   left: 0;
   top: 30px;
-  height: calc(100% - 60px);
-  width: 20px;
+  height: 600px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
   padding: 10px 0;
   box-sizing: border-box;
-}
-
-#topLabels span, #leftLabels span {
-  position: relative;
-  display: block;
 }
 
 /* === FLASH MESSAGES === */
