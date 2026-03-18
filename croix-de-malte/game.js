@@ -1671,8 +1671,6 @@ function resizeCanvas() {
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  console.log('Spacing:', spacing, 'Offset:', offset);
-
   redrawEverything();
   updateLabels();
 }
@@ -1727,10 +1725,21 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
+  // Ajustements proportionnels basés sur le spacing
+  const adjustments = {
+    5: 0.75 * spacing,
+    10: 0.5 * spacing,
+    15: 0.75 * spacing,
+    20: spacing,
+    25: 1.25 * spacing,
+    30: 1.5 * spacing
+  };
+
   // Positionnement des repères horizontaux
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    const leftPos = offset + (label - 1) * spacing - spacing / 2;
+    const adjustment = adjustments[label] || 0;
+    const leftPos = offset + (label - 1) * spacing + adjustment;
     span.style.left = `${leftPos}px`;
     console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
@@ -1738,11 +1747,13 @@ function updateLabels() {
   // Positionnement des repères verticaux
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    const topPos = offset + (label - 1) * spacing - spacing / 2;
+    const adjustment = adjustments[label] || 0;
+    const topPos = offset + (label - 1) * spacing + adjustment;
     span.style.top = `${topPos}px`;
     console.log(`Left Label ${label} positioned at ${topPos}px`);
   });
 }
+
 
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
