@@ -696,7 +696,6 @@ footer {
   border-image: url("../images/plateau.jpg") 30 round;
 }
 
-/* plateau responsive */
 
 #canvasContainer {
   position: relative;
@@ -743,6 +742,8 @@ footer {
   pointer-events: none;
   font-size: clamp(10px, 1.5vw, 12px);
   color: #444;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 #topLabels {
@@ -1120,8 +1121,6 @@ footer {
   cursor: pointer;
   margin-right: 10px;
 }
-
-/* Burger overlay */
 
 .burger-panel {
   background: #fff;
