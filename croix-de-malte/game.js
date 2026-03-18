@@ -1655,41 +1655,26 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 // ===============================
 
 // Fonction pour redimensionner le canvas
-
-function updateLabelsPosition() {
-  const topLabels = document.querySelectorAll('#topLabels span');
-  const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  topLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.left = `${offset + (pos - 1) * spacing * 2 - 6}px`;
-  });
-
-  leftLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.top = `${offset + (pos - 1) * spacing * 2 - 6}px`;
-  });
-}
-
 function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
+  // Ajuste la taille du canvas en fonction du conteneur
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
 
+  // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
+  // Calcule spacing et offset
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  updateLabelsPosition(); // Ajoutez cette ligne
+  // Redessine tout après le redimensionnement
   redrawEverything();
 }
 
@@ -1871,16 +1856,15 @@ function initMaltaCross() {
     permanentPoints.add(key);
     activePoints.add(key);
   });
+  console.log("Spacing:", spacing);
+  console.log("Offset:", offsetX);
+  console.log("Target Left X:", targetLeftX);
+  console.log("Target Left Y:", targetLeftY);
 }
 
+// Fonction pour redessiner tout le contenu
 function redrawEverything() {
-
-  // Le canvas s’adapte visuellement
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   drawGrid();
 
   validatedSegments.forEach(seg => drawSegment(seg.points));
