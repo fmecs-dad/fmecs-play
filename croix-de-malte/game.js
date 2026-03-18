@@ -1655,14 +1655,8 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
 // Fonctions utilitaires pour le canvas et les repères
 function resizeCanvas() {
-  if (!canvas || !ctx) {
-    console.error("Canvas ou contexte non initialisé");
-    return;
-  }
-
   const container = document.getElementById('canvasContainer');
-  if (!container) {
-    console.error("Conteneur non trouvé");
+  if (!canvas || !container) {
     return;
   }
 
