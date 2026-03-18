@@ -1819,6 +1819,79 @@ function snapToAlignedPoint(first, clicked, mx, my) {
 }
 
 // ===============================
+//   CROIX DE MALTE
+// ===============================
+
+function drawMaltaCross() {
+  permanentPoints.forEach(key => {
+    const [x, y] = key.split(",").map(Number);
+    drawPoint(x, y);
+  });
+}
+
+function initMaltaCross() {
+
+  permanentPoints.clear();
+  activePoints.clear();
+
+  // Construction brute de la croix
+  let x = 0, y = 0;
+  const pts = [];
+  const add = (px, py) => pts.push({ x: px, y: py });
+  add(x, y);
+
+  const steps = [
+    [1,0,3],[0,1,3],[1,0,3],[0,1,3],
+    [-1,0,3],[0,1,3],[-1,0,3],[0,-1,3],
+    [-1,0,3],[0,-1,3],[1,0,3],[0,-1,3]
+  ];
+
+  for (const [dx, dy, n] of steps) {
+    for (let i = 0; i < n; i++) {
+      x += dx;
+      y += dy;
+      add(x, y);
+    }
+  }
+
+  // Point de référence dans la croix brute
+  const refX = -3;
+  const refY = 3;
+
+  // Point logique où placer ce point
+  const targetLeftX = 10;
+  const targetLeftY = 13;
+
+  const offsetX = targetLeftX - refX; // 11
+  const offsetY = targetLeftY - refY; // 14
+
+  // Application de l’offset
+  pts.forEach(p => {
+    const key = `${p.x + offsetX},${p.y + offsetY}`;
+    permanentPoints.add(key);
+    activePoints.add(key);
+  });
+}
+
+function redrawEverything() {
+
+  // Le canvas s’adapte visuellement
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawGrid();
+
+  validatedSegments.forEach(seg => drawSegment(seg.points));
+
+  activePoints.forEach(key => {
+    const [x, y] = key.split(",").map(Number);
+    drawPoint(x, y);
+  });
+}
+
+// ===============================
 //   ARÊTES
 // ===============================
 
