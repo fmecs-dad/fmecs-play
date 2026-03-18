@@ -701,7 +701,7 @@ footer {
   position: relative;
   width: min(600px, 90vw);
   height: min(600px, 90vw);
-  overflow: visible !important;
+  overflow: visible;
   z-index: 0;
 }
 
@@ -742,6 +742,7 @@ footer {
   pointer-events: none;
   font-size: clamp(10px, 1.5vw, 12px);
   color: #444;
+  z-index: 10;
 }
 
 #topLabels {
@@ -770,7 +771,7 @@ footer {
 }
 
 #topLabels span, #leftLabels span {
-  position: relative; /* Changé de absolute à relative */
+  position: relative;
   display: block;
 }
 
