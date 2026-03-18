@@ -1720,14 +1720,17 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
+  const spacing = 16;  // Valeur exacte de spacing
+  const offset = 13;   // Valeur exacte de offset
+
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.left = `${30 + (label - 1) * spacing * 2}px`;
+    span.style.left = `${offset + (label - 1) * spacing}px`;
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.top = `${30 + (label - 1) * spacing * 2}px`;
+    span.style.top = `${offset + (label - 1) * spacing}px`;
   });
 }
 
