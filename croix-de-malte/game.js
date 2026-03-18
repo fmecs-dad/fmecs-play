@@ -1722,16 +1722,17 @@ function updateLabels() {
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
-  const spacing = 600 / 29; // Espacement basé sur 30 lignes (29 intervalles)
 
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.left = `${(label - 1) * spacing}px`;
+    span.style.position = 'absolute';
+    span.style.left = `${offset + (label - 1) * spacing - 6}px`;
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.top = `${(label - 1) * spacing}px`;
+    span.style.position = 'absolute';
+    span.style.top = `${offset + (label - 1) * spacing - 6}px`;
   });
 }
 
