@@ -1659,29 +1659,24 @@ function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
-  console.log('Container dimensions:', container.clientWidth, container.clientHeight);
-
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
-
-  console.log('Canvas style dimensions:', canvas.style.width, canvas.style.height);
 
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
-  console.log('Canvas actual dimensions:', canvas.width, canvas.height);
-
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  console.log('Spacing:', spacing, 'Offset:', offset);
+  console.log('Spacing:', spacing.toFixed(2), 'Offset:', offset.toFixed(2));
 
   redrawEverything();
   updateLabels();
 }
+
 
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
@@ -1727,22 +1722,23 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
-  // Ajustement pour les repères horizontaux
+  console.log('Updating labels with spacing:', spacing.toFixed(2), 'and offset:', offset.toFixed(2));
+
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    const leftPos = 30 + (label - 1) * 16 - 16; // Ajustement pour aligner avec les colonnes
-    span.style.left = `${leftPos}px`;
-    console.log(`Top Label ${label} positioned at ${leftPos}px`);
+    const leftPos = offset + (label - 1) * spacing;
+    span.style.left = `${leftPos.toFixed(2)}px`;
+    console.log(`Top Label ${label} positioned at ${leftPos.toFixed(2)}px`);
   });
 
-  // Ajustement pour les repères verticaux
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    const topPos = 30 + (label - 1) * 16 - 16; // Ajustement pour aligner avec les lignes
-    span.style.top = `${topPos}px`;
-    console.log(`Left Label ${label} positioned at ${topPos}px`);
+    const topPos = offset + (label - 1) * spacing;
+    span.style.top = `${topPos.toFixed(2)}px`;
+    console.log(`Left Label ${label} positioned at ${topPos.toFixed(2)}px`);
   });
 }
+
 
 
 // ===============================
