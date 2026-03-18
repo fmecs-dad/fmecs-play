@@ -2777,9 +2777,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Contexte 2D non disponible");
         return;
       }
+
+      // Calcul du canvas et de la grille
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      spacing = canvas.width / (30 + 1);
+      offset = spacing;
+
+      // Positionnement initial des repères
+      updateLabels();
     } else {
       console.error("Canvas non trouvé");
-      return;
     }
 
     // Ajout des écouteurs d'événements pour le redimensionnement
