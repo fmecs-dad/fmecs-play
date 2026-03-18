@@ -701,7 +701,7 @@ footer {
   position: relative;
   width: min(600px, 90vw);
   height: min(600px, 90vw);
-  overflow: visible;
+  overflow: visible !important;
   z-index: 0;
 }
 
@@ -742,8 +742,6 @@ footer {
   pointer-events: none;
   font-size: clamp(10px, 1.5vw, 12px);
   color: #444;
-  opacity: 1 !important;
-  visibility: visible !important;
 }
 
 #topLabels {
