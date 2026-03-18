@@ -1014,7 +1014,8 @@ let audioUnlocked = false;
 const size = 30;
 let offset;
 let spacing;
-
+let resizeTimeout;
+ 
 let selectedStart = null;
 let score = 0;
 let paused = false;
@@ -1650,6 +1651,43 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 // ===============================
 //   DESSIN DE LA GRILLE
 // ===============================
+
+function resizeCanvas() {
+  const canvas = document.getElementById('gameCanvas');
+  const container = document.getElementById('canvasContainer');
+
+  const containerSize = Math.min(container.clientWidth, container.clientHeight);
+  canvas.style.width = `${containerSize - 60}px`;
+  canvas.style.height = `${containerSize - 60}px`;
+
+  const pixelRatio = window.devicePixelRatio || 1;
+  canvas.width = (containerSize - 60) * pixelRatio;
+  canvas.height = (containerSize - 60) * pixelRatio;
+
+  // Calcul de spacing et offset comme dans l'ancien code
+  spacing = canvas.width / (size + 1);
+  offset = spacing;
+
+  redrawEverything();
+  updateLabels();
+}
+  
+  function updateLabels() {
+  const topLabels = document.querySelectorAll('#topLabels span');
+  const leftLabels = document.querySelectorAll('#leftLabels span');
+
+  topLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+  });
+
+  leftLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+  });
+}
 
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
@@ -2647,48 +2685,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
     document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
   });
- 
-  // Fonction pour redimensionner le canvas
-
-  let resizeTimeout;
  	
-function resizeCanvas() {
-  const canvas = document.getElementById('gameCanvas');
-  const container = document.getElementById('canvasContainer');
-
-  const containerSize = Math.min(container.clientWidth, container.clientHeight);
-  canvas.style.width = `${containerSize - 60}px`;
-  canvas.style.height = `${containerSize - 60}px`;
-
-  const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = (containerSize - 60) * pixelRatio;
-  canvas.height = (containerSize - 60) * pixelRatio;
-
-  // Calcul de spacing et offset comme dans l'ancien code
-  spacing = canvas.width / (size + 1);
-  offset = spacing;
-
-  redrawEverything();
-  updateLabels();
-}
-  
-  function updateLabels() {
-  const topLabels = document.querySelectorAll('#topLabels span');
-  const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  topLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-  });
-
-  leftLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-  });
-}
-
   try {
     // 1. Initialisation de base (votre code existant)
     const { data: { session }, error } = await supa.auth.getSession();
@@ -2754,43 +2751,31 @@ function resizeCanvas() {
       enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     }
 
-    // 5. Initialisation du canvas (votre code existant)
-    canvas = document.getElementById("gameCanvas");
+    // 5. Initialisation du canvas
+    const canvas = document.getElementById("gameCanvas");
     if (canvas) {
-      ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d");
 
       // Calcul du canvas et de la grille
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
-      spacing = canvas.width / (size + 1);
+      spacing = canvas.width / (30 + 1);
       offset = spacing;
 
-      // Positionnement des repères
-      const topLabels = document.querySelectorAll('#topLabels span');
-      const leftLabels = document.querySelectorAll('#leftLabels span');
-
-      if (topLabels.length && leftLabels.length) {
-        topLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-
-        leftLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-      }
+      // Positionnement initial des repères
+      updateLabels();
     } else {
       console.error("Canvas non trouvé");
     }
 
-    window.addEventListener('load', resizeCanvas);
+    // Ajout des écouteurs d'événements pour le redimensionnement
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(resizeCanvas, 100);
     });
+
+    // Appel initial de resizeCanvas
+    resizeCanvas();
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
