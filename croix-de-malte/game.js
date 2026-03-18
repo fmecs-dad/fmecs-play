@@ -1727,22 +1727,18 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
-  console.log('Updating labels with spacing:', spacing, 'and offset:', offset);
-
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    const leftPos = offset + (label - 1) * spacing;
-    span.style.position = 'absolute';
+    const leftPos = 30 + (label - 1) * 16; // Utilisation de la valeur fixe de spacing (16)
     span.style.left = `${leftPos}px`;
     console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    const topPos = offset + (label - 1) * spacing;
-    span.style.position = 'absolute';
-    span.style.top = `${topPos}px`;
-    console.log(`Left Label ${label} positioned at ${topPos}px`);
+    const topPos = 30 + (label - 1) * 16; // Utilisation de la valeur fixe de spacing (16)
+    span.style.top = `${topPos + 20}px`; // Ajout de 20px pour positionner sur le plateau
+    console.log(`Left Label ${label} positioned at ${topPos + 20}px`);
   });
 }
 
