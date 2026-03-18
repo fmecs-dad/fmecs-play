@@ -1742,6 +1742,7 @@ function updateLabels() {
   });
 }
 
+
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
 // ===============================
