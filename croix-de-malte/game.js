@@ -1020,8 +1020,6 @@ let score = 0;
 let paused = false;
 let gameOver = false;
 
-//let resizeTimeout;
-
 let tutorialBtn = null;
 
 let activePoints = new Set();
@@ -1653,27 +1651,6 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 //   DESSIN DE LA GRILLE
 // ===============================
 
-// Fonction pour redimensionner le canvas
-function resizeCanvas() {
-  const canvas = document.getElementById('gameCanvas');
-  const container = document.getElementById('canvasContainer');
-
-  const containerSize = Math.min(container.clientWidth, container.clientHeight);
-  canvas.style.width = `${containerSize - 60}px`;
-  canvas.style.height = `${containerSize - 60}px`;
-
-  const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = (containerSize - 60) * pixelRatio;
-  canvas.height = (containerSize - 60) * pixelRatio;
-
-  // Calcul de spacing et offset comme dans l'ancien code
-  spacing = canvas.width / (size + 1);
-  offset = spacing;
-
-  redrawEverything();
-  updateLabels();
-}
-
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
@@ -1717,24 +1694,6 @@ function drawSegment(segmentPoints) {
   ctx.lineTo(offset + ex * spacing, offset + ey * spacing);
   ctx.stroke();
 }
-
-function updateLabels() {
-  const topLabels = document.querySelectorAll('#topLabels span');
-  const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  topLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-  });
-
-  leftLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-  });
-}
-
 
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
@@ -2688,6 +2647,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
     document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
   });
+ 
+  // Fonction pour redimensionner le canvas
+
+  let resizeTimeout;
+
+function resizeCanvas() {
+  const canvas = document.getElementById('gameCanvas');
+  const container = document.getElementById('canvasContainer');
+
+  const containerSize = Math.min(container.clientWidth, container.clientHeight);
+  canvas.style.width = `${containerSize - 60}px`;
+  canvas.style.height = `${containerSize - 60}px`;
+
+  const pixelRatio = window.devicePixelRatio || 1;
+  canvas.width = (containerSize - 60) * pixelRatio;
+  canvas.height = (containerSize - 60) * pixelRatio;
+
+  // Calcul de spacing et offset comme dans l'ancien code
+  spacing = canvas.width / (size + 1);
+  offset = spacing;
+
+  redrawEverything();
+  updateLabels();
+}
+  
+  function updateLabels() {
+  const topLabels = document.querySelectorAll('#topLabels span');
+  const leftLabels = document.querySelectorAll('#leftLabels span');
+
+  topLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+  });
+
+  leftLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+  });
+}
 
   try {
     // 1. Initialisation de base (votre code existant)
