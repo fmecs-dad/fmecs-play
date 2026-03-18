@@ -1725,10 +1725,22 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
+  // Ajustements manuels pour chaque repère
+  const manualAdjustments = {
+    1: 0,
+    5: 8,   // Ajustement pour le repère 5
+    10: 16,  // Ajustement pour le repère 10
+    15: 24,  // Ajustement pour le repère 15
+    20: 32,  // Ajustement pour le repère 20
+    25: 40,  // Ajustement pour le repère 25
+    30: 48   // Ajustement pour le repère 30
+  };
+
   // Positionnement des repères horizontaux
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    const leftPos = offset + (label - 1) * spacing;
+    const adjustment = manualAdjustments[label] || 0;
+    const leftPos = offset + (label - 1) * spacing + adjustment;
     span.style.left = `${leftPos}px`;
     console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
@@ -1736,11 +1748,13 @@ function updateLabels() {
   // Positionnement des repères verticaux
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    const topPos = offset + (label - 1) * spacing;
+    const adjustment = manualAdjustments[label] || 0;
+    const topPos = offset + (label - 1) * spacing + adjustment;
     span.style.top = `${topPos}px`;
     console.log(`Left Label ${label} positioned at ${topPos}px`);
   });
 }
+
 
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
