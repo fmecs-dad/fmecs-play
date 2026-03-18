@@ -2801,7 +2801,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateAuthUI(null);
     initialFlow(null);
   }
-});
 
 // ===============================
 //   GESTION DU MENU PROFIL 
