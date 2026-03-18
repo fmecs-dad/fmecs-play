@@ -724,11 +724,13 @@ footer {
 /* === LABELS === */
 #topLabels {
   position: absolute;
-  top: -20px;
-  left: 30px;
-  width: 600px;
+  top: 10px;
+  left: 0;
+  width: 660px;
   display: flex;
   justify-content: space-between;
+  padding: 0 30px;
+  box-sizing: border-box;
   font-size: 12px;
   color: #444;
   z-index: 10;
@@ -736,7 +738,7 @@ footer {
 
 #leftLabels {
   position: absolute;
-  left: -20px;
+  left: 10px;
   top: 30px;
   height: 600px;
   display: flex;
@@ -748,8 +750,25 @@ footer {
 }
 
 #topLabels span, #leftLabels span {
-  position: relative;
+  position: absolute;
 }
+
+#topLabels span:nth-child(1) { left: 0; }
+#topLabels span:nth-child(2) { left: 100px; }
+#topLabels span:nth-child(3) { left: 200px; }
+#topLabels span:nth-child(4) { left: 300px; }
+#topLabels span:nth-child(5) { left: 400px; }
+#topLabels span:nth-child(6) { left: 500px; }
+#topLabels span:nth-child(7) { left: 600px; }
+
+#leftLabels span:nth-child(1) { top: 0; }
+#leftLabels span:nth-child(2) { top: 100px; }
+#leftLabels span:nth-child(3) { top: 200px; }
+#leftLabels span:nth-child(4) { top: 300px; }
+#leftLabels span:nth-child(5) { top: 400px; }
+#leftLabels span:nth-child(6) { top: 500px; }
+#leftLabels span:nth-child(7) { top: 600px; }
+
 
 /* === FLASH MESSAGES === */
 
