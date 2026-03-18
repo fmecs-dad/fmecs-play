@@ -1722,14 +1722,12 @@ function updateLabels() {
 
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.position = 'absolute';
-    span.style.left = `${offset + (label - 1) * spacing * 2}px`;
+    span.style.left = `${30 + (label - 1) * spacing * 2}px`;
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.position = 'absolute';
-    span.style.top = `${offset + (label - 1) * spacing * 2}px`;
+    span.style.top = `${30 + (label - 1) * spacing * 2}px`;
   });
 }
 
