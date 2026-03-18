@@ -1727,18 +1727,20 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
+  // Ajustement pour les repères horizontaux
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    const leftPos = 30 + (label - 1) * 16; // Utilisation de la valeur fixe de spacing (16)
+    const leftPos = 30 + (label - 1) * 16 - 16; // Ajustement pour aligner avec les colonnes
     span.style.left = `${leftPos}px`;
     console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
 
+  // Ajustement pour les repères verticaux
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    const topPos = 30 + (label - 1) * 16; // Utilisation de la valeur fixe de spacing (16)
-    span.style.top = `${topPos + 20}px`; // Ajout de 20px pour positionner sur le plateau
-    console.log(`Left Label ${label} positioned at ${topPos + 20}px`);
+    const topPos = 30 + (label - 1) * 16 - 16; // Ajustement pour aligner avec les lignes
+    span.style.top = `${topPos}px`;
+    console.log(`Left Label ${label} positioned at ${topPos}px`);
   });
 }
 
