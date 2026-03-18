@@ -1655,26 +1655,53 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 // ===============================
 
 // Fonction pour redimensionner le canvas
+
+function updateLabels() {
+  const topLabels = document.getElementById('topLabels');
+  const leftLabels = document.getElementById('leftLabels');
+
+  topLabels.innerHTML = '';
+  leftLabels.innerHTML = '';
+
+  for (let x = 0; x < 30; x += 5) {
+    const span = document.createElement('span');
+    span.textContent = x + 1;
+    span.style.position = 'absolute';
+    span.style.left = `${offset + x * spacing - 5}px`;
+    topLabels.appendChild(span);
+  }
+
+  for (let y = 0; y < 30; y += 5) {
+    const span = document.createElement('span');
+    span.textContent = y + 1;
+    span.style.position = 'absolute';
+    span.style.top = `${offset + y * spacing - 10}px`;
+    leftLabels.appendChild(span);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+});
+
 function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
-  // Ajuste la taille du canvas en fonction du conteneur
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
 
-  // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
-  // Calcule spacing et offset
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  // Redessine tout après le redimensionnement
+  updateLabels();
   redrawEverything();
 }
 
