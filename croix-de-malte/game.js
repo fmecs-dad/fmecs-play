@@ -1721,19 +1721,17 @@ function updateLabels() {
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
-  const canvasWidth = document.getElementById('gameCanvas').width;
-  const canvasHeight = document.getElementById('gameCanvas').height;
-  const gridSize = 30;
-  const spacing = canvasWidth / gridSize;
+  const labels = [1, 5, 10, 15, 20, 25, 30];
+  const spacing = 600 / 29; // Espacement basé sur 30 lignes (29 intervalles)
 
   topLabels.forEach((span, index) => {
-    const label = parseInt(span.textContent);
-    span.style.left = `${30 + (label - 1) * spacing * 2}px`;
+    const label = labels[index];
+    span.style.left = `${(label - 1) * spacing}px`;
   });
 
   leftLabels.forEach((span, index) => {
-    const label = parseInt(span.textContent);
-    span.style.top = `${30 + (label - 1) * spacing * 2}px`;
+    const label = labels[index];
+    span.style.top = `${(label - 1) * spacing}px`;
   });
 }
 
