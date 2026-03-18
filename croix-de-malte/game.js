@@ -1687,14 +1687,10 @@ function updateLabels() {
   labels.forEach(label => {
     const spanTop = document.createElement('span');
     spanTop.textContent = label;
-    spanTop.style.position = 'absolute';
-    spanTop.style.left = `${30 + (label - 1) * 20}px`; /* Positionnement sur le plateau */
     topLabels.appendChild(spanTop);
 
     const spanLeft = document.createElement('span');
     spanLeft.textContent = label;
-    spanLeft.style.position = 'absolute';
-    spanLeft.style.top = `${30 + (label - 1) * 20}px`; /* Positionnement sur le plateau */
     leftLabels.appendChild(spanLeft);
   });
 }
