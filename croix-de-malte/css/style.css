@@ -737,42 +737,39 @@ footer {
 }
 
 /* === LABELS === */
-#topLabels, #leftLabels {
+#topLabels {
   position: absolute;
-  pointer-events: none;
-  font-size: clamp(10px, 1.5vw, 12px);
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+  box-sizing: border-box;
+  font-size: 12px;
+  color: #444;
+  z-index: 10;
+  height: 30px;
+}
+
+#leftLabels {
+  position: absolute;
+  left: 0;
+  top: 30px;
+  height: calc(100% - 30px);
+  width: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 0;
+  box-sizing: border-box;
+  font-size: 12px;
   color: #444;
   z-index: 10;
 }
 
-#topLabels {
-  top: 0;
-  left: 30px;
-  width: calc(100% - 60px);
-  height: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 10px;
-  box-sizing: border-box;
-}
-
-#leftLabels {
-  left: 0;
-  top: 30px;
-  width: 20px;
-  height: calc(100% - 60px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  box-sizing: border-box;
-}
-
 #topLabels span, #leftLabels span {
-  position: relative; /* Changé de absolute à relative */
-  display: block;
+  position: relative;
 }
 
 /* === FLASH MESSAGES === */
