@@ -1727,16 +1727,18 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
+  // Positionnement des repères horizontaux
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    const leftPos = offset + (label - 1) * spacing;
+    const leftPos = offset + (label - 1) * spacing - spacing / 2;
     span.style.left = `${leftPos}px`;
     console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
 
+  // Positionnement des repères verticaux
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    const topPos = offset + (label - 1) * spacing;
+    const topPos = offset + (label - 1) * spacing - spacing / 2;
     span.style.top = `${topPos}px`;
     console.log(`Left Label ${label} positioned at ${topPos}px`);
   });
