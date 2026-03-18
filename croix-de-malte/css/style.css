@@ -740,12 +740,10 @@ footer {
 #topLabels {
   position: absolute;
   top: -20px;
-  left: 0;
-  width: 660px;
+  left: 30px;
+  width: 600px;
   display: flex;
   justify-content: space-between;
-  padding: 0 30px;
-  box-sizing: border-box;
   font-size: 12px;
   color: #444;
   z-index: 10;
@@ -759,8 +757,6 @@ footer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0;
-  box-sizing: border-box;
   font-size: 12px;
   color: #444;
   z-index: 10;
@@ -769,7 +765,6 @@ footer {
 #topLabels span, #leftLabels span {
   position: relative;
 }
-
 
 /* === FLASH MESSAGES === */
 
