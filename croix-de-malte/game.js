@@ -1655,44 +1655,27 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 // ===============================
 
 // Fonction pour redimensionner le canvas
-
 function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
+  // Ajuste la taille du canvas en fonction du conteneur
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
 
+  // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
+  // Calcule spacing et offset
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
+  // Redessine tout après le redimensionnement
   redrawEverything();
-}
-
-function updateLabels() {
-  const topLabels = document.getElementById('topLabels');
-  const leftLabels = document.getElementById('leftLabels');
-
-  topLabels.innerHTML = '';
-  leftLabels.innerHTML = '';
-
-  const labels = [1, 5, 10, 15, 20, 25, 30];
-
-  labels.forEach(label => {
-    const spanTop = document.createElement('span');
-    spanTop.textContent = label;
-    topLabels.appendChild(spanTop);
-
-    const spanLeft = document.createElement('span');
-    spanLeft.textContent = label;
-    leftLabels.appendChild(spanLeft);
-  });
 }
 
 function drawGrid() {
@@ -1731,16 +1714,6 @@ function drawSegment(segmentPoints) {
   ctx.moveTo(offset + sx * spacing, offset + sy * spacing);
   ctx.lineTo(offset + ex * spacing, offset + ey * spacing);
   ctx.stroke();
-}
-
-function checkLabelsPosition() {
-  const topLabels = document.getElementById('topLabels');
-  const leftLabels = document.getElementById('leftLabels');
-  const canvasContainer = document.getElementById('canvasContainer');
-
-  console.log("Position de #topLabels:", topLabels.getBoundingClientRect());
-  console.log("Position de #leftLabels:", leftLabels.getBoundingClientRect());
-  console.log("Position de #canvasContainer:", canvasContainer.getBoundingClientRect());
 }
 
 // ===============================
@@ -2762,7 +2735,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // 5. Initialisation du canvas (votre code existant)
-    checkLabelsPosition();
     canvas = document.getElementById("gameCanvas");
     if (canvas) {
       ctx = canvas.getContext("2d");
@@ -3090,11 +3062,7 @@ if (burgerAuthBtn) {
   // ===============================
  
   resizeCanvas();
-  updateLabels();
-  window.addEventListener('resize', () => {
-    resizeCanvas();
-    updateLabels();
-  });
+  window.addEventListener('resize', resizeCanvas);
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
