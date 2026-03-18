@@ -2788,7 +2788,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     window.addEventListener('load', resizeCanvas);
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeCanvas, 100);
+    });
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
