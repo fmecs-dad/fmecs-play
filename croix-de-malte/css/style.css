@@ -743,6 +743,7 @@ footer {
   pointer-events: none;
   font-size: clamp(10px, 1.5vw, 12px);
   color: #444;
+  z-index: ;
 }
 
 #topLabels {
