@@ -687,8 +687,8 @@ footer {
   border: 30px solid transparent;
   background-clip: padding-box;
   border-image: url("../images/plateau.jpg") 30 round;
-  width: 660px; /* 600px (grille) + 30px (bordure gauche) + 30px (bordure droite) */
-  height: 660px; /* 600px (grille) + 30px (bordure haut) + 30px (bordure bas) */
+  width: min(660px, 90vw);
+  height: min(660px, 90vw);
   position: relative;
   margin: 0;
 }
@@ -713,62 +713,53 @@ footer {
 }
 
 #gameCanvas {
-  width: 600px;
-  height: 600px;
+  width: calc(100% - 60px) !important;
+  height: calc(100% - 60px) !important;
   background: #fafafa;
   display: block;
+  margin: 30px;
   position: relative;
   z-index: 1;
 }
 
 /* === LABELS === */
-#topLabels {
+#topLabels, #leftLabels {
   position: absolute;
-  top: 10px;
-  left: 0;
-  width: 660px;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 30px;
-  box-sizing: border-box;
-  font-size: 12px;
+  pointer-events: none;
+  font-size: clamp(10px, 1.5vw, 12px);
   color: #444;
   z-index: 10;
+}
+
+#topLabels {
+  top: 0;
+  left: 30px;
+  width: calc(100% - 60px);
+  height: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
 #leftLabels {
-  position: absolute;
-  left: 10px;
+  left: 0;
   top: 30px;
-  height: 600px;
+  height: calc(100% - 60px);
+  width: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  font-size: 12px;
-  color: #444;
-  z-index: 10;
+  align-items: center;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 
 #topLabels span, #leftLabels span {
-  position: absolute;
+  position: relative;
+  display: block;
 }
-
-#topLabels span:nth-child(1) { left: 0; }
-#topLabels span:nth-child(2) { left: 100px; }
-#topLabels span:nth-child(3) { left: 200px; }
-#topLabels span:nth-child(4) { left: 300px; }
-#topLabels span:nth-child(5) { left: 400px; }
-#topLabels span:nth-child(6) { left: 500px; }
-#topLabels span:nth-child(7) { left: 600px; }
-
-#leftLabels span:nth-child(1) { top: 0; }
-#leftLabels span:nth-child(2) { top: 100px; }
-#leftLabels span:nth-child(3) { top: 200px; }
-#leftLabels span:nth-child(4) { top: 300px; }
-#leftLabels span:nth-child(5) { top: 400px; }
-#leftLabels span:nth-child(6) { top: 500px; }
-#leftLabels span:nth-child(7) { top: 600px; }
-
 
 /* === FLASH MESSAGES === */
 
