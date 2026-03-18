@@ -1726,12 +1726,12 @@ function updateLabels() {
 
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.left = `${30 + (label - 1) * gridSpacing}px`;
+    span.style.left = `${(label - 1) * gridSpacing}px`;
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.top = `${30 + (label - 1) * gridSpacing}px`;
+    span.style.top = `${(label - 1) * gridSpacing}px`;
   });
 }
 
