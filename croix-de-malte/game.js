@@ -1671,12 +1671,11 @@ function resizeCanvas() {
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  console.log('Spacing:', spacing.toFixed(2), 'Offset:', offset.toFixed(2));
+  console.log('Spacing:', spacing, 'Offset:', offset);
 
   redrawEverything();
   updateLabels();
 }
-
 
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
@@ -1722,24 +1721,20 @@ function updateLabels() {
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
 
-  console.log('Updating labels with spacing:', spacing.toFixed(2), 'and offset:', offset.toFixed(2));
-
   topLabels.forEach((span, index) => {
     const label = labels[index];
     const leftPos = offset + (label - 1) * spacing;
-    span.style.left = `${leftPos.toFixed(2)}px`;
-    console.log(`Top Label ${label} positioned at ${leftPos.toFixed(2)}px`);
+    span.style.left = `${leftPos}px`;
+    console.log(`Top Label ${label} positioned at ${leftPos}px`);
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
     const topPos = offset + (label - 1) * spacing;
-    span.style.top = `${topPos.toFixed(2)}px`;
-    console.log(`Left Label ${label} positioned at ${topPos.toFixed(2)}px`);
+    span.style.top = `${topPos}px`;
+    console.log(`Left Label ${label} positioned at ${topPos}px`);
   });
 }
-
-
 
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
