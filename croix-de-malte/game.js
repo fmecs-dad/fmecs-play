@@ -1655,10 +1655,8 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
 
 // Fonctions utilitaires pour le canvas et les repères
 function resizeCanvas() {
+  const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
-  if (!canvas || !container) {
-    return;
-  }
 
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
@@ -1679,10 +1677,6 @@ function resizeCanvas() {
 function updateLabels() {
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  if (!topLabels.length || !leftLabels.length) {
-    return;
-  }
 
   topLabels.forEach(span => {
     const pos = Number(span.textContent);
@@ -2767,37 +2761,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     canvas = document.getElementById("gameCanvas");
     if (canvas) {
       ctx = canvas.getContext("2d");
-      if (!ctx) {
-        console.error("Contexte 2D non disponible");
-        return;
-      }
 
       // Calcul du canvas et de la grille
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
-      spacing = canvas.width / (30 + 1);
+      spacing = canvas.width / (size + 1);
       offset = spacing;
 
-      // Positionnement initial des repères
-      updateLabels();
+      // Positionnement des repères
+      const topLabels = document.querySelectorAll('#topLabels span');
+      const leftLabels = document.querySelectorAll('#leftLabels span');
+
+      if (topLabels.length && leftLabels.length) {
+        topLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+
+        leftLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+      }
     } else {
       console.error("Canvas non trouvé");
     }
 
-    // Ajout des écouteurs d'événements pour le redimensionnement
+    // Ajoutez ces lignes ici, à la fin du bloc try
+    window.addEventListener('load', resizeCanvas);
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(resizeCanvas, 100);
     });
-
-    // Appel initial de resizeCanvas
-    resizeCanvas();
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
     updateAuthUI(null);
     initialFlow(null);
   }
+});
 
 // ===============================
 //   GESTION DU MENU PROFIL 
