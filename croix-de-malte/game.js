@@ -1667,9 +1667,9 @@ function resizeCanvas() {
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
-  const gridSize = 30;
-  spacing = canvas.width / gridSize;
-  offset = spacing / 2;
+  // Calcul de spacing et offset comme dans l'ancien code
+  spacing = canvas.width / (size + 1);
+  offset = spacing;
 
   redrawEverything();
   updateLabels();
@@ -1723,35 +1723,16 @@ function updateLabels() {
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
-  const labels = [1, 5, 10, 15, 20, 25, 30];
-
-  // Ajustements manuels pour chaque repère
-  const manualAdjustments = {
-    1: 0,
-    5: 8,   // Ajustement pour le repère 5
-    10: 16,  // Ajustement pour le repère 10
-    15: 24,  // Ajustement pour le repère 15
-    20: 32,  // Ajustement pour le repère 20
-    25: 40,  // Ajustement pour le repère 25
-    30: 48   // Ajustement pour le repère 30
-  };
-
-  // Positionnement des repères horizontaux
-  topLabels.forEach((span, index) => {
-    const label = labels[index];
-    const adjustment = manualAdjustments[label] || 0;
-    const leftPos = offset + (label - 1) * spacing + adjustment;
-    span.style.left = `${leftPos}px`;
-    console.log(`Top Label ${label} positioned at ${leftPos}px`);
+  topLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
   });
 
-  // Positionnement des repères verticaux
-  leftLabels.forEach((span, index) => {
-    const label = labels[index];
-    const adjustment = manualAdjustments[label] || 0;
-    const topPos = offset + (label - 1) * spacing + adjustment;
-    span.style.top = `${topPos}px`;
-    console.log(`Left Label ${label} positioned at ${topPos}px`);
+  leftLabels.forEach(span => {
+    const pos = Number(span.textContent);
+    if (!Number.isFinite(pos)) return;
+    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
   });
 }
 
@@ -2774,7 +2755,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       enableModalBehavior("bestScoreOverlay", ".panel", closeBestScore);
     }
 
-    // 5. Initialisation du canvas
+    // 5. Initialisation du canvas (votre code existant)
     canvas = document.getElementById("gameCanvas");
     if (canvas) {
       ctx = canvas.getContext("2d");
@@ -2782,12 +2763,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Calcul du canvas et de la grille
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
+      spacing = canvas.width / (size + 1);
+      offset = spacing;
 
-      resizeCanvas(); // Appel à resizeCanvas pour initialiser spacing et offset
-      updateLabels(); // Appel à updateLabels pour positionner les repères
+      // Positionnement des repères
+      const topLabels = document.querySelectorAll('#topLabels span');
+      const leftLabels = document.querySelectorAll('#leftLabels span');
+
+      if (topLabels.length && leftLabels.length) {
+        topLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+
+        leftLabels.forEach(span => {
+          const pos = Number(span.textContent);
+          if (!Number.isFinite(pos)) return;
+          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
+        });
+      }
     } else {
       console.error("Canvas non trouvé");
     }
+
+    window.addEventListener('load', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
