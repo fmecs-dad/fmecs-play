@@ -1659,24 +1659,20 @@ function resizeCanvas() {
   const canvas = document.getElementById('gameCanvas');
   const container = document.getElementById('canvasContainer');
 
-  // Ajuste la taille du canvas en fonction du conteneur
   const containerSize = Math.min(container.clientWidth, container.clientHeight);
   canvas.style.width = `${containerSize - 60}px`;
   canvas.style.height = `${containerSize - 60}px`;
 
-  // Prend en compte la densité de pixels pour les écrans Retina
   const pixelRatio = window.devicePixelRatio || 1;
   canvas.width = (containerSize - 60) * pixelRatio;
   canvas.height = (containerSize - 60) * pixelRatio;
 
-  // Calcule spacing et offset
   const gridSize = 30;
   spacing = canvas.width / gridSize;
   offset = spacing / 2;
 
-  // Redessine tout après le redimensionnement
   redrawEverything();
-  updateLabels();
+  updateLabels(); // Appel après redimensionnement
 }
 
 function drawGrid() {
@@ -1722,16 +1718,15 @@ function updateLabels() {
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
   const labels = [1, 5, 10, 15, 20, 25, 30];
-  const gridSpacing = 600 / 29; // Espacement entre les lignes de la grille
 
   topLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.left = `${(label - 1) * gridSpacing}px`;
+    span.style.left = `${(label - 1) * (600 / 29)}px`;
   });
 
   leftLabels.forEach((span, index) => {
     const label = labels[index];
-    span.style.top = `${(label - 1) * gridSpacing}px`;
+    span.style.top = `${(label - 1) * (600 / 29)}px`;
   });
 }
 
