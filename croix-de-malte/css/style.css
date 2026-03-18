@@ -740,7 +740,7 @@ footer {
 #topLabels {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 30px;
   width: 100%;
   display: flex;
   justify-content: space-between;
