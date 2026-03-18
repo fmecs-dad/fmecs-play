@@ -1688,17 +1688,16 @@ function updateLabels() {
     const spanTop = document.createElement('span');
     spanTop.textContent = label;
     spanTop.style.position = 'absolute';
-    spanTop.style.left = `${offset + (label - 1) * spacing * 2 - 6}px`;
+    spanTop.style.left = `${30 + (label - 1) * 20}px`; /* Positionnement sur le plateau */
     topLabels.appendChild(spanTop);
 
     const spanLeft = document.createElement('span');
     spanLeft.textContent = label;
     spanLeft.style.position = 'absolute';
-    spanLeft.style.top = `${offset + (label - 1) * spacing * 2 - 6}px`;
+    spanLeft.style.top = `${30 + (label - 1) * 20}px`; /* Positionnement sur le plateau */
     leftLabels.appendChild(spanLeft);
   });
 }
-
 
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
