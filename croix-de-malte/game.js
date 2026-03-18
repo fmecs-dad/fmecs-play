@@ -1678,31 +1678,27 @@ function resizeCanvas() {
 function updateLabels() {
   const topLabels = document.getElementById('topLabels');
   const leftLabels = document.getElementById('leftLabels');
-  const canvas = document.getElementById('gameCanvas');
-
-  const labelPositions = [0, 4, 9, 14, 19, 24, 29]; // Positions pour les labels 1, 5, 10, 15, 20, 25, 30
 
   topLabels.innerHTML = '';
   leftLabels.innerHTML = '';
 
-  labelPositions.forEach((pos, index) => {
-    const labelValue = (index + 1) * 5;
+  const labels = [1, 5, 10, 15, 20, 25, 30];
 
-    // Top Labels
-    const topSpan = document.createElement('span');
-    topSpan.textContent = labelValue;
-    topSpan.style.position = 'absolute';
-    topSpan.style.left = `${offset + pos * spacing - 5}px`;
-    topLabels.appendChild(topSpan);
+  labels.forEach(label => {
+    const spanTop = document.createElement('span');
+    spanTop.textContent = label;
+    spanTop.style.position = 'absolute';
+    spanTop.style.left = `${offset + (label - 1) * spacing * 2 - 6}px`;
+    topLabels.appendChild(spanTop);
 
-    // Left Labels
-    const leftSpan = document.createElement('span');
-    leftSpan.textContent = labelValue;
-    leftSpan.style.position = 'absolute';
-    leftSpan.style.top = `${offset + pos * spacing - 10}px`;
-    leftLabels.appendChild(leftSpan);
+    const spanLeft = document.createElement('span');
+    spanLeft.textContent = label;
+    spanLeft.style.position = 'absolute';
+    spanLeft.style.top = `${offset + (label - 1) * spacing * 2 - 6}px`;
+    leftLabels.appendChild(spanLeft);
   });
 }
+
 
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
