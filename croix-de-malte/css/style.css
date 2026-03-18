@@ -715,9 +715,9 @@ footer {
 #gameCanvas {
   width: 600px;
   height: 600px;
-  /*background: #fafafa;*/
+  background: #fafafa;
   display: block;
-  /*position: relative;*/
+  position: relative;
   z-index: 1;
 }
 
