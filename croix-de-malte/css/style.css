@@ -740,7 +740,7 @@ footer {
 #topLabels {
   position: absolute;
   top: -20px;
-  left: 30px;
+  left: 0;
   width: 660px;
   height: 20px;
   font-size: 12px;
@@ -753,7 +753,7 @@ footer {
 #leftLabels {
   position: absolute;
   left: -20px;
-  top: 30px;
+  top: 0;
   width: 20px;
   height: 660px;
   font-size: 12px;
