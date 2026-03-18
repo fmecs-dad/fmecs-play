@@ -739,30 +739,24 @@ footer {
 /* === LABELS === */
 #topLabels {
   position: absolute;
-  top: -20px;
+  top: 0;
   left: 30px;
-  width: 100%;
+  width: 600px;
+  height: 20px;
   display: flex;
-  justify-content: space-between;
-  padding: 0 30px;
-  box-sizing: border-box;
   font-size: 12px;
   color: #444;
   z-index: 10;
-  height: 30px;
 }
 
 #leftLabels {
   position: absolute;
-  left: -20px;
+  left: 0;
   top: 30px;
-  height: calc(100% - 30px);
   width: 30px;
+  height: 600px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 0;
-  box-sizing: border-box;
   font-size: 12px;
   color: #444;
   z-index: 10;
