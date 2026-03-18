@@ -739,7 +739,7 @@ footer {
 /* === LABELS === */
 #topLabels {
   position: absolute;
-  top: 0;
+  top: -20px;
   left: 30px;
   width: 100%;
   display: flex;
@@ -754,7 +754,7 @@ footer {
 
 #leftLabels {
   position: absolute;
-  left: 0;
+  left: -20px;
   top: 30px;
   height: calc(100% - 30px);
   width: 30px;
