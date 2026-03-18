@@ -665,28 +665,20 @@ footer {
 }
 
 /* === MAIN AREA === */
-
 #mainArea {
   display: flex;
   flex: 1;
   align-items: flex-start;
   overflow: hidden;
-}
-
-#mainArea {
   min-height: 0;
 }
 
 /* === BOARD === */
-
 #boardWrapper {
   padding-top: 20px;
   padding-left: clamp(10px, 4vw, 60px);
   flex: 1;
   overflow: visible;
-}
-
-#boardWrapper {
   min-height: 0;
 }
 
@@ -694,13 +686,16 @@ footer {
   border: 30px solid transparent;
   background-clip: padding-box;
   border-image: url("../images/plateau.jpg") 30 round;
-}
-
-
-#canvasContainer {
   position: relative;
   width: min(600px, 90vw);
   height: min(600px, 90vw);
+  margin: 0 auto;
+}
+
+#canvasContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: visible;
   z-index: 0;
 }
@@ -708,30 +703,22 @@ footer {
 #canvasContainer::before {
   content: "";
   position: absolute;
-
-  width: calc(min(600px, 90vw) + 20px);
-  height: calc(min(600px, 90vw) + 20px);
-
+  width: calc(100% + 20px);
+  height: calc(100% + 20px);
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-
-  background: radial-gradient(circle,
-    rgba(255,255,255,0.25) 40%,
-    rgba(0,0,0,0.25) 100%
-  );
-
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 40%, rgba(0, 0, 0, 0.25) 100%);
   pointer-events: none;
-
   z-index: -1;
 }
 
 #gameCanvas {
-  width: 100% !important;
-  height: 100% !important;
+  width: calc(100% - 60px) !important;
+  height: calc(100% - 60px) !important;
   background: #fafafa;
   display: block;
-
+  margin: 30px;
   position: relative;
   z-index: 1;
 }
@@ -746,28 +733,20 @@ footer {
 }
 
 #topLabels {
-  top: 0;
+  top: -20px;
   left: 30px;
   width: calc(100% - 60px);
-  height: 20px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0 10px;
-  box-sizing: border-box;
 }
 
 #leftLabels {
-  left: 0;
+  left: -20px;
   top: 30px;
-  width: 20px;
   height: calc(100% - 60px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  box-sizing: border-box;
 }
 
 #topLabels span, #leftLabels span {
