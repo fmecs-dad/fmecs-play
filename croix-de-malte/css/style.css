@@ -739,8 +739,8 @@ footer {
 /* === LABELS === */
 #topLabels {
   position: absolute;
-  top: 15px;
-  left: 0;
+  top: 0;
+  left: 30px;
   width: 660px;
   display: flex;
   justify-content: space-between;
