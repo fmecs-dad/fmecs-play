@@ -1723,21 +1723,19 @@ function updateLabels() {
 
   const canvasWidth = document.getElementById('gameCanvas').width;
   const canvasHeight = document.getElementById('gameCanvas').height;
-  const labelPositions = [1, 5, 10, 15, 20, 25, 30];
+  const gridSize = 30;
+  const spacing = canvasWidth / gridSize;
 
   topLabels.forEach((span, index) => {
-    const label = labelPositions[index];
-    const positionPercentage = (label - 1) / 29 * 100;
-    span.style.left = `calc(${positionPercentage}% + 30px)`;
+    const label = parseInt(span.textContent);
+    span.style.left = `${30 + (label - 1) * spacing * 2}px`;
   });
 
   leftLabels.forEach((span, index) => {
-    const label = labelPositions[index];
-    const positionPercentage = (label - 1) / 29 * 100;
-    span.style.top = `calc(${positionPercentage}% + 30px)`;
+    const label = parseInt(span.textContent);
+    span.style.top = `${30 + (label - 1) * spacing * 2}px`;
   });
 }
-
 
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
