@@ -680,31 +680,32 @@ footer {
   flex: 1;
   overflow: visible;
   min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .board-frame {
   border: 30px solid transparent;
   background-clip: padding-box;
   border-image: url("../images/plateau.jpg") 30 round;
+  width: 600px;
+  height: 600px;
   position: relative;
-  width: min(600px, 90vw);
-  height: min(600px, 90vw);
-  margin: 0 auto;
 }
 
 #canvasContainer {
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: 600px;
+  height: 600px;
   overflow: visible;
-  z-index: 0;
 }
 
 #canvasContainer::before {
   content: "";
   position: absolute;
-  width: calc(100% + 20px);
-  height: calc(100% + 20px);
+  width: 640px; /* 600px + 20px de chaque côté */
+  height: 640px; /* 600px + 20px de chaque côté */
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -714,11 +715,10 @@ footer {
 }
 
 #gameCanvas {
-  width: calc(100% - 60px) !important;
-  height: calc(100% - 60px) !important;
+  width: 600px !important;
+  height: 600px !important;
   background: #fafafa;
   display: block;
-  margin: 30px;
   position: relative;
   z-index: 1;
 }
@@ -727,7 +727,7 @@ footer {
 #topLabels, #leftLabels {
   position: absolute;
   pointer-events: none;
-  font-size: clamp(10px, 1.5vw, 12px);
+  font-size: 12px;
   color: #444;
   z-index: 10;
 }
@@ -735,7 +735,7 @@ footer {
 #topLabels {
   top: -20px;
   left: 30px;
-  width: calc(100% - 60px);
+  width: 540px; /* 600px - 60px (30px de chaque côté) */
   display: flex;
   justify-content: space-between;
 }
@@ -743,7 +743,7 @@ footer {
 #leftLabels {
   left: -20px;
   top: 30px;
-  height: calc(100% - 60px);
+  height: 540px; /* 600px - 60px (30px de chaque côté) */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
