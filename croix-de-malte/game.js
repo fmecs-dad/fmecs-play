@@ -1721,18 +1721,23 @@ function updateLabels() {
   const topLabels = document.querySelectorAll('#topLabels span');
   const leftLabels = document.querySelectorAll('#leftLabels span');
 
-  const labelPositions = [0, 4, 9, 14, 19, 24, 29]; // Positions pour les labels 1, 5, 10, 15, 20, 25, 30
+  const canvasWidth = document.getElementById('gameCanvas').width;
+  const canvasHeight = document.getElementById('gameCanvas').height;
+  const labelPositions = [1, 5, 10, 15, 20, 25, 30];
 
   topLabels.forEach((span, index) => {
-    const pos = labelPositions[index];
-    span.style.left = `${30 + pos * (600 / 29)}px`;
+    const label = labelPositions[index];
+    const positionPercentage = (label - 1) / 29 * 100;
+    span.style.left = `calc(${positionPercentage}% + 30px)`;
   });
 
   leftLabels.forEach((span, index) => {
-    const pos = labelPositions[index];
-    span.style.top = `${30 + pos * (600 / 29)}px`;
+    const label = labelPositions[index];
+    const positionPercentage = (label - 1) / 29 * 100;
+    span.style.top = `calc(${positionPercentage}% + 30px)`;
   });
 }
+
 
 // ===============================
 //   TROUVER LE POINT LE PLUS PROCHE
