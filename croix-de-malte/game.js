@@ -1675,6 +1675,7 @@ function resizeCanvas() {
   offset = spacing / 2;
 
   // Redessine tout après le redimensionnement
+  updateLabels();
   redrawEverything();
 }
 
@@ -1714,6 +1715,23 @@ function drawSegment(segmentPoints) {
   ctx.moveTo(offset + sx * spacing, offset + sy * spacing);
   ctx.lineTo(offset + ex * spacing, offset + ey * spacing);
   ctx.stroke();
+}
+
+function updateLabels() {
+  const topLabels = document.querySelectorAll('#topLabels span');
+  const leftLabels = document.querySelectorAll('#leftLabels span');
+
+  const labelPositions = [0, 4, 9, 14, 19, 24, 29]; // Positions pour les labels 1, 5, 10, 15, 20, 25, 30
+
+  topLabels.forEach((span, index) => {
+    const pos = labelPositions[index];
+    span.style.left = `${30 + pos * (600 / 29)}px`;
+  });
+
+  leftLabels.forEach((span, index) => {
+    const pos = labelPositions[index];
+    span.style.top = `${30 + pos * (600 / 29)}px`;
+  });
 }
 
 // ===============================
@@ -2762,6 +2780,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
         });
       }
+      resizeCanvas();
+      updateLabels();
     } else {
       console.error("Canvas non trouvé");
     }
