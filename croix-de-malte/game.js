@@ -2749,19 +2749,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // 5. Initialisation du canvas
-canvas = document.getElementById("gameCanvas");
-if (canvas) {
-  ctx = canvas.getContext("2d");
+    canvas = document.getElementById("gameCanvas");
+    if (canvas) {
+      ctx = canvas.getContext("2d");
 
-  // Calcul du canvas et de la grille
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
+      // Calcul du canvas et de la grille
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
 
-  resizeCanvas(); // Appel à resizeCanvas pour initialiser spacing et offset
-  updateLabels(); // Appel à updateLabels pour positionner les repères
-} else {
-  console.error("Canvas non trouvé");
-}
+      resizeCanvas(); // Appel à resizeCanvas pour initialiser spacing et offset
+      updateLabels(); // Appel à updateLabels pour positionner les repères
+    } else {
+      console.error("Canvas non trouvé");
+    }
 
   } catch (err) {
     console.error("Erreur DOMContentLoaded:", err);
@@ -3058,8 +3058,8 @@ if (burgerAuthBtn) {
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
  
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  //resizeCanvas();
+  //window.addEventListener('resize', resizeCanvas);
 
   document.getElementById("burgerReplayBtn").addEventListener("click", () => {
     if (typeof playClickSound === 'function') playClickSound();
