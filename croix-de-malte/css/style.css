@@ -741,9 +741,8 @@ footer {
   position: absolute;
   top: -20px;
   left: 30px;
-  width: 600px;
-  display: flex;
-  justify-content: space-between;
+  width: 660px;
+  height: 20px;
   font-size: 12px;
   color: #444;
   z-index: 10;
@@ -753,17 +752,16 @@ footer {
   position: absolute;
   left: -20px;
   top: 30px;
-  height: 600px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  width: 20px;
+  height: 660px;
   font-size: 12px;
   color: #444;
   z-index: 10;
 }
 
 #topLabels span, #leftLabels span {
-  position: relative;
+  position: absolute;
+  display: block;
 }
 
 /* === FLASH MESSAGES === */
