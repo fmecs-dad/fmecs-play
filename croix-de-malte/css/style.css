@@ -677,20 +677,20 @@ footer {
 
 /* === BOARD === */
 #boardWrapper {
-  flex: 1;
+  flex: none;
   padding-left: 20px;
   overflow: visible;
   min-height: 0;
+  width: 660px; /* Largeur fixe pour éviter l'extension sur toute la page */
 }
 
 .board-frame {
   border: 30px solid transparent;
   background-clip: padding-box;
   border-image: url("../images/plateau.jpg") 30 round;
-  width: 660px;
-  height: 660px;
+  width: 660px; /* 600px (grille) + 30px (bordure gauche) + 30px (bordure droite) */
+  height: 660px; /* 600px (grille) + 30px (bordure haut) + 30px (bordure bas) */
   position: relative;
-  margin: 0;
 }
 
 #canvasContainer {
@@ -717,7 +717,6 @@ footer {
   height: 600px;
   background: #fafafa;
   display: block;
-  margin: 30px;
   position: relative;
   z-index: 1;
 }
@@ -732,17 +731,17 @@ footer {
 }
 
 #topLabels {
-  top: 0;
-  left: 30px;
-  width: 600px;
+  top: 15px;
+  left: 0;
+  width: 660px;
   display: flex;
   justify-content: space-between;
-  padding: 0 10px;
+  padding: 0 30px;
   box-sizing: border-box;
 }
 
 #leftLabels {
-  left: 0;
+  left: 15px;
   top: 30px;
   height: 600px;
   display: flex;
