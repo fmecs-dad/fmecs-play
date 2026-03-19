@@ -1677,24 +1677,24 @@ function drawGrid() {
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
 
-  console.log("Dessin des lignes horizontales :");
+  //console.log("Dessin des lignes horizontales :");
   for (let y = 0; y < size; y++) {
     const yPos = offset + y * spacing;
     ctx.beginPath();
     ctx.moveTo(offset, yPos);
     ctx.lineTo(offset + (size - 1) * spacing, yPos);
     ctx.stroke();
-    console.log(`Ligne ${y + 1} à ${yPos}px`);
+    //console.log(`Ligne ${y + 1} à ${yPos}px`);
   }
 
-  console.log("Dessin des lignes verticales :");
+  //console.log("Dessin des lignes verticales :");
   for (let x = 0; x < size; x++) {
     const xPos = offset + x * spacing;
     ctx.beginPath();
     ctx.moveTo(xPos, offset);
     ctx.lineTo(xPos, offset + (size - 1) * spacing);
     ctx.stroke();
-    console.log(`Colonne ${x + 1} à ${xPos}px`);
+    //console.log(`Colonne ${x + 1} à ${xPos}px`);
   }
 }
 
@@ -1724,12 +1724,16 @@ function drawSegment(segmentPoints) {
 function getNearestPoint(mx, my) {
   const rect = canvas.getBoundingClientRect();
 
-  // Ajuste les coordonnées de la souris en tenant compte du style CSS et du ratio de pixels
+  // Ajustement des coordonnées de la souris
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
 
-  const adjustedMx = (mx - rect.left) * scaleX;
-  const adjustedMy = (my - rect.top) * scaleY;
+  // Calcul des coordonnées ajustées
+  const adjustedMx = (mx) * scaleX;
+  const adjustedMy = (my) * scaleY;
+
+  console.log(`Coordonnées ajustées : (${adjustedMx}, ${adjustedMy})`);
+  console.log(`Offset : ${offset}, Spacing : ${spacing}`);
 
   let best = null;
   let bestDist = Infinity;
@@ -1750,8 +1754,14 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  // Augmentez le seuil de détection pour faciliter les clics
-  if (bestDist <= spacing * 0.7) return best;
+  console.log(`Meilleur point trouvé : ${best ? JSON.stringify(best) : 'Aucun'}`);
+  console.log(`Meilleure distance : ${bestDist}`);
+  console.log(`Seuil de détection : ${spacing * 0.7}`);
+
+  // Augmenter le seuil de détection pour faciliter les clics
+  if (bestDist <= spacing * 0.7) {
+    return best;
+  }
 
   return null;
 }
