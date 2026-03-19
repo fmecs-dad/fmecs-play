@@ -2940,27 +2940,49 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   // ===============================
   
   canvas.addEventListener('click', (e) => {
-  if (gameOver) return;
-  if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
-  if (tutorialRunning) return;
-  if (paused && typeof resumeGame === 'function') resumeGame();
+  console.log("--- Début de la gestion du clic ---");
+
+  if (gameOver) {
+    console.log("Jeu terminé, clic ignoré.");
+    return;
+  }
+  if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') {
+    startTimer();
+  }
+  if (tutorialRunning) {
+    console.log("Tutoriel en cours, clic ignoré.");
+    return;
+  }
+  if (paused && typeof resumeGame === 'function') {
+    resumeGame();
+  }
 
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
 
+  console.log(`Coordonnées du clic : (${mx}, ${my})`);
+  console.log(`Taille du canvas : ${canvas.width}x${canvas.height}`);
+  console.log(`Taille affichée du canvas : ${rect.width}x${rect.height}`);
+
   const nearest = getNearestPoint(mx, my);
+  console.log(`Point le plus proche : ${nearest ? JSON.stringify(nearest) : 'Aucun'}`);
+
   if (!nearest) {
+    console.log("Aucun point trouvé à proximité, affichage du message 'Hors grille'.");
     if (typeof flash === 'function') flash("Hors grille", "error");
     if (typeof playErrorSound === 'function') playErrorSound();
     selectedStart = null;
     return;
   }
 
-  const result = getSegmentBetween(selectedStart, { x, y });
+  console.log(`Point sélectionné : (${nearest.x}, ${nearest.y})`);
+
+  const result = getSegmentBetween(selectedStart, nearest);
   selectedStart = null;
 
   if (result) {
+    console.log("Segment validé.");
     if (typeof playSuccessSound === 'function') playSuccessSound();
     validatedSegments.push(result);
     if (typeof drawSegment === 'function') drawSegment(result.points);
