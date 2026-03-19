@@ -50,7 +50,7 @@ body {
 }
 
 /* Médias Queries pour les petits écrans */
-@media (max-width: 768px), (max-height: 768px) {
+@media (max-width: 1366px), (max-height: 768px) {
   #canvasContainer {
     width: 95vmin;
     height: 95vmin;
