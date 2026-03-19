@@ -1677,33 +1677,24 @@ function drawGrid() {
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
 
-  // Dessin des lignes horizontales et verticales
-  for (let i = 0; i < size; i++) {
-    const pos = offset + i * spacing;
-
-    // Dessin des lignes horizontales
+  console.log("Dessin des lignes horizontales :");
+  for (let y = 0; y < size; y++) {
+    const yPos = offset + y * spacing;
     ctx.beginPath();
-    ctx.moveTo(offset, pos);
-    ctx.lineTo(offset + (size - 1) * spacing, pos);
+    ctx.moveTo(offset, yPos);
+    ctx.lineTo(offset + (size - 1) * spacing, yPos);
     ctx.stroke();
-
-    // Dessin des lignes verticales
-    ctx.beginPath();
-    ctx.moveTo(pos, offset);
-    ctx.lineTo(pos, offset + (size - 1) * spacing);
-    ctx.stroke();
+    console.log(`Ligne ${y + 1} à ${yPos}px`);
   }
 
-  // Dessin des points de la grille
-  ctx.fillStyle = "red";
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const px = offset + x * spacing;
-      const py = offset + y * spacing;
-      ctx.beginPath();
-      ctx.arc(px, py, 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
+  console.log("Dessin des lignes verticales :");
+  for (let x = 0; x < size; x++) {
+    const xPos = offset + x * spacing;
+    ctx.beginPath();
+    ctx.moveTo(xPos, offset);
+    ctx.lineTo(xPos, offset + (size - 1) * spacing);
+    ctx.stroke();
+    console.log(`Colonne ${x + 1} à ${xPos}px`);
   }
 }
 
