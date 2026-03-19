@@ -2952,20 +2952,10 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   canvas.addEventListener('click', (e) => {
   console.log("--- Début de la gestion du clic ---");
 
-  if (gameOver) {
-    console.log("Jeu terminé, clic ignoré.");
-    return;
-  }
-  if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') {
-    startTimer();
-  }
-  if (tutorialRunning) {
-    console.log("Tutoriel en cours, clic ignoré.");
-    return;
-  }
-  if (paused && typeof resumeGame === 'function') {
-    resumeGame();
-  }
+  if (gameOver) return;
+  if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
+  if (tutorialRunning) return;
+  if (paused && typeof resumeGame === 'function') resumeGame();
 
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
@@ -2987,12 +2977,16 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   }
 
   console.log(`Point sélectionné : (${nearest.x}, ${nearest.y})`);
+  console.log(`selectedStart avant traitement : ${selectedStart ? JSON.stringify(selectedStart) : 'null'}`);
+
+  if (!selectedStart) {
+    selectedStart = nearest;
+    console.log(`Premier point sélectionné : (${selectedStart.x}, ${selectedStart.y})`);
+    return;
+  }
 
   const result = getSegmentBetween(selectedStart, nearest);
-  selectedStart = null;
-
   if (result) {
-    console.log("Segment validé.");
     if (typeof playSuccessSound === 'function') playSuccessSound();
     validatedSegments.push(result);
     if (typeof drawSegment === 'function') drawSegment(result.points);
@@ -3008,7 +3002,10 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
     if (typeof appendHistoryEntry === 'function') appendHistoryEntry(result.points, result.activeCount);
     if (typeof checkGameOver === 'function') checkGameOver();
   }
+
+  selectedStart = null;
 });
+
 
   // ===============================
   //   BOUTONS TOP BAR
