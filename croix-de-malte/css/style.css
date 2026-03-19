@@ -736,43 +736,6 @@ footer {
   z-index: 1;
 }
 
-/* === LABELS === */
-#topLabels {
-  position: absolute;
-  top: -20px;
-  left: 0;
-  width: 660px;
-  height: 20px;
-  font-size: 12px;
-  color: #444;
-  z-index: 10;
-  margin: 0;
-  padding: 0;
-}
-
-#leftLabels {
-  position: absolute;
-  left: -20px;
-  top: 0;
-  width: 20px;
-  height: 660px;
-  font-size: 12px;
-  color: #444;
-  z-index: 10;
-  margin: 0;
-  padding: 0;
-}
-
-#topLabels span, #leftLabels span {
-  position: absolute;
-  display: inline-block;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-  width: 20px;
-  transform: translateX(-50%);
-}
-
 /* === FLASH MESSAGES === */
 
 #flashContainer {
