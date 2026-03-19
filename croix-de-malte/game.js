@@ -1722,10 +1722,11 @@ function drawSegment(segmentPoints) {
 
 function getNearestPoint(mx, my) {
   const rect = canvas.getBoundingClientRect();
+
+  // Ajuste les coordonnées de la souris en tenant compte du style CSS et du ratio de pixels
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
 
-  // Ajuste les coordonnées de la souris en tenant compte du zoom et de la position du canvas
   const adjustedMx = (mx - rect.left) * scaleX;
   const adjustedMy = (my - rect.top) * scaleY;
 
@@ -1748,7 +1749,8 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  if (bestDist <= spacing * 0.5) return best;
+  // Augmentez le seuil de détection pour faciliter les clics
+  if (bestDist <= spacing * 0.7) return best;
 
   return null;
 }
