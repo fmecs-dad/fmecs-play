@@ -1015,6 +1015,7 @@ const size = 30;
 let offset;
 let spacing;
 let canvas, ctx;
+let resizeTimeout;
  
 let selectedStart = null;
 let score = 0;
@@ -2750,29 +2751,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       canvas.height = canvas.clientHeight;
       spacing = canvas.width / (size + 1);
       offset = spacing;
-
-      // Positionnement des repères
-      const topLabels = document.querySelectorAll('#topLabels span');
-      const leftLabels = document.querySelectorAll('#leftLabels span');
-
-      if (topLabels.length && leftLabels.length) {
-        topLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-
-        leftLabels.forEach(span => {
-          const pos = Number(span.textContent);
-          if (!Number.isFinite(pos)) return;
-          span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-        });
-      }
     } else {
       console.error("Canvas non trouvé");
     }
 
-    // Ajoutez ces lignes ici, à la fin du bloc try
     window.addEventListener('load', resizeCanvas);
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimeout);
