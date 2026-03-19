@@ -1014,7 +1014,6 @@ let audioUnlocked = false;
 const size = 30;
 let offset;
 let spacing;
-//let resizeTimeout;
 let canvas, ctx;
  
 let selectedStart = null;
@@ -1671,26 +1670,8 @@ function resizeCanvas() {
   offset = spacing;
 
   redrawEverything();
-  updateLabels();
 }
   
-function updateLabels() {
-  const topLabels = document.querySelectorAll('#topLabels span');
-  const leftLabels = document.querySelectorAll('#leftLabels span');
-
-  topLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.left = `${offset + (pos - 1) * spacing - 6}px`;
-  });
-
-  leftLabels.forEach(span => {
-    const pos = Number(span.textContent);
-    if (!Number.isFinite(pos)) return;
-    span.style.top = `${offset + (pos - 1) * spacing - 6}px`;
-  });
-}
-
 function drawGrid() {
   ctx.strokeStyle = "#ddd";
   ctx.lineWidth = 1;
