@@ -656,7 +656,7 @@ footer {
 
 #helpContent {
   background: #fff;
-  width: min(800px, 90vw);
+  width: min(700px, 90vw);
   max-height: 80vh; 
   padding: 30px;
   border-radius: 12px;
@@ -1117,7 +1117,7 @@ footer {
   flex-direction: column;
   gap: 6px;
   top: 116px; /* 110px de topBar + marge */
-  left: 10px;
+  left: 20px;
 }
 
 #burgerAuthBtn {
