@@ -830,7 +830,8 @@ footer {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
-  display: flex;
+  /*display: flex;*/
+  height: 300px;
   align-items: flex-start; 
   justify-content: center;
   padding-top: 100px; 
