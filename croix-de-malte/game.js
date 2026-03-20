@@ -137,7 +137,7 @@ async function getSession() {
   }
 }
 
-// Fonction pour récupérer le pseudo (version corrigée)
+// Fonction pour récupérer le pseudo
 async function fetchPlayerPseudo(userId) {
   try {
     const token = localStorage.getItem('supabase.access.token');
@@ -169,7 +169,7 @@ async function fetchPlayerPseudo(userId) {
 
 // Fonction pour mettre à jour l'UI
 async function updateAuthUI(user = null) {
-  console.log("Updating UI with user:", user);
+  //console.log("Updating UI with user:", user);
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
   const burgerPseudo = document.getElementById("burgerPseudo");
   const profileBtn = document.getElementById("profileBtn");
@@ -249,11 +249,11 @@ async function initialiserProfilEtLancerJeu(session) {
     }
 
     if (!player) {
-      console.log("Nouveau joueur détecté, affichage de l'aide...");
+      //console.log("Nouveau joueur détecté, affichage de l'aide...");
       openHelpOverlay(true);
     } else {
       localStorage.setItem("playerPseudo", player.pseudo);
-      console.log("Profil initialisé avec succès pour :", player.pseudo);
+      //console.log("Profil initialisé avec succès pour :", player.pseudo);
 
       // Affichage de la modale readyModal pour les utilisateurs existants
       const readyModal = document.getElementById("readyModal");
@@ -270,7 +270,7 @@ async function initialiserProfilEtLancerJeu(session) {
 //   FONCTIONS DE PROFIL
 // ===============================
 async function ouvrirProfil() {
-  console.log("Ouverture de la modale de profil");
+  //console.log("Ouverture de la modale de profil");
 
   try {
     // 1. Récupération des données
@@ -309,7 +309,7 @@ async function ouvrirProfil() {
           const testImg = new Image();
           testImg.onload = () => {
             avatarPreview.src = signedData.signedUrl;
-            console.log("Avatar chargé avec succès");
+            //console.log("Avatar chargé avec succès");
           };
           testImg.onerror = () => {
             console.error("Impossible de charger l'avatar, utilisation de l'avatar par défaut");
@@ -321,7 +321,7 @@ async function ouvrirProfil() {
       } else {
         // Pas d'avatar personnalisé
         avatarPreview.src = "images/avatarDefault.png";
-        console.log("Utilisation de l'avatar par défaut (aucun avatar personnalisé)");
+        //console.log("Utilisation de l'avatar par défaut (aucun avatar personnalisé)");
       }
     } else {
       console.error("Élément profileAvatarPreview introuvable !");
@@ -348,7 +348,7 @@ async function ouvrirProfil() {
 }
 
 async function updateProfileInfo(force = false) {
-  console.log("[updateProfileInfo] Début de la mise à jour du profil");
+  //console.log("[updateProfileInfo] Début de la mise à jour du profil");
 
   // 1. Récupération des éléments DOM
   const profileBtn = document.getElementById("profileBtn");
@@ -361,7 +361,7 @@ async function updateProfileInfo(force = false) {
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
-        console.log("[updateProfileInfo] Pas de token - utilisateur déconnecté");
+        //console.log("[updateProfileInfo] Pas de token - utilisateur déconnecté");
         return; // On quitte la fonction (bouton reste désactivé)
       }
     }
@@ -376,7 +376,7 @@ async function updateProfileInfo(force = false) {
     }
 
     if (!user) {
-      console.log("[updateProfileInfo] Aucun utilisateur trouvé");
+      //console.log("[updateProfileInfo] Aucun utilisateur trouvé");
       return; // On quitte la fonction (bouton reste désactivé)
     }
 
@@ -422,7 +422,7 @@ async function updateProfileInfo(force = false) {
           };
 
           const testImg = new Image();
-          testImg.onload = () => console.log("[updateProfileInfo] Avatar chargé avec succès");
+          testImg.onload = ();// => console.log("[updateProfileInfo] Avatar chargé avec succès");
           testImg.onerror = () => {
             console.error("[updateProfileInfo] Vérification échouée");
             profileAvatar.src = "images/avatarDefault.png";
@@ -455,7 +455,7 @@ async function updateProfileInfo(force = false) {
       profileCreationDate.textContent = new Date(player.created_at).toLocaleDateString('fr-FR');
     }
 
-    console.log("[updateProfileInfo] Mise à jour terminée avec succès");
+    //console.log("[updateProfileInfo] Mise à jour terminée avec succès");
 
   } catch (err) {
     console.error("[updateProfileInfo] Erreur inattendue:", err);
@@ -468,7 +468,7 @@ async function getSession() {
   try {
     const token = localStorage.getItem('supabase.access.token');
     if (!token) {
-      console.log("[getSession] Aucun token trouvé");
+      //console.log("[getSession] Aucun token trouvé");
       return null;
     }
 
@@ -501,27 +501,27 @@ function setupProfileMenu() {
     if (typeof playClickSound === 'function') playClickSound();
     e.stopPropagation();
     if (profileBtn.disabled) {
-      console.log("Bouton désactivé - clic ignoré");
+      //console.log("Bouton désactivé - clic ignoré");
       return;
     }
 
     const isShowing = profileDropdown.classList.toggle("show");
 
     // Logs de débogage avancés
-    console.log("Dropdown togglé. Visible ?", isShowing);
-    console.log("Styles après toggle:", {
-      display: window.getComputedStyle(profileDropdown).display,
-      visibility: window.getComputedStyle(profileDropdown).visibility,
-      opacity: window.getComputedStyle(profileDropdown).opacity,
-      transform: window.getComputedStyle(profileDropdown).transform
-    });
+    //console.log("Dropdown togglé. Visible ?", isShowing);
+    //console.log("Styles après toggle:", {
+    //  display: window.getComputedStyle(profileDropdown).display,
+    //  visibility: window.getComputedStyle(profileDropdown).visibility,
+    //  opacity: window.getComputedStyle(profileDropdown).opacity,
+    //  transform: window.getComputedStyle(profileDropdown).transform
+    //});
   });
 
   // Écouteur de fermeture externe
   document.addEventListener("click", (e) => {
     if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
       profileDropdown.classList.remove("show");
-      console.log("Dropdown fermé (clic externe)");
+      //console.log("Dropdown fermé (clic externe)");
     }
   });
 }
@@ -600,20 +600,20 @@ async function uploadAvatar(file) {
 /*** Initialise tous les écouteurs pour la modale de profil et le menu dropdown ***/
 
 function initProfileModalListeners() {
-  console.log("Initialisation des écouteurs de la modale de profil");
+  //console.log("Initialisation des écouteurs de la modale de profil");
 
   // 1. Écouteur pour le bouton "Modifier le profil"
   const editProfileBtn = document.getElementById("editProfileBtn");
   if (editProfileBtn) {
     editProfileBtn.addEventListener("click", async () => {
       if (typeof playClickSound === 'function') playClickSound();
-      console.log("Bouton 'Modifier le profil' cliqué");
+      //console.log("Bouton 'Modifier le profil' cliqué");
 
       // Ouverture de la modale
       const modal = document.getElementById("profileModal");
       if (modal) {
         modal.classList.remove("hidden");
-        console.log("Modale de profil ouverte");
+        //console.log("Modale de profil ouverte");
 
         // Pré-remplissage des champs
         await ouvrirProfil();
@@ -641,12 +641,12 @@ function initProfileModalListeners() {
   if (cancelProfileBtn) {
     cancelProfileBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      console.log("Bouton 'Annuler' cliqué");
+      //console.log("Bouton 'Annuler' cliqué");
 
       const modal = document.getElementById("profileModal");
       if (modal) {
         modal.classList.add("hidden");
-        console.log("Modale de profil fermée");
+        //console.log("Modale de profil fermée");
 
         // Réinitialisation de l'aperçu de l'avatar
         const avatarPreview = document.getElementById("profileAvatarPreview");
@@ -667,7 +667,7 @@ function initProfileModalListeners() {
   if (changeAvatarBtn) {
     changeAvatarBtn.addEventListener("click", () => {
       if (typeof playClickSound === 'function') playClickSound();
-      console.log("Bouton 'Changer l'avatar' cliqué");
+      //console.log("Bouton 'Changer l'avatar' cliqué");
 
       const avatarUpload = document.getElementById("avatarUpload");
       if (avatarUpload) {
@@ -680,7 +680,7 @@ function initProfileModalListeners() {
     console.error("Bouton changeAvatarBtn introuvable !");
   }
 
-  // 5. Gestion du téléchargement d'avatar (CORRIGÉ)
+  // 5. Gestion du téléchargement d'avatar
   const avatarUpload = document.getElementById("avatarUpload");
   if (avatarUpload) {
     avatarUpload.addEventListener("change", (e) => {
@@ -701,7 +701,7 @@ function initProfileModalListeners() {
       if (preview) {
         preview.src = URL.createObjectURL(file);
         window.tempAvatarFile = file; // Stocke le fichier pour l'enregistrement
-        console.log("Avatar temporaire stocké pour enregistrement");
+        //console.log("Avatar temporaire stocké pour enregistrement");
       }
     });
   }
@@ -712,7 +712,7 @@ function initProfileModalListeners() {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
         modal.classList.add("hidden");
-        console.log("Modale fermée en cliquant en dehors");
+        //console.log("Modale fermée en cliquant en dehors");
         window.tempAvatarFile = null;
       }
     });
@@ -720,13 +720,12 @@ function initProfileModalListeners() {
     console.error("Modale profileModal introuvable !");
   }
 
-  console.log("Initialisation des écouteurs terminée avec succès");
+  //console.log("Initialisation des écouteurs terminée avec succès");
 }
 
 /*** Change le mot de passe de l'utilisateur ***/
 async function changePassword() {
-  console.log("Entrée dans la fonction");
-  // const currentPassword = document.getElementById("currentPassword").value.trim(); // Champ masqué, pas besoin de le vérifier
+
   const newPassword = document.getElementById("newPassword").value.trim();
   const confirmNewPassword = document.getElementById("confirmNewPassword").value.trim();
 
@@ -745,7 +744,6 @@ async function changePassword() {
     }
   }
 
-  // if (!currentPassword || !newPassword || !confirmNewPassword) { // Champ masqué, vérification désactivée
   if (!newPassword || !confirmNewPassword) {
     errorMessage.textContent = "Les champs 'Nouveau mot de passe' et 'Confirmer le mot de passe' sont obligatoires.";
     errorMessage.classList.remove("hidden");
@@ -776,7 +774,6 @@ async function changePassword() {
     errorMessage.classList.remove("hidden");
 
     setTimeout(() => {
-      // document.getElementById("currentPassword").value = ""; // Champ masqué, pas besoin de le réinitialiser
       document.getElementById("newPassword").value = "";
       document.getElementById("confirmNewPassword").value = "";
       errorMessage.classList.add("hidden");
@@ -820,7 +817,7 @@ async function resetPassword(authEmailInputId, errorMessageId) {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  console.log("Enregistrement des modifications du profil");
+  //console.log("Enregistrement des modifications du profil");
 
   // 1. Récupération des éléments et validation
   const pseudoInput = document.getElementById("profilePseudoInput");
@@ -857,7 +854,7 @@ async function saveProfileChanges() {
       await supa.auth.updateUser({ email: newEmail, emailRedirectTo: window.location.origin });
     }
 
-    // 5. Gestion de l'avatar (CORRIGÉ)
+    // 5. Gestion de l'avatar
     const avatarUpload = document.getElementById("avatarUpload");
     if (avatarUpload && avatarUpload.files[0]) {
       const file = avatarUpload.files[0];
@@ -873,7 +870,7 @@ async function saveProfileChanges() {
         // Mise à jour de l'URL dans la base de données
         await supa.from("players").update({ avatar_url: filePath }).eq("id", session.user.id);
 
-        console.log("Avatar mis à jour avec succès:", filePath);
+        //console.log("Avatar mis à jour avec succès:", filePath);
       } catch (err) {
         console.error("Erreur mise à jour avatar:", err);
         errorMessage.textContent = "Erreur lors de la mise à jour de l'avatar.";
@@ -883,8 +880,8 @@ async function saveProfileChanges() {
 
     // 6. Fermeture et rafraîchissement
     document.getElementById("profileModal").classList.add("hidden");
-    await updateProfileInfo(true); // Rafraîchit tout, y compris l'avatar de la topbar
-    console.log("Profil mis à jour avec succès");
+    await updateProfileInfo(true); 
+    //console.log("Profil mis à jour avec succès");
 
   } catch (err) {
     console.error("Erreur enregistrement:", err);
@@ -1115,7 +1112,7 @@ async function sendScoreToSupabase(userId, score, durationMs, undoCount, jokersU
     if (insertError) {
       console.error("Erreur lors de l'insertion du score :", insertError);
     } else {
-      console.log("Score enregistré avec succès !");
+      //console.log("Score enregistré avec succès !");
     }
   } catch (err) {
     console.error("Erreur inattendue lors de l'enregistrement du score :", err);
@@ -1142,7 +1139,7 @@ async function loadMoreScores() {
   const isLoggedIn = !!user;
 
   const list = await fetchLeaderboard(currentPage, limit);
-  console.log("Liste des scores récupérés :", list); // Log pour vérifier les scores récupérés
+  //console.log("Liste des scores récupérés :", list);
 
   if (list.length === 0) {
     allScoresLoaded = true;
@@ -1180,7 +1177,7 @@ async function fetchLeaderboard(page = 1, limit = 20) {
     }
   );
   const data = await response.json();
-  console.log("Scores récupérés depuis Supabase :", data); // Log pour vérifier les données retournées
+  //console.log("Scores récupérés depuis Supabase :", data);
   return data;
 }
 
@@ -1196,7 +1193,7 @@ async function fetchPlayerScores(userId) {
   );
 
   const data = await response.json();
-  console.log("Scores de l'utilisateur connecté :", data); // Log pour vérifier les scores de l'utilisateur
+  //console.log("Scores de l'utilisateur connecté :", data); 
   return data;
 }
 
@@ -1261,8 +1258,6 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
   const container = document.getElementById("leaderboardContainer");
   if (!container) return;
 
-  console.log("Liste des scores à afficher :", list); // Log pour vérifier les scores à afficher
-
   if (!append) {
     container.innerHTML = "";
   }
@@ -1313,7 +1308,7 @@ function renderLeaderboard(list, isLoggedIn, userId = null, append = false) {
 
     if (userId && entry.players?.id === userId && entry.score === bestScore) {
       row.classList.add("my-best-score");
-      console.log("Meilleur score de l'utilisateur mis en évidence :", entry.score);
+      //console.log("Meilleur score de l'utilisateur mis en évidence :", entry.score);
     }
 
     container.appendChild(row);
@@ -1360,7 +1355,7 @@ document.getElementById("leaderboardContainer").addEventListener("scroll", async
   }
 });
 
-// --- FERMETURE LEADERBOARD (fonction centralisée) ---
+// --- FERMETURE LEADERBOARD ---
 function closeLeaderboard() {
   const overlay = document.getElementById("leaderboardOverlay");
   overlay.classList.add("hidden");
@@ -1468,7 +1463,6 @@ function showBestScorePanel() {
 
   document.getElementById("bestScoreOverlay").classList.remove("hidden");
 }
-
 
 document.getElementById("closeBestScore").addEventListener("click", () => {
   if (typeof playClickSound === 'function') playClickSound();
@@ -1625,7 +1619,7 @@ function pauseGame() {
 }
 
 function resumeGame() {
-  startGameTimer(); // ta fonction existante
+  startGameTimer();
 }
 
 function enableModalBehavior(overlayId, panelSelector, closeFn) {
@@ -1732,8 +1726,8 @@ function getNearestPoint(mx, my) {
   const adjustedMx = (mx) * scaleX;
   const adjustedMy = (my) * scaleY;
 
-  console.log(`Coordonnées ajustées : (${adjustedMx}, ${adjustedMy})`);
-  console.log(`Offset : ${offset}, Spacing : ${spacing}`);
+  //console.log(`Coordonnées ajustées : (${adjustedMx}, ${adjustedMy})`);
+  //console.log(`Offset : ${offset}, Spacing : ${spacing}`);
 
   let best = null;
   let bestDist = Infinity;
@@ -1754,9 +1748,9 @@ function getNearestPoint(mx, my) {
     }
   }
 
-  console.log(`Meilleur point trouvé : ${best ? JSON.stringify(best) : 'Aucun'}`);
-  console.log(`Meilleure distance : ${bestDist}`);
-  console.log(`Seuil de détection : ${spacing * 0.7}`);
+  //console.log(`Meilleur point trouvé : ${best ? JSON.stringify(best) : 'Aucun'}`);
+  //console.log(`Meilleure distance : ${bestDist}`);
+  //console.log(`Seuil de détection : ${spacing * 0.7}`);
 
   // Augmenter le seuil de détection pour faciliter les clics
   if (bestDist <= spacing * 0.7) {
@@ -1869,10 +1863,10 @@ function initMaltaCross() {
     permanentPoints.add(key);
     activePoints.add(key);
   });
-  console.log("Spacing:", spacing);
-  console.log("Offset:", offsetX);
-  console.log("Target Left X:", targetLeftX);
-  console.log("Target Left Y:", targetLeftY);
+  //console.log("Spacing:", spacing);
+  //console.log("Offset:", offsetX);
+  //console.log("Target Left X:", targetLeftX);
+  //console.log("Target Left Y:", targetLeftY);
 }
 
 // Fonction pour redessiner tout le contenu
@@ -2212,7 +2206,7 @@ async function checkGameOver() {
     const user = session?.user;
 
     if (user) {
-      console.log("User ID:", user.id); // Vérifie que l'ID est correct
+      //console.log("User ID:", user.id); // Vérifie que l'ID est correct
       await sendScoreToSupabase(
         user.id,
         current.score,
@@ -2552,13 +2546,13 @@ function handleFirstLaunchFlow(userFromEvent) {
 }
 
 // ===============================
-//   INITIAL FLOW (VERSION FINALE)
+//   INITIAL FLOW 
 // ===============================
 
 //let gameStarted = false; // global
 
 function initialFlow(user) {
-  console.log("initialFlow appelé avec user :", user);
+  //console.log("initialFlow appelé avec user :", user);
 
   let lastEmail;
   let skip;
@@ -2572,50 +2566,50 @@ function initialFlow(user) {
     skip = false;
   }
 
-  console.log("lastEmail :", lastEmail);
-  console.log("skip :", skip);
+  //console.log("lastEmail :", lastEmail);
+  //console.log("skip :", skip);
 
   // 1. Utilisateur connecté → readyModal
   if (user) {
-    console.log("Utilisateur connecté, affichage de readyModal...");
+    //console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
     return;
   }
 
   // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
   if (skip) {
-    console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
+    //console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
     showReadyModal("skipWhySignup");
     return;
   }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
-    console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
+    //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
   if (!lastEmail) {
-    console.log("Nouveau joueur, affichage de whySignupModal...");
+    //console.log("Nouveau joueur, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 5. Fallback (ne devrait jamais arriver)
-  console.log("Fallback, affichage de authOverlay...");
+  //console.log("Fallback, affichage de authOverlay...");
   const auth = document.getElementById("authOverlay");
   auth.classList.remove("hidden");
 }
 
 function showReadyModal(reason) {
-  console.log(`Affichage de readyModal pour la raison : ${reason}`);
+  //console.log(`Affichage de readyModal pour la raison : ${reason}`);
   const modal = document.getElementById("readyModal");
   if (modal) {
-    console.log("[showReadyModal] Modale trouvée. Classes avant:");
+    //console.log("[showReadyModal] Modale trouvée. Classes avant:");
     modal.classList.remove("hidden");
-    console.log("[showReadyModal] Classes après:", modal.className);
+    //console.log("[showReadyModal] Classes après:", modal.className);
   } else {
     console.error("Élément readyModal non trouvé dans le DOM.");
   }
@@ -2666,14 +2660,12 @@ function closeWhySignup() {
 //   DOMContentLoaded 
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("=== Initialisation DOM ===");
-  console.log("=== Vérification éléments profil ===");
-  console.log({
-    profileBtn: !!document.getElementById("profileBtn"),
-    profileDropdown: !!document.getElementById("profileDropdown"),
-    profileAvatar: !!document.getElementById("profileAvatar"),
-    profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
-  });
+  //console.log({
+  //  profileBtn: !!document.getElementById("profileBtn"),
+  //  profileDropdown: !!document.getElementById("profileDropdown"),
+  //  profileAvatar: !!document.getElementById("profileAvatar"),
+  //  profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
+  //});
 
   // Activation du bouton "S'inscrire" quand la case est cochée
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
@@ -2681,21 +2673,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
  	
   try {
-    // 1. Initialisation de base (votre code existant)
+    // 1. Initialisation de base
     const { data: { session }, error } = await supa.auth.getSession();
 
     if (session) {
-      console.log("Utilisateur connecté détecté au démarrage");
+      //console.log("Utilisateur connecté détecté au démarrage");
       localStorage.setItem('supabase.access.token', session.access_token);
       localStorage.setItem('supabase.refresh.token', session.refresh_token);
       await initialiserProfilEtLancerJeu(session);
       updateAuthUI(session.user);
     } else {
-      console.log("Aucun utilisateur connecté au démarrage");
+      //console.log("Aucun utilisateur connecté au démarrage");
       updateAuthUI(null);
     }
 
-    // 2. Initialisation du menu profil (version corrigée)
+    // 2. Initialisation du menu profil
     const setupProfileMenu = () => {
       const profileBtn = document.getElementById("profileBtn");
       const profileDropdown = document.getElementById("profileDropdown");
@@ -2710,10 +2702,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (typeof playClickSound === 'function') playClickSound();
         e.stopPropagation();
         if (profileBtn.disabled) {
-          console.log("Bouton profil désactivé - clic ignoré");
+          //console.log("Bouton profil désactivé - clic ignoré");
           return;
         }
-        console.log("Toggle menu profil");
+        //console.log("Toggle menu profil");
         profileDropdown.classList.toggle("show");
       });
 
@@ -2727,8 +2719,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Appel de l'initialisation du menu profil
     setupProfileMenu();
-    initProfileModalListeners(); // Écouteurs de la modale (inclut maintenant l'avatar)
-    console.log("Écouteurs de la modale de profil initialisés");
+    initProfileModalListeners(); // Écouteurs de la modale (inclut l'avatar)
+    //console.log("Écouteurs de la modale de profil initialisés");
 
     // 3. Appel à initialFlow (votre code existant)
     const user = session ? session.user : null;
@@ -2789,10 +2781,10 @@ const initProfileMenu = () => {
     if (typeof playClickSound === 'function') playClickSound();
     e.stopPropagation();
     if (profileBtn.disabled) {
-      console.log("Bouton désactivé - clic ignoré");
+      //console.log("Bouton désactivé - clic ignoré");
       return;
     }
-    console.log("Toggle menu profil");
+    //console.log("Toggle menu profil");
     profileDropdown.classList.toggle("show");
   });
 
@@ -2800,7 +2792,7 @@ const initProfileMenu = () => {
   document.addEventListener("click", (e) => {
     if (!profileDropdown.contains(e.target) && !profileBtn.contains(e.target)) {
       profileDropdown.classList.remove("show");
-      console.log("Menu profil fermé (clic externe)");
+      //console.log("Menu profil fermé (clic externe)");
     }
   });
 };
@@ -2950,7 +2942,7 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   // ===============================
   
   canvas.addEventListener('click', (e) => {
-  console.log("--- Début de la gestion du clic ---");
+  //console.log("--- Début de la gestion du clic ---");
 
   if (gameOver) return;
   if (!tutorialRunning && !timerRunning && typeof startTimer === 'function') startTimer();
@@ -2961,27 +2953,27 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
 
-  console.log(`Coordonnées du clic : (${mx}, ${my})`);
-  console.log(`Taille du canvas : ${canvas.width}x${canvas.height}`);
-  console.log(`Taille affichée du canvas : ${rect.width}x${rect.height}`);
+  //console.log(`Coordonnées du clic : (${mx}, ${my})`);
+  //console.log(`Taille du canvas : ${canvas.width}x${canvas.height}`);
+  //console.log(`Taille affichée du canvas : ${rect.width}x${rect.height}`);
 
   const nearest = getNearestPoint(mx, my);
-  console.log(`Point le plus proche : ${nearest ? JSON.stringify(nearest) : 'Aucun'}`);
+  //console.log(`Point le plus proche : ${nearest ? JSON.stringify(nearest) : 'Aucun'}`);
 
   if (!nearest) {
-    console.log("Aucun point trouvé à proximité, affichage du message 'Hors grille'.");
+    //console.log("Aucun point trouvé à proximité, affichage du message 'Hors grille'.");
     if (typeof flash === 'function') flash("Hors grille", "error");
     if (typeof playErrorSound === 'function') playErrorSound();
     selectedStart = null;
     return;
   }
 
-  console.log(`Point sélectionné : (${nearest.x}, ${nearest.y})`);
-  console.log(`selectedStart avant traitement : ${selectedStart ? JSON.stringify(selectedStart) : 'null'}`);
+  //console.log(`Point sélectionné : (${nearest.x}, ${nearest.y})`);
+  //console.log(`selectedStart avant traitement : ${selectedStart ? JSON.stringify(selectedStart) : 'null'}`);
 
   if (!selectedStart) {
     selectedStart = nearest;
-    console.log(`Premier point sélectionné : (${selectedStart.x}, ${selectedStart.y})`);
+    //console.log(`Premier point sélectionné : (${selectedStart.x}, ${selectedStart.y})`);
     return;
   }
 
@@ -3052,7 +3044,7 @@ document.getElementById('cancelPasswordBtn').addEventListener('click', function(
   });
 
   // ===============================
-  //   AUTH BURGER (v1)
+  //   AUTH BURGER
   // ===============================
 
   const burgerAuthBtn = document.getElementById("burgerAuthBtn");
@@ -3273,7 +3265,7 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
 
     // Insertion ou mise à jour dans players
     if (existingPlayer) {
-      console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
+      //console.log("Le joueur existe déjà dans la table players, mise à jour du pseudo...");
 
       const { error: updateError } = await supa
         .from("players")
@@ -3287,9 +3279,9 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
         alert("Erreur lors de la mise à jour du joueur : " + updateError.message);
         return;
       }
-      console.log("Pseudo mis à jour avec succès dans la table players.");
+      //console.log("Pseudo mis à jour avec succès dans la table players.");
     } else {
-      console.log("Insertion d'un nouveau joueur dans la table players...");
+      //console.log("Insertion d'un nouveau joueur dans la table players...");
 
       const { error: insertError } = await supa
         .from("players")
@@ -3305,7 +3297,7 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
         alert("Erreur lors de l'enregistrement du joueur : " + insertError.message);
         return;
       }
-      console.log("Joueur inséré avec succès dans la table players.");
+      //console.log("Joueur inséré avec succès dans la table players.");
     }
 
     // Mise à jour UI
@@ -3368,6 +3360,7 @@ async function fetchBestScore(userId) {
 }
 
 // --- LOGIN ---
+
 document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
   if (typeof playClickSound === 'function') playClickSound();
   e.preventDefault();
@@ -3423,7 +3416,7 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
         if (typeof saveBestScore === 'function') {
           saveBestScore(bestScoreData);
         }
-        console.log("Meilleur score récupéré et sauvegardé :", bestScoreData);
+        //console.log("Meilleur score récupéré et sauvegardé :", bestScoreData);
       }
     }
 
@@ -3453,7 +3446,7 @@ document.getElementById("loginBtn")?.addEventListener("click", async (e) => {
     const profileBtn = document.getElementById("profileBtn");
     if (profileBtn) {
       profileBtn.disabled = false;
-      console.log("Bouton profil activé après connexion");
+      //console.log("Bouton profil activé après connexion");
     }
 
     // 10. Affichage message de succès
@@ -3490,5 +3483,5 @@ function closeWhySignup() {
 }
 
 
-console.log("[DOMContentLoaded] Fin de l'initialisation");
+//console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
