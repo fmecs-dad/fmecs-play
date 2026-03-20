@@ -831,6 +831,7 @@ footer {
   inset: 0;
   background: rgba(0,0,0,0.45);
   display: flex;
+  margin-bottom: 200px;
   align-items: flex-start; 
   justify-content: center;
   padding-top: 100px; 
