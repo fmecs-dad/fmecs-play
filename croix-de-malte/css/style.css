@@ -830,8 +830,7 @@ footer {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
-  /*display: flex;*/
-  margin-bottom: 200px;
+  display: flex;
   align-items: flex-start; 
   justify-content: center;
   padding-top: 100px; 
@@ -841,6 +840,18 @@ footer {
 #helpOverlay.hidden {
   display: none !important;
 }
+
+.panelHelp {
+  background: #fff;
+  padding: 24px 30px;
+  border-radius: 12px;
+  max-width: 90vw;
+  max-height: 400px;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
 
 /* === GENERIC OVERLAY === */
 
