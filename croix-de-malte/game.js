@@ -422,7 +422,7 @@ async function updateProfileInfo(force = false) {
           };
 
           const testImg = new Image();
-          testImg.onload = ();// => console.log("[updateProfileInfo] Avatar chargé avec succès");
+          //testImg.onload = (); => console.log("[updateProfileInfo] Avatar chargé avec succès");
           testImg.onerror = () => {
             console.error("[updateProfileInfo] Vérification échouée");
             profileAvatar.src = "images/avatarDefault.png";
