@@ -1152,6 +1152,7 @@ footer {
 
 /* === LEADERBOARD PANEL === */
 
+/* === LEADERBOARD PANEL === */
 .leaderboard-panel {
   background: #fff !important;
   padding: 20px 24px;
@@ -1159,22 +1160,27 @@ footer {
   min-width: 440px;
   max-width: 600px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  position: relative;
+  position: fixed !important; /* Position fixe pour le sortir du flux */
   overflow: visible !important;
   max-height: none !important;
+  top: 50%; /* Centrer verticalement */
+  left: 50%; /* Centrer horizontalement */
+  transform: translate(-50%, -50%); /* Centrage parfait */
+  z-index: 9999999 !important; /* Valeur très élevée pour être au-dessus de tout */
+  margin: 0 !important; /* Supprimer les marges pour éviter les décalages */
 }
-
 
 /* === CONTENEUR SCROLLABLE === */
 
+/* === CONTENEUR SCROLLABLE === */
 #leaderboardContainer {
   max-height: 360px !important;
   overflow-y: auto !important;
   scroll-snap-type: y mandatory;
   scroll-padding-top: 6px;
-  scroll-behavior: smooth; 
+  scroll-behavior: smooth;
+  padding-top: 0 !important; /* Supprimer le padding-top */
 }
-
 
 /* === LIGNES DU LEADERBOARD === */
 
@@ -1223,7 +1229,8 @@ footer {
   border-bottom: 2px solid #ddd;
   position: sticky;
   top: 0;
-  z-index: 10001;
+  z-index: 10;
+  top: 110;
 }
 
 
