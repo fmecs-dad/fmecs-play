@@ -846,7 +846,7 @@ footer {
   align-items: flex-start; 
   justify-content: center;
   padding-top: 100px; 
-  z-index: 999999;
+  z-index: 999997;
 }
 
 #helpOverlay.hidden {
