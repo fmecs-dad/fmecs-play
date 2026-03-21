@@ -1162,7 +1162,6 @@ footer {
   position: relative;
   overflow: visible !important;
   max-height: none !important;
-  z-index: 10001;
 }
 
 
@@ -1224,7 +1223,7 @@ footer {
   border-bottom: 2px solid #ddd;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 10001;
 }
 
 
