@@ -1630,7 +1630,7 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
   }
 
   const panel = overlay.querySelector(panelSelector);
-  if (!panel) {
+  if (!panelHelp) {
     console.warn(`Panel avec sélecteur "${panelSelector}" non trouvé dans "${overlayId}". Sélecteurs disponibles :`, Array.from(overlay.children).map(el => el.className));
     return;
   }
