@@ -996,7 +996,6 @@ footer {
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   animation: popIn 0.25s ease-out;
   isolation: isolate;
-  z-index: 10001; 
 }
 
 #bestScoreContent {
@@ -1163,6 +1162,7 @@ footer {
   position: relative;
   overflow: visible !important;
   max-height: none !important;
+  z-index: 10001;
 }
 
 
