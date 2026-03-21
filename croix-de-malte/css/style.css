@@ -1166,8 +1166,10 @@ footer {
   top: 50%; /* Centrer verticalement */
   left: 50%; /* Centrer horizontalement */
   transform: translate(-50%, -50%); /* Centrage parfait */
-  z-index: 9999999 !important; /* Valeur très élevée pour être au-dessus de tout */
+  z-index: 999999 !important; /* Valeur très élevée pour être au-dessus de tout */
   margin: 0 !important; /* Supprimer les marges pour éviter les décalages */
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 /* === CONTENEUR SCROLLABLE === */
