@@ -952,7 +952,7 @@ footer {
 
 /* Classe spécifique pour le panel d'aide */
 .panel-help {
-  max-height: 80vh; 
+  max-height: 70vh; 
   overflow-y: auto; 
 }
 
