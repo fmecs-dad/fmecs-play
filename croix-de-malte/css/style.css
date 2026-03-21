@@ -52,7 +52,7 @@ body {
 /* Médias Queries pour les petits écrans */
 @media (max-width: 1366px) and (max-height: 768px) {
   #canvasContainer {
-    transform: scale(0.75);
+    transform: scale(0.80);
     transform-origin: center top;
     width: 140%; /* Compenser la réduction de taille */
   }
