@@ -793,7 +793,7 @@ footer {
 
 #sidePanel {
   margin-top: 10px;
-  margin-left: 10px;
+  margin-left: 20px;
   width: clamp(220px, 28vw, 320px);
   background: #fafafa;
   border: 1px solid #e0e0e0;
