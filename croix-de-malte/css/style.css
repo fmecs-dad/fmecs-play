@@ -684,6 +684,7 @@ footer {
 
 #mainArea {
   display: flex;
+  max-height: 600px;
   flex: 1;
   align-items: flex-start;
   overflow: hidden;
@@ -800,14 +801,14 @@ footer {
 
 #historyTitle {
   color: #222;
-  font-weight: 550;
+  font-weight: 600;
   margin: 0 0 12px;
   padding-bottom: 6px;
   border-bottom: 1px solid #e0e0e0;
 }
 
 #historyPanel {
-  max-height: 550px;
+  max-height: 600px;
   overflow-y: auto;
   z-index:10001;
 }
