@@ -807,7 +807,7 @@ footer {
 }
 
 #historyPanel {
-  max-height: 550px;
+  max-height: 540px;
   overflow-y: auto;
   z-index:10001;
 }
@@ -827,8 +827,8 @@ footer {
   text-overflow: ellipsis;
 }
 
-#historyList li.gain { color: #008a00; font-weight: 600; }
-#historyList li.loss { color: #cc0000; font-weight: 600; }
+#historyList li.gain { color: #008a00; font-weight: 540; }
+#historyList li.loss { color: #cc0000; font-weight: 540; }
 #historyList li.neutral { color: #222; }
 
 /* === HELP OVERLAY === */
