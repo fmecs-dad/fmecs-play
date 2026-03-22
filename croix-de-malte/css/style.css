@@ -807,7 +807,7 @@ footer {
 }
 
 #historyPanel {
-  max-height: 560px;
+  max-height: 550px;
   overflow-y: auto;
   z-index:10001;
 }
