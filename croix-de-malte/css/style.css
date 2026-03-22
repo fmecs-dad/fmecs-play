@@ -683,7 +683,7 @@ footer {
 /* === MAIN AREA === */
 
 #mainArea {
-  display: flex;
+  //display: flex;
   max-height: 640px;
   flex: 1;
   align-items: flex-start;
