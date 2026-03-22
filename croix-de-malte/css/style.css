@@ -683,8 +683,7 @@ footer {
 /* === MAIN AREA === */
 
 #mainArea {
-  //display: flex;
-  max-height: 640px;
+  display: flex;
   flex: 1;
   align-items: flex-start;
   overflow: hidden;
@@ -808,7 +807,7 @@ footer {
 }
 
 #historyPanel {
-  max-height: 600px;
+  max-height: 580px;
   overflow-y: auto;
   z-index:10001;
 }
