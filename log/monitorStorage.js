@@ -16,35 +16,38 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Récupérer l'ID du bucket "avatars"
-    let { data: bucketData, error: bucketError } = await supabase
-      .from('storage.buckets')
-      .select('id')
-      .eq('name', 'avatars')
-      .maybeSingle();
+    // Exécuter une requête SQL brute pour obtenir la taille totale
+    const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': process.env.SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        query: `
+          SELECT sum((metadata->>'size')::bigint) as total_size
+          FROM storage.objects
+          WHERE bucket_id = (SELECT id FROM storage.buckets WHERE name = 'avatars');
+        `
+      }),
+    });
 
-    if (bucketError) throw bucketError;
-
-    if (!bucketData) {
-      console.error("Le bucket 'avatars' n'existe pas.");
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Erreur lors de la requête:', errorData);
       return;
     }
 
-    const bucketId = bucketData.id;
-    console.log(`ID du bucket 'avatars' : ${bucketId}`);
+    const { result } = await response.json();
 
-    // Récupérer la taille totale des fichiers dans le bucket
-    const { data: totalSizeData, error: totalSizeError } = await supabase
-      .rpc('get_bucket_size', { bucket_name: 'avatars' });
-
-    if (totalSizeError) throw totalSizeError;
-
-    if (!totalSizeData || totalSizeData.length === 0) {
-      console.error("Aucun résultat retourné par la fonction RPC.");
+    if (!result || result.length === 0) {
+      console.error("Aucun résultat retourné par la requête.");
       return;
     }
 
-    const totalSizeBytes = totalSizeData[0].total_size;
+    const totalSizeBytes = result[0].total_size;
     const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
@@ -58,7 +61,6 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
-
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
