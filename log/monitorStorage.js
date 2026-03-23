@@ -40,6 +40,18 @@ async function checkStorageUsage() {
   }
 }
 
+async function testSendEmail() {
+  try {
+    const testSizeMB = 801; // Valeur supérieure au seuil de 800 Mo pour déclencher l'envoi d'email
+    console.log(`Test : Envoi d'un email avec une taille simulée de ${testSizeMB} Mo`);
+
+    await sendAlertEmail(testSizeMB);
+    console.log('Email de test envoyé avec succès !');
+  } catch (err) {
+    console.error('Erreur lors de l\'envoi de l\'email de test:', err.message);
+  }
+}
+
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
   const mailOptions = {
@@ -94,3 +106,10 @@ async function cleanUnusedAvatars() {
 }
 // Exécuter la vérification
 checkStorageUsage();
+
+// Exécuter les fonctions
+(async () => {
+  await cleanUnusedAvatars();
+  await checkStorageUsage();
+  await testSendEmail(); // Appel de la fonction de test
+})();
