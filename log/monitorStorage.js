@@ -16,29 +16,58 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Exécuter une requête SQL directe via l'API REST de Supabase
-    const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/get_bucket_size`, {
+    // Récupérer l'ID du bucket "avatars"
+    const bucketResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': process.env.SUPABASE_KEY,
         'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
       },
-      body: JSON.stringify({ bucket_name: 'avatars' }),
+      body: JSON.stringify({
+        query: `
+          SELECT id FROM storage.buckets WHERE name = 'avatars';
+        `
+      }),
     });
 
-    const { result, error } = await response.json();
+    const bucketData = await bucketResponse.json();
+    if (bucketData.error) throw bucketData.error;
 
-    if (error) throw error;
-
-    // Vérifier que le résultat est valide
-    if (!result || result.length === 0) {
-      console.error("Aucun résultat retourné par la requête.");
+    if (!bucketData.result || bucketData.result.length === 0) {
+      console.error("Le bucket 'avatars' n'existe pas.");
       return;
     }
 
-    const totalSizeBytes = result[0].total_size;
-    const totalSizeMB = totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
+    const bucketId = bucketData.result[0].id;
+
+    // Récupérer la taille totale des fichiers dans le bucket
+    const filesResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': process.env.SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({
+        query: `
+          SELECT sum((metadata->>'size')::bigint) as total_size
+          FROM storage.objects
+          WHERE bucket_id = '${bucketId}';
+        `
+      }),
+    });
+
+    const filesData = await filesResponse.json();
+    if (filesData.error) throw filesData.error;
+
+    if (!filesData.result || filesData.result.length === 0) {
+      console.error("Aucun fichier trouvé dans le bucket.");
+      return;
+    }
+
+    const totalSizeBytes = filesData.result[0].total_size;
+    const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
     if (totalSizeMB > 800) {
@@ -51,6 +80,7 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
+
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
