@@ -14,7 +14,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Fonction pour vérifier l'utilisation du stockage
 async function checkStorageUsage() {
   try {
     // Appeler la fonction RPC pour obtenir la taille totale en octets
