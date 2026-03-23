@@ -16,32 +16,29 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    let totalSizeBytes = 0;
-    let currentPage = 0;
-    const pageSize = 100; // Nombre de fichiers par page
+    // Exécuter une requête SQL directe via l'API REST de Supabase
+    const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/get_bucket_size`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': process.env.SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+      },
+      body: JSON.stringify({ bucket_name: 'avatars' }),
+    });
 
-    while (true) {
-      const { data: files, error } = await supabase.storage
-        .from('avatars')
-        .list('', { limit: pageSize, offset: currentPage * pageSize });
+    const { result, error } = await response.json();
 
-      if (error) throw error;
+    if (error) throw error;
 
-      if (!files || files.length === 0) {
-        break; // Plus de fichiers à traiter
-      }
-
-      files.forEach(file => {
-        if (file.metadata && file.metadata.size) {
-          totalSizeBytes += parseInt(file.metadata.size);
-        }
-      });
-
-      currentPage++;
-      if (files.length < pageSize) break; // Dernière page
+    // Vérifier que le résultat est valide
+    if (!result || result.length === 0) {
+      console.error("Aucun résultat retourné par la requête.");
+      return;
     }
 
-    const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
+    const totalSizeBytes = result[0].total_size;
+    const totalSizeMB = totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
     if (totalSizeMB > 800) {
