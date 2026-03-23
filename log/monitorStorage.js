@@ -16,66 +16,35 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Vérifier l'existence du bucket "avatars" et récupérer son ID
-    const bucketResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': process.env.SUPABASE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
-      },
-      body: JSON.stringify({
-        query: `
-          SELECT id FROM storage.buckets WHERE name = 'avatars';
-        `
-      }),
-    });
+    // Récupérer l'ID du bucket "avatars"
+    let { data: bucketData, error: bucketError } = await supabase
+      .from('storage.buckets')
+      .select('id')
+      .eq('name', 'avatars')
+      .maybeSingle();
 
-    const bucketData = await bucketResponse.json();
+    if (bucketError) throw bucketError;
 
-    if (bucketResponse.ok === false) {
-      console.error("Erreur lors de la récupération de l'ID du bucket :", bucketData);
+    if (!bucketData) {
+      console.error("Le bucket 'avatars' n'existe pas.");
       return;
     }
 
-    if (!bucketData.result || bucketData.result.length === 0) {
-      console.error("Le bucket 'avatars' n'existe pas ou n'est pas accessible.");
-      return;
-    }
-
-    const bucketId = bucketData.result[0].id;
+    const bucketId = bucketData.id;
     console.log(`ID du bucket 'avatars' : ${bucketId}`);
 
     // Récupérer la taille totale des fichiers dans le bucket
-    const filesResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': process.env.SUPABASE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
-      },
-      body: JSON.stringify({
-        query: `
-          SELECT sum((metadata->>'size')::bigint) as total_size
-          FROM storage.objects
-          WHERE bucket_id = '${bucketId}';
-        `
-      }),
-    });
+    const { data: totalSizeData, error: totalSizeError } = await supabase
+      .rpc('get_bucket_size', { bucket_name: 'avatars' });
 
-    const filesData = await filesResponse.json();
+    if (totalSizeError) throw totalSizeError;
 
-    if (filesResponse.ok === false) {
-      console.error("Erreur lors de la récupération de la taille des fichiers :", filesData);
+    if (!totalSizeData || totalSizeData.length === 0) {
+      console.error("Aucun résultat retourné par la fonction RPC.");
       return;
     }
 
-    if (!filesData.result || filesData.result.length === 0) {
-      console.error("Aucun fichier trouvé dans le bucket.");
-      return;
-    }
-
-    const totalSizeBytes = filesData.result[0].total_size;
+    const totalSizeBytes = totalSizeData[0].total_size;
     const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
@@ -89,6 +58,7 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
+
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
