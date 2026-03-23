@@ -16,33 +16,18 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Obtenir l'ID du bucket "avatars"
-    const { data: bucketData, error: bucketError } = await supabase
-      .from('storage.buckets')
-      .select('id')
-      .eq('name', 'avatars')
-      .single();
-
-    if (bucketError) throw bucketError;
-    if (!bucketData) {
-      console.error("Le bucket 'avatars' n'existe pas.");
-      return;
-    }
-
-    const bucketId = bucketData.id;
-
-    // Obtenir la taille totale des fichiers dans le bucket
-    const { data: objectsData, error: objectsError } = await supabase
+    // Exécuter une requête SQL brute pour obtenir la taille totale
+    const { data, error } = await supabase
       .from('storage.objects')
       .select('metadata->>size')
-      .eq('bucket_id', bucketId);
+      .eq('bucket_id', (await supabase.from('storage.buckets').select('id').eq('name', 'avatars').single()).data.id);
 
-    if (objectsError) throw objectsError;
+    if (error) throw error;
 
     // Calculer la taille totale
     let totalSizeBytes = 0;
-    objectsData.forEach(item => {
-      const size = parseInt(item['size']);
+    data.forEach(item => {
+      const size = parseInt(item['?column?']);
       if (!isNaN(size)) {
         totalSizeBytes += size;
       }
@@ -61,7 +46,6 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
-
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
