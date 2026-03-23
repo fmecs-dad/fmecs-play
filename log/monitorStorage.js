@@ -16,13 +16,15 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Appeler la fonction RPC pour obtenir la taille totale en octets
-    const { data: totalSizeBytes, error } = await supabase
-      .rpc('get_bucket_size', { bucket_name: 'avatars' });
+    // Appeler la fonction RPC
+    const { data, error } = await supabase.rpc('get_bucket_size', { bucket_name: 'avatars' });
 
     if (error) throw error;
 
+    // La réponse de la fonction RPC est dans `data` (pas `totalSizeBytes`)
+    const totalSizeBytes = data; // `data` contient directement le résultat de la fonction RPC
     const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
+
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
     if (totalSizeMB > 800) {
