@@ -18,7 +18,7 @@ async function checkStorageUsage() {
   try {
     // Appeler la fonction RPC
     const { data, error } = await supabase.rpc('get_bucket_size', { bucket_name: 'avatars' });
-
+    console.log('Réponse RPC :', data); // Affiche la réponse brute
     if (error) throw error;
 
     // La réponse de la fonction RPC est dans `data` (pas `totalSizeBytes`)
