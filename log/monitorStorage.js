@@ -16,28 +16,31 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Exécuter une requête SQL brute pour obtenir la taille totale
-    const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': process.env.SUPABASE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
-      },
-      body: JSON.stringify({
-        query: `
-          SELECT sum((metadata->>'size')::bigint) as total_size
-          FROM storage.objects
-          WHERE bucket_id = (SELECT id FROM storage.buckets WHERE name = 'avatars');
-        `
-      }),
-    });
+    let totalSizeBytes = 0;
+    let currentPage = 0;
+    const pageSize = 100; // Nombre de fichiers par page
 
-    const { result, error } = await response.json();
+    while (true) {
+      const { data: files, error } = await supabase.storage
+        .from('avatars')
+        .list('', { limit: pageSize, offset: currentPage * pageSize });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    const totalSizeBytes = result[0].total_size;
+      if (!files || files.length === 0) {
+        break; // Plus de fichiers à traiter
+      }
+
+      files.forEach(file => {
+        if (file.metadata && file.metadata.size) {
+          totalSizeBytes += parseInt(file.metadata.size);
+        }
+      });
+
+      currentPage++;
+      if (files.length < pageSize) break; // Dernière page
+    }
+
     const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
