@@ -106,10 +106,3 @@ async function cleanUnusedAvatars() {
 }
 // Exécuter la vérification
 checkStorageUsage();
-
-// Exécuter les fonctions
-(async () => {
-  await cleanUnusedAvatars();
-  await checkStorageUsage();
-  await testSendEmail(); // Appel de la fonction de test
-})();
