@@ -16,39 +16,17 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Exécuter une requête SQL brute pour obtenir la taille totale
-    const response = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': process.env.SUPABASE_KEY,
-        'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        query: `
-          SELECT sum((metadata->>'size')::bigint) as total_size
-          FROM storage.objects
-          WHERE bucket_id = (SELECT id FROM storage.buckets WHERE name = 'avatars');
-        `
-      }),
-    });
+    // Appeler la fonction RPC
+    const { data, error } = await supabase.rpc('get_bucket_size');
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Erreur lors de la requête:', errorData);
+    if (error) throw error;
+
+    if (data === null) {
+      console.error("La fonction RPC a retourné null. Vérifie les permissions ou la définition de la fonction.");
       return;
     }
 
-    const { result } = await response.json();
-
-    if (!result || result.length === 0) {
-      console.error("Aucun résultat retourné par la requête.");
-      return;
-    }
-
-    const totalSizeBytes = result[0].total_size;
-    const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
+    const totalSizeMB = data / (1024 * 1024); // Convertir en Mo
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
     if (totalSizeMB > 800) {
