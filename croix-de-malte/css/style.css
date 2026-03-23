@@ -599,7 +599,7 @@ footer {
   color: #ccc;
   min-height: auto;
   height: auto;
-  z-index: 100003;
+  z-index: 99996;
 }
 
 .transparent-footer {
@@ -612,7 +612,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100001;
+  z-index: 99995;
   width: 100%;
   color: #ccc; 
   min-height: auto;
