@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Récupérer l'ID du bucket "avatars"
+    // Vérifier l'existence du bucket "avatars" et récupérer son ID
     const bucketResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
       method: 'POST',
       headers: {
@@ -32,14 +32,19 @@ async function checkStorageUsage() {
     });
 
     const bucketData = await bucketResponse.json();
-    if (bucketData.error) throw bucketData.error;
+
+    if (bucketResponse.ok === false) {
+      console.error("Erreur lors de la récupération de l'ID du bucket :", bucketData);
+      return;
+    }
 
     if (!bucketData.result || bucketData.result.length === 0) {
-      console.error("Le bucket 'avatars' n'existe pas.");
+      console.error("Le bucket 'avatars' n'existe pas ou n'est pas accessible.");
       return;
     }
 
     const bucketId = bucketData.result[0].id;
+    console.log(`ID du bucket 'avatars' : ${bucketId}`);
 
     // Récupérer la taille totale des fichiers dans le bucket
     const filesResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
@@ -59,7 +64,11 @@ async function checkStorageUsage() {
     });
 
     const filesData = await filesResponse.json();
-    if (filesData.error) throw filesData.error;
+
+    if (filesResponse.ok === false) {
+      console.error("Erreur lors de la récupération de la taille des fichiers :", filesData);
+      return;
+    }
 
     if (!filesData.result || filesData.result.length === 0) {
       console.error("Aucun fichier trouvé dans le bucket.");
@@ -80,7 +89,6 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
-
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
