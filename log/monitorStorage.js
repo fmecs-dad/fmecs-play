@@ -17,20 +17,26 @@ const transporter = nodemailer.createTransport({
 // Fonction pour vérifier l'utilisation du stockage
 async function checkStorageUsage() {
   try {
-    // Récupérer les métriques de stockage (remplace "bucket_name" par le nom de ton bucket)
-    const { data: files, error } = await supabase.storage.from('avatars').list('', { limit: 1 });
+    // Lister tous les fichiers du bucket "avatars"
+    const { data: files, error } = await supabase.storage.from('avatars').list('', { limit: 1000 });
+
     if (error) throw error;
 
-    // Calculer la taille totale utilisée (simplifié - à adapter selon ton bucket)
-    const { data: bucketSize } = await supabase.rpc('get_bucket_size', { bucket_name: 'avatars' });
-    const usedMB = bucketSize / (1024 * 1024); // Convertir en Mo
+    // Calculer la taille totale en sommant la taille de chaque fichier
+    let totalSizeBytes = 0;
+    files.forEach(file => {
+      if (file.metadata && file.metadata.size) {
+        totalSizeBytes += parseInt(file.metadata.size);
+      }
+    });
 
-    console.log(`Utilisation actuelle du stockage : ${usedMB.toFixed(2)} Mo`);
+    const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
+    console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
     // Vérifier si le seuil de 800 Mo est dépassé
-    if (usedMB > 800) {
+    if (totalSizeMB > 800) {
       console.log('Seuil dépassé ! Envoi d\'un email d\'alerte...');
-      await sendAlertEmail(usedMB);
+      await sendAlertEmail(totalSizeMB);
     } else {
       console.log('Tout est normal.');
     }
@@ -38,6 +44,7 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
+
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
