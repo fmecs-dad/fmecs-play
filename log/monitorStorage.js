@@ -56,5 +56,40 @@ async function sendAlertEmail(usedMB) {
   }
 }
 
+// Fonction nettoyage base avatars
+async function cleanUnusedAvatars() {
+  try {
+    // Récupérer les noms des avatars actifs
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('avatar_url')
+      .not('avatar_url', 'is', null);
+
+    if (playersError) throw playersError;
+
+    const activeAvatarNames = players.map(player =>
+      player.avatar_url.replace('https://gjzqghhqpycbcwykxvgw.supabase.co/storage/v1/object/public/avatars/', '')
+    );
+
+    // Lister tous les objets du bucket "avatars"
+    const { data: allObjects, error: listError } = await supabase.storage.from('avatars').list('', { limit: 100 });
+
+    if (listError) throw listError;
+
+    // Filtrer les objets à supprimer (ceux non présents dans activeAvatarNames)
+    const objectsToDelete = allObjects.filter(obj => !activeAvatarNames.includes(obj.name));
+
+    // Supprimer les objets inutilisés
+    for (const obj of objectsToDelete) {
+      const { error: deleteError } = await supabase.storage.from('avatars').remove([obj.name]);
+      if (deleteError) throw deleteError;
+      console.log(`Suppression de l'avatar inutilisé : ${obj.name}`);
+    }
+
+    console.log('Nettoyage des avatars inutilisés terminé.');
+  } catch (err) {
+    console.error('Erreur lors du nettoyage :', err.message);
+  }
+}
 // Exécuter la vérification
 checkStorageUsage();
