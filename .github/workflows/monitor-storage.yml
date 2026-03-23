@@ -1,0 +1,28 @@
+name: Monitor Supabase Storage
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Exécution tous les jours à minuit (UTC)
+  workflow_dispatch:  # Permet de déclencher manuellement si besoin
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js nodemailer dotenv
+
+      - name: Run monitoring script
+        run: node log/monitorStorage.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
