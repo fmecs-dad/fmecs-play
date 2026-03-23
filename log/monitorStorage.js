@@ -16,21 +16,20 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Appeler la fonction RPC avec un retour explicite
-    const { data, error } = await supabase
-      .rpc('get_bucket_size', { bucket_name: 'avatars' });
+    // Lister tous les fichiers du bucket "avatars"
+    const { data: files, error } = await supabase.storage.from('avatars').list('', { limit: 1000 });
 
     if (error) throw error;
 
-    // Vérifier si `data` est null ou non
-    if (data === null) {
-      console.error("La fonction RPC a retourné null. Vérifie les permissions ou la définition de la fonction.");
-      return;
-    }
+    // Calculer la taille totale en sommant la taille de chaque fichier
+    let totalSizeBytes = 0;
+    files.forEach(file => {
+      if (file.metadata && file.metadata.size) {
+        totalSizeBytes += parseInt(file.metadata.size);
+      }
+    });
 
-    const totalSizeBytes = data; // `data` contient le résultat de la fonction RPC
     const totalSizeMB = totalSizeBytes / (1024 * 1024); // Convertir en Mo
-
     console.log(`Utilisation actuelle du stockage : ${totalSizeMB.toFixed(2)} Mo`);
 
     if (totalSizeMB > 800) {
