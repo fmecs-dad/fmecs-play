@@ -16,20 +16,16 @@ const transporter = nodemailer.createTransport({
 
 async function checkStorageUsage() {
   try {
-    // Exécuter une requête SQL brute pour obtenir la taille totale
-    const { data, error } = await supabase
-      .from('storage.objects')
-      .select('metadata->>size')
-      .eq('bucket_id', (await supabase.from('storage.buckets').select('id').eq('name', 'avatars').single()).data.id);
+    // Lister tous les fichiers du bucket "avatars"
+    const { data: files, error } = await supabase.storage.from('avatars').list('', { limit: 1000 });
 
     if (error) throw error;
 
-    // Calculer la taille totale
+    // Calculer la taille totale en sommant la taille de chaque fichier
     let totalSizeBytes = 0;
-    data.forEach(item => {
-      const size = parseInt(item['?column?']);
-      if (!isNaN(size)) {
-        totalSizeBytes += size;
+    files.forEach(file => {
+      if (file.metadata && file.metadata.size) {
+        totalSizeBytes += parseInt(file.metadata.size);
       }
     });
 
@@ -46,6 +42,7 @@ async function checkStorageUsage() {
     console.error('Erreur:', err.message);
   }
 }
+
 
 // Fonction pour envoyer un email d'alerte
 async function sendAlertEmail(usedMB) {
