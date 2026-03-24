@@ -3069,7 +3069,7 @@ if (burgerAuthBtn) {
  
   // Sélectionnez le bouton et le conteneur de l'historique
 const burgerHistoryBtn = document.getElementById('burgerHistoryBtn');
-const historyContainer = document.getElementById('historyContainer');
+const SidePanel = document.getElementById('historyContainer');
 
 // Variable pour suivre l'état de l'historique
 let historyVisible = true;
