@@ -690,6 +690,58 @@ footer {
   padding: 10px;
 }
 
+/* === SIDE PANEL === */
+
+#sidePanel {
+  margin-top: 10px;
+  margin-left: 10px;
+  width: clamp(220px, 28vw, 320px);
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  padding: 20px 12px 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.25);
+  border-radius: 8px;
+  overflow-y: auto;
+  z-index: 99998;
+}
+
+#SidePanel.hidden {
+  display: none !important;
+}
+
+#historyTitle {
+  color: #222;
+  font-weight: 600;
+  margin: 0 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#historyPanel {
+  max-height: 540px;
+  overflow-y: auto;
+  z-index:10001;
+}
+
+#historyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+}
+
+#historyList li {
+  padding: 4px 0;
+  border-bottom: 1px dashed #e6e6e6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#historyList li.gain { color: #008a00; font-weight: 540; }
+#historyList li.loss { color: #cc0000; font-weight: 540; }
+#historyList li.neutral { color: #222; }
+
 /* === BOARD === */
 
 #boardWrapper {
@@ -778,58 +830,6 @@ footer {
   opacity: 1;
   transform: translateY(0);
 }
-
-/* === SIDE PANEL === */
-
-#sidePanel {
-  margin-top: 10px;
-  margin-left: 10px;
-  width: clamp(220px, 28vw, 320px);
-  background: #fafafa;
-  border: 1px solid #e0e0e0;
-  padding: 20px 12px 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.25);
-  border-radius: 8px;
-  overflow-y: auto;
-  z-index: 99998;
-}
-
-#SidePanel.hidden {
-  display: none !important;
-}
-
-#historyTitle {
-  color: #222;
-  font-weight: 600;
-  margin: 0 0 12px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-#historyPanel {
-  max-height: 540px;
-  overflow-y: auto;
-  z-index:10001;
-}
-
-#historyList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 13px;
-}
-
-#historyList li {
-  padding: 4px 0;
-  border-bottom: 1px dashed #e6e6e6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#historyList li.gain { color: #008a00; font-weight: 540; }
-#historyList li.loss { color: #cc0000; font-weight: 540; }
-#historyList li.neutral { color: #222; }
 
 /* === HELP OVERLAY === */
 
