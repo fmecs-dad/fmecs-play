@@ -685,8 +685,8 @@ footer {
 #mainArea {
   display: flex;
   align-items: flex-start;
-  overflow: hidden;
-  min-height: 0;
+  width: 100%;
+  gap: 10px; /*
   padding: 10px;
 }
 
@@ -749,7 +749,6 @@ footer {
   justify-content: center;
   display: flex;
   width: 100%;
-  /*min-height: 0;*/
   flex: 1;
 }
 
