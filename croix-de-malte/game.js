@@ -3083,10 +3083,10 @@ burgerHistoryBtn.addEventListener('click', function(e) {
 
   // Masquez ou affichez l'historique
   if (historyVisible) {
-    historyContainer.classList.remove('hidden');
+    SidePanel.classList.remove('hidden');
     burgerHistoryBtn.textContent = 'Historique : on';
   } else {
-    historyContainer.classList.add('hidden');
+    SidePanel.classList.add('hidden');
     burgerHistoryBtn.textContent = 'Historique : off';
   }
 });
