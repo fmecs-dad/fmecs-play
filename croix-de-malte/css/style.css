@@ -685,6 +685,8 @@ footer {
 #mainArea {
   display: flex;
   align-items: flex-start;
+  width: 100%;
+  gap: 10px;
   overflow: hidden;
   min-height: 0;
   padding: 10px;
@@ -706,7 +708,7 @@ footer {
 }
 
 #SidePanel.hidden {
-  display: none !important;
+  display: none;
 }
 
 #historyTitle {
@@ -750,7 +752,6 @@ footer {
   justify-content: center;
   display: flex;
   width: 100%;
-  /*min-height: 0;*/
   flex: 1;
 }
 
