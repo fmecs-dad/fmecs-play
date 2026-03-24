@@ -743,6 +743,12 @@ footer {
   z-index: -1;
 }
 
+/* Classe pour masquer la grille */
+#canvasContainer.hide-grid .grid-line {
+  opacity: 0 !important;
+  /* ou display: none; */
+}
+
 #gameCanvas {
   width: 100% !important;
   height: 100% !important;
