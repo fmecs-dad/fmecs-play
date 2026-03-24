@@ -745,8 +745,8 @@ footer {
 
 /* Classe pour masquer la grille */
 #canvasContainer.hide-grid .grid-line {
-  opacity: 0 !important;
-  /* ou display: none; */
+  /*opacity: 0 !important;*/
+  display: none;
 }
 
 #gameCanvas {
