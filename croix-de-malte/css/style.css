@@ -743,12 +743,6 @@ footer {
   z-index: -1;
 }
 
-/* Classe pour masquer la grille */
-#canvasContainer.hide-grid .grid-line {
-  /*opacity: 0 !important;*/
-  display: none;
-}
-
 #gameCanvas {
   width: 100% !important;
   height: 100% !important;
@@ -837,6 +831,10 @@ footer {
 #historyList li.gain { color: #008a00; font-weight: 540; }
 #historyList li.loss { color: #cc0000; font-weight: 540; }
 #historyList li.neutral { color: #222; }
+
+#historyContainer.hidden {
+  display: none !important;
+}
 
 /* === HELP OVERLAY === */
 
