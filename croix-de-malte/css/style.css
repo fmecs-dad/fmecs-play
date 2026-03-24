@@ -697,7 +697,7 @@ footer {
 
 #boardWrapper {
   padding-top: 20px;
-  padding-left: clamp(10px, 4vw, 60px);
+  justify-content: center;
   flex: 1;
   overflow: visible;
 }
