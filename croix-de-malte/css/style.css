@@ -832,7 +832,7 @@ footer {
 #historyList li.loss { color: #cc0000; font-weight: 540; }
 #historyList li.neutral { color: #222; }
 
-#historyContainer.hidden {
+#SidePanel.hidden {
   display: none !important;
 }
 
