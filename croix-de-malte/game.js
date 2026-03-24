@@ -3067,19 +3067,29 @@ if (burgerAuthBtn) {
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
  
-  // Masquer/afficher la grille
-  const toggleGridBtn = document.getElementById('toggleGridBtn');
-  const canvasContainer = document.getElementById('canvasContainer');
+  // Sélectionnez le bouton et le conteneur de l'historique
+const burgerHistoryBtn = document.getElementById('burgerHistoryBtn');
+const historyContainer = document.getElementById('historyContainer');
 
-  toggleGridBtn.addEventListener('click', function() {
-    canvasContainer.classList.toggle('hide-grid');
+// Variable pour suivre l'état de l'historique
+let historyVisible = true;
 
-    if (canvasContainer.classList.contains('hide-grid')) {
-      toggleGridBtn.textContent = 'Afficher la grille';
-    } else {
-      toggleGridBtn.textContent = 'Masquer la grille';
-    }
-  });
+// Écouteur d'événement pour basculer l'historique
+burgerHistoryBtn.addEventListener('click', function(e) {
+  e.stopPropagation(); // Empêche la fermeture du menu burger
+
+  // Basculez l'état de l'historique
+  historyVisible = !historyVisible;
+
+  // Masquez ou affichez l'historique
+  if (historyVisible) {
+    historyContainer.classList.remove('hidden');
+    burgerHistoryBtn.textContent = 'Historique : on';
+  } else {
+    historyContainer.classList.add('hidden');
+    burgerHistoryBtn.textContent = 'Historique : off';
+  }
+});
 
   //resizeCanvas();
   //window.addEventListener('resize', resizeCanvas);
