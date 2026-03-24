@@ -688,7 +688,6 @@ footer {
   width: 100%;
   gap: 10px;
   overflow: hidden;
-  min-height: 0;
   padding: 10px;
 }
 
