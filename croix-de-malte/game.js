@@ -3067,26 +3067,26 @@ if (burgerAuthBtn) {
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
  
-  // Sélectionnez le bouton et le conteneur de l'historique
+// Sélectionnez le bouton et le panneau latéral
 const burgerHistoryBtn = document.getElementById('burgerHistoryBtn');
-const SidePanel = document.getElementById('historyContainer');
+const sidePanel = document.getElementById('sidePanel');
 
-// Variable pour suivre l'état de l'historique
+// Variable pour suivre l'état du panneau latéral
 let historyVisible = true;
 
-// Écouteur d'événement pour basculer l'historique
+// Écouteur d'événement pour basculer le panneau latéral
 burgerHistoryBtn.addEventListener('click', function(e) {
   e.stopPropagation(); // Empêche la fermeture du menu burger
 
-  // Basculez l'état de l'historique
+  // Basculez l'état du panneau latéral
   historyVisible = !historyVisible;
 
-  // Masquez ou affichez l'historique
+  // Masquez ou affichez le panneau latéral
   if (historyVisible) {
-    SidePanel.classList.remove('hidden');
+    sidePanel.classList.remove('hidden');
     burgerHistoryBtn.textContent = 'Historique : on';
   } else {
-    SidePanel.classList.add('hidden');
+    sidePanel.classList.add('hidden');
     burgerHistoryBtn.textContent = 'Historique : off';
   }
 });
