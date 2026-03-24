@@ -1019,6 +1019,8 @@ let score = 0;
 let paused = false;
 let gameOver = false;
 
+let gridVisible = true;
+
 let tutorialBtn = null;
 
 let activePoints = new Set();
@@ -1630,7 +1632,7 @@ function enableModalBehavior(overlayId, panelSelector, closeFn) {
   }
 
   const panel = overlay.querySelector(panelSelector);
-  if (!panelHelp) {
+  if (!panel) {
     console.warn(`Panel avec sélecteur "${panelSelector}" non trouvé dans "${overlayId}". Sélecteurs disponibles :`, Array.from(overlay.children).map(el => el.className));
     return;
   }
@@ -2660,12 +2662,6 @@ function closeWhySignup() {
 //   DOMContentLoaded 
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
-  //console.log({
-  //  profileBtn: !!document.getElementById("profileBtn"),
-  //  profileDropdown: !!document.getElementById("profileDropdown"),
-  //  profileAvatar: !!document.getElementById("profileAvatar"),
-  //  profilePseudoDisplay: !!document.getElementById("profilePseudoDisplay")
-  //});
 
   // Activation du bouton "S'inscrire" quand la case est cochée
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
@@ -3071,6 +3067,20 @@ if (burgerAuthBtn) {
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
  
+  // Masquer/afficher la grille
+  const toggleGridBtn = document.getElementById('toggleGridBtn');
+  const canvasContainer = document.getElementById('canvasContainer');
+
+  toggleGridBtn.addEventListener('click', function() {
+    canvasContainer.classList.toggle('hide-grid');
+
+    if (canvasContainer.classList.contains('hide-grid')) {
+      toggleGridBtn.textContent = 'Afficher la grille';
+    } else {
+      toggleGridBtn.textContent = 'Masquer la grille';
+    }
+  });
+
   //resizeCanvas();
   //window.addEventListener('resize', resizeCanvas);
 
