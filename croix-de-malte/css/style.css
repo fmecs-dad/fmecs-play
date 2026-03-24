@@ -695,7 +695,6 @@ footer {
 
 #sidePanel {
   margin-top: 10px;
-  /*margin-left: 10px;*/
   width: clamp(220px, 28vw, 320px);
   background: #fafafa;
   border: 1px solid #e0e0e0;
@@ -747,10 +746,11 @@ footer {
 /* === BOARD === */
 
 #boardWrapper {
-  padding-top: 20px;
-  justify-content: center;
   display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
+  padding-top: 20px;
   flex: 1;
 }
 
