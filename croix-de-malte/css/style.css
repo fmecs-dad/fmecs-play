@@ -687,10 +687,8 @@ footer {
   flex: 1;
   align-items: flex-start;
   overflow: hidden;
-}
-
-#mainArea {
   min-height: 0;
+  width: 100%;
 }
 
 /* === BOARD === */
@@ -700,10 +698,8 @@ footer {
   justify-content: center;
   display: flex;
   width: 100%;
-}
-
-#boardWrapper {
   min-height: 0;
+  flex: 1;
 }
 
 .board-frame {
@@ -720,6 +716,7 @@ footer {
   height: min(600px, 90vw);
   overflow: visible;
   z-index: 0;
+  margin: 0 auto;
 }
 
 #canvasContainer::before {
