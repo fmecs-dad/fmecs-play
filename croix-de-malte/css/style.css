@@ -684,11 +684,10 @@ footer {
 
 #mainArea {
   display: flex;
-  flex: 1;
   align-items: flex-start;
   overflow: hidden;
   min-height: 0;
-  width: 100%;
+  padding: 10px;
 }
 
 /* === BOARD === */
@@ -698,7 +697,7 @@ footer {
   justify-content: center;
   display: flex;
   width: 100%;
-  min-height: 0;
+  /*min-height: 0;*/
   flex: 1;
 }
 
@@ -716,7 +715,6 @@ footer {
   height: min(600px, 90vw);
   overflow: visible;
   z-index: 0;
-  margin: 0 auto;
 }
 
 #canvasContainer::before {
@@ -796,6 +794,10 @@ footer {
   z-index: 99998;
 }
 
+#SidePanel.hidden {
+  display: none !important;
+}
+
 #historyTitle {
   color: #222;
   font-weight: 600;
@@ -828,10 +830,6 @@ footer {
 #historyList li.gain { color: #008a00; font-weight: 540; }
 #historyList li.loss { color: #cc0000; font-weight: 540; }
 #historyList li.neutral { color: #222; }
-
-#SidePanel.hidden {
-  display: none !important;
-}
 
 /* === HELP OVERLAY === */
 
