@@ -3073,8 +3073,8 @@ const sidePanel = document.getElementById('sidePanel');
 // Récupération de l'état sauvegardé dans localStorage
 const savedHistoryState = localStorage.getItem('historyVisible');
 
-// Définition de l'état initial (par défaut : "on" si rien n'est sauvegardé)
-let historyVisible = savedHistoryState === null ? true : savedHistoryState === 'true';
+// Définition de l'état initial (par défaut : "off" si rien n'est sauvegardé)
+let historyVisible = savedHistoryState === null ? false : savedHistoryState === 'true';
 
 // Application de l'état initial
 if (historyVisible) {
