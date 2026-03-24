@@ -700,7 +700,6 @@ footer {
   justify-content: center;
   display: flex;
   width: 100%;
-  overflow: visible;
 }
 
 #boardWrapper {
