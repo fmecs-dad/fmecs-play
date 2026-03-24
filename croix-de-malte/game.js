@@ -1489,7 +1489,6 @@ function saveGameState() {
     usedEdges: Array.from(usedEdges),
     validatedSegments, // tableau simple → OK
     historyStack: JSON.parse(JSON.stringify(validatedSegments)),
-    //historyStack: JSON.parse(JSON.stringify(historyStack)),
     score,
     jokersAvailable,
     jokersTotal,
@@ -3067,28 +3066,37 @@ if (burgerAuthBtn) {
   //   AUTRES ÉCOUTEURS DE BOUTONS
   // ===============================
  
-// Sélectionnez le bouton et le panneau latéral
+// Sélection des éléments
 const burgerHistoryBtn = document.getElementById('burgerHistoryBtn');
 const sidePanel = document.getElementById('sidePanel');
 
-// Variable pour suivre l'état du panneau latéral
-let historyVisible = true;
+// Récupération de l'état sauvegardé dans localStorage
+const savedHistoryState = localStorage.getItem('historyVisible');
 
-// Écouteur d'événement pour basculer le panneau latéral
+// Définition de l'état initial (par défaut : "on" si rien n'est sauvegardé)
+let historyVisible = savedHistoryState === null ? true : savedHistoryState === 'true';
+
+// Application de l'état initial
+if (historyVisible) {
+  sidePanel.classList.remove('hidden');
+  burgerHistoryBtn.textContent = 'Historique : on';
+} else {
+  sidePanel.classList.add('hidden');
+  burgerHistoryBtn.textContent = 'Historique : off';
+}
+
 burgerHistoryBtn.addEventListener('click', function(e) {
-  e.stopPropagation(); // Empêche la fermeture du menu burger
+  e.stopPropagation();
 
-  // Basculez l'état du panneau latéral
+  // Inversion de l'état
   historyVisible = !historyVisible;
 
-  // Masquez ou affichez le panneau latéral
-  if (historyVisible) {
-    sidePanel.classList.remove('hidden');
-    burgerHistoryBtn.textContent = 'Historique : on';
-  } else {
-    sidePanel.classList.add('hidden');
-    burgerHistoryBtn.textContent = 'Historique : off';
-  }
+  // Mise à jour de l'affichage
+  sidePanel.classList.toggle('hidden', !historyVisible);
+  burgerHistoryBtn.textContent = historyVisible ? 'Historique : on' : 'Historique : off';
+
+  // Sauvegarde dans localStorage
+  localStorage.setItem('historyVisible', historyVisible);
 });
 
   //resizeCanvas();
