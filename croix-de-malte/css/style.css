@@ -685,8 +685,8 @@ footer {
 #mainArea {
   display: flex;
   align-items: flex-start;
-  width: 100%;
-  gap: 10px; /*
+  overflow: hidden;
+  min-height: 0;
   padding: 10px;
 }
 
@@ -742,6 +742,7 @@ footer {
 #historyList li.loss { color: #cc0000; font-weight: 540; }
 #historyList li.neutral { color: #222; }
 
+
 /* === BOARD === */
 
 #boardWrapper {
@@ -749,6 +750,7 @@ footer {
   justify-content: center;
   display: flex;
   width: 100%;
+  /*min-height: 0;*/
   flex: 1;
 }
 
@@ -829,6 +831,7 @@ footer {
   opacity: 1;
   transform: translateY(0);
 }
+
 
 /* === HELP OVERLAY === */
 
