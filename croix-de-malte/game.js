@@ -631,11 +631,16 @@ function isPseudoForbidden(pseudo) {
 async function validatePseudo(pseudo) {
   if (!pseudo) throw new Error("Le pseudo ne peut pas être vide.");
 
-  validatePseudoLength(pseudo);
+  // Vérifier la longueur minimale (doit correspondre à celle du serveur)
+  const MIN_PSEUDO_LENGTH = 6; // Mettez la même valeur que côté serveur !
+  if (pseudo.length < MIN_PSEUDO_LENGTH) {
+    throw new Error(`Le pseudo doit contenir au moins ${MIN_PSEUDO_LENGTH} caractères.`);
+  }
 
+  // Vérifier les motifs interdits
   if (isPseudoForbidden(pseudo)) {
-    const matchedPattern = forbiddenPatterns.find(pattern => pattern.test(pseudo));
-    const reason = forbiddenPatterns.find(item => new RegExp(item.pattern, 'i').test(pseudo))?.reason || "Pseudo interdit.";
+    const reason = forbiddenPatterns.find(pattern => pattern.test(pseudo))?.reason ||
+                  "Ce pseudo est interdit.";
     throw new Error(reason);
   }
 }
