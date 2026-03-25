@@ -827,35 +827,6 @@ async function changePassword() {
 
 
 /*** Réinitialise le mot de passe via email ***/
-async function resetPassword(authEmailInputId, errorMessageId) {
-  const emailInput = document.getElementById(authEmailInputId);
-  const errorMessage = document.getElementById(errorMessageId);
-
-  if (!emailInput || !errorMessage) return;
-
-  const email = emailInput.value.trim();
-  if (!email) {
-    errorMessage.textContent = "Veuillez saisir votre email pour réinitialiser le mot de passe.";
-    errorMessage.classList.remove("hidden");
-    return;
-  }
-
-  try {
-    const { error } = await supa.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://play.fmecs.fr/croix-de-malte/resetpwd.html' //
-    });
-    if (error) throw error;
-    errorMessage.textContent = "Un email de réinitialisation a été envoyé.";
-    errorMessage.classList.remove("hidden");
-    errorMessage.style.color = "green";
-  } catch (err) {
-    errorMessage.textContent = err.message || "Erreur lors de l'envoi de l'email.";
-    errorMessage.classList.remove("hidden");
-    errorMessage.style.color = "red";
-  }
-}
-
-/*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
   // 1. Récupération des éléments
   const pseudoInput = document.getElementById("profilePseudoInput");
