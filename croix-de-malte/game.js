@@ -857,42 +857,51 @@ async function resetPassword(authEmailInputId, errorMessageId) {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  // 1. Récupération des éléments et validation
+  // 1. Récupération des éléments
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
   const newPseudo = pseudoInput.value.trim();
   const newEmail = emailInput.value.trim();
 
-  // Gestion du message d'erreur
+  // 2. Gestion du message d'erreur
   let errorMessage = document.getElementById("profileErrorMessage");
   if (!errorMessage) {
     errorMessage = document.createElement("div");
     errorMessage.id = "profileErrorMessage";
-    errorMessage.className = "error-message hidden";
     errorMessage.style.color = "red";
     errorMessage.style.textAlign = "center";
     errorMessage.style.margin = "10px 0";
     document.getElementById("profileModal").querySelector('.panel').prepend(errorMessage);
   }
-  errorMessage.classList.add("hidden"); // Masquer les erreurs précédentes
+  errorMessage.textContent = "";
+  errorMessage.classList.add("hidden");
 
+  // 3. Validation SYNCHRONE du pseudo (bloquante)
   try {
-    // 1. Validation stricte du pseudo (bloque si invalide)
-    try {
-      await validatePseudo(newPseudo);
-    } catch (validationError) {
-      errorMessage.textContent = validationError.message;
-      errorMessage.classList.remove("hidden");
-      throw new Error("Validation échouée"); // Propage l'erreur pour sortir du try/catch principal
+    // Version synchrone de la validation
+    function validatePseudoSync(pseudo) {
+      if (!pseudo) throw new Error("Le pseudo ne peut pas être vide.");
+      if (pseudo.length < 6) throw new Error("Le pseudo doit contenir au moins 6 caractères.");
+      if (forbiddenPatterns.some(pattern => pattern.test(pseudo))) {
+        const reason = forbiddenPatterns.find(pattern => pattern.test(pseudo))?.reason || "Pseudo interdit.";
+        throw new Error(reason);
+      }
     }
 
-    // 2. Récupération de la session
+    validatePseudoSync(newPseudo); // Appel synchrone bloquant
+  } catch (validationError) {
+    errorMessage.textContent = validationError.message;
+    errorMessage.classList.remove("hidden");
+    return; // ARRÊTE ICI l'exécution de la fonction
+  }
+
+  // 4. Si on arrive ici, le pseudo est valide
+  try {
+    // Récupération de la session
     const { data: { session }, error: sessionError } = await supa.auth.getSession();
-    if (sessionError || !session) {
-      throw new Error("Utilisateur non connecté");
-    }
+    if (sessionError || !session) throw new Error("Utilisateur non connecté.");
 
-    // 3. Vérification de disponibilité du pseudo
+    // Vérification de disponibilité du pseudo
     const { data: currentPlayer, error: fetchError } = await supa
       .from("players")
       .select("pseudo")
@@ -907,73 +916,57 @@ async function saveProfileChanges() {
         .select("id")
         .eq("pseudo", newPseudo)
         .maybeSingle();
-      if (existingPseudo) {
-        throw new Error("Ce pseudo est déjà pris.");
-      }
+      if (existingPseudo) throw new Error("Ce pseudo est déjà pris.");
     }
 
-    // 4. Mise à jour du pseudo dans la base de données
-    const { error: updatePlayerError } = await supa
+    // Mise à jour du pseudo
+    const { error: updateError } = await supa
       .from("players")
       .update({ pseudo: newPseudo })
       .eq("id", session.user.id);
-    if (updatePlayerError) throw updatePlayerError;
+    if (updateError) throw updateError;
 
-    // 5. Mise à jour des scores
-    const { error: updateScoresError } = await supa
+    // Mise à jour des scores
+    const { error: scoresError } = await supa
       .from("scores")
       .update({ pseudo: newPseudo })
       .eq("player_id", session.user.id);
-    if (updateScoresError) throw updateScoresError;
+    if (scoresError) throw scoresError;
 
-    // 6. Mise à jour de l'email (optionnel)
+    // Mise à jour de l'email
     if (newEmail !== session.user.email) {
-      const { error: updateEmailError } = await supa.auth.updateUser({
+      const { error: emailError } = await supa.auth.updateUser({
         email: newEmail,
         emailRedirectTo: window.location.origin
       });
-      if (updateEmailError) throw updateEmailError;
+      if (emailError) throw emailError;
     }
 
-    // 7. Gestion de l'avatar
+    // Gestion de l'avatar
     const avatarUpload = document.getElementById("avatarUpload");
     if (avatarUpload && avatarUpload.files[0]) {
       const file = avatarUpload.files[0];
-      try {
-        const filePath = `avatars/${session.user.id}/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supa.storage
-          .from('avatars')
-          .upload(filePath, file);
-        if (uploadError) throw uploadError;
+      const filePath = `avatars/${session.user.id}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supa.storage
+        .from('avatars')
+        .upload(filePath, file);
+      if (uploadError) throw uploadError;
 
-        const { error: updateAvatarError } = await supa
-          .from("players")
-          .update({ avatar_url: filePath })
-          .eq("id", session.user.id);
-        if (updateAvatarError) throw updateAvatarError;
-      } catch (avatarError) {
-        console.error("Erreur avatar:", avatarError);
-        errorMessage.textContent = "Erreur avatar: " + avatarError.message;
-        errorMessage.classList.remove("hidden");
-        throw avatarError; // Bloque la suite
-      }
+      const { error: avatarUpdateError } = await supa
+        .from("players")
+        .update({ avatar_url: filePath })
+        .eq("id", session.user.id);
+      if (avatarUpdateError) throw avatarUpdateError;
     }
 
-    // 8. Fermeture et rafraîchissement (uniquement si tout est OK)
+    // Fermeture et rafraîchissement
     document.getElementById("profileModal").classList.add("hidden");
     await updateProfileInfo(true);
 
   } catch (err) {
-    console.error("Erreur globale:", err);
-    // L'erreur de validation est déjà affichée dans le bloc spécifique
-    // Les autres erreurs sont affichées ici si nécessaire
-    if (!errorMessage.classList.contains("hidden")) {
-      // L'erreur est déjà affichée
-    } else if (err.message !== "Validation échouée") {
-      errorMessage.textContent = err.message;
-      errorMessage.classList.remove("hidden");
-    }
-    throw err; // Empêche toute exécution ultérieure
+    console.error("Erreur:", err);
+    errorMessage.textContent = err.message;
+    errorMessage.classList.remove("hidden");
   }
 }
 
