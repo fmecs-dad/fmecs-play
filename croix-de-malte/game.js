@@ -2846,6 +2846,11 @@ const initProfileMenu = () => {
   });
 };
 
+document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
+  if (typeof playClickSound === 'function') playClickSound();
+  await saveProfileChanges(); // Appel de la fonction avec validation
+});
+
   // Fermeture du menu avec la touche Echap
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
@@ -2879,50 +2884,6 @@ document.getElementById("cancelProfileBtn")?.addEventListener("click", () => {
   if (modal) modal.classList.add("hidden");
 });
 
-document.getElementById("saveProfileBtn")?.addEventListener("click", async () => {
-  if (typeof playClickSound === 'function') playClickSound();
-  const pseudoInput = document.getElementById("profilePseudoInput");
-  const errorMessage = document.getElementById("profileErrorMessage");
-
-  if (!pseudoInput || !errorMessage) return;
-
-  const newPseudo = pseudoInput.value.trim();
-
-  if (!newPseudo) {
-    errorMessage.textContent = "Le pseudo ne peut pas être vide";
-    errorMessage.classList.remove("hidden");
-    return;
-  }
-
-  try {
-    const user = await getSession();
-    if (!user) throw new Error("Utilisateur non connecté");
-
-    // Mise à jour du pseudo dans la base de données
-    const { error } = await supa
-      .from("players")
-      .update({ pseudo: newPseudo })
-      .eq("id", user.id);
-
-    if (error) throw error;
-
-    // Mise à jour de l'interface
-    const pseudoDisplay = document.getElementById("profilePseudoDisplay");
-    if (pseudoDisplay) pseudoDisplay.textContent = newPseudo;
-
-    // Fermeture de la modale
-    const modal = document.getElementById("profileModal");
-    if (modal) modal.classList.add("hidden");
-
-    // Réinitialisation du message d'erreur
-    errorMessage.classList.add("hidden");
-
-  } catch (err) {
-    console.error("Erreur lors de la sauvegarde du profil:", err);
-    errorMessage.textContent = err.message || "Une erreur est survenue";
-    errorMessage.classList.remove("hidden");
-  }
-});
 
 // Écouteur pour fermer la modale en cliquant en dehors
 document.getElementById("profileModal")?.addEventListener("click", (e) => {
