@@ -357,7 +357,7 @@ async function updateProfileInfo(force = false) {
   if (profileBtn) profileBtn.disabled = true;
 
   try {
-    // 2. Vérification de la connexion (ton code original)
+    // 2. Vérification de la connexion
     if (!force) {
       const token = localStorage.getItem('supabase.access.token');
       if (!token) {
@@ -366,7 +366,7 @@ async function updateProfileInfo(force = false) {
       }
     }
 
-    // 3. Récupération de l'utilisateur (ton code original)
+    // 3. Récupération de l'utilisateur
     const { data: { user }, error: userError } = await supa.auth.getUser();
     if (userError) {
       console.warn("[updateProfileInfo] Erreur de récupération utilisateur:", userError.message);
@@ -383,7 +383,7 @@ async function updateProfileInfo(force = false) {
     // 4. Utilisateur connecté : active le bouton (modification minimale)
     if (profileBtn) profileBtn.disabled = false;
 
-    // 5. Récupération du joueur (ton code original)
+    // 5. Récupération du joueur
     const { data: player, error: playerError } = await supa
       .from("players")
       .select("pseudo, avatar_url, created_at")
@@ -404,7 +404,7 @@ async function updateProfileInfo(force = false) {
       return updateProfileInfo(true);
     }
 
-    // 6. Mise à jour de l'avatar (ton code original)
+    // 6. Mise à jour de l'avatar
     const profileAvatar = document.getElementById("profileAvatar");
     if (profileAvatar) {
       if (player.avatar_url) {
@@ -440,7 +440,7 @@ async function updateProfileInfo(force = false) {
       console.error("Élément profileAvatar introuvable dans le DOM !");
     }
 
-    // 7. Mise à jour des informations (ton code original)
+    // 7. Mise à jour des informations
     const pseudoDisplay = document.getElementById("profilePseudoDisplay");
     if (pseudoDisplay) {
       pseudoDisplay.textContent = player.pseudo || "Utilisateur";
@@ -507,14 +507,6 @@ function setupProfileMenu() {
 
     const isShowing = profileDropdown.classList.toggle("show");
 
-    // Logs de débogage avancés
-    //console.log("Dropdown togglé. Visible ?", isShowing);
-    //console.log("Styles après toggle:", {
-    //  display: window.getComputedStyle(profileDropdown).display,
-    //  visibility: window.getComputedStyle(profileDropdown).visibility,
-    //  opacity: window.getComputedStyle(profileDropdown).opacity,
-    //  transform: window.getComputedStyle(profileDropdown).transform
-    //});
   });
 
   // Écouteur de fermeture externe
@@ -576,9 +568,7 @@ async function checkSessionOnStartup() {
 // FONCTIONS D'INITIALISATION DES ÉCOUTEURS
 // ===============================
 
-/**
- * Upload un avatar vers Supabase
- */
+/*** Upload un avatar vers Supabase ***/
 async function uploadAvatar(file) {
   try {
     const { data: { session }, error } = await supa.auth.getSession();
@@ -594,6 +584,59 @@ async function uploadAvatar(file) {
   } catch (err) {
     console.error("Erreur dans uploadAvatar:", err);
     throw err;
+  }
+}
+
+/*** Gérer les pseudos interdits ***/
+let forbiddenPatterns = [];
+
+// Charge les motifs interdits depuis le fichier JSON
+async function loadForbiddenPatterns() {
+  try {
+    const response = await fetch('/data/forbidden-patterns.json');
+    const patterns = await response.json();
+    forbiddenPatterns = patterns.map(item => new RegExp(item.pattern, 'i')); // 'i' = insensible à la casse
+  } catch (err) {
+    console.error("Erreur chargement motifs interdits :", err);
+    // Motifs par défaut en cas d'erreur de chargement
+    forbiddenPatterns = [
+      /^sbre/i,
+      /admin/i,
+      /moderateur/i,
+      /jeu/i,
+      /test/i
+    ];
+  }
+}
+
+// Appel initial pour charger les motifs
+loadForbiddenPatterns();
+
+// Minimum de caractères pour le pseudo
+const MIN_PSEUDO_LENGTH = 6;
+
+// Valide la longueur du pseudo
+function validatePseudoLength(pseudo) {
+  if (pseudo.length < MIN_PSEUDO_LENGTH) {
+    throw new Error(`Le pseudo doit contenir au moins ${MIN_PSEUDO_LENGTH} caractères.`);
+  }
+}
+
+// Vérifie si le pseudo est interdit
+function isPseudoForbidden(pseudo) {
+  return forbiddenPatterns.some(pattern => pattern.test(pseudo));
+}
+
+// Valide le pseudo (longueur + motifs interdits)
+async function validatePseudo(pseudo) {
+  if (!pseudo) throw new Error("Le pseudo ne peut pas être vide.");
+
+  validatePseudoLength(pseudo);
+
+  if (isPseudoForbidden(pseudo)) {
+    const matchedPattern = forbiddenPatterns.find(pattern => pattern.test(pseudo));
+    const reason = forbiddenPatterns.find(item => new RegExp(item.pattern, 'i').test(pseudo))?.reason || "Pseudo interdit.";
+    throw new Error(reason);
   }
 }
 
@@ -817,8 +860,6 @@ async function resetPassword(authEmailInputId, errorMessageId) {
 
 /*** Sauvegarde les modifications du profil ***/
 async function saveProfileChanges() {
-  //console.log("Enregistrement des modifications du profil");
-
   // 1. Récupération des éléments et validation
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
@@ -834,20 +875,23 @@ async function saveProfileChanges() {
     document.getElementById("profileModal").querySelector('.panel').prepend(errorMessage);
   }
 
-  if (!newPseudo) {
-    errorMessage.textContent = "Le pseudo ne peut pas être vide";
-    errorMessage.classList.remove("hidden");
-    return;
-  }
-
   try {
+    // 1. Validation du pseudo
+    await validatePseudo(newPseudo);
+
     // 2. Récupération de la session
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // 3. Mise à jour du pseudo
-    await supa.from("players").update({ pseudo: newPseudo }).eq("id", session.user.id);
-    await supa.from("scores").update({ pseudo: newPseudo }).eq("player_id", session.user.id);
+    // 3. Vérification de disponibilité du nouveau pseudo
+    if (newPseudo !== (await supa.from("players").select("pseudo").eq("id", session.user.id).single()).data.pseudo) {
+      const { data: existingPseudo } = await supa
+        .from("players")
+        .select("id")
+        .eq("pseudo", newPseudo)
+        .maybeSingle();
+      if (existingPseudo) throw new Error("Ce pseudo est déjà pris.");
+    }
 
     // 4. Mise à jour de l'email (optionnel)
     if (newEmail !== session.user.email) {
@@ -3073,8 +3117,8 @@ const sidePanel = document.getElementById('sidePanel');
 // Récupération de l'état sauvegardé dans localStorage
 const savedHistoryState = localStorage.getItem('historyVisible');
 
-// Définition de l'état initial (par défaut : "off" si rien n'est sauvegardé)
-let historyVisible = savedHistoryState === null ? false : savedHistoryState === 'true';
+// Définition de l'état initial (par défaut : "on" si rien n'est sauvegardé)
+let historyVisible = savedHistoryState === null ? true : savedHistoryState === 'true';
 
 // Application de l'état initial
 if (historyVisible) {
@@ -3228,6 +3272,9 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
   }
 
   try {
+    // Validation du pseudo
+    await validatePseudo(pseudo);
+
     // Vérification pseudo unique
     const { data: existingPseudo, error: checkPseudoError } = await supa
       .from("players")
@@ -3236,14 +3283,11 @@ document.getElementById("confirmPseudoBtn")?.addEventListener("click", async () 
       .maybeSingle();
 
     if (checkPseudoError && checkPseudoError.code !== "PGRST116") {
-      console.error("Erreur SELECT pseudo :", checkPseudoError);
-      alert("Erreur interne.");
-      return;
+      throw new Error("Erreur interne.");
     }
 
     if (existingPseudo) {
-      alert("Ce pseudo est déjà pris.");
-      return;
+      throw new Error("Ce pseudo est déjà pris.");
     }
 
     // Inscription de l'utilisateur
