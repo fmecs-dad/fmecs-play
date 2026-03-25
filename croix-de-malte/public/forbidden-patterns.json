@@ -1,1 +1,9 @@
-
+[
+  { "pattern": "sbre", "reason": "Mot réservé" },
+  { "pattern": "ybial", "reason": "Mot réservé" },
+  { "pattern": "admin", "reason": "Mot réservé" },
+  { "pattern": "moderateur", "reason": "Mot réservé" },
+  { "pattern": "test", "reason": "Mot générique interdit" },
+  { "pattern": "hitler", "reason": "Langage inapproprié" },
+  { "pattern": "poutine", "reason": "Langage inapproprié" }
+]
