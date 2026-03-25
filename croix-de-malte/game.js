@@ -828,6 +828,8 @@ async function changePassword() {
 
 /*** Réinitialise le mot de passe via email ***/
 async function saveProfileChanges() {
+  if (typeof playClickSound === 'function') playClickSound();
+
   // 1. Récupération des éléments
   const pseudoInput = document.getElementById("profilePseudoInput");
   const emailInput = document.getElementById("profileEmailInput");
