@@ -863,74 +863,117 @@ async function saveProfileChanges() {
   const newPseudo = pseudoInput.value.trim();
   const newEmail = emailInput.value.trim();
 
+  // Gestion du message d'erreur
   let errorMessage = document.getElementById("profileErrorMessage");
   if (!errorMessage) {
     errorMessage = document.createElement("div");
     errorMessage.id = "profileErrorMessage";
     errorMessage.className = "error-message hidden";
     errorMessage.style.color = "red";
+    errorMessage.style.textAlign = "center";
+    errorMessage.style.margin = "10px 0";
     document.getElementById("profileModal").querySelector('.panel').prepend(errorMessage);
   }
-  errorMessage.classList.add("hidden"); // Réinitialiser l'affichage
+  errorMessage.classList.add("hidden"); // Masquer les erreurs précédentes
 
   try {
-    // 1. Validation du pseudo (avec gestion explicite des erreurs)
+    // 1. Validation stricte du pseudo (bloque si invalide)
     try {
       await validatePseudo(newPseudo);
-    } catch (pseudoError) {
-      errorMessage.textContent = pseudoError.message;
+    } catch (validationError) {
+      errorMessage.textContent = validationError.message;
       errorMessage.classList.remove("hidden");
-      throw pseudoError; // Arrête l'exécution ici
+      throw new Error("Validation échouée"); // Propage l'erreur pour sortir du try/catch principal
     }
 
     // 2. Récupération de la session
-    const { data: { session }, error } = await supa.auth.getSession();
-    if (error || !session) throw new Error("Utilisateur non connecté");
+    const { data: { session }, error: sessionError } = await supa.auth.getSession();
+    if (sessionError || !session) {
+      throw new Error("Utilisateur non connecté");
+    }
 
     // 3. Vérification de disponibilité du pseudo
-    const currentPseudo = (await supa.from("players").select("pseudo").eq("id", session.user.id).single()).data.pseudo;
-    if (newPseudo !== currentPseudo) {
+    const { data: currentPlayer, error: fetchError } = await supa
+      .from("players")
+      .select("pseudo")
+      .eq("id", session.user.id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    if (newPseudo !== currentPlayer.pseudo) {
       const { data: existingPseudo } = await supa
         .from("players")
         .select("id")
         .eq("pseudo", newPseudo)
         .maybeSingle();
-      if (existingPseudo) throw new Error("Ce pseudo est déjà pris.");
+      if (existingPseudo) {
+        throw new Error("Ce pseudo est déjà pris.");
+      }
     }
 
     // 4. Mise à jour du pseudo dans la base de données
-    await supa.from("players").update({ pseudo: newPseudo }).eq("id", session.user.id);
-    await supa.from("scores").update({ pseudo: newPseudo }).eq("player_id", session.user.id);
+    const { error: updatePlayerError } = await supa
+      .from("players")
+      .update({ pseudo: newPseudo })
+      .eq("id", session.user.id);
+    if (updatePlayerError) throw updatePlayerError;
 
-    // 5. Mise à jour de l'email (optionnel)
+    // 5. Mise à jour des scores
+    const { error: updateScoresError } = await supa
+      .from("scores")
+      .update({ pseudo: newPseudo })
+      .eq("player_id", session.user.id);
+    if (updateScoresError) throw updateScoresError;
+
+    // 6. Mise à jour de l'email (optionnel)
     if (newEmail !== session.user.email) {
-      await supa.auth.updateUser({ email: newEmail, emailRedirectTo: window.location.origin });
+      const { error: updateEmailError } = await supa.auth.updateUser({
+        email: newEmail,
+        emailRedirectTo: window.location.origin
+      });
+      if (updateEmailError) throw updateEmailError;
     }
 
-    // 6. Gestion de l'avatar (votre code existant)
+    // 7. Gestion de l'avatar
     const avatarUpload = document.getElementById("avatarUpload");
     if (avatarUpload && avatarUpload.files[0]) {
       const file = avatarUpload.files[0];
       try {
         const filePath = `avatars/${session.user.id}/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supa.storage.from('avatars').upload(filePath, file);
+        const { error: uploadError } = await supa.storage
+          .from('avatars')
+          .upload(filePath, file);
         if (uploadError) throw uploadError;
-        await supa.from("players").update({ avatar_url: filePath }).eq("id", session.user.id);
-      } catch (err) {
-        console.error("Erreur mise à jour avatar:", err);
-        errorMessage.textContent = "Erreur lors de la mise à jour de l'avatar.";
+
+        const { error: updateAvatarError } = await supa
+          .from("players")
+          .update({ avatar_url: filePath })
+          .eq("id", session.user.id);
+        if (updateAvatarError) throw updateAvatarError;
+      } catch (avatarError) {
+        console.error("Erreur avatar:", avatarError);
+        errorMessage.textContent = "Erreur avatar: " + avatarError.message;
         errorMessage.classList.remove("hidden");
-        throw err; // Bloque la suite
+        throw avatarError; // Bloque la suite
       }
     }
 
-    // 7. Fermeture et rafraîchissement
+    // 8. Fermeture et rafraîchissement (uniquement si tout est OK)
     document.getElementById("profileModal").classList.add("hidden");
     await updateProfileInfo(true);
 
   } catch (err) {
-    console.error("Erreur enregistrement:", err);
-    // L'erreur est déjà affichée dans le bloc de validation du pseudo
+    console.error("Erreur globale:", err);
+    // L'erreur de validation est déjà affichée dans le bloc spécifique
+    // Les autres erreurs sont affichées ici si nécessaire
+    if (!errorMessage.classList.contains("hidden")) {
+      // L'erreur est déjà affichée
+    } else if (err.message !== "Validation échouée") {
+      errorMessage.textContent = err.message;
+      errorMessage.classList.remove("hidden");
+    }
+    throw err; // Empêche toute exécution ultérieure
   }
 }
 
