@@ -879,17 +879,25 @@ async function saveProfileChanges() {
     errorMessage.style.color = "red";
     document.getElementById("profileModal").querySelector('.panel').prepend(errorMessage);
   }
+  errorMessage.classList.add("hidden"); // Réinitialiser l'affichage
 
   try {
-    // 1. Validation du pseudo
-    await validatePseudo(newPseudo);
+    // 1. Validation du pseudo (avec gestion explicite des erreurs)
+    try {
+      await validatePseudo(newPseudo);
+    } catch (pseudoError) {
+      errorMessage.textContent = pseudoError.message;
+      errorMessage.classList.remove("hidden");
+      throw pseudoError; // Arrête l'exécution ici
+    }
 
     // 2. Récupération de la session
     const { data: { session }, error } = await supa.auth.getSession();
     if (error || !session) throw new Error("Utilisateur non connecté");
 
-    // 3. Vérification de disponibilité du nouveau pseudo
-    if (newPseudo !== (await supa.from("players").select("pseudo").eq("id", session.user.id).single()).data.pseudo) {
+    // 3. Vérification de disponibilité du pseudo
+    const currentPseudo = (await supa.from("players").select("pseudo").eq("id", session.user.id).single()).data.pseudo;
+    if (newPseudo !== currentPseudo) {
       const { data: existingPseudo } = await supa
         .from("players")
         .select("id")
@@ -898,44 +906,39 @@ async function saveProfileChanges() {
       if (existingPseudo) throw new Error("Ce pseudo est déjà pris.");
     }
 
-    // 4. Mise à jour de l'email (optionnel)
+    // 4. Mise à jour du pseudo dans la base de données
+    await supa.from("players").update({ pseudo: newPseudo }).eq("id", session.user.id);
+    await supa.from("scores").update({ pseudo: newPseudo }).eq("player_id", session.user.id);
+
+    // 5. Mise à jour de l'email (optionnel)
     if (newEmail !== session.user.email) {
       await supa.auth.updateUser({ email: newEmail, emailRedirectTo: window.location.origin });
     }
 
-    // 5. Gestion de l'avatar
+    // 6. Gestion de l'avatar (votre code existant)
     const avatarUpload = document.getElementById("avatarUpload");
     if (avatarUpload && avatarUpload.files[0]) {
       const file = avatarUpload.files[0];
       try {
         const filePath = `avatars/${session.user.id}/${Date.now()}_${file.name}`;
-
-        // Upload du fichier
-        const { error: uploadError } = await supa.storage
-          .from('avatars')
-          .upload(filePath, file);
+        const { error: uploadError } = await supa.storage.from('avatars').upload(filePath, file);
         if (uploadError) throw uploadError;
-
-        // Mise à jour de l'URL dans la base de données
         await supa.from("players").update({ avatar_url: filePath }).eq("id", session.user.id);
-
-        //console.log("Avatar mis à jour avec succès:", filePath);
       } catch (err) {
         console.error("Erreur mise à jour avatar:", err);
         errorMessage.textContent = "Erreur lors de la mise à jour de l'avatar.";
         errorMessage.classList.remove("hidden");
+        throw err; // Bloque la suite
       }
     }
 
-    // 6. Fermeture et rafraîchissement
+    // 7. Fermeture et rafraîchissement
     document.getElementById("profileModal").classList.add("hidden");
-    await updateProfileInfo(true); 
-    //console.log("Profil mis à jour avec succès");
+    await updateProfileInfo(true);
 
   } catch (err) {
     console.error("Erreur enregistrement:", err);
-    errorMessage.textContent = err.message || "Une erreur est survenue";
-    errorMessage.classList.remove("hidden");
+    // L'erreur est déjà affichée dans le bloc de validation du pseudo
   }
 }
 
