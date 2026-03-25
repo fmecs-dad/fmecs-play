@@ -1326,6 +1326,15 @@ footer {
   font-size: 15px;
 }
 
+/* Champs */
+#createPseudoModal .modal-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
 /* Boutons */
 #authOverlay .auth-buttons {
   display: flex;
