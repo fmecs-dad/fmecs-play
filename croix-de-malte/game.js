@@ -616,6 +616,7 @@ const MIN_PSEUDO_LENGTH = 6;
 
 // Valide la longueur du pseudo
 function validatePseudoLength(pseudo) {
+console.log("entrée dans la vérification pseudo");
   if (pseudo.length < MIN_PSEUDO_LENGTH) {
     throw new Error(`Le pseudo doit contenir au moins ${MIN_PSEUDO_LENGTH} caractères.`);
   }
