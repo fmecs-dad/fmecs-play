@@ -593,7 +593,7 @@ let forbiddenPatterns = [];
 // Charge les motifs interdits depuis le fichier JSON
 async function loadForbiddenPatterns() {
   try {
-    const response = await fetch('/public/forbidden-patterns.json');
+    const response = await fetch('/croix-de-malte/public/forbidden-patterns.json');
     const patterns = await response.json();
     forbiddenPatterns = patterns.map(item => new RegExp(item.pattern, 'i')); // 'i' = insensible à la casse
   } catch (err) {
