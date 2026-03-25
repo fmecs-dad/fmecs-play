@@ -2706,6 +2706,9 @@ function closeWhySignup() {
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
 
+  // Chargement des pseudos interdits
+  await loadForbiddenPatterns();
+
   // Activation du bouton "S'inscrire" quand la case est cochée
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
     document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
