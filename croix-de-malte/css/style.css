@@ -386,6 +386,13 @@ body {
   box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
 }
 
+.pseudo-requirement {
+  /*display: block;*/
+  color: white;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
 /* ===== MODALE DE PROFIL ===== */
 #profileModal .panel {
   text-align: left;
