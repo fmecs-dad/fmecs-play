@@ -17,18 +17,6 @@ const LEADERBOARD_PAGE_SIZE = 10;
 // ===============================
 let audioCtx = null;
 
-// Écouteur pour le premier clic utilisateur
-document.addEventListener('click', async function initAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') {
-      await audioCtx.resume();
-    }
-    console.log("AudioContext démarré après un clic utilisateur.");
-  }
-  document.removeEventListener('click', initAudio);
-}, { once: true });
-
 function getAudioContext() {
   if (!audioCtx) {
     console.warn("AudioContext non initialisé. Attends un clic utilisateur.");
@@ -56,7 +44,11 @@ async function loadSound(id, url) {
 // ===============================
 
 async function preloadAllSounds() {
-  getAudioContext(); // création ici si nécessaire
+  const ctx = getAudioContext();
+  if (!ctx) {
+    console.warn("AudioContext non initialisé. Impossible de précharger les sons.");
+    return;
+  }
 
   await Promise.all([
     loadSound("clickSound", "sounds/click.mp3"),
@@ -71,17 +63,22 @@ async function preloadAllSounds() {
   ]);
 }
 
-preloadAllSounds();
-
 // ===============================
 //   DEBLOCAGE AUDIO AU 1er CLIC
 // ===============================
 
-window.addEventListener("pointerdown", () => {
-  const ctx = getAudioContext(); // <-- correction ici
-  if (ctx.state === "suspended") {
-    ctx.resume();
+document.addEventListener('click', async function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+    console.log("AudioContext démarré après un clic utilisateur.");
+
+    // Appeler le préchargement des sons après l'initialisation de l'AudioContext
+    await preloadAllSounds();
   }
+  document.removeEventListener('click', initAudio);
 }, { once: true });
 
 // ===============================
