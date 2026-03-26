@@ -3539,18 +3539,16 @@ function closeWhySignup() {
 // Code pour la bannière
 const adSpace = document.getElementById('ad-space');
 const topbar = document.getElementById('topbar');
-adSpace.style.top = '116px';
+
+const topBarRect = topBar.getBoundingClientRect();
+adSpace.style.top = `${topBarRect.bottom + window.scrollY + 6}px`;
 adSpace.style.height = 'calc(100vh - 186px)';
 
   // Écouteur de défilement 
 window.addEventListener('scroll', function() {
-  const topbarHeight = topbar.offsetHeight;
-  //const windowHeight = window.innerHeight;
-  const scrollY = window.scrollY;
-
-  adSpace.style.top = `${topbarHeight + scrollY + 6}px`;
-  //adSpace.style.height = `${windowHeight - topbarHeight - 70}px`;
-});
+    const topBarRect = topBar.getBoundingClientRect();
+    adSpace.style.top = `${topBarRect.bottom + window.scrollY + 6}px`;
+  });
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
