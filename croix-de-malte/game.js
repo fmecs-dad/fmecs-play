@@ -3524,21 +3524,6 @@ function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
 
-// Code pour la bannière
-const adSpace = document.getElementById('ad-space');
-  adSpace.style.top = '110px';
-  adSpace.style.height = 'calc(100vh - 117px)';
-
-  // Écouteur de défilement pour ajuster la position et la hauteur de la bannière
-  window.addEventListener('scroll', function() {
-    const topbar = document.getElementById('topbar');
-    const topbarHeight = topbar.offsetHeight;
-    const windowHeight = window.innerHeight;
-    const scrollY = window.scrollY;
-
-    adSpace.style.top = `${topbarHeight + scrollY}px`;
-    adSpace.style.height = `${windowHeight - topbarHeight - 7}px`;
-  });
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
