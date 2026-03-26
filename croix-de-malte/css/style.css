@@ -1395,16 +1395,24 @@ footer {
 }
 
 /* Style pour la bannière verticale */
-    #ad-space {
-      position: fixed;
-      top: 110px;
-      right: 20px;
-      top: 0;
-      height: calc(100vh - 110px);
-      width: 160px;
-      padding: 10px;
-      overflow: hidden;
-      z-index: 100;
-      background-color: rgba(245, 245, 245, 0.9);
-      border-left: 1px solid #e0e0e0;
-    }
+#ad-space {
+  position: fixed;
+  top: 110px;
+  right: 20px;
+  top: 0;
+  height: calc(100vh - 180px);
+  width: 160px;
+  padding: 10px;
+  overflow: hidden;
+  z-index: 100;
+  background-color: rgba(245, 245, 245, 0.9);
+  border-left: 1px solid #e0e0e0;
+}
+/* Assure que le contenu de la bannière ne dépasse pas */
+#ad-space ins.adsbygoogle {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
