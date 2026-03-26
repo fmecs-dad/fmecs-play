@@ -1402,9 +1402,10 @@ footer {
       top: 0;
       height: 100vh;
       width: 160px;
+      margin: 0;
       padding: 10px;
       overflow: hidden;
-      z-index: 100;
+      z-index: 1000000;
       background-color: rgba(245, 245, 245, 0.9);
       border-left: 1px solid #e0e0e0;
     }
