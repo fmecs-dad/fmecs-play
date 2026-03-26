@@ -1398,7 +1398,7 @@ footer {
     #ad-space {
       position: fixed;
       right: 0;
-      top: 0;
+      top: 160px;
       height: 100vh;
       width: 160px;
       padding: 10px;
