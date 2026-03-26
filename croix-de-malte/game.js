@@ -3545,11 +3545,11 @@ adSpace.style.height = 'calc(100vh - 186px)';
   // Écouteur de défilement 
 window.addEventListener('scroll', function() {
   const topbarHeight = topbar.offsetHeight;
-  const windowHeight = window.innerHeight;
+  //const windowHeight = window.innerHeight;
   const scrollY = window.scrollY;
 
   adSpace.style.top = `${topbarHeight + scrollY + 6}px`;
-  adSpace.style.height = `${windowHeight - topbarHeight - 70}px`;
+  //adSpace.style.height = `${windowHeight - topbarHeight - 70}px`;
 });
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
