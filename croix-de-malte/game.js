@@ -3543,13 +3543,13 @@ const adSpace = document.getElementById('ad-space');
 
   // Écouteur de défilement pour ajuster la position et la hauteur de la bannière
   window.addEventListener('scroll', function() {
-    const topbar = document.getElementById('topbar');
-    const topbarHeight = topbar.offsetHeight;
+    //const topbar = document.getElementById('topbar');
+    //const topbarHeight = topbar.offsetHeight;
     const windowHeight = window.innerHeight;
     const scrollY = window.scrollY;
 
-    adSpace.style.top = `${topbarHeight + scrollY}px`;
-    adSpace.style.height = `${windowHeight - topbarHeight - 7}px`;
+    adSpace.style.top = `${116 + scrollY}px`;
+    adSpace.style.height = `${windowHeight - 186}px`;
   });
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
