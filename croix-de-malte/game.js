@@ -2714,6 +2714,11 @@ function closeWhySignup() {
 //   DOMContentLoaded 
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
+  
+// Corriger la hauteur de #ad-space après le chargement de la page
+window.addEventListener('load', function() {
+  document.getElementById('ad-space').style.height = 'calc(100vh - 117px)';
+});
 
   // Chargement des pseudos interdits
   await loadForbiddenPatterns();
