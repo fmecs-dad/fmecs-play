@@ -3558,23 +3558,6 @@ const adSpace = document.getElementById('ad-space');
     adSpace.style.height = `${windowHeight - topbarHeight - 7}px`;
   });
 
-// Gestion de l'AudioContext (à déclencher après un clic utilisateur)
-  let audioContext = null;
-
-  // Écouteur pour le premier clic utilisateur
-  document.addEventListener('click', async function initAudio() {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-      // Ton code audio ici...
-
-      // Supprime l'écouteur après le premier clic
-      document.removeEventListener('click', initAudio);
-    }
-  }, { once: true });
-
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
 
