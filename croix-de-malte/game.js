@@ -17,9 +17,22 @@ const LEADERBOARD_PAGE_SIZE = 10;
 // ===============================
 let audioCtx = null;
 
-function getAudioContext() {
+// Écouteur pour le premier clic utilisateur
+document.addEventListener('click', async function initAudio() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+    console.log("AudioContext démarré après un clic utilisateur.");
+  }
+  document.removeEventListener('click', initAudio);
+}, { once: true });
+
+function getAudioContext() {
+  if (!audioCtx) {
+    console.warn("AudioContext non initialisé. Attends un clic utilisateur.");
+    return null;
   }
   return audioCtx;
 }
@@ -27,9 +40,14 @@ function getAudioContext() {
 const audioBuffers = {};
 
 async function loadSound(id, url) {
+  const ctx = getAudioContext();
+  if (!ctx) {
+    console.warn("AudioContext non initialisé. Impossible de charger le son.");
+    return;
+  }
+
   const response = await fetch(url);
   const arrayBuffer = await response.arrayBuffer();
-  const ctx = getAudioContext();
   audioBuffers[id] = await ctx.decodeAudioData(arrayBuffer);
 }
 
