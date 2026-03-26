@@ -30,7 +30,6 @@ const audioBuffers = {};
 async function loadSound(id, url) {
   const ctx = getAudioContext();
   if (!ctx) {
-    console.warn("AudioContext non initialisé. Impossible de charger le son.");
     return;
   }
 
