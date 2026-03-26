@@ -3532,10 +3532,6 @@ function closeWhySignup() {
   document.getElementById("whySignupModal")?.classList.add("hidden");
 }
 
-
-//console.log("[DOMContentLoaded] Fin de l'initialisation");
-});
-
 window.addEventListener('load', function() {
     const adSpace = document.getElementById('ad-space');
     adSpace.style.top = '110px'; // Position initiale
@@ -3552,3 +3548,7 @@ window.addEventListener('load', function() {
     adSpace.style.top = `${topbarHeight + scrollY}px`;
     adSpace.style.height = `${windowHeight - topbarHeight - 7}px`;
   });
+
+//console.log("[DOMContentLoaded] Fin de l'initialisation");
+});
+
