@@ -83,17 +83,18 @@ body {
 /* Style pour la bannière verticale */
 #ad-space {
   position: fixed;
-  /*top: 116px;*/
-  right: 20px;
-  /*height: calc(100vh - 186px);*/
+  right: 0;
+  top: 116px;
+  height: calc(100vh - 186px);
   width: 160px;
+  margin: 0;
   padding: 10px;
   overflow: hidden;
   z-index: 100;
   background-color: rgba(245, 245, 245, 0.9);
   border-left: 1px solid #e0e0e0;
 }
-/* Assure que le contenu de la bannière ne dépasse pas */
+
 #ad-space ins.adsbygoogle {
   display: flex;
   justify-content: center;
