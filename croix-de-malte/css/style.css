@@ -83,9 +83,9 @@ body {
 /* Style pour la bannière verticale */
 #ad-space {
   position: fixed;
-  top: 110px;
+  top: 116px;
   right: 20px;
-  height: calc(100vh - 180px);
+  height: calc(100vh - 186px);
   width: 160px;
   padding: 10px;
   overflow: hidden;
