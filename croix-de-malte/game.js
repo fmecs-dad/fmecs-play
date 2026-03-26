@@ -19,7 +19,6 @@ let audioCtx = null;
 
 function getAudioContext() {
   if (!audioCtx) {
-    console.warn("AudioContext non initialisé. Attends un clic utilisateur.");
     return null;
   }
   return audioCtx;
@@ -71,7 +70,7 @@ document.addEventListener('click', async function initAudio() {
     if (audioCtx.state === 'suspended') {
       await audioCtx.resume();
     }
-    console.log("AudioContext démarré après un clic utilisateur.");
+    //console.log("AudioContext démarré après un clic utilisateur.");
 
     // Appeler le préchargement des sons après l'initialisation de l'AudioContext
     await preloadAllSounds();
