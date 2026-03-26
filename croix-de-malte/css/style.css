@@ -83,9 +83,9 @@ body {
 /* Style pour la bannière verticale */
 #ad-space {
   position: fixed;
-  top: 116px;
+  /*top: 116px;*/
   right: 20px;
-  height: calc(100vh - 186px);
+  /*height: calc(100vh - 186px);*/
   width: 160px;
   padding: 10px;
   overflow: hidden;
@@ -95,11 +95,10 @@ body {
 }
 /* Assure que le contenu de la bannière ne dépasse pas */
 #ad-space ins.adsbygoogle {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 /* Bloc titre + sous-titre */
