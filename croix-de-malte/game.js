@@ -3535,3 +3535,20 @@ function closeWhySignup() {
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
+
+window.addEventListener('load', function() {
+    const adSpace = document.getElementById('ad-space');
+    adSpace.style.top = '110px'; // Position initiale
+    adSpace.style.height = 'calc(100vh - 117px)'; // Hauteur initiale
+  });
+
+  window.addEventListener('scroll', function() {
+    const topbar = document.getElementById('topbar');
+    const adSpace = document.getElementById('ad-space');
+    const topbarHeight = topbar.offsetHeight;
+    const windowHeight = window.innerHeight;
+    const scrollY = window.scrollY;
+
+    adSpace.style.top = `${topbarHeight + scrollY}px`;
+    adSpace.style.height = `${windowHeight - topbarHeight - 7}px`;
+  });
