@@ -3538,19 +3538,19 @@ function closeWhySignup() {
 
 // Code pour la bannière
 const adSpace = document.getElementById('ad-space');
-  adSpace.style.top = '116px';
-  adSpace.style.height = 'calc(100vh - 186px)';
+const topbar = document.getElementById('topbar');
+adSpace.style.top = '116px';
+adSpace.style.height = 'calc(100vh - 186px)';
 
-  // Écouteur de défilement pour ajuster la position et la hauteur de la bannière
-  window.addEventListener('scroll', function() {
-    //const topbar = document.getElementById('topbar');
-    //const topbarHeight = topbar.offsetHeight;
-    const windowHeight = window.innerHeight;
-    const scrollY = window.scrollY;
+  // Écouteur de défilement 
+window.addEventListener('scroll', function() {
+  const topbarHeight = topbar.offsetHeight;
+  const windowHeight = window.innerHeight;
+  const scrollY = window.scrollY;
 
-    adSpace.style.top = `${116 + scrollY}px`;
-    adSpace.style.height = `${windowHeight - 186}px`;
-  });
+  adSpace.style.top = `${topbarHeight + scrollY + 6}px`;
+  adSpace.style.height = `${windowHeight - topbarHeight - 70}px`;
+});
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
