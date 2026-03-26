@@ -1397,7 +1397,7 @@ footer {
 /* Style pour la bannière verticale */
     #ad-space {
       position: fixed;
-      top: 116px;
+      margin-top: 116px;
       right: 20px;
       top: 0;
       height: calc(100vh - 116px);
