@@ -1397,14 +1397,14 @@ footer {
 /* Style pour la bannière verticale */
     #ad-space {
       position: fixed;
-      margin-top: 116px;
+      top: 116px;
       right: 20px;
       top: 0;
-      height: 100vh;
+      height: calc(100vh - 60px);
       width: 160px;
       padding: 10px;
       overflow: hidden;
-      z-index: 1000000;
+      z-index: 100;
       background-color: rgba(245, 245, 245, 0.9);
       border-left: 1px solid #e0e0e0;
     }
