@@ -46,7 +46,6 @@ async function loadSound(id, url) {
 async function preloadAllSounds() {
   const ctx = getAudioContext();
   if (!ctx) {
-    console.warn("AudioContext non initialisé. Impossible de précharger les sons.");
     return;
   }
 
