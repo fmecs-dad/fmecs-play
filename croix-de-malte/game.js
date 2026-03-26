@@ -3538,8 +3538,8 @@ function closeWhySignup() {
 
 // Code pour la bannière
 const adSpace = document.getElementById('ad-space');
-  adSpace.style.top = '110px';
-  adSpace.style.height = 'calc(100vh - 117px)';
+  adSpace.style.top = '116px';
+  adSpace.style.height = 'calc(100vh - 186px)';
 
   // Écouteur de défilement pour ajuster la position et la hauteur de la bannière
   window.addEventListener('scroll', function() {
