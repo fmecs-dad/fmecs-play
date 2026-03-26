@@ -2715,15 +2715,7 @@ function closeWhySignup() {
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
   
-// Corriger la hauteur de #ad-space après le chargement de la page
-window.addEventListener('load', function() {
-  document.getElementById('ad-space').style.height = 'calc(100vh - 117px)';
-});
-
-  // Chargement des pseudos interdits
-  await loadForbiddenPatterns();
-
-  // Activation du bouton "S'inscrire" quand la case est cochée
+// Activation du bouton "S'inscrire" quand la case est cochée
   document.getElementById("acceptPrivacyPolicy").addEventListener("change", function() {
     document.getElementById("whySignupRegisterBtn").disabled = !this.checked;
   });
@@ -3538,9 +3530,14 @@ window.addEventListener('load', function() {
     adSpace.style.height = 'calc(100vh - 117px)'; // Hauteur initiale
   });
 
+// Code pour la bannière
+const adSpace = document.getElementById('ad-space');
+  adSpace.style.top = '110px';
+  adSpace.style.height = 'calc(100vh - 117px)';
+
+  // Écouteur de défilement pour ajuster la position et la hauteur de la bannière
   window.addEventListener('scroll', function() {
     const topbar = document.getElementById('topbar');
-    const adSpace = document.getElementById('ad-space');
     const topbarHeight = topbar.offsetHeight;
     const windowHeight = window.innerHeight;
     const scrollY = window.scrollY;
