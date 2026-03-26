@@ -1402,7 +1402,7 @@ footer {
       height: 100vh;
       width: 160px;
       padding: 10px;
-      overflow: auto;
+      overflow: hidden;
       z-index: 100;
       background-color: rgba(245, 245, 245, 0.9);
       border-left: 1px solid #e0e0e0;
