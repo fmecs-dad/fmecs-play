@@ -1400,7 +1400,7 @@ footer {
       top: 116px;
       right: 20px;
       top: 0;
-      height: calc(100vh - 60px);
+      height: calc(100vh - 116px);
       width: 160px;
       padding: 10px;
       overflow: hidden;
