@@ -94,7 +94,7 @@ body::-webkit-scrollbar {
 /* Style pour la bannière verticale */
 #ad-space {
   position: fixed;
-  right: 20px;
+  right: 10px;
   top: 116px;
   height: calc(100vh - 186px);
   width: 160px;
