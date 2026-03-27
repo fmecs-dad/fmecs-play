@@ -95,8 +95,6 @@ body::-webkit-scrollbar {
 #ad-space {
   position: fixed;
   right: 10px;
-  //top: 116px;
-  //height: calc(100vh - 186px);
   width: 160px;
   margin: 0;
   padding: 10px;
