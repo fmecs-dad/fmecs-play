@@ -3,17 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Morpion Solitaire – Croix de Malte</title>
-  <!link rel="preload" as="image" href="images/monfond.jpg">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" type="image/png" href="favicon.png?v=1">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="description" content="Jouez au Morpion Solitaire - Croix de Malte, un jeu de réflexion gratuit en ligne. Développez votre stratégie et battez vos records !">
+  <meta name="keywords" content="morpion solitaire, croix de malte, jeu de réflexion, jeu en ligne, jeu gratuit, puzzle, stratégie, jeu de logique">
+  <meta name="robots" content="index, follow">
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://play.fmecs.fr/croix-de-malte/">
+  <meta property="og:title" content="Morpion Solitaire - Croix de Malte | Jeu de Réflexion Gratuit">
+  <meta property="og:description" content="Découvrez le Morpion Solitaire - Croix de Malte, un jeu de réflexion gratuit en ligne. Améliorez vos compétences stratégiques et défiez-vous !">
+  <meta property="og:image" content="https://play.fmecs.fr/croix-de-malte/images/aperçu-jeu.jpg">
 
-  <!-- Code AdSense obligatoire dans le <head> -->
+  <title>Morpion Solitaire – Croix de Malte | Jeu de Réflexion Gratuit en Ligne</title>
+  <link rel="preload" as="image" href="images/monfond.jpg">
+  <link rel="stylesheet" href="css/style.min.css">
+  <link rel="icon" type="image/png" href="favicon.png?v=1">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3592273084085271"
           crossorigin="anonymous"></script>
-
 </head>
-
 <body>
 
 <!-- login -->
@@ -249,11 +256,9 @@
     <input type="email" id="authEmail" class="modal-input" />
     <label for="authPassword">Mot de passe</label>
     <input type="password" id="authPassword" class="modal-input" />
-    <!-- Lien "Mot de passe oublié" -->
     <a href="#" id="forgotPasswordLink" style="display: block; margin-top: 10px; color: blue; text-decoration: underline; cursor: pointer;">
       Mot de passe oublié ?
     </a>
-    <!-- Message d'erreur/Succès -->
     <p id="authErrorMessage" class="hidden" style="margin-top: 10px;"></p>
     <div class="auth-buttons">
       <button id="showSignupModalBtn" class="main-btn">Créer un compte</button>
@@ -290,7 +295,6 @@
 
     <hr class="modal-separator">
 
-    <!-- BOUTONS -->
     <div class="main-buttons">
       <button id="saveProfileBtn" class="secondary-btn">Enregistrer</button>
       <button id="cancelProfileBtn" class="secondary-btn">Annuler</button>
@@ -329,18 +333,7 @@
 </div>
 
 <!-- Conteneur pour la bannière verticale -->
-  <div id="ad-space">
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:160px;height:600px"
-         data-ad-client="ca-pub-3592273084085271"
-         data-ad-slot="5148652068"
-         data-ad-format="auto"
-         data-full-width-responsive="false"
-         data-adtest="on"></ins>
-    <script>
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-  </div>
+  
 
 <!-- Bas de page -->
 
@@ -364,7 +357,7 @@
 </div>
 
 <script src="/croix-de-malte/lib/supabase.js"></script>
-<script src="game.js"></script>
+<script src="game.min.js"></script>
 
 </body>
 
