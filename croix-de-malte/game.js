@@ -187,7 +187,7 @@ async function updateAuthUI(user = null) {
   const profileBtn = document.getElementById("profileBtn");
 
   if (!user) {
-    if (burgerAuthBtn) burgerAuthBtn.style.display = "block"; // Afficher le bouton
+    if (burgerAuthBtn) burgerAuthBtn.style.display = "block";
     if (burgerPseudo) burgerPseudo.textContent = "";
     if (profileBtn) profileBtn.disabled = true;
     profileAvatar.src = "images/avatarDefault.png";
@@ -203,7 +203,7 @@ async function updateAuthUI(user = null) {
     return;
   }
 
-  if (burgerAuthBtn) burgerAuthBtn.style.display = "none"; // Masquer le bouton si connecté
+  if (burgerAuthBtn) burgerAuthBtn.style.display = "none";
   if (profileBtn) profileBtn.disabled = false;
 
   // Correction ici : utiliser localStorage.getItem au lieu de localStorage.getElementById
