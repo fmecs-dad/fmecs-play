@@ -3548,7 +3548,7 @@ adSpace.style.height = 'calc(100vh - 186px)';
 window.addEventListener('scroll', function() {
     const topBarRect = topBar.getBoundingClientRect();
     adSpace.style.top = `${topBarRect.bottom + window.scrollY + 6}px`;
-  });
+});
 
 //console.log("[DOMContentLoaded] Fin de l'initialisation");
 });
