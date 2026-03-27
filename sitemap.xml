@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+   <!-- Page d'accueil (si elle existe) -->
+   <url>
+      <loc>https://play.fmecs.fr/</loc>
+      <lastmod>2026-03-27</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>1.0</priority>
+   </url>
+
+   <!-- Page du jeu "Croix de Malte" -->
+   <url>
+      <loc>https://play.fmecs.fr/croix-de-malte/</loc>
+      <lastmod>2026-03-27</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.8</priority>
+   </url>
+
+   <!-- Page "Mentions légales" -->
+   <url>
+      <loc>https://play.fmecs.fr/croix-de-malte/mentions-legales-morpionsolitaire.html</loc>
+      <lastmod>2026-03-27</lastmod>
+      <changefreq>yearly</changefreq>
+      <priority>0.5</priority>
+   </url>
+
+   <!-- Page "Politique de confidentialité" -->
+   <url>
+      <loc>https://play.fmecs.fr/croix-de-malte/politique-confidentialite-morpionsolitaire.html</loc>
+      <lastmod>2026-03-27</lastmod>
+      <changefreq>yearly</changefreq>
+      <priority>0.5</priority>
+   </url>
+</urlset>
