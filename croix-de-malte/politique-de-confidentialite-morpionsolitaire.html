@@ -28,10 +28,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 80px;
         }
 
         .logo img {
-            height: 48px;
+            height: 60px;
             width: auto;
             display: block;
         }
@@ -53,25 +54,44 @@
             max-width: 900px;
             margin: auto;
             padding: 20px;
+            min-height: calc(100vh - 180px);
         }
 
         /* --- FOOTER --- */
         footer {
             text-align: center;
-            padding: 25px;
+            padding: 20px;
             background: #333333;
             border-top: 1px solid #444444;
             color: #ccc;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* --- LIENS --- */
         a {
-            color: #4d94ff;
+            color: #fedd94; /* Jaune clair pour correspondre au jeu */
             text-decoration: none;
         }
 
         a:hover {
-            color: #2a7ae9;
+            color: #ffcc00; /* Jaune plus foncé au survol */
+        }
+
+        /* --- TITRES --- */
+        h1, h2 {
+            color: #fedd94;
+        }
+
+        /* --- LISTES --- */
+        ul {
+            margin-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
         }
     </style>
 </head>
