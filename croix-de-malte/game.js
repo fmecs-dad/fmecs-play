@@ -1049,14 +1049,12 @@ window.addEventListener("beforeunload", saveGameState);
 // --------------------------------------------------
 
 function openHelpOverlay(auto = false) {
-
   if (!auto) playClickSound();
   const overlay = document.getElementById("helpOverlay");
   const topBar = document.getElementById("topBar");
 
   overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
   overlay.classList.remove("hidden");
-
 
   window.helpAutoOpened = auto;
 }
@@ -2623,7 +2621,7 @@ function initialFlow(user) {
   try {
     lastEmail = localStorage.getItem("lastEmail");
     skip = localStorage.getItem("skipWhySignup") === "1";
-    helpShown = localStorage.getItem("helpShown") === "1";
+    helpShown = localStorage.getItem("helpShown") === "true";
   } catch (err) {
     console.error("Erreur d'accès à localStorage :", err);
     lastEmail = null;
@@ -2631,48 +2629,39 @@ function initialFlow(user) {
     helpShown = false;
   }
 
-  //console.log("lastEmail :", lastEmail);
-  //console.log("skip :", skip);
-
   // 1. Utilisateur connecté → readyModal
   if (user) {
-    //console.log("Utilisateur connecté, affichage de readyModal...");
     showReadyModal("connected");
     return;
   }
 
   // 2. Joueur déconnecté mais a choisi "Ne plus me rappeler" → readyModal
   if (skip) {
-    //console.log("Joueur déconnecté mais a choisi 'Ne plus me rappeler', affichage de readyModal...");
     showReadyModal("skipWhySignup");
     return;
   }
  
-  // 3. Nouveau joueur → afficher la fenêtre d'aide
-    if (!lastEmail && !helpShown) {
+  // 3. Nouveau joueur et l'aide n'a pas encore été vue → afficher la fenêtre d'aide
+    if (!lastEmail && !helpSeen) {
         openHelpOverlay(true);
-        localStorage.setItem("helpShown", "1");
         return;
     }
 
-  // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (lastEmail && !user) {
-    //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
-    document.getElementById("whySignupModal").classList.remove("hidden");
-    return;
-  }
+    // 4. Joueur déconnecté + a déjà saisi un email → whySignupModal
+    if (lastEmail && !user) {
+        document.getElementById("whySignupModal").classList.remove("hidden");
+        return;
+    }
 
-  // 4. Nouveau joueur → whySignupModal
-  //if (!lastEmail) {
-  //  //console.log("Nouveau joueur, affichage de whySignupModal...");
-  //  document.getElementById("whySignupModal").classList.remove("hidden");
-  //  return;
-  //}
+    // 5. Si l'aide a déjà été vue → readyModal
+    if (helpSeen) {
+        showReadyModal("helpSeen");
+        return;
+    }
 
-  // 5. Fallback (ne devrait jamais arriver)
-  //console.log("Fallback, affichage de authOverlay...");
-  //const auth = document.getElementById("authOverlay");
-  //auth.classList.remove("hidden");
+    // 6. Fallback (ne devrait jamais arriver)
+    const auth = document.getElementById("authOverlay");
+    auth.classList.remove("hidden");
 }
 
 function showReadyModal(reason) {
@@ -2699,6 +2688,7 @@ function closeHelp() {
     localStorage.setItem("helpSeen", "true");
     document.getElementById("readyModal").classList.remove("hidden");
     startNewGame();
+    delete window.helpAutoOpened;
   }
 }
 
