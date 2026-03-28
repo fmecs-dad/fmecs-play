@@ -3154,7 +3154,7 @@ burgerHistoryBtn.addEventListener('click', function(e) {
     }
   });
 
-  // Écouteur pour le bouton de fermeture de l'aide
+// Écouteur pour le bouton de fermeture de l'aide
 const closeHelpBtn = document.getElementById("closeHelpBtn");
 if (closeHelpBtn) {
   closeHelpBtn.addEventListener("click", () => {
