@@ -2616,7 +2616,7 @@ function initialFlow(user) {
 
   let lastEmail;
   let skip;
-  let helpShown;
+  let helpSeen;
 
   try {
     lastEmail = localStorage.getItem("lastEmail");
