@@ -2649,14 +2649,14 @@ function initialFlow(user) {
   }
  
   // 3. Nouveau joueur → afficher la fenêtre d'aide
-    if (!helpShown) {
+    if (!lastEmail && !helpShown) {
         openHelpOverlay(true);
         localStorage.setItem("helpShown", "1");
         return;
     }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (!helpShown) {
+  if (lastEmail) {
     //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
