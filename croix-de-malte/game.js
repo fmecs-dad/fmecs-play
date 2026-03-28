@@ -1057,10 +1057,6 @@ function openHelpOverlay(auto = false) {
   overlay.style.paddingTop = `${topBar.offsetHeight + 20}px`;
   overlay.classList.remove("hidden");
 
-  // Le flash ne doit apparaître que si ce n’est PAS automatique
-  //if (!auto) {
-  //  flash("Jeu en pause");
-  //}
 
   window.helpAutoOpened = auto;
 }
@@ -2648,6 +2644,12 @@ function initialFlow(user) {
     showReadyModal("skipWhySignup");
     return;
   }
+ 
+  // 3. Nouveau joueur → afficher la fenêtre d'aide
+    if (!lastEmail) {
+        openHelpOverlay(true); // Appelle la fonction pour afficher la fenêtre d'aide
+        return;
+    }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
   if (lastEmail) {
