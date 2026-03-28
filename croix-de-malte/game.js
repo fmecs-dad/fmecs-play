@@ -2646,8 +2646,9 @@ function initialFlow(user) {
   }
  
   // 3. Nouveau joueur → afficher la fenêtre d'aide
-    if (!lastEmail) {
-        openHelpOverlay(true); // Appelle la fonction pour afficher la fenêtre d'aide
+    if (!lastEmail && !helpShown) {
+        openHelpOverlay(true);
+        localStorage.setItem("helpShown", "1");
         return;
     }
 
