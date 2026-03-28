@@ -2619,7 +2619,7 @@ function initialFlow(user) {
   try {
     lastEmail = localStorage.getItem("lastEmail");
     skip = localStorage.getItem("skipWhySignup") === "1";
-    helpShown = localStorage.getItem("helpSeen") === "true";
+    helpSeen = localStorage.getItem("helpSeen") === "true";
   } catch (err) {
     console.error("Erreur d'accès à localStorage :", err);
     lastEmail = null;
