@@ -2612,8 +2612,6 @@ function handleFirstLaunchFlow(userFromEvent) {
 //let gameStarted = false; // global
 
 function initialFlow(user) {
-  //console.log("initialFlow appelé avec user :", user);
-
   let lastEmail;
   let skip;
   let helpSeen;
@@ -2621,7 +2619,7 @@ function initialFlow(user) {
   try {
     lastEmail = localStorage.getItem("lastEmail");
     skip = localStorage.getItem("skipWhySignup") === "1";
-    helpShown = localStorage.getItem("helpShown") === "true";
+    helpShown = localStorage.getItem("helpSeen") === "true";
   } catch (err) {
     console.error("Erreur d'accès à localStorage :", err);
     lastEmail = null;
