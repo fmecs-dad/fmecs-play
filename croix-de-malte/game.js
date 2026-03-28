@@ -2623,10 +2623,12 @@ function initialFlow(user) {
   try {
     lastEmail = localStorage.getItem("lastEmail");
     skip = localStorage.getItem("skipWhySignup") === "1";
+    helpShown = localStorage.getItem("helpShown") === "1";
   } catch (err) {
     console.error("Erreur d'accès à localStorage :", err);
     lastEmail = null;
     skip = false;
+    helpShown = false;
   }
 
   //console.log("lastEmail :", lastEmail);
@@ -2654,7 +2656,7 @@ function initialFlow(user) {
     }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (lastEmail) {
+  if (!lastEmail && !helpShown) {
     //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
