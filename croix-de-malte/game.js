@@ -2656,18 +2656,18 @@ function initialFlow(user) {
     }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (lastEmail) {
+  if (lastEmail && !user) {
     //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
   }
 
   // 4. Nouveau joueur → whySignupModal
-  if (!lastEmail) {
-    //console.log("Nouveau joueur, affichage de whySignupModal...");
-    document.getElementById("whySignupModal").classList.remove("hidden");
-    return;
-  }
+  //if (!lastEmail) {
+  //  //console.log("Nouveau joueur, affichage de whySignupModal...");
+  //  document.getElementById("whySignupModal").classList.remove("hidden");
+  //  return;
+  //}
 
   // 5. Fallback (ne devrait jamais arriver)
   //console.log("Fallback, affichage de authOverlay...");
