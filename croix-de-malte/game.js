@@ -2656,7 +2656,7 @@ function initialFlow(user) {
     }
 
   // 3. Joueur déconnecté + a déjà saisi un email → whySignupModal
-  if (!lastEmail && !helpShown) {
+  if (!helpShown) {
     //console.log("Joueur déconnecté et a déjà saisi un email, affichage de whySignupModal...");
     document.getElementById("whySignupModal").classList.remove("hidden");
     return;
