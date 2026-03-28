@@ -2671,8 +2671,8 @@ function initialFlow(user) {
 
   // 5. Fallback (ne devrait jamais arriver)
   //console.log("Fallback, affichage de authOverlay...");
-  const auth = document.getElementById("authOverlay");
-  auth.classList.remove("hidden");
+  //const auth = document.getElementById("authOverlay");
+  //auth.classList.remove("hidden");
 }
 
 function showReadyModal(reason) {
