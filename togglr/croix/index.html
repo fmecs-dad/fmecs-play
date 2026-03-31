@@ -1,1 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Défi Togglr - la Croix</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary: #506efa;
+      --secondary: #3f37c9;
+      --success: #4caf50;
+      --background: #f0f2f5;
+      --grid-bg: #adadad;
+      --text: #212529;
+    }
 
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      /*color: var(--primary);*/
+      color: #212529;
+      margin: 15px 0;
+      text-align: center;
+      width: 100%;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 90%;
+      margin: 0 auto;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 25px);
+      grid-template-rows: repeat(10, 25px);
+      gap: 3px;
+      margin: 15px auto;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: var(--grid-bg);
+      width: fit-content;
+    }
+
+    .cell {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: white;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.1s;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cell:active {
+      transform: scale(0.95);
+    }
+
+    .blue {
+      background-color: var(--primary);
+    }
+    
+    .cell.clicked {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(255, 255, 0, 0.7);
+  z-index: 10; 
+  background-color: white !important;
+}
+
+.blue.clicked {
+  background-color: var(--primary);
+}
+
+    #controls {
+      margin: 15px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    #controls p {
+      font-size: 16px;
+      margin: 8px 0;
+      color: var(--text);
+    }
+
+    #buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    #instructions {
+      width: 90%;
+      max-width: 400px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px auto 0;
+    }
+
+    #instructions h2 {
+      color: var(--success);
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    /* Pop-up de victoire */
+    #victory-popup {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border: 2px solid var(--success);
+      max-width: 250px;
+      text-align: center;
+      z-index: 1000;
+      animation: popupAnimation 0.5s ease-out;
+    }
+
+    @keyframes popupAnimation {
+      0% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+      100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    #startButton.blink {
+      animation: blink 1.5s infinite; /* Animation de clignotement */
+    }
+
+    .trophy-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #FFD700;
+    }
+      
+    #victory-text {
+      color: var(--success);
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .game-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+      button {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    .dark-blue {
+      background-color: #7c93fc; /* Bleu plus foncé */
+    }
+
+    .white {
+       background-color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Togglr - la Croix !</h1>
+
+  <div class="game-container">
+    <div id="grid"></div>
+    <div id="victory-popup">
+      <div class="trophy-icon">🏆</div>
+      <div id="victory-text">Bravo !<br>Togglr réussi en <span id="victory-time">00:00<br></span> avec <span id="victory-moves">0</span> coups !</div>
+    </div>
+    </div>
+    <div id="controls">
+      <p>Coups : <span id="moves">0</span></p>
+      <p>Temps : <span id="time">00:00</span></p>
+      <div id="buttons">
+        <button id="startButton" title="Commencer"><i class="fas fa-play"></i></button>
+        <button id="resetButton" title="Rejouer"><i class="fas fa-redo"></i></button>
+      </div>
+    </div>
+
+    <div id="instructions">
+      <h2>Comment jouer ?</h2>
+      <p>Cliquez sur les cercles bleus pour les faire passer en blanc et inversement.</p>
+      <p>Un clic sur un cercle change aussi la couleur des 4 voisins (haut, bas, gauche, droite).</p>
+      <p>Reproduisez la forme initiale en un minimum de coups !</p>
+    </div>
+  </div>
+
+  <script src="togglrcroix.js"></script>
+</body>
+</html>
