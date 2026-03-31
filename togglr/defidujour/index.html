@@ -1,1 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Défi Togglr du jour</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    :root {
+      --primary: #506efa;
+      --secondary: #3f37c9;
+      --success: #4caf50;
+      --background: #f0f2f5;
+      --grid-bg: #adadad;
+      --text: #212529;
+    }
 
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      padding: 20px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      /*color: var(--primary);*/
+      color: #212529;
+      margin: 15px 0;
+      text-align: center;
+      width: 100%;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 90%;
+      margin: 0 auto;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(10, 25px);
+      grid-template-rows: repeat(10, 25px);
+      gap: 3px;
+      margin: 15px auto;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: var(--grid-bg);
+      width: fit-content;
+    }
+
+    .cell {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background-color: white;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transition: all 0.1s;
+      margin: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cell:active {
+      transform: scale(0.95);
+    }
+
+    .blue {
+      background-color: var(--primary);
+    }
+    
+    .cell.clicked {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 3px rgba(255, 255, 0, 0.7);
+  z-index: 10; 
+  background-color: white !important;
+}
+
+.blue.clicked {
+  background-color: var(--primary);
+}
+
+    #controls {
+      margin: 15px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    #controls p {
+      font-size: 16px;
+      margin: 8px 0;
+      color: var(--text);
+    }
+
+    #buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    #instructions {
+      width: 90%;
+      max-width: 400px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 15px auto 0;
+    }
+
+    #instructions h2 {
+      color: var(--success);
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    /* Pop-up de victoire */
+    #victory-popup {
+      display: none;
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border: 2px solid var(--success);
+      max-width: 250px;
+      text-align: center;
+      z-index: 1000;
+      animation: popupAnimation 0.5s ease-out;
+    }
+
+    @keyframes popupAnimation {
+      0% { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+      100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    #startButton.blink {
+      animation: blink 1.5s infinite; /* Animation de clignotement */
+    }
+
+    .trophy-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #FFD700;
+    }
+      
+    #victory-text {
+      color: var(--success);
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .game-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+      button {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    .dark-blue {
+      background-color: #7c93fc; /* Bleu plus foncé */
+    }
+
+    .white {
+       background-color: white;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Togglr du jour !</h1>
+
+  <div class="game-container">
+    <div id="grid"></div>
+    <div id="victory-popup">
+      <div class="trophy-icon">🏆</div>
+      <div id="victory-text">Bravo !<br>Togglr réussi en <span id="victory-time">00:00<br></span> avec <span id="victory-moves">0</span> coups !</div>
+    </div>
+    </div>
+    <div id="controls">
+      <p>Coups : <span id="moves">0</span></p>
+      <p>Temps : <span id="time">00:00</span></p>
+      <div id="buttons">
+        <button id="startButton" title="Commencer"><i class="fas fa-play"></i></button>
+        <button id="resetButton" title="Rejouer"><i class="fas fa-redo"></i></button>
+      </div>
+    </div>
+
+    <div id="instructions">
+      <h2>Comment jouer ?</h2>
+      <p>Cliquez sur les cercles bleus pour les faire passer en blanc et inversement.</p>
+      <p>Un clic sur un cercle change aussi la couleur des 4 voisins (haut, bas, gauche, droite).</p>
+      <p>Reproduisez la forme initiale en un minimum de coups !</p>
+    </div>
+  </div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const movesDisplay = document.getElementById('moves');
+    const timeDisplay = document.getElementById('time');
+    const startButton = document.getElementById('startButton');
+    const resetButton = document.getElementById('resetButton');
+    const victoryPopup = document.getElementById('victory-popup');
+    const victoryTime = document.getElementById('victory-time');
+    const victoryMoves = document.getElementById('victory-moves');
+
+    const rows = 10;
+    const cols = 10;
+    let cells = [];
+    let moves = 0;
+    let time = 0;
+    let timer;
+    let gameStarted = false;
+    let gameWon = false;
+
+    // Forme cible (exemple - à remplacer par la forme du jour)
+    const target = [
+      [1, 1, 1, 0, 0, 0, 0, 1, 1, 1],
+      [1, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+      [1, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 1, 0, 1, 1, 1, 1, 0, 1, 0],
+      [0, 1, 0, 1, 1, 1, 1, 0, 1, 0],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [1, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+      [1, 1, 1, 0, 1, 1, 0, 1, 1, 1],
+      [1, 1, 1, 0, 0, 0, 0, 1, 1, 1]
+    ];
+
+    // Initialisation de la grille
+ function initGrid() {
+  grid.innerHTML = '';
+  cells = [];
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      if (target[i][j] === 1) {
+        cell.classList.add('blue'); // Points non-cibles en bleu
+      } else {
+        cell.classList.add('white'); // Points cibles en blanc
+      }
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      cell.addEventListener('click', () => toggleCell(i, j));
+      grid.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+  gameWon = false;
+}
+
+function updateTimeDisplay() {
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+    // Inverser la couleur d'une cellule et de ses voisins
+function toggleCell(row, col) {
+  if (!gameStarted || gameWon) return;
+
+  const index = row * cols + col;
+  const isTargetCell = target[row][col] === 0; // Vérifie si c'est un point de la forme cible
+
+  // Ajoute l'effet de clic
+  cells[index].classList.add('clicked');
+
+  // Retire l'effet après un court délai
+  setTimeout(() => {
+    cells[index].classList.remove('clicked');
+  }, 300);
+
+  // Logique spécifique pour les points de la forme cible
+  if (isTargetCell) {
+    if (cells[index].classList.contains('dark-blue')) {
+      cells[index].classList.replace('dark-blue', 'white');
+    } else if (cells[index].classList.contains('white')) {
+      cells[index].classList.replace('white', 'dark-blue');
+    }
+  } else {
+    cells[index].classList.toggle('blue');
+  }
+
+  // Gestion des voisins
+  const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  directions.forEach(([dr, dc]) => {
+    const newRow = row + dr;
+    const newCol = col + dc;
+    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+      const neighborIndex = newRow * cols + newCol;
+      const isNeighborTargetCell = target[newRow][newCol] === 0;
+
+      if (isNeighborTargetCell) {
+        if (cells[neighborIndex].classList.contains('dark-blue')) {
+          cells[neighborIndex].classList.replace('dark-blue', 'white');
+        } else if (cells[neighborIndex].classList.contains('white')) {
+          cells[neighborIndex].classList.replace('white', 'dark-blue');
+        }
+      } else {
+        cells[neighborIndex].classList.toggle('blue');
+      }
+    }
+  });
+
+  moves++;
+  movesDisplay.textContent = moves;
+  checkWin();
+}
+
+    // Inverser la couleur d'une cellule
+    function toggleColor(row, col) {
+      const index = row * cols + col;
+      cells[index].classList.toggle('blue');
+    }
+
+    // Vérifier si le joueur a gagné
+ function checkWin() {
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const index = i * cols + j;
+      const isTargetCell = target[i][j] === 0; // Vérifie si c'est un point de la forme cible
+
+      if (isTargetCell) {
+        // Les points de la forme cible doivent être blancs
+        if (!cells[index].classList.contains('white')) {
+          return; // Si un point cible n'est pas blanc, le joueur n'a pas encore gagné
+        }
+      } else {
+        // Les autres points doivent être bleus
+        if (!cells[index].classList.contains('blue')) {
+          return; // Si un point non-cible n'est pas bleu, le joueur n'a pas encore gagné
+        }
+      }
+    }
+  }
+
+  // Si on arrive ici, le joueur a gagné
+  gameWon = true;
+  clearInterval(timer);
+
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  victoryTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  victoryMoves.textContent = moves;
+  victoryPopup.style.display = 'block';
+
+  // Masquer la pop-up après quelques secondes
+  setTimeout(() => {
+    victoryPopup.style.display = 'none';
+  }, 3000);
+}
+
+// Démarrer le jeu
+function startGame() {
+  const startButton = document.getElementById('startButton');
+  startButton.classList.remove('blink'); // Désactive le clignotement
+
+  cells.forEach((cell, index) => {
+    const row = Math.floor(index / cols);
+    const col = index % cols;
+    const isTargetCell = target[row][col] === 0;
+
+    if (isTargetCell) {
+      cell.classList.replace('white', 'dark-blue');
+    } else {
+      cell.classList.add('blue');
+      cell.classList.remove('white');
+    }
+  });
+
+  gameStarted = true;
+  moves = 0;
+  movesDisplay.textContent = moves;
+  time = 0;
+  updateTimeDisplay();
+
+  if (timer) {
+    clearInterval(timer);
+  }
+
+  timer = setInterval(() => {
+    time++;
+    updateTimeDisplay();
+  }, 1000);
+
+  gameWon = false;
+}
+    // Recommencer le jeu
+    function resetGame() {
+      clearInterval(timer);
+      initGrid();
+      gameStarted = false;
+      moves = 0;
+      movesDisplay.textContent = moves;
+      time = 0;
+      updateTimeDisplay();
+      victoryPopup.style.display = 'none';
+    }
+
+    // Écouteurs d'événements
+    startButton.addEventListener('click', startGame);
+    resetButton.addEventListener('click', resetGame);
+    window.addEventListener('load', function() {
+      const startButton = document.getElementById('startButton');
+      startButton.classList.add('blink');
+    });
+
+    // Initialisation
+    initGrid();
+  </script>
+</body>
+</html>
