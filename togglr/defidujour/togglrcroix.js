@@ -18,12 +18,12 @@ const grid = document.getElementById('grid');
 
     // Forme cible (exemple - à remplacer par la forme du jour)
     const target = [
-      [1, 1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1, 1],
-      [1, 1, 0, 0, 1, 1]
+      [1, 0, 0, 1, 1, 1],
+      [1, 1, 1, 1, 0, 1],
+      [1, 1, 1, 0, 0, 1],
+      [1, 0, 1, 1, 0, 1],
+      [0, 1, 1, 0, 0, 1],
+      [0, 0, 0, 1, 0, 1]
     ];
 
     // Initialisation de la grille
