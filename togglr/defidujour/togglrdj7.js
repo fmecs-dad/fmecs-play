@@ -151,6 +151,37 @@ function toggleCell(row, col) {
   }, 3000);
 }
 
+// Fonction pour charger le défi du jour
+async function loadDailyChallenge() {
+    try {
+        const response = await fetch('https://play.fmecs.fr/togglr/data/challenges.json');
+        const data = await response.json();
+
+        // Récupère la date actuelle (format AAAA-MM-JJ)
+        const today = new Date().toISOString().split('T')[0];
+
+        // Trouve le défi correspondant à la date actuelle
+        const todayChallenge = data.challenges.find(challenge => challenge.date === today);
+
+        if (todayChallenge) {
+            // Met à jour le titre du jeu
+            document.title = todayChallenge.title;
+            document.getElementById('game-title').textContent = todayChallenge.title;
+
+            // Applique la forme cible
+            window.target = todayChallenge.target;
+            initGrid(); // Initialise la grille avec la nouvelle cible
+        } else {
+            console.error("Aucun défi trouvé pour aujourd'hui.");
+        }
+    } catch (error) {
+        console.error("Erreur lors du chargement des défis :", error);
+    }
+}
+
+// Appelle la fonction au chargement de la page
+window.onload = loadDailyChallenge;
+
 // Démarrer le jeu
 function startGame() {
   const startButton = document.getElementById('startButton');
