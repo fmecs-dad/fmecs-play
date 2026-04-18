@@ -30,7 +30,7 @@ let target = [
 // Fonction pour charger le défi du jour
 async function loadDailyChallenge() {
     try {
-        const response = await fetch('https://play.fmecs.fr/togglr/data/challenges.json');
+        const response = await fetch('https://play.fmecs.fr/togglr/defidujour/data/challenges.json');
         if (!response.ok) throw new Error("Fichier introuvable");
 
         const data = await response.json();
