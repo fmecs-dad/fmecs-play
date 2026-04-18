@@ -27,7 +27,47 @@ const grid = document.getElementById('grid');
       [0, 1, 1, 1, 1, 1, 1]
     ];
 
-    // Initialisation de la grille
+// Variable globale pour la cible (définie plus haut)
+let target = [
+  [1, 1, 1, 0, 0, 0, 0],
+  [1, 1, 1, 1, 0, 0, 0],
+  [1, 1, 1, 1, 0, 0, 0],
+  [1, 1, 1, 0, 1, 1, 0],
+  [1, 1, 0, 1, 1, 1, 1],
+  [1, 0, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 1, 1]
+];
+
+// Fonction pour charger le défi du jour
+async function loadDailyChallenge() {
+    try {
+        const response = await fetch('https://play.fmecs.fr/togglr/data/challenges.json');
+        if (!response.ok) throw new Error("Fichier introuvable");
+
+        const data = await response.json();
+        const today = new Date().toISOString().split('T')[0];
+
+        const todayChallenge = data.challenges.find(challenge => challenge.date === today);
+
+        if (todayChallenge && todayChallenge.target.length > 0) {
+            target = todayChallenge.target; // Met à jour la cible
+            document.title = todayChallenge.title;
+            document.getElementById('game-title').textContent = todayChallenge.title;
+        }
+    } catch (error) {
+        console.error("Erreur :", error);
+    }
+}
+
+// Initialisation au chargement de la page
+window.onload = async function() {
+    await loadDailyChallenge(); // Charge le défi
+    initGrid(); // Initialise la grille après le chargement
+    const startButton = document.getElementById('startButton');
+    startButton.classList.add('blink');
+};
+
+// Initialisation de la grille
  function initGrid() {
   grid.innerHTML = '';
   cells = [];
@@ -151,37 +191,6 @@ function toggleCell(row, col) {
   }, 3000);
 }
 
-// Fonction pour charger le défi du jour
-async function loadDailyChallenge() {
-    try {
-        const response = await fetch('https://play.fmecs.fr/togglr/data/challenges.json');
-        const data = await response.json();
-
-        // Récupère la date actuelle (format AAAA-MM-JJ)
-        const today = new Date().toISOString().split('T')[0];
-
-        // Trouve le défi correspondant à la date actuelle
-        const todayChallenge = data.challenges.find(challenge => challenge.date === today);
-
-        if (todayChallenge) {
-            // Met à jour le titre du jeu
-            document.title = todayChallenge.title;
-            document.getElementById('game-title').textContent = todayChallenge.title;
-
-            // Applique la forme cible
-            window.target = todayChallenge.target;
-            initGrid(); // Initialise la grille avec la nouvelle cible
-        } else {
-            console.error("Aucun défi trouvé pour aujourd'hui.");
-        }
-    } catch (error) {
-        console.error("Erreur lors du chargement des défis :", error);
-    }
-}
-
-// Appelle la fonction au chargement de la page
-window.onload = loadDailyChallenge;
-
 // Démarrer le jeu
 function startGame() {
   const startButton = document.getElementById('startButton');
@@ -236,6 +245,3 @@ function startGame() {
       const startButton = document.getElementById('startButton');
       startButton.classList.add('blink');
     });
-
-    // Initialisation
-    initGrid();
