@@ -16,17 +16,6 @@ const grid = document.getElementById('grid');
     let gameStarted = false;
     let gameWon = false;
 
-    // Forme cible (exemple - à remplacer par la forme du jour)
-    const target = [
-      [1, 1, 1, 0, 0, 0, 0],
-      [1, 1, 1, 1, 0, 0, 0],
-      [1, 1, 1, 1, 0, 0, 0],
-      [1, 1, 1, 0, 1, 1, 0],
-      [1, 1, 0, 1, 1, 1, 1],
-      [1, 0, 1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1]
-    ];
-
 // Variable globale pour la cible (définie plus haut)
 let target = [
   [1, 1, 1, 0, 0, 0, 0],
